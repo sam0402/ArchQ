@@ -27,7 +27,7 @@ Supported Hardware: (Include Macbook or Mac mini Intel version)
  3. Filesystem: F2FS(default), EXT4, XFS, HFS+(Apple), NTFS3, FATs, NFS, CIFS/SMBFS
  4. Ethernet: Intel e100, e1000, 82575/82576(IGB), I225-LM/I225-V (IGC), Realtek RTL8129/8130/8139/8111/8168/8411
  5. USB Ethernet: Realtek RTL8152/8153, ASIX AX88179/178A
- 6. Sound card: USB(DDC, DAC)
+ 6. Sound card: USB(DDC, DAC) & HDMI (Intel i915)
 
 Stand-alone: Install
  1. LMS + Squeezelite
@@ -46,6 +46,7 @@ Client-server:
   5. Raspberry 4 or CM4 install with pCP8-Q264_5.16.5 
      (https://github.com/sam0402/pcp-44.1KHz/blob/master/pCP8-Q264_5.16.5.img.7z.001)
      (https://github.com/sam0402/pcp-44.1KHz/blob/master/pCP8-Q264_5.16.5.img.7z.002)
+ HDMI output (Intel i915): Install and boot by Q352h
  
 http://www.stsd99.com/phpBB3/viewtopic.php?f=61&t=3129&sid=3e3eeea96d483cf9b63b8200b949685e&p=20583#p20583
 ![Kernel](images/kernels.png)
