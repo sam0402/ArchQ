@@ -50,10 +50,10 @@ Client-server:
  
 http://www.stsd99.com/phpBB3/viewtopic.php?f=61&t=3129&sid=3e3eeea96d483cf9b63b8200b949685e&p=20583#p20583
 ![Kernel](images/kernel.png)
-![Server](images/server.png)
+![Config](images/config.png)
 ![Squeezelite](images/squeezelite.png)
-![Player](images/player.png)
+![Server](images/server.png)
 ![Partition](images/partition_mount.png)
 ![ethernet](images/ethernet.png)
 ![NFS](images/nfs_mount.png)
-![Config](images/config.png)
+![Player](images/player.png)
