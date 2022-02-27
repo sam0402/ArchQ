@@ -1,3 +1,4 @@
+rm -f /root/*.tar.zst /root/*.tar.xz*
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/usr/bin/shairport-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sqzlite-cfg.sh >/usr/bin/sqzlite-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/nfs-cfg.sh >/usr/bin/nfs-cfg.sh
