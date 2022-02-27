@@ -68,7 +68,7 @@ Name()
 
 WK=$(dialog --stdout --title "ArchQ" --menu "Airplay configure" 7 0 0 \
     S "Sound Card" \
-    V Volume & Active \
+    V "Volume & Active" \
     N "Name: $name") || exit 1
 clear
 
