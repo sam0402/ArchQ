@@ -215,9 +215,9 @@ fi
 # arch-chroot /mnt wpa_supplicant -B -i wlan -c /etc/wpa_supplicant/wpa_supplicant-wlan.conf
 
 ### Kernel
-ker=Q352A; kver=5.16.8-1
+ker=Q352O; kver=5.16.8-1
 [ $cpu = amd ] && ker=Q352AMD
-[ $server = N ] && ker=${ker}w
+[ $server = N ] && ker=Q352Aw
 echo .......................
 echo Install Kernel Q352 ...
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
