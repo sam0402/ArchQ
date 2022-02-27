@@ -1,0 +1,93 @@
+#!/bin/bash
+config='/etc/shairport-sync.conf'
+name=$(grep -m1 'name = ' $config | awk -F\" '{print $2}')
+[ $name = '%H' ] && name=$(uname -n)
+
+SelDevice()
+{
+    config='/etc/shairport-sync.conf'
+    if [ ! $(aplay -L | grep ':') ]; then
+      echo "No Sound Device" ; exit 1
+    fi
+
+    while read line; do
+        devs+=${line}' 　 '
+    done <<< $(aplay -L | grep ':')
+
+    device=$(dialog --stdout \
+                    --title "Airplay" \
+                    --menu "Select ouput device" 7 0 0 ${devs}) || exit 1
+    clear
+
+    sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$device\""';/' $config 
+}
+
+Config()
+{
+  a0=off; a1=off; v1=off
+  volctl=$(grep ignore_volume_control $config | awk -F\" '{print $2}')
+  [ $volctl = yes ] && v0=off || v0=on
+  [ $(systemctl is-active shairport-sync) = active ] && a0=on
+
+  SEL=$(dialog --stdout --title "ArchQ" \
+          --checklist "Config" 7 0 0 \
+          V "Volume Control"  $v0 \
+          A Active            $a0 ) || exit 1
+  clear
+  [[ $SEL =~ V ]] && v1=on
+  [[ $SEL =~ A ]] && a1=on
+
+  if [[ $v0 != $v1 ]] && [[ $v1 == 'off' ]]; then
+      sed -i 's/^\/\?\/\?\tignore_volume_control = "no";/\tignore_volume_control = "yes";/' $config
+      echo "Turn off volume control."
+  else
+      sed -i 's/^\/\?\/\?\tignore_volume_control = "yes";/\tignore_volume_control = "no";/' $config
+      echo "Turn on volume control."
+  fi
+  if [[ $a0 != $a1 ]]; then
+    if [[ $a1 == 'on' ]]; then
+        systemctl enable shairport-sync
+        systemctl start shairport-sync
+    else
+        systemctl disable shairport-sync
+        systemctl stop shairport-sync
+    fi
+  fi
+
+}
+
+Name()
+{
+  name=$(dialog --stdout \
+      --title "Airplay" \
+      --ok-label "Ok" \
+      --form "Change name" 0 20 0 \
+      ""  1 1  "$name" 1 0 20 0  ) || exit 1
+
+  sed -i 's/^\/\?\/\?\tname = ".*";/\tname = '"\"$name\""';/1' $config
+}
+
+WK=$(dialog --stdout --title "ArchQ" --menu "Airplay setting" 7 0 0 \
+    S "Sound Card" \
+    C Config \
+    N "Name: $name") || exit 1
+clear
+
+case $WK in
+  S)
+    if [ ! -f $config ]; then
+      wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
+      pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
+      SelDevice
+    fi
+      systemctl enable shairport-sync
+      systemctl restart shairport-sync
+      echo shAirport is started.
+    ;;
+  C)
+    Config
+    ;;
+  N)
+    Name
+    ;;
+esac
