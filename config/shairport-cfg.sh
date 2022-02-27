@@ -66,7 +66,7 @@ Name()
   sed -i 's/^\/\?\/\?\tname = ".*";/\tname = '"\"$name\""';/1' $config
 }
 
-WK=$(dialog --stdout --title "ArchQ" --menu "Airplay setting" 7 0 0 \
+WK=$(dialog --stdout --title "ArchQ" --menu "Airplay configure" 7 0 0 \
     S "Sound Card" \
     C Config \
     N "Name: $name") || exit 1
