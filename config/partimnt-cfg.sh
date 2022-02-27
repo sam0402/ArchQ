@@ -17,7 +17,7 @@ case $WK in
         ID=$(echo $partdata | cut -d ' ' -f 3)
 
         OP='rw'
-        [ $FS = ext4 ] && OP='defaults,iocharset=utf8'
+        [ $FS = ext4 ] && OP='defaults'
         [ $FS = hfsplus ] && OP='force'
         if [ $FS = ntfs ]; then
             FS=ntfs3; OP='iocharset=utf8'
