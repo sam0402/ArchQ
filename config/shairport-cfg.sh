@@ -5,7 +5,6 @@ name=$(grep -m1 'name = ' $config | awk -F\" '{print $2}')
 
 SelDevice()
 {
-    config='/etc/shairport-sync.conf'
     if [ ! $(aplay -L | grep ':') ]; then
       echo "No Sound Device" ; exit 1
     fi
@@ -19,7 +18,7 @@ SelDevice()
                     --menu "Select ouput device" 7 0 0 ${devs}) || exit 1
     clear
 
-    sed -i 's/^\/\?\/\?\toutput_device = ".*"/\toutput_device = '"\"$device\""';/' $config 
+    sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$device\""';/' $config 
 }
 
 Config()
@@ -78,8 +77,8 @@ case $WK in
     if [ ! -f $config ]; then
       wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
       pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
-      SelDevice
     fi
+      SelDevice
       systemctl enable shairport-sync
       systemctl restart shairport-sync
       echo shAirport is started.
@@ -89,7 +88,7 @@ case $WK in
     ;;
   N)
     Name
-      systemctl restart shairport-sync
-      echo shAirport is started.
+    systemctl restart shairport-sync
+    echo shAirport is started.
     ;;
 esac
