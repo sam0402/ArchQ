@@ -89,5 +89,7 @@ case $WK in
     ;;
   N)
     Name
+      systemctl restart shairport-sync
+      echo shAirport is started.
     ;;
 esac
