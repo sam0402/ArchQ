@@ -29,7 +29,7 @@ Config()
   [ $(systemctl is-active shairport-sync) = active ] && a0=on
 
   SEL=$(dialog --stdout --title "ArchQ" \
-          --checklist "Config" 7 0 0 \
+          --checklist "Configure" 7 0 0 \
           V "Volume Control"  $v0 \
           A Active            $a0 ) || exit 1
   clear
@@ -68,7 +68,7 @@ Name()
 
 WK=$(dialog --stdout --title "ArchQ" --menu "Airplay configure" 7 0 0 \
     S "Sound Card" \
-    C Config \
+    V Volume & Active \
     N "Name: $name") || exit 1
 clear
 
@@ -83,7 +83,7 @@ case $WK in
       systemctl restart shairport-sync
       echo shAirport is started.
     ;;
-  C)
+  V)
     Config
     ;;
   N)
