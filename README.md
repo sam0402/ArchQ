@@ -13,9 +13,11 @@ Boot up with Arch Linux Install ISO (http://mirror.rackspace.com/archlinux/iso/l
 
 After reboot, the monitor will not show any message only 'linux-Q352A ...'
 
+Use `http://name@host.local:9000` or `http://ip.address:9000` to configure LMS.
+
 Use `ssh name@host.local` or `ssh name@ip.address` to login ArchQ system and configure.
 
-Use `sudo config.sh` command for setting kernel version, partitions, NFS client, ethernet and squeezelite.
+Use `sudo config.sh` command for setting kernel version, partitions, NFS client, ethernet, squeezelite and Airplay.
 
 Use `sensors` command to check the CPU temperature, which is not too high.
 
