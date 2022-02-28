@@ -322,6 +322,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/player-cfg.sh >/mnt/usr/bin/player-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
 chmod +x /mnt/usr/bin/*.sh
+echo "alias config='sudo config.sh'" >>/mnt/home/${user}/.bashrc
 
 # Install ramroot
 # arch-chroot /mnt wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/pkg/main/ramroot-2.0.2-1-x86_64.pkg.tar.zst | pacman -U
