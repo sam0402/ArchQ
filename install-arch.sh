@@ -40,7 +40,7 @@ clear
 f2fs=$(dialog  --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1
 clear
 
-lang=$(dialog  --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "en_US" J "ja_JP" T "zh_TW") || exit 1
+lang=$(dialog  --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
 clear
 
 ip=$(dialog  --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1
