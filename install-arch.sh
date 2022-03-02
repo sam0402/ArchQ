@@ -286,7 +286,7 @@ if [[ ! -z $scard ]] && [[ $player =~ S ]]; then
     sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/squeezelite.conf
     arch-chroot /mnt systemctl enable squeezelite
 fi
-if [[ ! -z $scard ]] && [[ $player =~ A ]]; then
+if [[ $player =~ A ]]; then
     echo Install Airplay ...
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
