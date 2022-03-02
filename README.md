@@ -7,19 +7,24 @@ Thus, you do not need to upsample your music files anymore, even SQ is better th
 ArchQ includes the LMS, Roon(bridge), MPD servers & optimized Squeezelite, Airplay, and it's easy to install and configure.
 If the cpu is more than 2 cores, LMS and squeezelite will work at isolated cpu.
 
-Boot up with Arch Linux Install ISO (http://mirror.rackspace.com/archlinux/iso/latest/), than typing as below.
+Install Step:
+1. Download the [!Arch Linux Install ISO](http://mirror.rackspace.com/archlinux/iso/latest/)
+
+2. Use [!Etcher](https://www.balena.io/etcher/?) to flash ISO image to USB drive.
+
+3. Boot up with USB drive , than typing as below.
  
 `curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install-arch.sh | bash`
 
-After reboot, the monitor will not show any message only 'linux-Q352A ...'
+4. After reboot, the monitor will not show any message only 'linux-Q352A ...'
 
-Use `http://name@hostname.local:9000` or `http://ip.address:9000` to configure LMS.
+5. Enter URL `http://name@hostname.local:9000` or `http://ip.address:9000` in browser to configure LMS.
 
-Use `ssh name@hostname.local` or `ssh name@ip.address` to login ArchQ system and configure.
+6. Use `ssh name@hostname.local` or `ssh name@ip.address` to login ArchQ system and configure.
 
-Use `config` command for setting kernel version, partitions, NFS client, ethernet, squeezelite and Airplay.
+  and enter `config` command for setting kernel version, partitions, NFS client, ethernet, squeezelite and Airplay.
 
-Use `sensors` command to check the CPU temperature, which is not too high.
+Use `sensors` command to check the CPU temperature, that is not too high.
 
 Enjoy it!　[![Donate](images/buymeacoffee.png)](https://buymeacoff.ee/samshu.tw)
  
