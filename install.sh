@@ -83,7 +83,7 @@ esac
 clear
 
 ### select sound card
-if [[ $(aplay -L | grep ':') ]] && [[ $player =~ S ]] || [[ $player =~ A ]]; then
+if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A ]]; then
     while read line; do
         devs+=${line}' 　 '
     done <<< $(aplay -L | grep ':')
@@ -282,11 +282,9 @@ arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-dsd-x86_64.p
 sed -i '/ExecStart=/iExecStartPre=/usr/bin/sleep 3' /mnt/usr/lib/systemd/system/squeezelite.service
 [ $cpus -ge 4 ] && sed -i '/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 3 $MAINPID' /mnt/usr/lib/systemd/system/squeezelite.service
 
-if [[ ! -z $scard ]] && [[ $player =~ S ]]; then
-    sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/squeezelite.conf
-    arch-chroot /mnt systemctl enable squeezelite
-fi
-if [[ ! -z $scard ]] && [[ $player =~ A ]]; then
+[[ $player =~ S ]] && arch-chroot /mnt systemctl enable squeezelite
+
+if [[ ! -z "$scard" ]] && [[ $player =~ A ]]; then
     echo Install Airplay ...
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
