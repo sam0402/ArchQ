@@ -22,9 +22,11 @@ Install step:
 
 6. Use `ssh name@hostname.local` or `ssh name@ip.address` to login ArchQ system and configure.
 
-   Enter `config` command for setting kernel version, partitions, NFS client, ethernet, squeezelite and Airplay.
+   Enter command `config` for setting kernel version, partitions, NFS client, ethernet, squeezelite and Airplay.
 
-7. Use `sensors` command to check the temperature of CPU, which is not too high.
+7. Use command `sensors` to check the temperature of CPU, which is not too high.
+
+Enter command `sudo reboot` if need to.
 
 Enjoy it!　[![Donate](images/buymeacoffee.png)](https://buymeacoff.ee/samshu.tw)
  
