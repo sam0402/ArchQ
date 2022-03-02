@@ -87,7 +87,7 @@ if [[ $(aplay -L | grep ':') ]] && [[ $player =~ S ]] || [[ $player =~ A ]]; the
     while read line; do
         devs+=${line}' 　 '
     done <<< $(aplay -L | grep ':')
-    scard=''
+
     scard=$(dialog --stdout \
                 --title "ArchQ" \
                 --menu "Select sound device" 7 0 0 ${devs}) || exit 1
@@ -282,11 +282,11 @@ arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-dsd-x86_64.p
 sed -i '/ExecStart=/iExecStartPre=/usr/bin/sleep 3' /mnt/usr/lib/systemd/system/squeezelite.service
 [ $cpus -ge 4 ] && sed -i '/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 3 $MAINPID' /mnt/usr/lib/systemd/system/squeezelite.service
 
-if  [[ $player =~ S ]]; then
+if [[ ! -z $scard ]] && [[ $player =~ S ]]; then
     sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/squeezelite.conf
     arch-chroot /mnt systemctl enable squeezelite
 fi
-if  [[ $player =~ A ]]; then
+if [[ ! -z $scard ]] && [[ $player =~ A ]]; then
     echo Install Airplay ...
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
@@ -326,7 +326,6 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >
 chmod +x /mnt/usr/bin/*.sh
 echo "alias config='sudo config.sh'" >>/mnt/home/${user}/.bashrc
 echo "alias config='config.sh'" >>/mnt/root/.bashrc
-
 # Install ramroot
 # arch-chroot /mnt wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/pkg/main/ramroot-2.0.2-1-x86_64.pkg.tar.zst | pacman -U
 # sed -i 's/ps_default=no/ps_default=yes/' /mnt/etc/ramroot.conf
