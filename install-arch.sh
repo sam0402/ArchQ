@@ -83,11 +83,11 @@ esac
 clear
 
 ### select sound card
+scard=""
 if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A ]]; then
     while read line; do
         devs+=${line}' 　 '
     done <<< $(aplay -L | grep ':')
-    scard=""
     scard=$(dialog --stdout \
                 --title "ArchQ" \
                 --menu "Select sound device" 7 0 0 ${devs}) || exit 1
@@ -288,7 +288,7 @@ if [[ $player =~ A ]]; then
     echo Install Airplay ...
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
-    sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/' /mnt/etc/shairport-sync.conf
+    [[ -n "$scard" ]] && sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/' /mnt/etc/shairport-sync.conf
     arch-chroot /mnt systemctl enable shairport-sync
 fi
 if  [[ $player =~ R ]]; then
