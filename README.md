@@ -24,7 +24,7 @@ Install Step:
 
    Enter `config` command for setting kernel version, partitions, NFS client, ethernet, squeezelite and Airplay.
 
-7. Use `sensors` command to check the CPU temperature, that is not too high.
+7. Use `sensors` command to check the temperature of CPU, which is not too high.
 
 Enjoy it!　[![Donate](images/buymeacoffee.png)](https://buymeacoff.ee/samshu.tw)
  
