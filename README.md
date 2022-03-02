@@ -7,7 +7,7 @@ Thus, you do not need to upsample your music files anymore, even SQ is better th
 ArchQ includes the LMS, Roon(bridge), MPD servers & optimized Squeezelite, Airplay, and it's easy to install and configure.
 If the cpu is more than 2 cores, LMS and squeezelite will work at isolated cpu.
 
-Install Step:
+Install step:
 1. Download the [Arch Linux Install ISO](http://mirror.rackspace.com/archlinux/iso/latest/)
 
 2. Flash ISO image to USB drive by [Etcher](https://www.balena.io/etcher/?).
