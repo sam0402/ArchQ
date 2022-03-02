@@ -87,7 +87,7 @@ if [[ $(aplay -L | grep ':') ]] && [[ $player =~ S ]] || [[ $player =~ A ]]; the
     while read line; do
         devs+=${line}' 　 '
     done <<< $(aplay -L | grep ':')
-
+    scard=""
     scard=$(dialog --stdout \
                 --title "ArchQ" \
                 --menu "Select sound device" 7 0 0 ${devs}) || exit 1
