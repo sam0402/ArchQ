@@ -10,7 +10,7 @@ If the cpu is more than 2 cores, LMS and squeezelite will work at isolated cpu.
 Install Step:
 1. Download the [Arch Linux Install ISO](http://mirror.rackspace.com/archlinux/iso/latest/)
 
-2. Use [Etcher](https://www.balena.io/etcher/?) to flash ISO image to USB drive.
+2. Flash ISO image to USB drive by [Etcher](https://www.balena.io/etcher/?).
 
 3. Boot up with USB drive , than typing as below.
  
