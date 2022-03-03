@@ -28,7 +28,7 @@ Config()
   [ $volctl = yes ] && v0=off || v0=on
   [ $(systemctl is-active shairport-sync) = active ] && a0=on
 
-  SEL=$(dialog --stdout --title "ArchQ" \
+  SEL=$(dialog --stdout --title "ArchQ $1" \
           --checklist "Configure" 7 0 0 \
           V "Volume Control"  $v0 \
           A Active            $a0 ) || exit 1
@@ -65,7 +65,7 @@ Name()
   sed -i 's/^\/\?\/\?\tname = ".*";/\tname = '"\"$name\""';/1' $config
 }
 
-WK=$(dialog --stdout --title "ArchQ" --menu "Airplay configure" 7 0 0 \
+WK=$(dialog --stdout --title "ArchQ $1" --menu "Airplay configure" 7 0 0 \
     S "Sound Card" \
     V "Volume & Active" \
     N "Name: $name") || exit 1

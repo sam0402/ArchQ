@@ -1,11 +1,11 @@
 #!/bin/bash
 config='/etc/fstab'
-WK=$(dialog --stdout --title "ArchQ Kernel" \
+WK=$(dialog --stdout --title "ArchQ $1" \
             --menu "Select command" 7 0 0 B "Boot" U "Update" R "Remove") || exit 1
 clear
 case $WK in
     U)
-        exec='dialog --stdout --title "ArchQ Kernel" --menu "Select to update" 7 0 0 '
+        exec='dialog --stdout --title "ArchQ '$1'" --menu "Select to update" 7 0 0 '
         while read line; do
             ver=$(echo $line | awk -F: '{print $1}')
             info=$(echo $line | awk -F: '{print $2}')
@@ -28,7 +28,7 @@ case $WK in
             menu+=${line}' '
         done <<< $(pacman -Q | grep linux-Q | grep -v headers)
         options=$(dialog --stdout \
-                --title "ArchQ Kernel" \
+                --title "ArchQ $1" \
                 --menu "Select to remove" 7 0 0 $menu) || exit 1
         clear
         echo Rmove Kernel Q1xx ...
@@ -46,7 +46,7 @@ case $WK in
             n=`expr $n + 2`
         done <<< $(grep 'with' /boot/grub/grub.cfg | grep -v 'fallback' | cut -d "'" -f2 | cut -d ' ' -f5)
         options=$(dialog --stdout \
-                --title "ArchQ Kernel" \
+                --title "ArchQ $1" \
                 --menu "Select default boot" 7 0 0 $menu S "Save Default") || exit 1
         clear
         [ $options = 'S' ] && sed -e 's/^#\?GRUB_SAVEDEFAULT=.*$/GRUB_SAVEDEFAULT=true/' $grub_def

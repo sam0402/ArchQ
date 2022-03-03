@@ -3,43 +3,45 @@
 num=$(cat /root/.update)
 git=$(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/update)
 
+Qver=$(uname -r | awk -F - '{print $3}')
+
 MENU=''
 [ -f /etc/mpd.conf ] && MENU='D MPD '
 [ -f /etc/squeezelite.conf ] && MENU+='S Squeezelite '
 [ -f /etc/shairport-sync.conf ] && MENU+='A Airplay '
 [ $git -gt $num ] && MENU+='U Update '
 
-WK=$(dialog --stdout --title "ArchQ" \
+WK=$(dialog --stdout --title "ArchQ $Qver" \
     --menu "Select to config" 7 0 0 K Kernel M "Partition mount" N "NFS mount" \
         E Ethernet T Timezone P "Active Player" ${MENU}) || exit 1
 clear
 case $WK in
     K)
-        /usr/bin/kernel-cfg.sh
+        /usr/bin/kernel-cfg.sh $Qver
         ;;
     M)
-        /usr/bin/partimnt-cfg.sh
+        /usr/bin/partimnt-cfg.sh $Qver
         ;;
     N)
-        /usr/bin/nfs-cfg.sh
+        /usr/bin/nfs-cfg.sh $Qver
         ;;
     D)
-        /usr/bin/mpd-cfg.sh
+        /usr/bin/mpd-cfg.sh $Qver
         ;;
     P)
-        /usr/bin/player-cfg.sh
+        /usr/bin/player-cfg.sh $Qver
         ;;
     E)
-        /usr/bin/ether-cfg.sh
+        /usr/bin/ether-cfg.sh $Qver
         ;;
     S)
-        /usr/bin/sqzlite-cfg.sh
+        /usr/bin/sqzlite-cfg.sh $Qver
         ;;
     A)
-        /usr/bin/shairport-cfg.sh
+        /usr/bin/shairport-cfg.sh $Qver
         ;;
     T)
-        /usr/bin/timezone.sh
+        /usr/bin/timezone.sh $Qver
         ;;
     U)
         curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/usr/bin/update_scpt.sh

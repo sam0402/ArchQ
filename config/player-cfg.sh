@@ -5,7 +5,7 @@ s1=off; a1=off; r1=off
 [ $(systemctl is-active shairport-sync) = active ] && a0=on
 [ $(systemctl is-active roonbridge) = active ] && r0=on
 
-player=$(dialog --stdout --title "ArchQ" \
+player=$(dialog --stdout --title "ArchQ $1" \
         --checklist "Active player" 7 0 0 \
         S Squeezelite   $s0 \
         A Airplay       $a0 \
