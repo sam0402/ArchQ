@@ -11,7 +11,7 @@ MENU=''
 
 WK=$(dialog --stdout --title "ArchQ" \
     --menu "Select to config" 7 0 0 K Kernel M "Partition mount" N "NFS mount" \
-        E Ethernet T Timezone P "Active Player" ${MENU})
+        E Ethernet T Timezone P "Active Player" ${MENU}) || exit 1
 clear
 case $WK in
     K)

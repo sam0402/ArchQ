@@ -1,7 +1,7 @@
 #!/bin/bash
 config='/etc/fstab'
 WK=$(dialog --stdout --title "NFS mount point" \
-            --menu "Select command" 7 0 0 A "Add" M "Modify" D "Delete")
+            --menu "Select command" 7 0 0 A "Add" M "Modify" D "Delete") || exit 1
 clear
 if [ $WK = A ]; then
     options=$(dialog --stdout \

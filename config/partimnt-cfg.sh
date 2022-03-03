@@ -6,7 +6,7 @@ clear
 case $WK in
     M)
         devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
-        device=$(dialog --stdout --title "Mount partition" --menu "Select device" 7 0 0 ${devicelist})
+        device=$(dialog --stdout --title "Mount partition" --menu "Select device" 7 0 0 ${devicelist}) || exit 1
         clear
         partitionlist=$(lsblk -pln -o name,size,fstype ${device} | sed -e '1d;s/\s\+/ /g;s/\s/,/2')
         partition=$(dialog --stdout --title "Device ${device}" --menu "Select partition" 7 0 0 ${partitionlist}) || exit 1
@@ -47,7 +47,7 @@ case $WK in
 
         options=$(dialog --stdout \
                 --title "Eject partition" \
-                --menu "Select to delete" 7 0 0 $MENU)
+                --menu "Select to delete" 7 0 0 $MENU) || exit 1
                 clear
         MP=$(echo $options | cut -d '/' -f 3)
         umount /mnt/${MP}
