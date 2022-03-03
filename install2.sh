@@ -256,33 +256,15 @@ case $server in
         ;;
     M)
         echo Install MPD ...
-        arch-chroot /mnt pacman -S --noconfirm mpd
-        sed -i '$d;$d' /mnt/etc/mpd.conf
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
         [[ -n "$scard" ]] &&  cat >>/mnt/etc/mpd.conf << EOF
-#bind_to_address "127.0.0.1"
-music_directory "/mnt/music"
-auto_update	"no"
-metadata_to_use	"artist,album,title,track,name,genre,date,composer,performer,disc"
-
 audio_output {
     type "alsa"
     name "$scard"
 #   device "hw:0,0"
     buffer_time "60"
 }
-
-input {
-    plugin "curl"
-}
-connection_timeout "9"
-max_connections	"3"
-max_playlist_length	"99"
-max_command_list_size "2048"
-max_output_buffer_size "2048576"
-audio_buffer_size "512"
-buffer_before_play "0%"
-filesystem_charset "UTF-8"
-id3v1_encoding "UTF-8"
 EOF
         arch-chroot /mnt systemctl enable mpd
         ;;
