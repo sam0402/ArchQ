@@ -15,7 +15,7 @@ player=$(dialog --stdout --title "ArchQ" \
 [[ $player =~ A ]] && a1=on
 [[ $player =~ R ]] && r1=on
 
-if [[ $player =~ A ]] && [ ! -f $config ]; then
+if [[ $player =~ A && ! -f $config ]]; then
         wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
         pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
 fi
