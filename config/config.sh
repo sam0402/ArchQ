@@ -1,12 +1,17 @@
 #!/bin/bash
 [ -f /root/.update ] || echo 0 >/root/.update
-update=''
 num=$(cat /root/.update)
 git=$(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/update)
-[ $git -gt $num ] && update='U Update'
+
+MENU=''
+[ -f /etc/mpd.conf ] && MENU='D MPD '
+[ -f /etc/squeezelite.conf ] && MENU+='S Squeezelite '
+[ -f /etc/shairport-sync.conf ] && MENU+='A Airplay '
+[ $git -gt $num ] && MENU+='U Update '
+
 WK=$(dialog --stdout --title "ArchQ" \
     --menu "Select to config" 7 0 0 K Kernel M "Partition mount" N "NFS mount" \
-        P "Active Player" E Ethernet S Squeezelite A Airplay T Timezone ${update})
+        E Ethernet T Timezone P "Active Player" ${MENU})
 clear
 case $WK in
     K)
@@ -17,6 +22,9 @@ case $WK in
         ;;
     N)
         /usr/bin/nfs-cfg.sh
+        ;;
+    D)
+        /usr/bin/mpd-cfg.sh
         ;;
     P)
         /usr/bin/player-cfg.sh

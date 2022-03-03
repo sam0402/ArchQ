@@ -1,8 +1,9 @@
 #!/bin/bash
 config='/etc/squeezelite.conf'
 
+### Select sound device
 if [ ! $(aplay -L | grep ':') ]; then
-  echo "No Sound Device" ; exit 1
+    echo "No Sound Device" ; exit 1
 fi
 
 while read line; do
@@ -10,8 +11,8 @@ while read line; do
 done <<< $(aplay -L | grep ':')
 
 device=$(dialog --stdout \
-                --title "Squeezelite" \
-                --menu "Select ouput device" 7 0 0 ${devs}) || exit 1
+        --title "Squeezelite" \
+        --menu "Select ouput device" 7 0 0 ${devs}) || exit 1
 clear
 sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$device"'"/' $config
 

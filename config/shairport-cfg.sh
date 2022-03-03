@@ -52,7 +52,6 @@ Config()
         systemctl stop shairport-sync
     fi
   fi
-
 }
 
 Name()
@@ -74,10 +73,6 @@ clear
 
 case $WK in
   S)
-    if [ ! -f $config ]; then
-      wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
-      pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
-    fi
       SelDevice
       systemctl enable shairport-sync
       systemctl restart shairport-sync
