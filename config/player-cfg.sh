@@ -10,6 +10,7 @@ player=$(dialog --stdout --title "ArchQ" \
         S Squeezelite   $s0 \
         A Airplay       $a0 \
         R Roonbridge    $r0 )
+clear
 
 [[ $player =~ S ]] && s1=on
 [[ $player =~ A ]] && a1=on
