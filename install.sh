@@ -84,7 +84,7 @@ clear
 
 ### select sound card
 scard=""
-if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A || $server = M ]]; then
+if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A || $player =~ S || $server = M ]]; then
     while read line; do
         devs+=${line}' 　 '
     done <<< $(aplay -L | grep ':')
@@ -282,6 +282,7 @@ if [[ $player =~ S ]]; then
     echo Install Squeezelite ...
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
+    [[ -n "$scard" ]] && sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/squeezelite.conf
     sed -i '/ExecStart=/iExecStartPre=/usr/bin/sleep 3' /mnt/usr/lib/systemd/system/squeezelite.service
     [ $cpus -ge 4 ] && sed -i '/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 3 $MAINPID' /mnt/usr/lib/systemd/system/squeezelite.service
     arch-chroot /mnt systemctl enable squeezelite
