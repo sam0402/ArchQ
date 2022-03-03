@@ -4,7 +4,7 @@ ArchQ headless linux is high quality music server and player for audiophiles.
 
 Powered by optimized realtime kernel(5.16) frequency works on 352.8KHz.
 Thus, you do not need to upsample your music files anymore, even SQ is better than them.
-ArchQ includes the LMS, Roon(bridge), MPD servers & optimized Squeezelite, Airplay, and it's easy to install and configure.
+ArchQ includes the LMS, Roon(bridge), MPD Light and optimized Squeezelite & Airplay, and it's easy to install and configure.
 If the cpu is more than 2 cores, LMS and squeezelite will work at isolated cpu.
 
 Install step:
@@ -41,7 +41,7 @@ Supported Hardware: (Include Macbook or Mac mini Intel version)
 Stand-alone: Install
  1. LMS + Squeezelite
  2. Roon
- 4. MPD
+ 4. MPD light
  5. Airplay
 
 Client-server:
