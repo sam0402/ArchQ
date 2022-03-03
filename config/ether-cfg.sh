@@ -19,7 +19,7 @@ fi
 
 [ -z $ifmtu ] && ifmtu=1500
 ifconfig=$(dialog --stdout \
-            --title "Ethernet" \
+            --title "ArchQ $1" \
             --ok-label "Ok" \
             --form "$ifport IP setting" 10 35 0 \
             "Address" 1 1   "$ifip"     1 10 15 0 \
