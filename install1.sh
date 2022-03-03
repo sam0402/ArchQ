@@ -258,14 +258,7 @@ case $server in
         echo Install MPD ...
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
-        [[ -n "$scard" ]] &&  cat >>/mnt/etc/mpd.conf << EOF
-audio_output {
-    type "alsa"
-    name "$scard"
-#   device "hw:0,0"
-    buffer_time "60"
-}
-EOF
+        [[ -n "$scard" ]] &&  sed -i 's/name.*"/name '"\"$scard\""'/' /mnt/etc/mpd.conf
         arch-chroot /mnt systemctl enable mpd
         ;;
     R)
