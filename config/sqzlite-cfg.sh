@@ -11,8 +11,8 @@ while read line; do
 done <<< $(aplay -L | grep ':')
 
 device=$(dialog --stdout \
-        --title "Squeezelite" \
-        --menu "Select ouput device" 7 0 0 ${devs}) || exit 1
+        --title "ArchQ $1" \
+        --menu "Output device" 7 0 0 ${devs}) || exit 1
 clear
 sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$device"'"/' $config
 

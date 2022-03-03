@@ -1,7 +1,7 @@
 #!/bin/bash
 config='/etc/fstab'
-WK=$(dialog --stdout --title "Partition mount point" \
-            --menu "Select command" 7 0 0 M Mount E Eject)
+WK=$(dialog --stdout --title "ArchQ $1" \
+            --menu "Partition mount point" 7 0 0 M Mount E Eject)
 clear
 case $WK in
     M)
