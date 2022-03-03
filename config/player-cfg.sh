@@ -9,7 +9,7 @@ player=$(dialog --stdout --title "ArchQ" \
         --checklist "Active player" 7 0 0 \
         S Squeezelite   $s0 \
         A Airplay       $a0 \
-        R Roonbridge    $r0 )
+        R Roonbridge    $r0 ) || exit 1
 clear
 
 [[ $player =~ S ]] && s1=on
