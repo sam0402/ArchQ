@@ -20,6 +20,13 @@ if [[ $player =~ A && ! -f '/etc/shairport-sync.conf' ]]; then
         wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
         pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
 fi
+if [[ $player =~ S && ! -f '/etc/squeezelite.conf' ]]; then
+        wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
+        pacman -U --noconfirm /root/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
+        sed -i '/ExecStart=/iExecStartPre=/usr/bin/sleep 3' /usr/lib/systemd/system/squeezelite.service
+        cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
+        [ $cpus -ge 4 ] && sed -i '/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 3 $MAINPID' /usr/lib/systemd/system/squeezelite.service
+fi
 
 if [[ $s0 != $s1 ]]; then
         [[ $s1 == 'on' ]] && act='squeezelite ' || inact='squeezelite '
