@@ -14,7 +14,7 @@ device=$(dialog --stdout \
         --title "ArchQ $1" \
         --menu "MPD ouput device" 7 0 0 ${devs}) || exit 1
 clear
-sed -i 's/^#\?\t\?device.*"/\tdevice '"\"$device\""'/' $config
+sed -i 's/^#\?.*\t\?device.*"/\tdevice '"\"$device\""'/' $config
 
 ### set music direcroty
 
