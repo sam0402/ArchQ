@@ -258,7 +258,7 @@ case $server in
         echo Install MPD ...
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
-        [[ -n "$scard" ]] &&  sed -i 's/^#\? .*name.*"/    name '"\"$scard\""'/' /mnt/etc/mpd.conf
+        [[ -n "$scard" ]] &&  sed -i 's/^#\?\t\?device.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
         arch-chroot /mnt systemctl enable mpd
         ;;
     R)
