@@ -66,7 +66,7 @@ ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
 player=N
-server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS M MPD R Roon N None) || exit 1
+server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS R Roon M MPD T MPD-lit N None) || exit 1
 clear
 case $server in
     L)
@@ -145,13 +145,13 @@ case $server in
         [ ! -d /mnt/opt/logitechmediaserver ] && mkdir -p /mnt/opt/logitechmediaserver
         mount "${part_data}" /mnt/opt/logitechmediaserver
         ;;
-    M)
-        [ ! -d /mnt/var/lib/mpd ] && mkdir -p /mnt/var/lib/mpd
-        mount "${part_data}" /mnt/var/lib/mpd
-        ;;
     R)
         [ ! -d /mnt/var/roon ] && mkdir -p /mnt/var/roon
         mount "${part_data}" /mnt/var/roon
+        ;;
+    M|T)
+        [ ! -d /mnt/var/lib/mpd ] && mkdir -p /mnt/var/lib/mpd
+        mount "${part_data}" /mnt/var/lib/mpd
         ;;
 esac
 
@@ -254,15 +254,6 @@ case $server in
         [ $cpus -ge 6 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 4 $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         arch-chroot /mnt systemctl enable logitechmediaserver
         ;;
-    M)
-        echo Install MPD ...
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
-        arch-chroot /mnt usermod -aG audio mpd
-        arch-chroot /mnt chown mpd.mpd /var/lib/mpd
-        [[ -n "$scard" ]] && sed -i 's/^#\?.*\t\?device.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
-        arch-chroot /mnt systemctl enable mpd
-        ;;
     R)
         echo Install Roon ...
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.884-1-x86_64.pkg.tar.xz.aa
@@ -272,6 +263,18 @@ case $server in
         cat /mnt/root/roonserver-1.8.884-1-x86_64.pkg.tar.xz.* > /mnt/root/roonserver-1.8.884-1-x86_64.pkg.tar.xz
         arch-chroot /mnt pacman -U --noconfirm /root/roonserver-1.8.884-1-x86_64.pkg.tar.xz
         arch-chroot /mnt systemctl enable roonserver
+        ;;
+    M|T)
+        echo Install MPD ...
+        arch-chroot /mnt pacman -S --noconfirm mpd
+        if [ $server = T ]; then
+            arch-chroot /mnt pacman -R --noconfirm mpd
+            arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
+        fi
+        curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd.conf >/mnt/etc/mpd.conf
+        [[ -n "$scard" ]] &&  sed -i 's/^#\?.*\t\?device.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
+        arch-chroot /mnt systemctl enable mpd
         ;;
 esac
 ### Install Player
