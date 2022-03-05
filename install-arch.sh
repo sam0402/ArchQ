@@ -264,15 +264,19 @@ case $server in
         arch-chroot /mnt pacman -U --noconfirm /root/roonserver-1.8.884-1-x86_64.pkg.tar.xz
         arch-chroot /mnt systemctl enable roonserver
         ;;
-    M|T)
+    M)
         echo Install MPD ...
         arch-chroot /mnt pacman -S --noconfirm mpd
-        if [ $server = T ]; then
-            arch-chroot /mnt pacman -R --noconfirm mpd
-            arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
-            arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
-        fi
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd.conf >/mnt/etc/mpd.conf
+        [[ -n "$scard" ]] &&  sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
+        arch-chroot /mnt systemctl enable mpd
+        ;;
+    T)
+        echo Install MPD ...
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt usermod -aG audio mpd
+        arch-chroot /mnt chown mpd.mpd /var/lib/mpd
         [[ -n "$scard" ]] &&  sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
         arch-chroot /mnt systemctl enable mpd
         ;;
