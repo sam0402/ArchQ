@@ -84,7 +84,7 @@ clear
 
 ### select sound card
 scard=""
-if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A || $player =~ S || $server = M ]]; then
+if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A || $player =~ S || $server = M || $server = T ]]; then
     while read line; do
         devs+=${line}' 　 '
     done <<< $(aplay -L | grep ':')
