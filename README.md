@@ -61,7 +61,7 @@ http://www.stsd99.com/phpBB3/viewtopic.php?f=61&t=3129&sid=3e3eeea96d483cf9b63b8
 ![Kernel](images/kernel.png)
 ![Config](images/config.png)
 ![Squeezelite](images/squeezelite.png)
-![Server](images/server.png)
+![Servers](images/server.png)
 ![Partition](images/partition_mount.png)
 ![ethernet](images/ethernet.png)
 ![NFS](images/nfs_mount.png)
