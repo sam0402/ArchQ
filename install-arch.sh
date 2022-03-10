@@ -228,7 +228,7 @@ fi
 # arch-chroot /mnt wpa_supplicant -B -i wlan -c /etc/wpa_supplicant/wpa_supplicant-wlan.conf
 
 ### Kernel
-ker=Q352A; kver=5.16.8-1
+ker=Q352A; kver=5.16.8-2
 [ $cpu = amd ] && ker=Q352AMD
 [ $server = N ] && ker=${ker}w
 echo .......................
@@ -270,13 +270,18 @@ case $server in
         arch-chroot /mnt pacman -S --noconfirm mpd
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd.conf >/mnt/etc/mpd.conf
         [[ -n "$scard" ]] &&  sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
+        sed -i '/ExecStart=/iExecStartPre=/usr/bin/sleep 3' /mnt/usr/lib/systemd/system/mpd.service
         arch-chroot /mnt systemctl enable mpd
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         ;;
     T)
         echo Install MPD ...
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.5-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.5-1-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         [[ -n "$scard" ]] &&  sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
+        sed -i '/ExecStart=/iExecStartPre=/usr/bin/sleep 3' /mnt/usr/lib/systemd/system/mpd.service
         arch-chroot /mnt systemctl enable mpd
         ;;
 esac
