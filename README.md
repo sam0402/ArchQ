@@ -14,7 +14,7 @@ Install step:
 
 3. Boot up with USB drive , than typing as below.
  
-`curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install-arch.sh | bash`
+`curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install.sh | bash`
 
 4. After reboot, the monitor will not show any message only 'linux-Q352A ...'
 
