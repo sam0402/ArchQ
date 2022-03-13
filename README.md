@@ -1,6 +1,6 @@
 # ArchQ　[![Donate](images/pdonate.png)](https://paypal.me/sam402shu)
 
-ArchQ headless linux is high quality music server and player for audiophiles.
+ArchQ is Arch Linux with high quality music server and player for audiophiles.
 
 Powered by optimized realtime kernel(5.16) frequency works on 352.8KHz.
 Thus, you do not need to upsample your music files anymore, even SQ is better than them.
