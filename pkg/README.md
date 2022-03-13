@@ -1,1 +1,1 @@
-Audio packages for ArchQ
+Audio packages for Arch Linux
