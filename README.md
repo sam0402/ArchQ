@@ -53,7 +53,7 @@ Client-server:
   3. Roonbridge
   4. Airplay
   5. Raspberry 4 or CM4 install with [pCP8-Q264_5.16.5.img.001](https://github.com/sam0402/pcp-44.1KHz/blob/master/pCP8-Q264_5.16.5.img.7z.001) 
-     [pCP8-Q264_5.16.5.img.002](https://github.com/sam0402/pcp-44.1KHz/blob/master/pCP8-Q264_5.16.5.img.7z.002)
+     & [pCP8-Q264_5.16.5.img.002](https://github.com/sam0402/pcp-44.1KHz/blob/master/pCP8-Q264_5.16.5.img.7z.002)
      
  HDMI output (Intel i915): Install and boot by Q352h
  
