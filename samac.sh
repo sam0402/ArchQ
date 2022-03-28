@@ -126,7 +126,7 @@ wipefs "${part_swap}"
 wipefs "${part_root}"
 wipefs "${part_data}"
 
-# mkfs.vfat -F32 "${part_boot}"
+mkfs.vfat -F32 "${part_boot}"
 # mkswap "${part_swap}"
 if [ $f2fs = F ]; then
     mkfs.f2fs -fl root "${part_root}"
@@ -184,7 +184,7 @@ arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
 # echo "root:$password" | chpasswd --root /mnt
 arch-chroot /mnt sh -c "echo root:$password | chpasswd"
 arch-chroot /mnt mkinitcpio -p linux
-arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot/EFI --bootloader-id=${hostname}
+arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=${hostname}
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
