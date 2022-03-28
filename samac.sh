@@ -156,8 +156,8 @@ case $server in
 esac
 
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
-
-pacstrap /mnt base linux linux-firmware grub efibootmgr gptfdisk f2fs-tools xfsprogs networkmanager openssh dhclient \
+rm /mnt/boot/intel-ucode.img
+pacstrap /mnt base linux linux-firmware ${cpu}-ucode grub efibootmgr gptfdisk f2fs-tools xfsprogs networkmanager openssh dhclient \
          vim nano wget avahi sudo dialog cpupower lm_sensors
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 
