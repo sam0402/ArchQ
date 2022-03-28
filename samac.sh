@@ -262,6 +262,7 @@ case $server in
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.918-1-x86_64.pkg.tar.xz.ab
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.918-1-x86_64.pkg.tar.xz.ac
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.918-1-x86_64.pkg.tar.xz.ad
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.918-1-x86_64.pkg.tar.xz.ae
         cat /mnt/root/roonserver-1.8.918-1-x86_64.pkg.tar.xz.* > /mnt/root/roonserver-1.8.918-1-x86_64.pkg.tar.xz
         arch-chroot /mnt pacman -U --noconfirm /root/roonserver-1.8.918-1-x86_64.pkg.tar.xz
         arch-chroot /mnt systemctl enable roonserver
