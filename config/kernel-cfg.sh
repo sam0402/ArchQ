@@ -66,6 +66,6 @@ case $WK in
         sleep 10
         t2=$(eval $cmd)
         count=$(expr $t2 / 10000 - $t1 / 10000)
-        echo "Kernel work frequency: $count"
+        echo "Kernel working frequency: $count"
         ;;
 esac
