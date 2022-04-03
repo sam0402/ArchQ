@@ -17,7 +17,7 @@ case $WK in
         if [ -n $options ]; then
             ver=$(echo $options | cut -d '-' -f 1)
             kver=$(echo $options | cut -d '-' -f 2-3)
-            echo Install Kernel Q176 ...
+            echo "Install Kernel ${ver}-${kver}..."
             [ ! -f "/root/linux-${ver}-${kver}-x86_64.pkg.tar.zst" ] && wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ver}-${kver}-x86_64.pkg.tar.zst
             [ ! -f "/root/linux-${ver}-headers-${kver}-x86_64.pkg.tar.zst" ] && wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ver}-headers-${kver}-x86_64.pkg.tar.zst
             pacman -U --noconfirm /root/linux-${ver}-${kver}-x86_64.pkg.tar.zst /root/linux-${ver}-headers-${kver}-x86_64.pkg.tar.zst
