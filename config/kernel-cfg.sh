@@ -1,7 +1,7 @@
 #!/bin/bash
 config='/etc/fstab'
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select command" 7 0 0 B "Boot" U "Update" R "Remove") || exit 1
+            --menu "Select command" 7 0 0 B "Boot" U "Update" R "Remove" F "Frequency") || exit 1
 clear
 case $WK in
     U)
@@ -22,6 +22,7 @@ case $WK in
             [ ! -f "/root/linux-${ver}-headers-${kver}-x86_64.pkg.tar.zst" ] && wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ver}-headers-${kver}-x86_64.pkg.tar.zst
             pacman -U --noconfirm /root/linux-${ver}-${kver}-x86_64.pkg.tar.zst /root/linux-${ver}-headers-${kver}-x86_64.pkg.tar.zst
         fi
+        grub-mkconfig -o /boot/grub/grub.cfg
         ;;
     R)
         while read line; do
@@ -33,6 +34,7 @@ case $WK in
         clear
         echo Rmove Kernel Q1xx ...
         pacman -R ${options} ${options}-headers
+        grub-mkconfig -o /boot/grub/grub.cfg
         ;;
     B)
         grub_def='/etc/default/grub'
@@ -51,6 +53,19 @@ case $WK in
         clear
         [ $options = 'S' ] && sed -e 's/^#\?GRUB_SAVEDEFAULT=.*$/GRUB_SAVEDEFAULT=true/' $grub_def
         sed -i 's/^#\?GRUB_DEFAULT=.*$/GRUB_DEFAULT='"$options"'/' $grub_def
+        grub-mkconfig -o /boot/grub/grub.cfg
+        ;;
+    F)
+        # cpus=$(lscpu | grep 'Core(s) per socket:' | awk -F ':' '{print $2}')
+        # [ $LANG = "ja_JP.UTF-8" ] && cpus=$(lscpu | grep 'ソケットあたりのコア数:' | awk -F ':' '{print $2}')
+        cpus=2
+        num=`expr $cpus + 1`
+        cmd="cat /proc/interrupts | grep tick | awk '{print \$${num}}'"
+        echo "Wait for 10 seconds..."
+        t1=$(eval $cmd)
+        sleep 10
+        t2=$(eval $cmd)
+        count=$(expr $t2 / 10000 - $t1 / 10000)
+        echo "Kernel work frequency: $count"
         ;;
 esac
-grub-mkconfig -o /boot/grub/grub.cfg
