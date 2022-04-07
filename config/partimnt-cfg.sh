@@ -38,6 +38,7 @@ case $WK in
         echo "UUID=${ID} /mnt/${MP} $FS ${OP} 0 0" >>$config
         echo "Add $partition ($FS) to /mnt/$MP mount point."
         [ -d "/mnt/${MP}" ] && mount /mnt/${MP} && echo and mounting.
+        systemctl daemon-reload
         ;;
     E)
         MENU=''
