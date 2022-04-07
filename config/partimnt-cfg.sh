@@ -19,6 +19,7 @@ case $WK in
         OP='rw'
         [ $FS = ext4 ] && OP='defaults'
         [ $FS = hfsplus ] && OP='force'
+        [ $FS = apfs ] && OP='readwrite'
         if [ $FS = ntfs ]; then
             FS=ntfs3; OP='iocharset=utf8'
         fi
