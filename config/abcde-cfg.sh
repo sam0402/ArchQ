@@ -24,7 +24,7 @@ while read line; do
 done < $config
 
 options=$(dialog --stdout \
-    --title "abcde" \
+    --title "abCDe ripper" \
     --ok-label "Ok" \
     --form "Modify settings" 0 40 0 \
     "Output directory"  1 1   "${OUTPUTDIR}"    1 18 40 0 \
