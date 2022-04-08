@@ -4,8 +4,9 @@ ArchQ is headless Arch Linux with high quality music server and player for audio
 
 Powered by optimized realtime kernel(5.16) frequency works on 352.8KHz.
 Thus, you do not need to upsample your music files anymore, even SQ is better than them.
-ArchQ includes the LMS, Roon(bridge), MPD(light) and optimized Squeezelite & Airplay, and it's easy to install and configure.
+ArchQ includes the LMS, Roon(bridge), MPD(light) and optimized Squeezelite & Airplay and CD ripper(abcde), and it's easy to install and configure.
 If the cpu is more than 2 cores, LMS and squeezelite will work at isolated cpu.
+
 
 Install step:
 1. Download the [Arch Linux Install ISO](http://mirror.rackspace.com/archlinux/iso/latest/)
@@ -65,3 +66,4 @@ http://www.stsd99.com/phpBB3/viewtopic.php?f=61&t=3129&sid=3e3eeea96d483cf9b63b8
 ![ethernet](images/ethernet.png)
 ![NFS](images/nfs_mount.png)
 ![Player](images/player.png)
+![abcde](images/abcde.png)
