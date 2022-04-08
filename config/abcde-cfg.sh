@@ -29,8 +29,8 @@ options=$(dialog --stdout \
     --form "Modify settings" 0 40 0 \
     "Output directory"  1 1   "${OUTPUTDIR}"    1 18 40 0 \
     "Type (wav/flac)"   2 1   "${OUTPUTTYPE}"   2 18 40 0 \
-    "Read speed"        3 1   "${CDSPEEDVALUE}" 3 18 40 0 \
-    "Read offset"       4 1   "$OFFSET"         4 18 40 0 \
+    "Read offset"       3 1   "$OFFSET"         3 18 40 0 \
+    "Read speed"        4 1   "${CDSPEEDVALUE}" 4 18 40 0 \
     "Eject CD (y/n)"    5 1   "$EJECTCD"        5 18 40 0) || exit 1
 clear
 
