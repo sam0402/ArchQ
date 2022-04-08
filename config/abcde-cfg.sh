@@ -13,13 +13,16 @@ if [ ! -f $config ]; then
     grub-mkconfig -o /boot/grub/grub.cfg
     systemctl enable rc-local.service
     curl -sL /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde.conf >/etc/abcde.conf
-    echo 'yes' | cpan install MusicBrainz::DiscID
-    echo 'yes' | cpan install WebService::MusicBrainz
-
+    echo 'yes' | cpan install MusicBrainz::DiscID WebService::MusicBrainz
+    
     sed -i '$d' /etc/rc.local
-cat >>/etc/rc.local <<EOF 
-[ \$(uname -r | awk -F - '{print \$3}') = 'Qrip' ] && \\
-    systemctl stop roonserver squeezelite mpd logitechmediaserver squeezelite shairport-sync 2> /dev/null
+cat >>/etc/rc.local <<EOF
+server="roonserver squeezelite mpd logitechmediaserver squeezelite shairport-sync"
+if [ \$(uname -r | awk -F - '{print \$3}') = 'Qrip' ]; then
+    for i in \$server; do   
+        [ \$(systemctl status \$i 2>&1 | grep -c 'Started') = 1 ] && systemctl stop \$i 
+    done
+fi
 exit 0
 EOF
 fi
