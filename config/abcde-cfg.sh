@@ -1,8 +1,8 @@
 #!/bin/bash
 config='/etc/abcde.conf'
 if [ ! -f $config ]; then
-    pacman -S --noconfirm glyr cdparanoia libdiscid atomicparsley make
     pacman -Syu --noconfirm
+    pacman -S --noconfirm glyr cdparanoia libdiscid atomicparsley make
     rm /root/*.pkg.tar.zst
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-5.16.8-2-x86_64.pkg.tar.zst
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-headers-5.16.8-2-x86_64.pkg.tar.zst
