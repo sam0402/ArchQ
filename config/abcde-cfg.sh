@@ -13,7 +13,8 @@ if [ ! -f $config ]; then
     grub-mkconfig -o /boot/grub/grub.cfg
     systemctl enable rc-local.service
     curl -sL /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde.conf >/etc/abcde.conf
-    echo 'yes' | cpan -fi MusicBrainz::DiscID WebService::MusicBrainz
+    echo 'yes' | cpan -fi MusicBrainz::DiscID
+    echo 'yes' | cpan -fi WebService::MusicBrainz
 
     sed -i '$d' /etc/rc.local
 cat >>/etc/rc.local <<EOF 
