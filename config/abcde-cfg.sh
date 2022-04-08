@@ -11,6 +11,7 @@ if [ ! -f $config ]; then
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rc-local-4-1-any.pkg.tar.zst
     pacman -U --noconfirm /root/*.pkg.tar.zst
     grub-mkconfig -o /boot/grub/grub.cfg
+    systemctl enable rc-local.service
     curl -sL /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde.conf >/etc/abcde.conf
     echo 'yes' | cpan -fi MusicBrainz::DiscID WebService::MusicBrainz
 
