@@ -1,6 +1,7 @@
 #!/bin/bash
 config='/etc/abcde.conf'
 if [ ! -f $config ]; then
+    pacman -Scc --noconfirm
     pacman -Syy --noconfirm
     pacman -S --noconfirm cdparanoia glyr imagemagick atomicparsley base-devel
     rm /root/*.pkg.tar.zst
