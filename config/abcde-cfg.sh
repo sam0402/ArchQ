@@ -13,7 +13,7 @@ if [ ! -f $config ]; then
     pacman -U --noconfirm /root/*.pkg.tar.zst
     grub-mkconfig -o /boot/grub/grub.cfg
     systemctl enable rc-local.service
-    curl -sL /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde.conf >/etc/abcde.conf
+    curl -sL /root https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde.conf >/etc/abcde.conf
     echo 'yes' | cpan install MusicBrainz::DiscID WebService::MusicBrainz
     
     sed -i '$d' /etc/rc.local
