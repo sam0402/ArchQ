@@ -50,6 +50,7 @@ OUTPUTTYPE=$(echo $options |  awk '//{print $2 }')
 OFFSET=$(echo $options |  awk '//{print $3 }')
 CDSPEEDVALUE=$(echo $options |  awk '//{print $4 }')
 EJECTCD=$(echo $options |  awk '//{print $5 }')
+CLOSETRAY=$(echo $options |  awk '//{print $6 }')
 
 [ -z $OUTPUTDIR ] && echo "Fail! Output directory is null." && exit 1
 [ -z $OUTPUTTYPE ] && echo "Fail! Output type is null." && exit 1
