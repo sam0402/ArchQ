@@ -39,9 +39,10 @@ options=$(dialog --stdout \
     --form "Modify settings" 0 40 0 \
     "Output directory"  1 1   "${OUTPUTDIR}"    1 18 40 0 \
     "Type (wav/flac)"   2 1   "${OUTPUTTYPE}"   2 18 40 0 \
-    "Read offset"       3 1   "${OFFSET}"         3 18 40 0 \
+    "Read offset"       3 1   "${OFFSET}"       3 18 40 0 \
     "Read speed"        4 1   "${CDSPEEDVALUE}" 4 18 40 0 \
-    "Eject CD (y/n)"    5 1   "${EJECTCD}"        5 18 40 0) || exit 1
+    "Eject CD (y/n)"    5 1   "${EJECTCD}"      5 18 40 0 \
+    "Auto Close Tray (y/n)"  6 1  "${CLOSETRAY}" 6 18 40 0) || exit 1
 clear
 
 OUTPUTDIR=$(echo $options |  awk '//{print $1 }')
@@ -55,6 +56,7 @@ EJECTCD=$(echo $options |  awk '//{print $5 }')
 [ -z $OFFSET ] && echo "Fail! Read offset is null." && exit 1
 [ -z $CDSPEEDVALUE ] && echo "Fail! Read offset is null." && exit 1
 [ -z $EJECTCD ] && echo "Fail! Eject CD is null." && exit 1
+[ -z $CLOSETRAY ] && echo "Fail! Auto Close Tray is null." && exit 1
 
 OUTPUTDIR=$(echo $OUTPUTDIR | sed 's"/"\\\/"g')
 sed -i 's/^#\?OUTPUTDIR=".*/OUTPUTDIR="'"$OUTPUTDIR"'"/' $config
@@ -62,3 +64,4 @@ sed -i 's/^#\?OUTPUTTYPE=".*/OUTPUTTYPE="'"$OUTPUTTYPE"'"/' $config
 sed -i 's/^#\?OFFSET=".*/OFFSET="'"$OFFSET"'"/' $config
 sed -i 's/^#\?CDSPEEDVALUE=".*/CDSPEEDVALUE="'"$CDSPEEDVALUE"'"/' $config
 sed -i 's/^#\?EJECTCD=.*/EJECTCD='"$EJECTCD"'/' $config
+sed -i 's/^#\?CLOSETRAY=.*/CLOSETRAY='"$CLOSETRAY"'/' $config
