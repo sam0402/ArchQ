@@ -66,4 +66,4 @@ http://www.stsd99.com/phpBB3/viewtopic.php?f=61&t=3129&sid=3e3eeea96d483cf9b63b8
 ![ethernet](images/ethernet.png)
 ![NFS](images/nfs_mount.png)
 ![Player](images/player.png)
-![abcde](images/abcde.png)
+![abcde](images/abCDe.png)
