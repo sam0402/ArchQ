@@ -42,7 +42,7 @@ options=$(dialog --stdout \
     "Read offset"       3 1   "${OFFSET}"       3 18 40 0 \
     "Read speed"        4 1   "${CDSPEEDVALUE}" 4 18 40 0 \
     "Eject CD (y/n)"    5 1   "${EJECTCD}"      5 18 40 0 \
-    "Auto Close Tray"   6 1  "${CLOSETRAY}" 6 18 40 0) || exit 1
+    "Close Tray (Sec)"  6 1  "${CLOSETRAY}" 6 18 40 0) || exit 1
 clear
 
 OUTPUTDIR=$(echo $options |  awk '//{print $1 }')
