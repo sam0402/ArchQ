@@ -20,7 +20,7 @@ case $WK in
         [ $FS = ext4 ] && OP='defaults'
         [ $FS = hfsplus ] && OP='rw,force,noatime'
         [ $FS = apfs ] && OP='readwrite'
-        [ $FS = f2fs ] && OP='noatime'
+        [ $FS = f2fs ] && OP='tw'
         if [ $FS = ntfs ]; then
             FS=ntfs3; OP='iocharset=utf8'
         fi
@@ -34,6 +34,7 @@ case $WK in
         clear
         MP=$(echo $options |  awk '//{print $1 }')
         OP=$(echo $options |  awk '//{print $2 }')
+        [ $FS = f2fs ] && OP+=',noatime,background_gc=on,nodiscard,no_heap,inline_xattr,inline_data,inline_dentry,flush_merge,extent_cache,mode=adaptive,active_logs=6,alloc_mode=reuse,checkpoint_merge,fsync_mode=posix,discard_unit=block'
         [ -z $OP ] && echo "Fail! Mount point is null." && exit 1
 
         echo "UUID=${ID} /mnt/${MP} $FS ${OP} 0 0" >>$config
