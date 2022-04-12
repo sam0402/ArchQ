@@ -18,7 +18,7 @@ case $WK in
 
         OP='rw'
         [ $FS = ext4 ] && OP='defaults'
-        [ $FS = hfsplus ] && OP='rw,force,uid=1000,gid=1000'
+        [ $FS = hfsplus ] && OP='rw,force'
         [ $FS = apfs ] && OP='readwrite'
         [ $FS = f2fs ] && OP='noatime'
         if [ $FS = ntfs ]; then
