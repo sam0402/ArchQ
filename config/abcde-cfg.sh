@@ -5,8 +5,8 @@ if [ ! -f $config ]; then
     pacman -Syy --noconfirm
     pacman -S --noconfirm cdparanoia glyr imagemagick atomicparsley base-devel
     rm /root/*.pkg.tar.zst
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-5.16.16-1-x86_64.pkg.tar.zst
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-headers-5.16.16-1-x86_64.pkg.tar.zst
+    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-5.16.8-3-x86_64.pkg.tar.zst
+    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-headers-5.16.8-3-x86_64.pkg.tar.zst
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde-2.9.3-6-any.pkg.tar.zst
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cdparanoia-10.2-9-x86_64.pkg.tar.zst
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cd-discid-1.4-3-x86_64.pkg.tar.zst
