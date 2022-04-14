@@ -104,7 +104,7 @@ timedatectl set-ntp true
 if [ $fmt = F ]; then
 #swap_size=$(free --mebi | awk '/Mem:/ {print $2}')
   swap_size=256
-  root_size=4096
+  root_size=4608
   swap_end=$(( $swap_size + 257 + 1 ))MiB
   root_end=$(( $root_size + $swap_size + 257 + 1 ))MiB
   parted --script "${device}" -- mklabel gpt \
@@ -158,22 +158,19 @@ esac
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 
 pacstrap /mnt base linux linux-firmware ${cpu}-ucode grub efibootmgr gptfdisk f2fs-tools xfsprogs networkmanager openssh dhclient \
-         vim nano wget avahi sudo dialog cpupower lm_sensors
+         vim nano wget avahi sudo dialog cpupower lm_sensors cronie
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 
 echo "${hostname}" > /mnt/etc/hostname
-echo "nameserver 8.8.8.8" >> /mnt/etc/resolv.conf
-echo "nameserver 1.1.1.1" >> /mnt/etc/resolv.conf
+echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" >> /mnt/etc/resolv.conf
 arch-chroot /mnt useradd -mU "$user"
 sed -i '82s/# %wheel/%wheel/' /mnt/etc/sudoers
 arch-chroot /mnt usermod -aG wheel $user
 
 ### Set locale language
-echo "en_US.UTF-8 UTF-8" >/mnt/etc/locale.gen
-echo "ja_JP.UTF-8 UTF-8" >>/mnt/etc/locale.gen
-echo "zh_TW.UTF-8 UTF-8" >>/mnt/etc/locale.gen
+echo -e "en_US.UTF-8 UTF-8\nja_JP.UTF-8 UTF-8\nzh_TW.UTF-8 UTF-8" >/mnt/etc/locale.gen
 arch-chroot /mnt locale-gen
-[ $lang = E ] && echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
+echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
 [ $lang = J ] && echo "LANG=ja_JP.UTF-8" > /mnt/etc/locale.conf
 [ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/etc/locale.conf
 arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime
@@ -209,13 +206,13 @@ EOF
     arch-chroot /mnt systemctl enable avahi-daemon
 
 else
-    echo [Match] >/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo Name=${ifport} >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo  >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo [Network] >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo Address=$ifaddr/$ifmask >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo Gateway=$ifgw >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo DNS=$ifgw $ifdns >>/mnt/etc/systemd/network/10-static-${ifport}.network
+    echo "[Match]" >/mnt/etc/systemd/network/10-static-${ifport}.network
+    echo "Name=${ifport}" >>/mnt/etc/systemd/network/10-static-${ifport}.network
+    echo -e "\n" >>/mnt/etc/systemd/network/10-static-${ifport}.network
+    echo "[Network]" >>/mnt/etc/systemd/network/10-static-${ifport}.network
+    echo "Address=$ifaddr/$ifmask" >>/mnt/etc/systemd/network/10-static-${ifport}.network
+    echo "Gateway=$ifgw" >>/mnt/etc/systemd/network/10-static-${ifport}.network
+    echo "DNS=$ifgw $ifdns" >>/mnt/etc/systemd/network/10-static-${ifport}.network
 
     arch-chroot /mnt systemctl enable systemd-networkd
 fi
@@ -238,7 +235,7 @@ arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst /root/linux-${ker}-headers-${kver}-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check nowatchdog intel_pstate=disable apparmor=0/' /mnt/etc/default/grub
 
-cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
+cpus=$(getconf _NPROCESSORS_ONLN)
 isocpu=''
 [ $cpus -ge 4 ] && [ $server = L ] || [[ $player =~ S ]] && isocpu='isolcpus=3 irqaffinity=0,1,2 '
 [ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu='isolcpus=3,4 irqaffinity=0,1,2,5,6,7 '
@@ -328,6 +325,7 @@ ACTION=="add|change", KERNEL=="sd[a-z]|mmcblk[0-9]*", ATTR{queue/rotational}=="0
 # set scheduler for rotating disks
 ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
 EOF
+sed -i 's/#Storage=auto/Storage=none/' /mnt/etc/systemd/journald.conf
 ### install config file
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/timezone.sh >/mnt/usr/bin/timezone.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sqzlite-cfg.sh >/mnt/usr/bin/sqzlite-cfg.sh
@@ -340,9 +338,12 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/player-cfg.
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/mnt/usr/bin/shairport-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
-chmod +x /mnt/usr/bin/*.sh
-echo "alias config='sudo config.sh'" >>/mnt/home/${user}/.bashrc
-echo "alias config='config.sh'" >>/mnt/root/.bashrc
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
+chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot
+
+echo -e "alias config='sudo config.sh'\nalias qboot='sudo qboot'" >>/mnt/home/${user}/.bashrc
+echo -e "alias config='config.sh'" >>/mnt/root/.bashrc
+
 # Install ramroot
 # arch-chroot /mnt wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/pkg/main/ramroot-2.0.2-1-x86_64.pkg.tar.zst | pacman -U
 # sed -i 's/ps_default=no/ps_default=yes/' /mnt/etc/ramroot.conf
