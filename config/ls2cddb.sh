@@ -4,7 +4,7 @@ cdpath='/mnt/Music/'
 
 cddbfile=$(ls abcde.*/cddbread.0)
 sed -i '/DTITLE/,$d' $cddbfile
-echo "DTITLE=$(echo $1 | awk -F '/' '{print $5}' | sed 's/ - /\//')" >>$cddbfile
+echo "DTITLE=$(echo $1 | sed 's/ - /\//')" >>$cddbfile
 echo "DYEAR=" >>$cddbfile
 echo "DGENRE=" >>$cddbfile
 n=-1
