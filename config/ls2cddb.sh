@@ -1,5 +1,5 @@
 #!/bin/bash
-format='m4a'
+format='wav'
 cdpath='/media/Music/BR-Rip/'
 
 cddbfile=$(ls abcde.*/cddbread.0)
