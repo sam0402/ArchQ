@@ -1,6 +1,6 @@
 #!/bin/bash
 format='wav'
-cdpath='/media/Music/BR-Rip/'
+cdpath='/mnt/Music/'
 
 cddbfile=$(ls abcde.*/cddbread.0)
 sed -i '/DTITLE/,$d' $cddbfile
