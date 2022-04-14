@@ -18,9 +18,13 @@ if [ ! $1 ]; then
     read input
 fi
 
+[ -z $input ] && input=1
 (( boot = input * 2 - 2 ))
-sed -i 's/^#\?GRUB_DEFAULT=.*$/GRUB_DEFAULT='"$boot"'/' $grub_def
-grub-mkconfig -o /boot/grub/grub.cfg
+#sed -i 's/^#\?GRUB_DEFAULT=.*$/GRUB_DEFAULT='"$boot"'/' $grub_def
+#grub-mkconfig -o /boot/grub/grub.cfg
 
 echo "......"
-echo -e "ArchQ will boot with '${options[$input]}'\n"
+echo -n "ArchQ will boot with '${options[$input]}', reboot now [Y/n]? "
+input=''
+read input
+[[ -z $input || $input = y ]] && reboot
