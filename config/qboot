@@ -1,0 +1,26 @@
+#!/bin/bash
+grub_def='/etc/default/grub'
+
+n=2;
+options=()
+while read line; do
+    options[ ((n / 2 )) ]=${line}
+    ((n += 2 ))
+done <<< $(grep 'with' /boot/grub/grub.cfg | grep -v 'fallback' | cut -d "'" -f2 | cut -d ' ' -f5)
+
+input=$1
+if [ ! $1 ]; then
+    for i in ${!options[@]}; do
+        echo "$i" "${options[i]}"
+        (( n += 1 ))
+    done
+    echo -n "Select kernel to boot: "
+    read input
+fi
+
+(( boot = input * 2 - 2 ))
+sed -i 's/^#\?GRUB_DEFAULT=.*$/GRUB_DEFAULT='"$boot"'/' $grub_def
+grub-mkconfig -o /boot/grub/grub.cfg
+
+echo "......"
+echo -e "ArchQ will boot with '${options[$input]}'\n"
