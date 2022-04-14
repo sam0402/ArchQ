@@ -3,7 +3,7 @@ config='/etc/abcde.conf'
 if [ ! -f $config ]; then
     pacman -Scc --noconfirm
     pacman -Syy --noconfirm
-    pacman -S --noconfirm cdparanoia glyr imagemagick atomicparsley base-devel
+    pacman -S --noconfirm nano cdparanoia glyr imagemagick atomicparsley base-devel
     rm /root/*.pkg.tar.zst
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-5.16.8-3-x86_64.pkg.tar.zst
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-headers-5.16.8-3-x86_64.pkg.tar.zst
