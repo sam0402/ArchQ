@@ -9,4 +9,5 @@ curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cf
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sqzlite-cfg.sh >/usr/bin/sqzlite-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/usr/bin/abcde-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/usr/bin/config.sh
-chmod +x /usr/bin/*.sh
+curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/usr/bin/qboot
+chmod +x /usr/bin/*.sh /usr/bin/qboot
