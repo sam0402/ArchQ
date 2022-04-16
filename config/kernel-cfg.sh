@@ -19,8 +19,7 @@ case $WK in
             kver=$(echo $options | cut -d '-' -f 2-3)
             echo "Install Kernel ${ver}-${kver}..."
             [ ! -f "/root/linux-${ver}-${kver}-x86_64.pkg.tar.zst" ] && wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ver}-${kver}-x86_64.pkg.tar.zst
-            [ ! -f "/root/linux-${ver}-headers-${kver}-x86_64.pkg.tar.zst" ] && wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ver}-headers-${kver}-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /root/linux-${ver}-${kver}-x86_64.pkg.tar.zst /root/linux-${ver}-headers-${kver}-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /root/linux-${ver}-${kver}-x86_64.pkg.tar.zst
         fi
         grub-mkconfig -o /boot/grub/grub.cfg
         ;;
@@ -33,7 +32,7 @@ case $WK in
                 --menu "Select to remove" 7 0 0 $menu) || exit 1
         clear
         echo Rmove Kernel Q1xx ...
-        pacman -R ${options} ${options}-headers
+        pacman -R ${options}
         grub-mkconfig -o /boot/grub/grub.cfg
         ;;
     B)
@@ -56,8 +55,6 @@ case $WK in
         grub-mkconfig -o /boot/grub/grub.cfg
         ;;
     F)
-        # cpus=$(lscpu | grep 'Core(s) per socket:' | awk -F ':' '{print $2}')
-        # [ $LANG = "ja_JP.UTF-8" ] && cpus=$(lscpu | grep 'ソケットあたりのコア数:' | awk -F ':' '{print $2}')
         cpus=2
         num=`expr $cpus + 1`
         cmd="cat /proc/interrupts | grep tick | awk '{print \$${num}}'"
