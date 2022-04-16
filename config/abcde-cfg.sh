@@ -29,7 +29,7 @@ if [ \$(uname -r | awk -F - '{print \$3}') = 'Qrip' ]; then
 fi
 exit 0
 EOF
-    echo "alias abcde='eject;abcde'" >>/root/.bashrc
+    echo "alias abcde='eject -t; abcde'" >>/root/.bashrc
 fi
 
 while read line; do
