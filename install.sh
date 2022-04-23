@@ -234,7 +234,8 @@ arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check nowatchdog intel_pstate=disable apparmor=0/' /mnt/etc/default/grub
 
-cpus=$(getconf _NPROCESSORS_ONLN)
+cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
+#cpus=$(getconf _NPROCESSORS_ONLN)
 isocpu=''
 [ $cpus - 4 ] && [ $server = L ] || [[ $player =~ S ]] && isocpu='isolcpus=3 irqaffinity=0,1,2 '
 [ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu='isolcpus=3,4 irqaffinity=0,1,2,5,6,7 '
