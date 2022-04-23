@@ -236,7 +236,7 @@ sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll nosmt clocksource=tsc tsc=rel
 
 cpus=$(getconf _NPROCESSORS_ONLN)
 isocpu=''
-[ $cpus -ge 4 ] && [ $server = L ] || [[ $player =~ S ]] && isocpu='isolcpus=3 irqaffinity=0,1,2 '
+[ $cpus - 4 ] && [ $server = L ] || [[ $player =~ S ]] && isocpu='isolcpus=3 irqaffinity=0,1,2 '
 [ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu='isolcpus=3,4 irqaffinity=0,1,2,5,6,7 '
 sed -i 's/idle=poll /idle=poll '"$isocpu"'/' /mnt/etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
