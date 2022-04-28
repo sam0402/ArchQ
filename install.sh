@@ -237,7 +237,7 @@ sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll nosmt clocksource=tsc tsc=rel
 cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
 #cpus=$(getconf _NPROCESSORS_ONLN)
 isocpu=''
-[ $cpus - 4 ] && [ $server = L ] || [[ $player =~ S ]] && isocpu='isolcpus=3 irqaffinity=0,1,2 '
+[ $cpus -eq 4 ] && [ $server = L ] || [[ $player =~ S ]] && isocpu='isolcpus=3 irqaffinity=0,1,2 '
 [ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu='isolcpus=3,4 irqaffinity=0,1,2,5,6,7 '
 sed -i 's/idle=poll /idle=poll '"$isocpu"'/' /mnt/etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
@@ -254,13 +254,12 @@ case $server in
         ;;
     R)
         echo Install Roon ...
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.918-1-x86_64.pkg.tar.xz.aa
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.918-1-x86_64.pkg.tar.xz.ab
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.918-1-x86_64.pkg.tar.xz.ac
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.918-1-x86_64.pkg.tar.xz.ad
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.918-1-x86_64.pkg.tar.xz.ae
-        cat /mnt/root/roonserver-1.8.918-1-x86_64.pkg.tar.xz.* > /mnt/root/roonserver-1.8.918-1-x86_64.pkg.tar.xz
-        arch-chroot /mnt pacman -U --noconfirm /root/roonserver-1.8.918-1-x86_64.pkg.tar.xz
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.935-1-x86_64.pkg.tar.xz.aa
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.935-1-x86_64.pkg.tar.xz.ab
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.935-1-x86_64.pkg.tar.xz.ac
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.935-1-x86_64.pkg.tar.xz.ad
+        cat /mnt/root/roonserver-1.8.935-1-x86_64.pkg.tar.xz.* > /mnt/root/roonserver-1.8.935-1-x86_64.pkg.tar.xz
+        arch-chroot /mnt pacman -U --noconfirm /root/roonserver-1.8.935-1-x86_64.pkg.tar.xz
         arch-chroot /mnt systemctl enable roonserver
         ;;
     M)
