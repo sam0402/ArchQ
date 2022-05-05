@@ -1,11 +1,11 @@
 #!/bin/bash
 config='/etc/fstab'
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select command" 7 0 0 B "Boot" U "Update" R "Remove" F "Frequency") || exit 1
+            --menu "Select command" 7 0 0 B "Boot" I "Install" R "Remove" F "Frequency") || exit 1
 clear
 case $WK in
-    U)
-        exec='dialog --stdout --title "ArchQ '$1'" --menu "Select to update" 7 0 0 '
+    I)
+        exec='dialog --stdout --title "ArchQ '$1'" --menu "Select to install" 7 0 0 '
         while read line; do
             ver=$(echo $line | awk -F: '{print $1}')
             info=$(echo $line | awk -F: '{print $2}')

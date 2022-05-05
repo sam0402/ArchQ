@@ -39,10 +39,9 @@ options=$(dialog --stdout \
     "MAC address"           8 1   "$MAC"           8 25 60 0 \
     "LMS ip"                9 1   "$SERVER_IP"     9 25 60 0 \
     "Device supports DSD/DoP"  10 1   "$DOP"      10 25 60 0 \
-    "ALSA volume control"   11 1   "$VOLUME"      11 25 60 0 \
-    "other Options"         12 1   "$OPTIONS"     12 25 60 0 ) || exit 1
+    "ALSA volume control"   11 1   "$VOLUME"      11 25 60 0 || exit 1
 clear
-
+    # "other Options"         12 1   "$OPTIONS"     12 25 60 0 ) 
 NAME=$(echo $options | cut -d ' ' -f 1)
 sed -i 's/^#\?NAME="-n .*/NAME="-n '"$NAME"'"/' $config
 
@@ -76,8 +75,8 @@ DOP=$(echo $options | cut -d ' ' -f 10)
 VOLUME=$(echo $options | cut -d ' ' -f 11)
 [ $VOLUME = '<null>' ] && sed -i 's/^VOLUME/#VOLUME/' $config || sed -i 's/^#\?VOLUME="-V .*/VOLUME="-V '"$VOLUME"'"/' $config
 
-OPTIONS=$(echo $options | cut -d ' ' -f 12)
-[ $OPTIONS = '<null>' ] && sed -i 's/^OPTIONS/#OPTIONS/' $config || sed -i 's/^#\?OPTIONS="-W .*/OPTIONS="-W '"$OPTIONS"'"/' $config
+# OPTIONS=$(echo $options | cut -d ' ' -f 12)
+# [ $OPTIONS = '<null>' ] && sed -i 's/^OPTIONS/#OPTIONS/' $config || sed -i 's/^#\?OPTIONS="-W .*/OPTIONS="-W '"$OPTIONS"'"/' $config
 
 echo $config is setting.
 systemctl stop squeezelite
