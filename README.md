@@ -21,7 +21,7 @@ Install step:
 
 5. Enter URL `http://name@hostname.local:9000` or `http://ip.address:9000` in browser to configure LMS.
 
-6. Use `ssh name@hostname.local` or `ssh name@ip.address` to login ArchQ system and configure. (Use [Putty](https://www.putty.org) for Windows)
+6. Use `ssh name@hostname.local` or `ssh name@ip.address` to login ArchQ system and configure. (Use [PuTTY](https://www.putty.org) for Windows)
    
    Enter command `config` for setting kernel version, partitions, NFS client, ethernet, squeezelite and Airplay.
 
