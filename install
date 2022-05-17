@@ -284,7 +284,7 @@ case $server in
         ;;
     X)
         echo Install XLDE ...
-        arch-chroot /mnt pacman -S --noconfirm lxde lxdm noto-fonts-cjk lxpanel midori tigernvc
+        arch-chroot /mnt pacman -S --noconfirm lxde lxdm noto-fonts-cjk lxpanel midori tigervnc
         echo "LANG=en_US.UTF-8" >/mnt/home/$user/.xinitrc
         [ $lang = J ] && echo "LANG=ja_JP.UTF-8" > /mnt/home/$user/.xinitrc
         [ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/home/$user/.xinitrc
