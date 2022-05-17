@@ -228,8 +228,9 @@ fi
 ker=Q352A; kver=5.16.8-2
 [ $cpu = amd ] && ker=Q352AMD
 [ $server = N ] && ker=${ker}w
+# [ $server = X ] && ker=evl
 echo .......................
-echo Install Kernel Q352 ...
+echo Install Kernel $ker
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check nowatchdog intel_pstate=disable apparmor=0/' /mnt/etc/default/grub
@@ -289,6 +290,11 @@ case $server in
         [ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/home/$user/.xinitrc
         sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
         arch-chroot /mnt systemctl enable lxdm
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-evl-${kver}-x86_64.pkg.tar.xz.aa
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-evl-${kver}-x86_64.pkg.tar.xz.ab
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-evl-${kver}-x86_64.pkg.tar.xz.ac
+        cat /mnt/root/linux-evl-${kver}-x86_64.pkg.tar.xz.* >linux-evl-${kver}-x86_64.pkg.tar.xz
+        arch-chroot /mnt pacman -U --noconfirm /root/linux-evl-${kver}-x86_64.pkg.tar.zst
         ;;
 esac
 ### Install Player
