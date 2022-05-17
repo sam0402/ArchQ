@@ -66,7 +66,7 @@ ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
 player=N
-server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS R Roon M MPD T MPD-lit X "Desktop + VNC" N None) || exit 1
+server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS R Roon M MPD T MPD-lit X "Desktop, VNC" N None) || exit 1
 clear
 case $server in
     L)
