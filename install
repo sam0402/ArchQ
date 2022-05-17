@@ -234,9 +234,9 @@ if [ $server = X ]; then
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.aa
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ab
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ac
-    cat /mnt/root/linux-evl-${kver}-x86_64.pkg.tar.xz.* >/mnt/root/linux-${ker}-${kver}-x86_64.pkg.tar.xz
+    cat /mnt/root/linux-evl-${kver}-x86_64.pkg.tar.xz.* >/mnt/root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 fi
-# [ $server = X ] && ker=evl
+
 echo .......................
 echo Install Kernel $ker
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
@@ -298,8 +298,8 @@ case $server in
         [ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/home/$user/.xinitrc
         sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
         # setup vncserver
-        cp /mnt/usr/lib/systemd/system/vncserver\@.service /mnt/etc/systemd/system/vncserver@:1.service
-        echo ":1=$user" >>/mnt/etc/tigervnc/vncserver.users
+        cp /mnt/usr/lib/systemd/system/vncserver\@.service /mnt/etc/systemd/system/vncserver@:0.service
+        echo ":0=$user" >>/mnt/etc/tigervnc/vncserver.users
         arch-chroot /mnt systemctl daemon-reload
         arch-chroot /mnt systemctl enable lxdm vncserver@:1.service
         ;;
