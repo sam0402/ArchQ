@@ -303,8 +303,8 @@ case $server in
         echo ":1=$user" >>/mnt/etc/tigervnc/vncserver.users
         mkdir /mnt/home/$user/.vnc
         arch-chroot /mnt sh -c "echo $password | vncpasswd -f >/home/$user/.vnc/passwd"
-        chmod 600 /mnt/home/$user/.vnc/passwd
-        chown -R $user: /mnt/home/$user/.vnc
+        arch-chroot /mnt chmod 600 /home/$user/.vnc/passwd
+        arch-chroot /mnt chown -R ${user}: /home/$user/.vnc
         arch-chroot /mnt systemctl daemon-reload
         arch-chroot /mnt systemctl enable lxdm vncserver@:1.service
         ;;
