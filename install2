@@ -69,7 +69,8 @@ player=N
 server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS R Roon M MPD T MPD-lit N None) || exit 1
 clear
 
-[ $server = R ] || desktop=$(dialog --stdout --title "ArchQ" --menu "Desktop & VNC" 7 0 0 D LXDE Q LXQT) || exit 1
+desktop=N
+[ $server = R ] || desktop=$(dialog --stdout --title "ArchQ" --menu "Desktop & VNC" 7 0 0 D LXDE Q LXQT N Disable) || exit 1
 
 case $server in
     L)
@@ -234,7 +235,7 @@ ker=Q352A; kver=5.16.8-2
 echo .......................
 echo Install Kernel $ker
 
-if [ $server = N ] && [[ -n "$desktop" ]]; then
+if [ $server = N ] && [[ $desktop = N ]]; then
     ker=evl
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.aa
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ab
@@ -297,7 +298,7 @@ case $server in
 esac
 
 ### Install Desktop (LXDE || LDQT) && TigerVNC
-if [[ -n $desktop ]]; then
+if [ ! $desktop = N ]; then
     echo "LANG=en_US.UTF-8" >/mnt/home/$user/.xinitrc
     [ $lang = J ] && echo "LANG=ja_JP.UTF-8" > /mnt/home/$user/.xinitrc
     [ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/home/$user/.xinitrc
