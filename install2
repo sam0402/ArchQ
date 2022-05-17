@@ -233,9 +233,9 @@ ker=Q352A; kver=5.16.8-2
 [ $cpu = amd ] && ker=Q352AMD
 [ $server = N ] && ker=${ker}w
 echo .......................
-echo Install Kernel $ker
+echo Install Kernel
 
-if [ $server = N ] && [[ $desktop = N ]]; then
+if [ $server = N ] && [ ! $desktop = N ]; then
     ker=evl
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.aa
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ab
@@ -305,7 +305,7 @@ if [ ! $desktop = N ]; then
 
     [ $desktop = D ] && lxd="lxde lxdm lxpanel"
     [ $desktop = Q ] && lxd="lxqt sddm xdg-utils cantata"
-    echo Install Desktop & VNC ...
+    echo "Install Desktop & VNC ..."
     arch-chroot /mnt pacman -S --noconfirm noto-fonts-cjk midori tigervnc $lxd
     if [ $desktop = D ]; then 
         sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
