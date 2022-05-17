@@ -294,7 +294,7 @@ case $server in
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-evl-${kver}-x86_64.pkg.tar.xz.ab
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-evl-${kver}-x86_64.pkg.tar.xz.ac
         cat /mnt/root/linux-evl-${kver}-x86_64.pkg.tar.xz.* >linux-evl-${kver}-x86_64.pkg.tar.xz
-        arch-chroot /mnt pacman -U --noconfirm /root/linux-evl-${kver}-x86_64.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/linux-evl-${kver}-x86_64.pkg.tar.xz
         # setup vncserver
         cp /mnt/usr/lib/systemd/system/vncserver\@.service /mnt/etc/systemd/system/vncserver@:1.service
         echo ":1=$user" >>/mnt/etc/tigervnc/vncserver.users
