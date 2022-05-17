@@ -69,7 +69,8 @@ player=N
 server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS R Roon M MPD T MPD-lit N None) || exit 1
 clear
 
-[ $server = R ] || vnc=$(dialog --stdout --title "ArchQ" --menu "Desktop & VNC" 7 0 0 E Enable N Disable) || exit 1
+desktop=N
+[ $server = R ] || desktop=$(dialog --stdout --title "ArchQ" --menu "Desktop & VNC" 7 0 0 D LXDE Q LXQt N Disable) || exit 1
 
 case $server in
     L)
@@ -232,9 +233,9 @@ ker=Q352A; kver=5.16.8-2
 [ $cpu = amd ] && ker=Q352AMD
 [ $server = N ] && ker=${ker}w
 echo .......................
-echo Install Kernel $ker
+echo Install Kernel
 
-if [ $server = N ] && [ $vnc = E ]; then
+if [ $server = N ] && [ ! $desktop = N ]; then
     ker=evl
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.aa
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ab
@@ -296,14 +297,22 @@ case $server in
         ;;
 esac
 
-### Install Desktop LXDE & TigerVNC
-if [ $vnc = E ]; then
-    echo Install VNC ...
-    arch-chroot /mnt pacman -S --noconfirm lxde lxdm noto-fonts-cjk lxpanel midori tigervnc
+### Install Desktop (LXDE || LDQT) && TigerVNC
+if [ ! $desktop = N ]; then
     echo "LANG=en_US.UTF-8" >/mnt/home/$user/.xinitrc
     [ $lang = J ] && echo "LANG=ja_JP.UTF-8" > /mnt/home/$user/.xinitrc
     [ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/home/$user/.xinitrc
-    sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
+
+    [ $desktop = D ] && lxd="lxde lxdm lxpanel"
+    [ $desktop = Q ] && lxd="lxqt sddm xdg-utils breeze-icons cantata"
+    echo "Install Desktop & VNC ..."
+    arch-chroot /mnt pacman -S --noconfirm noto-fonts-cjk midori tigervnc $lxd
+    if [ $desktop = D ]; then 
+        sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
+        arch-chroot /mnt systemctl enable lxdm
+    fi
+    [ $desktop = Q ] && arch-chroot /mnt systemctl enable sddm
+
     # setup vncserver
     cp /mnt/usr/lib/systemd/system/vncserver\@.service /mnt/etc/systemd/system/vncserver@:1.service
     echo ":1=$user" >>/mnt/etc/tigervnc/vncserver.users
@@ -311,7 +320,7 @@ if [ $vnc = E ]; then
     arch-chroot /mnt sh -c "echo $password | vncpasswd -f >/home/$user/.vnc/passwd"
     arch-chroot /mnt chmod 600 /home/$user/.vnc/passwd
     arch-chroot /mnt chown -R ${user}: /home/$user/.vnc
-    arch-chroot /mnt systemctl enable lxdm vncserver@:1.service
+    arch-chroot /mnt systemctl enable vncserver@:1.service
 fi
 
 ### Install Player
