@@ -228,6 +228,14 @@ fi
 ker=Q352A; kver=5.16.8-2
 [ $cpu = amd ] && ker=Q352AMD
 [ $server = N ] && ker=${ker}w
+# Install kernel evl for LXDE
+if [ $server = X ]; then
+    ker=evl
+    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.aa
+    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ab
+    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ac
+    cat /mnt/root/linux-evl-${kver}-x86_64.pkg.tar.xz.* >/mnt/root/linux-${ker}-${kver}-x86_64.pkg.tar.xz
+fi
 # [ $server = X ] && ker=evl
 echo .......................
 echo Install Kernel $ker
@@ -289,12 +297,6 @@ case $server in
         [ $lang = J ] && echo "LANG=ja_JP.UTF-8" > /mnt/home/$user/.xinitrc
         [ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/home/$user/.xinitrc
         sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
-        # Install kernel evl
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-evl-${kver}-x86_64.pkg.tar.xz.aa
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-evl-${kver}-x86_64.pkg.tar.xz.ab
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-evl-${kver}-x86_64.pkg.tar.xz.ac
-        cat /mnt/root/linux-evl-${kver}-x86_64.pkg.tar.xz.* >/mnt/root/linux-evl-${kver}-x86_64.pkg.tar.xz
-        arch-chroot /mnt pacman -U --noconfirm /root/linux-evl-${kver}-x86_64.pkg.tar.xz
         # setup vncserver
         cp /mnt/usr/lib/systemd/system/vncserver\@.service /mnt/etc/systemd/system/vncserver@:1.service
         echo ":1=$user" >>/mnt/etc/tigervnc/vncserver.users
