@@ -231,11 +231,11 @@ fi
 ker=Q352A; kver=5.16.8-2
 [ $cpu = amd ] && ker=Q352AMD
 [ $server = N ] && ker=${ker}w
-[ $server = X ] && ker=evl
 echo .......................
 echo Install Kernel $ker
 
 if [ $server = N ] && [ $vnc = E ]; then
+    ker=evl
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.aa
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ab
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ac
