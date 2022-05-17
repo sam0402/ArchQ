@@ -228,18 +228,19 @@ fi
 ker=Q352A; kver=5.16.8-2
 [ $cpu = amd ] && ker=Q352AMD
 [ $server = N ] && ker=${ker}w
-# Install kernel evl for LXDE
+[ $server = X ] && ker=evl
+echo .......................
+echo Install Kernel $ker
+
 if [ $server = X ]; then
-    ker=evl
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.aa
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ab
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ac
     cat /mnt/root/linux-evl-${kver}-x86_64.pkg.tar.xz.* >/mnt/root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+else
+    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 fi
 
-echo .......................
-echo Install Kernel $ker
-arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check nowatchdog intel_pstate=disable apparmor=0/' /mnt/etc/default/grub
 
