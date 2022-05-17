@@ -304,9 +304,9 @@ if [ ! $desktop = N ]; then
     [ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/home/$user/.xinitrc
 
     [ $desktop = D ] && lxd="lxde lxdm lxpanel"
-    [ $desktop = Q ] && lxd="lxqt sddm xdg-utils breeze-icons cantata"
+    [ $desktop = Q ] && lxd="lxqt sddm xdg-utils breeze-icons"
     echo "Install Desktop & VNC ..."
-    arch-chroot /mnt pacman -S --noconfirm noto-fonts-cjk midori tigervnc $lxd
+    arch-chroot /mnt pacman -S --noconfirm noto-fonts-cjk tigervnc midori cantata $lxd
     if [ $desktop = D ]; then 
         sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
         arch-chroot /mnt systemctl enable lxdm
