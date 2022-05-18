@@ -9,6 +9,7 @@ if [[ ! $(pacman -Q lxdm | cut -f1) ]]; then
     pacman -Scc --noconfirm
     pacman -Syy --noconfirm
     pacman -S --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool
+    echo "session=lxqt" >/home/$user/.vnc/config
 fi
 case $desktop in
     D)
@@ -16,6 +17,7 @@ case $desktop in
             pacman -S --noconfirm lxde lxpanel
         fi
         sed -i 's;^# session=/usr/bin/startlx??;session=/usr/bin/startlxde;g' /etc/lxdm/lxdm.conf
+        sed -i 's;^session=.*;session=LXDE;g' /home/$user/.vnc/config
         systemctl enable lxdm vncserver@:1.service
         systemctl restart lxdm vncserver@:1.service
         echo "Enable LXDE & VNC ..."
@@ -25,6 +27,7 @@ case $desktop in
             pacman -S --noconfirm lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc
         fi
         sed -i 's;^# session=/usr/bin/startlx??;session=/usr/bin/startlxqt;g' /etc/lxdm/lxdm.conf
+        sed -i 's;^session=.*;session=lxqt;g' /home/$user/.vnc/config
         systemctl enable lxdm vncserver@:1.service
         systemctl restart lxdm vncserver@:1.service
         echo "LXQt & VNC is enabled."
