@@ -70,7 +70,7 @@ server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LM
 clear
 
 desktop=N
-[ $server = R ] || desktop=$(dialog --stdout --title "ArchQ" --menu "Desktop & VNC" 7 0 0 D LXDE Q LXQt N Disable) || exit 1
+[ $server = R ] || desktop=$(dialog --stdout --title "ArchQ" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt N Disable) || exit 1
 
 case $server in
     L)
