@@ -5,37 +5,33 @@ user=$(ls /home)
 desktop=$(dialog --stdout --title "ArchQ" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt N Disable) || exit 1
 
 cat /etc/locale.conf >/home/$user/.xinitrc
+if [[ ! $(pacman -Q lxdm | cut -f1) ]]; then
+    pacman -Scc --noconfirm
+    pacman -Syy --noconfirm
+    pacman -S --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool
+fi
 case $desktop in
     D)
-        lxd="lxde lxdm lxpanel"
-        if [[ ! $(pacman -Q lxdm | cut -f1) ]]; then
-            pacman -Scc --noconfirm
-            pacman -Syy --noconfirm
-            pacman -S --noconfirm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool $lxd
-            sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /etc/lxdm/lxdm.conf
+        if [[ ! $(pacman -Q lxsession | cut -f1) ]]; then
+            pacman -S --noconfirm lxde lxpanel
         fi
-        systemctl disable sddm; systemctl stop sddm
+        sed -i 's;^# session=/usr/bin/startlx??;session=/usr/bin/startlxde;g' /etc/lxdm/lxdm.conf
         systemctl enable lxdm vncserver@:1.service
-        systemctl start lxdm vncserver@:1.service
-
+        systemctl restart lxdm vncserver@:1.service
         echo "Enable LXDE & VNC ..."
         ;;
     Q)
-        lxd="lxqt sddm xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
-        if [[ ! $(pacman -Q sddm | cut -f1) ]]; then
-            pacman -Scc --noconfirm
-            pacman -Syy --noconfirm
-            pacman -S --noconfirm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool $lxd
+        if [[ ! $(pacman -Q lxqt-session | cut -f1) ]]; then
+            pacman -S --noconfirm lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc
         fi
-        systemctl disable lxdm; systemctl stop lxdm
-        systemctl enable sddm vncserver@:1.service
-        systemctl start sddm vncserver@:1.service
-
+        sed -i 's;^# session=/usr/bin/startlx??;session=/usr/bin/startlxqt;g' /etc/lxdm/lxdm.conf
+        systemctl enable lxdm vncserver@:1.service
+        systemctl restart lxdm vncserver@:1.service
         echo "LXQt & VNC is enabled."
         ;;
     N)
-        systemctl disable lxdm sddm vncserver@:1.service
-        systemctl stop lxdm sddm vncserver@:1.service
+        systemctl disable lxdm vncserver@:1.service
+        systemctl stop lxdm vncserver@:1.service
         echo "Desktop & VNC is enabled."
         ;;
 esac
