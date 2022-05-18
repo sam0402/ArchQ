@@ -13,7 +13,7 @@ MENU=''
 
 WK=$(dialog --stdout --title "ArchQ $Qver" \
     --menu "Select to config" 7 0 0 K Kernel M "Partition mount" N "NFS mount" \
-        E Ethernet T Timezone P "Active Player" R "abCDe ripper" ${MENU}) || exit 1
+        E Ethernet T Timezone X "Desktop & VNC" P "Active Player" R "abCDe ripper" ${MENU}) || exit 1
 clear
 case $WK in
     K)
@@ -39,6 +39,9 @@ case $WK in
         ;;
     A)
         /usr/bin/shairport-cfg.sh $Qver
+        ;;
+    R)
+        /usr/bin/desktop-cfg.sh $Qver
         ;;
     R)
         /usr/bin/abcde-cfg.sh $Qver
