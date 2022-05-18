@@ -40,7 +40,7 @@ case $WK in
     A)
         /usr/bin/shairport-cfg.sh $Qver
         ;;
-    R)
+    X)
         /usr/bin/desktop-cfg.sh $Qver
         ;;
     R)
