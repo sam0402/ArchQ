@@ -300,28 +300,22 @@ esac
 ### Install Desktop (LXDE || LDQT) && TigerVNC
 if [ ! $desktop = N ]; then
     echo "LANG=en_US.UTF-8" >/mnt/home/$user/.xinitrc
-    if [ $lang = J ]; then
-        echo "LANG=ja_JP.UTF-8" > /mnt/home/$user/.xinitrc
-        im="fcitx5-mozc"
-    fi
-    if [ $lang = T ];then
-        echo "LANG=zh_TW.UTF-8" > /mnt/home/$user/.xinitrc
-        im="fcitx5-chewing"
-    fi
-    [ $desktop = D ] && lxd="lxde lxdm lxpanel fcitx5-gtk"
-    [ $desktop = Q ] && lxd="lxqt sddm xdg-utils breeze-icons fcitx5-qt"
+    [ $lang = J ] && echo "LANG=ja_JP.UTF-8" > /mnt/home/$user/.xinitrc
+    [ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/home/$user/.xinitrc
+
+    [ $desktop = D ] && lxd="lxde lxdm lxpanel"
+    [ $desktop = Q ] && lxd="lxqt sddm xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
     echo "Install Desktop & VNC ..."
-    arch-chroot /mnt pacman -S --noconfirm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool $lxd $im
+    arch-chroot /mnt pacman -S --noconfirm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool $lxd
+    echo "GTK_IM_MODULE=fcitx" >>/mnt/etc/environment
+    echo "QT_IM_MODULE=fcitx" >>/mnt/etc/environment
+    echo "XMODIFIERS=@im=fcitx" >>/mnt/etc/environment
     if [ $desktop = D ]; then 
         sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
         arch-chroot /mnt systemctl enable lxdm
     fi
     [ $desktop = Q ] && arch-chroot /mnt systemctl enable sddm
 
-    echo "GTK_IM_MODULE=fcitx" >>/mnt/etc/environment
-    echo "QT_IM_MODULE=fcitx" >>/mnt/etc/environment
-    echo "XMODIFIERS=@im=fcitx" >>/mnt/etc/environment
-    
     # setup vncserver
     cp /mnt/usr/lib/systemd/system/vncserver\@.service /mnt/etc/systemd/system/vncserver@:1.service
     echo ":1=$user" >>/mnt/etc/tigervnc/vncserver.users
