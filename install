@@ -383,6 +383,9 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh 
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot
+mkdir /mnt/home/$user/Desktop
+arch-chroot /mnt ln -sf /usr/bin/config.sh /home/$user/Desktop/.
+arch-chroot /mnt chown -R ${user}: /home/$user/Desktop
 
 echo -e "alias config='sudo config.sh'\nalias qboot='sudo qboot'" >>/mnt/home/${user}/.bashrc
 echo -e "alias config='config.sh'" >>/mnt/root/.bashrc
