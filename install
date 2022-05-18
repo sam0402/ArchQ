@@ -319,6 +319,8 @@ if [ ! $desktop = N ]; then
     cp /mnt/usr/lib/systemd/system/vncserver\@.service /mnt/etc/systemd/system/vncserver@:1.service
     echo ":1=$user" >>/mnt/etc/tigervnc/vncserver.users
     mkdir /mnt/home/$user/.vnc
+    [ $desktop = D ] && echo "session=LXDE" >/mnt/home/$user/.vnc/config
+    [ $desktop = Q ] && echo "session=lxqt" >/mnt/home/$user/.vnc/config
     arch-chroot /mnt sh -c "echo $password | vncpasswd -f >/home/$user/.vnc/passwd"
     arch-chroot /mnt chmod 600 /home/$user/.vnc/passwd
     arch-chroot /mnt chown -R ${user}: /home/$user/.vnc
