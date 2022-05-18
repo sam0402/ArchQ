@@ -310,6 +310,8 @@ if [ ! $desktop = N ]; then
     echo "GTK_IM_MODULE=fcitx" >>/mnt/etc/environment
     echo "QT_IM_MODULE=fcitx" >>/mnt/etc/environment
     echo "XMODIFIERS=@im=fcitx" >>/mnt/etc/environment
+    arch-chroot /mnt ln -s /usr/bin/qterminal /usr/bin/xterm
+
     if [ $desktop = D ]; then 
         sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
         arch-chroot /mnt systemctl enable lxdm
