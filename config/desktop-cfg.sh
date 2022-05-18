@@ -1,6 +1,6 @@
 #!/bin/bash
 ### Install Desktop (LXDE || LDQT) && TigerVNC
-user=$(ls /home)
+user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
 
 desktop=$(dialog --stdout --title "ArchQ" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt N Disable) || exit 1
 
