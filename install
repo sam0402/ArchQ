@@ -303,20 +303,17 @@ if [ ! $desktop = N ]; then
     [ $lang = J ] && echo "LANG=ja_JP.UTF-8" > /mnt/home/$user/.xinitrc
     [ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/home/$user/.xinitrc
 
-    [ $desktop = D ] && lxd="lxde lxdm lxpanel"
-    [ $desktop = Q ] && lxd="lxqt sddm xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
+    [ $desktop = D ] && lxd="lxde lxpanel"
+    [ $desktop = Q ] && lxd="lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
     echo "Install Desktop & VNC ..."
-    arch-chroot /mnt pacman -S --noconfirm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool $lxd
+    arch-chroot /mnt pacman -S --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool $lxd
     echo "GTK_IM_MODULE=fcitx" >>/mnt/etc/environment
     echo "QT_IM_MODULE=fcitx" >>/mnt/etc/environment
     echo "XMODIFIERS=@im=fcitx" >>/mnt/etc/environment
     arch-chroot /mnt ln -s /usr/bin/qterminal /usr/bin/xterm
 
-    if [ $desktop = D ]; then 
-        sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
-        arch-chroot /mnt systemctl enable lxdm
-    fi
-    [ $desktop = Q ] && arch-chroot /mnt systemctl enable sddm
+    [ $desktop = D ] && sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
+    [ $desktop = Q ] && sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxqt;g' /mnt/etc/lxdm/lxdm.conf
 
     # setup vncserver
     cp /mnt/usr/lib/systemd/system/vncserver\@.service /mnt/etc/systemd/system/vncserver@:1.service
@@ -325,7 +322,7 @@ if [ ! $desktop = N ]; then
     arch-chroot /mnt sh -c "echo $password | vncpasswd -f >/home/$user/.vnc/passwd"
     arch-chroot /mnt chmod 600 /home/$user/.vnc/passwd
     arch-chroot /mnt chown -R ${user}: /home/$user/.vnc
-    arch-chroot /mnt systemctl enable vncserver@:1.service
+    arch-chroot /mnt systemctl enable lxdm vncserver@:1.service
 fi
 
 ### Install Player
