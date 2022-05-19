@@ -10,6 +10,13 @@ if [[ ! $(pacman -Q lxdm | cut -f1) ]]; then
     pacman -Syy --noconfirm
     pacman -S --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool
     echo "session=lxqt" >/home/$user/.vnc/config
+    ker=evl; kver=5.16.8-2
+    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.aa
+    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ab
+    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ac
+    cat /root/linux-evl-${kver}-x86_64.pkg.tar.xz.* >/root/linux-${ker}-${kver}-x86_64.pkg.tar.xz
+    rm -f /root/linux-${ker}-${kver}-x86_64.pkg.tar.xz.a?
+    pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.xz
 fi
 case $desktop in
     D)
