@@ -9,6 +9,7 @@ if [[ ! $(pacman -Q lxdm | cut -f1) ]]; then
     pacman -Scc --noconfirm
     pacman -Syy --noconfirm
     pacman -S --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool
+    mkdir -p /home/$user/.vnc
     echo "session=lxqt" >/home/$user/.vnc/config
     ker=evl; kver=5.16.8-2
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.aa
@@ -71,7 +72,6 @@ if [ ! -e "/home/$user/.vnc/passwd" ]; then
 
     cp /usr/lib/systemd/system/vncserver\@.service /etc/systemd/system/vncserver@:1.service
     echo ":1=$user" >>/etc/tigervnc/vncserver.users
-    mkdir -p /home/$user/.vnc
     echo $password | vncpasswd -f >/home/$user/.vnc/passwd
     chmod 600 /home/$user/.vnc/passwd
     chown -R ${user}: /home/$user/.vnc
