@@ -1,7 +1,7 @@
 #!/bin/bash
 # WARNING: this script will destroy data on the selected disk.
 # This script can be run by executing the following:
-#   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install | bash
+#   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install.sh | bash
 set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
@@ -68,10 +68,6 @@ fi
 player=N
 server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS R Roon M MPD T MPD-lit N None) || exit 1
 clear
-
-desktop=N
-[ $server = R ] || desktop=$(dialog --stdout --title "ArchQ" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt N Disable) || exit 1
-
 case $server in
     L)
         player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
@@ -233,18 +229,8 @@ ker=Q352A; kver=5.16.8-2
 [ $cpu = amd ] && ker=Q352AMD
 [ $server = N ] && ker=${ker}w
 echo .......................
-echo Install Kernel
-
-if [ $server = N ] && [ ! $desktop = N ]; then
-    ker=evl
-    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.aa
-    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ab
-    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ac
-    cat /mnt/root/linux-evl-${kver}-x86_64.pkg.tar.xz.* >/mnt/root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-else
-    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-fi
-
+echo Install Kernel Q352 ...
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check nowatchdog intel_pstate=disable apparmor=0/' /mnt/etc/default/grub
 
@@ -296,37 +282,6 @@ case $server in
         arch-chroot /mnt systemctl enable mpd
         ;;
 esac
-
-### Install Desktop (LXDE || LDQT) && TigerVNC
-if [ ! $desktop = N ]; then
-    echo "LANG=en_US.UTF-8" >/mnt/home/$user/.xinitrc
-    [ $lang = J ] && echo "LANG=ja_JP.UTF-8" > /mnt/home/$user/.xinitrc
-    [ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/home/$user/.xinitrc
-
-    [ $desktop = D ] && lxd="lxde lxpanel"
-    [ $desktop = Q ] && lxd="lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
-    echo "Install Desktop & VNC ..."
-    arch-chroot /mnt pacman -S --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool $lxd
-    echo "GTK_IM_MODULE=fcitx" >>/mnt/etc/environment
-    echo "QT_IM_MODULE=fcitx" >>/mnt/etc/environment
-    echo "XMODIFIERS=@im=fcitx" >>/mnt/etc/environment
-    arch-chroot /mnt ln -s /usr/bin/qterminal /usr/bin/xterm
-
-    [ $desktop = D ] && sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
-    [ $desktop = Q ] && sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxqt;g' /mnt/etc/lxdm/lxdm.conf
-
-    # setup vncserver
-    cp /mnt/usr/lib/systemd/system/vncserver\@.service /mnt/etc/systemd/system/vncserver@:1.service
-    echo ":1=$user" >>/mnt/etc/tigervnc/vncserver.users
-    mkdir /mnt/home/$user/.vnc
-    [ $desktop = D ] && echo "session=LXDE" >/mnt/home/$user/.vnc/config
-    [ $desktop = Q ] && echo "session=lxqt" >/mnt/home/$user/.vnc/config
-    arch-chroot /mnt sh -c "echo $password | vncpasswd -f >/home/$user/.vnc/passwd"
-    arch-chroot /mnt chmod 600 /home/$user/.vnc/passwd
-    arch-chroot /mnt chown -R ${user}: /home/$user/.vnc
-    arch-chroot /mnt systemctl enable lxdm vncserver@:1.service
-fi
-
 ### Install Player
 echo Install alsa-lib ......
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
@@ -379,15 +334,11 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/kernel-cfg.
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/partimnt-cfg.sh >/mnt/usr/bin/partimnt-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/mnt/usr/bin/update_scpt.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/player-cfg.sh >/mnt/usr/bin/player-cfg.sh
-curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg.sh >/mnt/usr/bin/desktop-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/mnt/usr/bin/shairport-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot
-mkdir /mnt/home/$user/Desktop
-arch-chroot /mnt ln -sf /usr/bin/config.sh /home/$user/Desktop/.
-arch-chroot /mnt chown -R ${user}: /home/$user/Desktop
 
 echo -e "alias config='sudo config.sh'\nalias qboot='sudo qboot'" >>/mnt/home/${user}/.bashrc
 echo -e "alias config='config.sh'" >>/mnt/root/.bashrc
