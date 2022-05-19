@@ -104,7 +104,7 @@ timedatectl set-ntp true
 if [ $fmt = F ]; then
 #swap_size=$(free --mebi | awk '/Mem:/ {print $2}')
   swap_size=256
-  root_size=5120
+  root_size=4608
   swap_end=$(( $swap_size + 257 + 1 ))MiB
   root_end=$(( $root_size + $swap_size + 257 + 1 ))MiB
   parted --script "${device}" -- mklabel gpt \
