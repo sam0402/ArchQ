@@ -67,5 +67,5 @@ http://www.stsd99.com/phpBB3/viewtopic.php?f=61&t=3129&sid=3e3eeea96d483cf9b63b8
 ![NFS](images/nfs_mount.png)
 ![Player](images/player.png)
 ![abcde](images/abcde.png)
-![desktop](images/desktops.png)
+![desktop](images/desktop_vnc.png)
 ![mdp_cantata](images/mpd_cantata.jpg)
