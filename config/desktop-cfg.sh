@@ -2,7 +2,7 @@
 ### Install Desktop (LXDE || LDQT) && TigerVNC
 user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
 
-desktop=$(dialog --stdout --title "ArchQ" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt N Disable) || exit 1
+desktop=$(dialog --stdout --title "ArchQ" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt V "VNC only" N Disable) || exit 1
 
 cat /etc/locale.conf >/home/$user/.xinitrc
 if [[ ! $(pacman -Q lxdm | cut -f1) ]]; then
@@ -38,6 +38,10 @@ case $desktop in
         systemctl enable lxdm vncserver@:1.service
         systemctl restart lxdm vncserver@:1.service
         echo "LXQt & VNC is enabled."
+        ;;
+    V)
+        systemctl disable lxdm 
+        systemctl stop lxdm    
         ;;
     N)
         systemctl disable lxdm vncserver@:1.service
