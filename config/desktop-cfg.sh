@@ -3,6 +3,7 @@
 user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
 
 desktop=$(dialog --stdout --title "ArchQ" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt V "VNC only" N Disable) || exit 1
+clear
 
 cat /etc/locale.conf >/home/$user/.xinitrc
 if [[ ! $(pacman -Q lxdm | cut -f1) ]]; then
