@@ -43,8 +43,9 @@ case $desktop in
         echo "LXQt & VNC is enabled."
         ;;
     V)
-        systemctl disable lxdm 
-        systemctl stop lxdm    
+        systemctl disable lxdm
+        systemctl stop lxdm
+        systemctl set-default multi-user.target
         ;;
     N)
         systemctl disable lxdm vncserver@:1.service
