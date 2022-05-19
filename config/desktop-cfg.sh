@@ -12,7 +12,7 @@ if [[ ! $(pacman -Q lxdm | cut -f1) ]]; then
     pacman -S --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool
     mkdir -p /home/$user/.vnc
     echo "session=lxqt" >/home/$user/.vnc/config
-    echo "geometry=1280x960" >/home/$user/.vnc/config
+    echo "geometry=1280x960" >>/home/$user/.vnc/config
     ker=evl; kver=5.16.8-2
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.aa
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ab
