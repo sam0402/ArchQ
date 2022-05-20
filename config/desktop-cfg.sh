@@ -9,7 +9,7 @@ cat /etc/locale.conf >/home/$user/.xinitrc
 if [[ ! $(pacman -Q lxdm | cut -f1) ]]; then
     pacman -Scc --noconfirm
     pacman -Syy --noconfirm
-    pacman -S --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool
+    pacman -S --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata
     mkdir -p /home/$user/.vnc
     echo "session=lxqt" >/home/$user/.vnc/config
     echo "geometry=1280x960" >>/home/$user/.vnc/config
@@ -25,6 +25,7 @@ case $desktop in
     D)
         if [[ ! $(pacman -Q lxsession | cut -f1) ]]; then
             pacman -S --noconfirm lxde lxpanel
+            pacman -R --noconfirm lxmusic
         fi
         sed -i 's;^# session=/usr/bin/startlx??;session=/usr/bin/startlxde;g' /etc/lxdm/lxdm.conf
         sed -i 's;^session=.*;session=LXDE;g' /home/$user/.vnc/config
@@ -49,6 +50,7 @@ case $desktop in
     N)
         systemctl disable lxdm vncserver@:1.service
         systemctl stop lxdm vncserver@:1.service
+        systemctl set-default multi-user.target
         echo "Desktop & VNC is enabled."
         ;;
 esac
