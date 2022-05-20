@@ -29,6 +29,7 @@ case $desktop in
         fi
         sed -i 's;^# session=/usr/bin/startlx??;session=/usr/bin/startlxde;g' /etc/lxdm/lxdm.conf
         sed -i 's;^session=.*;session=LXDE;g' /home/$user/.vnc/config
+        ln -sf /usr/bin/lxterminal /usr/bin/xterm
         systemctl enable lxdm vncserver@:1.service
         systemctl restart lxdm vncserver@:1.service
         echo "Enable LXDE & VNC ..."
@@ -39,6 +40,7 @@ case $desktop in
         fi
         sed -i 's;^# session=/usr/bin/startlx??;session=/usr/bin/startlxqt;g' /etc/lxdm/lxdm.conf
         sed -i 's;^session=.*;session=lxqt;g' /home/$user/.vnc/config
+        ln -sf /usr/bin/qterminal /usr/bin/xterm
         systemctl enable lxdm vncserver@:1.service
         systemctl restart lxdm vncserver@:1.service
         echo "LXQt & VNC is enabled."
@@ -59,7 +61,6 @@ echo "GTK_IM_MODULE=fcitx" >>/etc/environment
 echo "QT_IM_MODULE=fcitx" >>/etc/environment
 
 if [ ! -e "/home/$user/Desktop/config.sh" ]; then
-    ln -sf /usr/bin/qterminal /usr/bin/xterm
     mkdir -p /home/$user/Desktop
     ln -sf /usr/bin/config.sh /home/$user/Desktop/.
     chown -R ${user}: /home/$user/Desktop
