@@ -7,6 +7,7 @@ clear
 
 cat /etc/locale.conf >/home/$user/.xinitrc
 if [[ ! $(pacman -Q lxdm | cut -f1) ]]; then
+    pacman -Sy archlinux-keyring
     pacman -Scc --noconfirm
     pacman -Syy --noconfirm
     pacman -S --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata

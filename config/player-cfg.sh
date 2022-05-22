@@ -17,12 +17,14 @@ clear
 [[ $player =~ R ]] && r1=on
 
 if [[ $player =~ A && ! -f '/etc/shairport-sync.conf' ]]; then
+    pacman -Sy archlinux-keyring
     pacman -Scc --noconfirm
     pacman -Syy --noconfirm
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
 fi
 if [[ $player =~ S && ! -f '/etc/squeezelite.conf' ]]; then
+    pacman -Sy archlinux-keyring
     pacman -Scc --noconfirm
     pacman -Syy --noconfirm
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst

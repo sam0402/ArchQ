@@ -1,6 +1,7 @@
 #!/bin/bash
 config='/etc/abcde.conf'
 if [ ! -f $config ]; then
+    pacman -Sy archlinux-keyring
     pacman -Scc --noconfirm
     pacman -Syy --noconfirm
     pacman -S --noconfirm nano cdparanoia glyr imagemagick atomicparsley base-devel
@@ -15,9 +16,9 @@ if [ ! -f $config ]; then
     systemctl enable rc-local.service
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde.conf >/etc/abcde.conf
     echo 'yes' | cpan install MusicBrainz::DiscID WebService::MusicBrainz
-    curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/ls2cddb.sh >/usr/bin/ls2cddb.sh
+    curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/ls2cddb.sh >/usr/bin/ls2cddb.sh
     chmod +x /usr/bin/ls2cddb.sh
-    
+
     sed -i '$d' /etc/rc.local
 cat >>/etc/rc.local <<EOF
 server="roonserver squeezelite mpd logitechmediaserver squeezelite shairport-sync"
