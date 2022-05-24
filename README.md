@@ -13,7 +13,7 @@ Install step:
 
 2. Flash ISO image to USB drive by [Etcher](https://www.balena.io/etcher/?).
 
-3. Boot up with USB drive , than typing as below.
+3. Boot up with USB drive , than typing as below. (Use 'ip addr' to check if conneted on the network or not.)
  
 `curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install | bash`
 
