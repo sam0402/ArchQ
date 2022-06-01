@@ -58,7 +58,7 @@ Client-server:
  HDMI output (Intel i915): Install and boot by Q352h
  
 http://www.stsd99.com/phpBB3/viewtopic.php?f=61&t=3129&sid=3e3eeea96d483cf9b63b8200b949685e&p=20583#p20583
-![Kernel](images/kerne518.png)
+![Kernel](images/kernel518.png)
 ![Config](images/config.png)
 ![Squeezelite](images/squeezelite.png)
 ![Server](images/servers.png)
