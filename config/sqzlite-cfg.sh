@@ -1,7 +1,19 @@
 #!/bin/bash
 config='/etc/squeezelite.conf'
 
-### Select sound device
+### Select squeezelite version
+ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
+inst=(0 pcm dsd pcmcf dsdcf)
+option=$(dialog --stdout --title "ArchQ $1" \
+        --menu "Squeezelite ${inst[$ver]^^}" 7 0 0 \
+        1 "PCM" 2 "DSD" 3 "PCM CF" 4 "DSD CF" ) || exit 1
+
+if [ $ver -ne $option ]; then
+    [ -f /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst] || wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
+    pacman -U --noconfirm /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
+fi
+
+## Select sound device
 if [ ! $(aplay -L | grep ':') ]; then
     echo "No Sound Device" ; exit 1
 fi
