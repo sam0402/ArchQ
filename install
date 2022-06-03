@@ -225,7 +225,7 @@ fi
 # arch-chroot /mnt wpa_supplicant -B -i wlan -c /etc/wpa_supplicant/wpa_supplicant-wlan.conf
 
 ### Kernel
-ker=Q352A; kver=5.16.8-2
+ker=Q352; kver=5.18.1-1
 [ $cpu = amd ] && ker=Q352AMD
 [ $server = N ] && ker=${ker}w
 echo .......................
@@ -254,12 +254,12 @@ case $server in
         ;;
     R)
         echo Install Roon ...
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.935-1-x86_64.pkg.tar.xz.aa
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.935-1-x86_64.pkg.tar.xz.ab
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.935-1-x86_64.pkg.tar.xz.ac
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.935-1-x86_64.pkg.tar.xz.ad
-        cat /mnt/root/roonserver-1.8.935-1-x86_64.pkg.tar.xz.* > /mnt/root/roonserver-1.8.935-1-x86_64.pkg.tar.xz
-        arch-chroot /mnt pacman -U --noconfirm /root/roonserver-1.8.935-1-x86_64.pkg.tar.xz
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.952-1-x86_64.pkg.tar.xz.aa
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.952-1-x86_64.pkg.tar.xz.ab
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.952-1-x86_64.pkg.tar.xz.ac
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.952-1-x86_64.pkg.tar.xz.ad
+        cat /mnt/root/roonserver-1.8.952-1-x86_64.pkg.tar.xz.* > /mnt/root/roonserver-1.8.952-1-x86_64.pkg.tar.xz
+        arch-chroot /mnt pacman -U --noconfirm /root/roonserver-1.8.952-1-x86_64.pkg.tar.xz
         arch-chroot /mnt systemctl enable roonserver
         ;;
     M)
@@ -290,7 +290,10 @@ arch-chroot /mnt pacman -Sd --noconfirm alsa-utils
 
 if [[ $player =~ S ]]; then
     echo Install Squeezelite ...
+    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-pcm-x86_64.pkg.tar.zst
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
+    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-pcmcf-x86_64.pkg.tar.zst
+    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsdcf-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
     [[ -n "$scard" ]] && sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/squeezelite.conf
     sed -i '/ExecStart=/iExecStartPre=/usr/bin/sleep 3' /mnt/usr/lib/systemd/system/squeezelite.service
