@@ -5,12 +5,12 @@ config='/etc/squeezelite.conf'
 ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
 inst=(0 pcmcf dsdcf pcmapl dsdapl pcm dsd)
 option=$(dialog --stdout --title "ArchQ $1" \
-        --menu "Select squeezelite version: ${inst[$ver]^^}" 7 0 0 \
+        --menu "Select squeezelite: ${inst[$ver]^^}" 7 0 0 \
         1 "PCM CF" 2 "DSD CF" 3 "PCM Apple" 4 "DSD Apple" 5 "PCM" 6 "DSD" ) || exit 1
 
 if [ $ver -ne $option ]; then
-    [ -f /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst ] || wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
-    pacman -U --noconfirm /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
+    [ -f /root/squzlite/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst ] || wget -qP /root/squzlite https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
+    pacman -U --noconfirm /root/squzlite/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
     ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
 fi
 
