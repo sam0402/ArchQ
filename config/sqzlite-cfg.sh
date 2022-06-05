@@ -9,9 +9,10 @@ option=$(dialog --stdout --title "ArchQ $1" \
         1 "PCM" 2 "DSD" 3 "PCM CF" 4 "DSD CF" ) || exit 1
 
 if [ $ver -ne $option ]; then
-    [ -f /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst] || wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
+    [ -f /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst ] || echo wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
 fi
+ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
 
 ## Select sound device
 if [ ! $(aplay -L | grep ':') ]; then
@@ -31,15 +32,15 @@ sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$device"'"/' $config
 
 ###
 NAME='<null>'; ALSA_PARAMS='<null>'; BUFFER='<null>'; CODEC='<null>'; PRIORITY='<null>'; OPTIONS='<null>'
-MAX_RATE='<null>'; UPSAMPLE='<null>'; MAC='<null>'; SERVER_IP='<null>'; DOP='<null>'; VOLUME='<null>'
+MAX_RATE='<null>'; UPSAMPLE='<null>'; MAC='<null>'; SERVER_IP='<null>'; VOLUME='<null>'
 
 while read line; do
 eval $(grep -v '#' | sed 's/-. //')
 #echo $(grep -v '#' | sed 's/-. //')
 done < $config
-
+[[ ${inst[$ver]^^} =~ PCM ]] && DOP='<null>' || DOP='0:u32be'
 options=$(dialog --stdout \
-    --title "Squeezelite" \
+    --title "Squeezelite ${inst[$ver]^^}" \
     --ok-label "Ok" \
     --form "Modify settings. Blank fills with <null>" 0 60 0 \
     "Name of Player"        1 1   "$NAME"          1 25 60 0 \
