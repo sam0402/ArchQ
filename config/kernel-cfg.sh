@@ -1,7 +1,7 @@
 #!/bin/bash
 config='/etc/fstab'
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select command" 7 0 0 B "Boot" I "Install" R "Remove" F "Frequency") || exit 1
+            --menu "Select command" 7 0 0 B "Boot" I "Install" R "Remove" F "Frequency" T "Temperature") || exit 1
 clear
 case $WK in
     I)
@@ -58,11 +58,17 @@ case $WK in
         cpus=2
         num=`expr $cpus + 1`
         cmd="cat /proc/interrupts | grep tick | awk '{print \$${num}}'"
-        echo "Wait for 10 seconds..."
+        dialog --stdout --title "ArchQ $1" --infobox "\n\n    Wait for 10 seconds..." 7 35
         t1=$(eval $cmd)
         sleep 10
         t2=$(eval $cmd)
         count=$(expr $t2 / 10000 - $t1 / 10000)
-        echo "Kernel working frequency: $count"
+        dialog --stdout --title "ArchQ $1" --msgbox "\nKernel working frequency: $count" 7 35
+        ;;
+
+    T)
+        temp=$(sensors | grep 'Core' | awk '{print "\n"$1,$2,$3}')
+        fan=$(sensors | grep 'RPM' | awk '{print "\n\n"$1,$2,$3,$4}')
+        dialog --stdout --title "ArchQ $1" --msgbox "${temp}${fan}" 10 35
         ;;
 esac
