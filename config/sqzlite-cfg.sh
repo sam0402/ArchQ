@@ -2,17 +2,15 @@
 config='/etc/squeezelite.conf'
 
 ### Select squeezelite version
-ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
+# ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
 inst=(0 pcm dsd pcmcf dsdcf)
 optver=(0 PCM DSD 'PCM CF' 'DSD CF')
 option=$(dialog --stdout --title "ArchQ $1" \
         --menu "Select squeezelite version" 7 0 0 \
         1 "PCM" 2 "DSD" 3 "PCM CF" 4 "DSD CF" ) || exit 1
 
-if [ $ver -ne $option ]; then
-    [ -f /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst ] || echo wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
-    pacman -U --noconfirm /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
-fi
+[ -f /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst ] || wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
+pacman -U --noconfirm /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
 
 ## Select sound device
 if [ ! $(aplay -L | grep ':') ]; then
