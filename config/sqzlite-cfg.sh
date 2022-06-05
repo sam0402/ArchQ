@@ -15,7 +15,8 @@ fi
 
 ## Select sound device
 if [ ! $(aplay -L | grep ':') ]; then
-    echo "No Sound Device" ; exit 1
+    dialog --stdout --title "ArchQ $1" --infobox "\n\nNo Sound Device" 7 35
+    exit 1
 fi
 
 while read line; do
