@@ -9,6 +9,7 @@ option=$(dialog --stdout --title "ArchQ $1" \
         1 "PCM CF" 2 "DSD CF" 3 "PCM Apple" 4 "DSD Apple" 5 "PCM" 6 "DSD" ) || exit 1
 
 if [ $ver -ne $option ]; then
+    mkdir -p /root/squzlite
     [ -f /root/squzlite/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst ] || wget -qP /root/squzlite https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/squzlite/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
     ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
