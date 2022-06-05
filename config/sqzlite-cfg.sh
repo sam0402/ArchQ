@@ -5,7 +5,7 @@ config='/etc/squeezelite.conf'
 ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
 inst=(0 pcmcf dsdcf pcmapl dsdapl pcm dsd)
 option=$(dialog --stdout --title "ArchQ $1" \
-        --menu "Select squeezelite version: ${inst[$ver]^^}" 8 0 0 \
+        --menu "Select squeezelite version: ${inst[$ver]^^}" 7 0 0 \
         1 "PCM CF" 2 "DSD CF" 3 "PCM Apple" 4 "DSD Apple" 5 "PCM" 6 "DSD" ) || exit 1
 
 if [ $ver -ne $option ]; then
