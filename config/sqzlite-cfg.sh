@@ -4,15 +4,15 @@ config='/etc/squeezelite.conf'
 ### Select squeezelite version
 ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
 inst=(0 pcm dsd pcmcf dsdcf)
+optver=(0 PCM DSD 'PCM CF' 'DSD CF')
 option=$(dialog --stdout --title "ArchQ $1" \
-        --menu "Squeezelite ${inst[$ver]^^}" 7 0 0 \
+        --menu "Select squeezelite version" 7 0 0 \
         1 "PCM" 2 "DSD" 3 "PCM CF" 4 "DSD CF" ) || exit 1
 
 if [ $ver -ne $option ]; then
     [ -f /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst ] || echo wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
 fi
-ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
 
 ## Select sound device
 if [ ! $(aplay -L | grep ':') ]; then
@@ -25,7 +25,7 @@ while read line; do
 done <<< $(aplay -L | grep ':')
 
 device=$(dialog --stdout \
-        --title "ArchQ $1" \
+        --title "Squeezelite ${optver[$option]^^}" \
         --menu "Output device" 7 0 0 ${devs}) || exit 1
 clear
 sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$device"'"/' $config
@@ -38,9 +38,11 @@ while read line; do
 eval $(grep -v '#' | sed 's/-. //')
 #echo $(grep -v '#' | sed 's/-. //')
 done < $config
-[[ ${inst[$ver]^^} =~ PCM ]] && DOP='<null>' || DOP='0:u32be'
+
+[[ ${optver[$option]^^} =~ PCM ]] && DOP='<null>' || DOP='0:u32be'
+
 options=$(dialog --stdout \
-    --title "Squeezelite ${inst[$ver]^^}" \
+    --title "Squeezelite ${optver[$option]^^}" \
     --ok-label "Ok" \
     --form "Modify settings. Blank fills with <null>" 0 60 0 \
     "Name of Player"        1 1   "$NAME"          1 25 60 0 \
