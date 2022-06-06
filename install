@@ -354,10 +354,6 @@ echo -e "alias config='config.sh'" >>/mnt/root/.bashrc
 # arch-chroot /mnt wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/pkg/main/ramroot-2.0.2-1-x86_64.pkg.tar.zst | pacman -U
 # sed -i 's/ps_default=no/ps_default=yes/' /mnt/etc/ramroot.conf
 # arch-chroot /mnt mkinitcpio -P
-echo
-echo
-echo '*************************************************************'
-echo 'Arch Linux is installed. System will reboot after 8 seconds.'
-echo '*************************************************************'
-sleep 8
+
+dialog --stdout --title "ArchQ" --pause "ArchQ is installed, unplug the USB driver.\n\nSystem will reboot after 10 seconds." 11 50 10
 reboot
