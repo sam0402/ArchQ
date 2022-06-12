@@ -227,7 +227,7 @@ fi
 ### Kernel
 ker=Q352; kver=5.18.1-1
 [ $cpu = amd ] && ker=Q352AMD
-[ $server = N ] && ker=${ker}wa
+[ $server = N ] && ker=${ker}w
 echo .......................
 echo Install Kernel Q352 ...
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
