@@ -1,7 +1,7 @@
 #!/bin/bash
 config='/etc/abcde.conf'
 if [ ! -f $config ]; then
-    pacman -Sy archlinux-keyring
+    pacman -Sy --noconfirm archlinux-keyring
     pacman -Scc --noconfirm
     pacman -Syy --noconfirm
     pacman -S --noconfirm nano cdparanoia glyr imagemagick atomicparsley base-devel
