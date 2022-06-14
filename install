@@ -343,6 +343,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/player-cfg.
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg.sh >/mnt/usr/bin/desktop-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/mnt/usr/bin/shairport-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot
