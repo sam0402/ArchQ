@@ -164,7 +164,7 @@ genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 echo "${hostname}" > /mnt/etc/hostname
 echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" >> /mnt/etc/resolv.conf
 arch-chroot /mnt useradd -mU "$user"
-sed -i '82s/# %wheel/%wheel/' /mnt/etc/sudoers
+sed -i '0,/# %wheel/s/# %wheel/%wheel/' /mnt/etc/sudoers
 arch-chroot /mnt usermod -aG wheel $user
 
 ### Set locale language
