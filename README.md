@@ -1,4 +1,4 @@
-# ArchQ　[![Donate](images/pdonate.png)](https://paypal.me/sam402shu)
+# ArchQ　[![Donate](images/pdonate.png)](https://paypal.me/sam402shu/USD)
 
 ArchQ is headless Arch Linux with high quality music server and player for audiophiles.
 
