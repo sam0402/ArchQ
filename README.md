@@ -31,6 +31,8 @@ Enter command `sudo reboot` if need to.
 
 Enjoy it!　[![Donate](images/buymeacoffee.png)](https://buymeacoff.ee/samshu.tw)
  
+[ArchQ Chinese manual](http://www.stsd99.com/phpBB3/viewtopic.php?f=61&t=3210&sid=702a4898b30a89bc20ba1276940ef412) 
+
 Supported Hardware: (Include Macbook or Mac mini Intel version)
  1. CPU: Intel(12gen) & AMD 
  2. Disk drive: SATA, USB, NVME >= 16GB
@@ -56,8 +58,6 @@ Client-server:
   5. Raspberry 4 or CM4 install with [pCP8-Q264.img.001](https://raw.githubusercontent.com/sam0402/pcp-44.1KHz/master/pCP8-Q264.img.7z.001),  [pCP8-Q264.img.002](https://raw.githubusercontent.com/sam0402/pcp-44.1KHz/master/pCP8-Q264.img.7z.002)
      
  HDMI output (Intel i915): Install and boot by Q352h
- 
-[ArchQ Chinese manual](http://www.stsd99.com/phpBB3/viewtopic.php?f=61&t=3210&sid=702a4898b30a89bc20ba1276940ef412)
 
 ![Kernels](images/kernels5181.png)
 ![Config](images/config.png)
