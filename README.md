@@ -69,4 +69,5 @@ Client-server:
 ![Player](images/player.png)
 ![abcde](images/abcde.png)
 ![desktop](images/desktop_vnc.png)
+![cpufreq](images/cpu_freq.png)
 ![mdp_cantata](images/mpd_cantata.jpg)
