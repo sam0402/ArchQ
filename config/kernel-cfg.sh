@@ -1,7 +1,7 @@
 #!/bin/bash
 config='/etc/fstab'
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select command" 7 0 0 B "Boot" I "Install" R "Remove" F "Frequency" T "Temperature") || exit 1
+            --menu "Select command" 7 0 0 B "Boot" I "Install" R "Remove" F "Frequency") || exit 1
 clear
 case $WK in
     I)
@@ -64,11 +64,5 @@ case $WK in
         t2=$(eval $cmd)
         count=$(expr $t2 / 10000 - $t1 / 10000)
         dialog --stdout --title "ArchQ $1" --msgbox "\nKernel working frequency: $count" 7 35
-        ;;
-
-    T)
-        temp=$(sensors | grep 'Core' | awk '{print "\n"$1,$2,$3}')
-        fan=$(sensors | grep 'RPM' | awk '{print "\n\n"$1,$2,$3,$4}')
-        dialog --stdout --title "ArchQ $1" --msgbox "${temp}${fan}" 10 35
         ;;
 esac

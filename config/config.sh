@@ -13,7 +13,7 @@ MENU=''
 
 WK=$(dialog --stdout --title "ArchQ $Qver" \
     --menu "Select to config" 7 0 0 K Kernel M "Partition mount" N "NFS mount" \
-        E Ethernet T Timezone X "Desktop & VNC" P "Active Player" R "abCDe ripper" ${MENU}) || exit 1
+        E Ethernet T Timezone X "Desktop & VNC" P "Active player" R "abCDe ripper" C "CPU frequency" ${MENU}) || exit 1
 clear
 case $WK in
     K)
@@ -45,6 +45,9 @@ case $WK in
         ;;
     R)
         /usr/bin/abcde-cfg.sh $Qver
+        ;;
+    C)
+        /usr/bin/cpu-cfg.sh $Qver
         ;;
     T)
         /usr/bin/timezone.sh $Qver

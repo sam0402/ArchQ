@@ -1,6 +1,7 @@
 rm -f /root/*.tar.zst /root/*.tar.xz*
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/ether-cfg.sh >/usr/bin/ether-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/kernel-cfg.sh >/usr/bin/kernel-cfg.sh
+curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/cpu-cfg.sh >/usr/bin/cpu-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/usr/bin/mpd-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/nfs-cfg.sh >/usr/bin/nfs-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/partimnt-cfg.sh >/usr/bin/partimnt-cfg.sh
