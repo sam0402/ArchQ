@@ -16,27 +16,30 @@ clear
 [[ $player =~ A ]] && a1=on
 [[ $player =~ R ]] && r1=on
 
+cpus=$(getconf _NPROCESSORS_ONLN)
 if [[ $player =~ A && ! -f '/etc/shairport-sync.conf' ]]; then
-    pacman -Sy archlinux-keyring
-    pacman -Scc --noconfirm
-    pacman -Syy --noconfirm
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
 fi
 if [[ $player =~ S && ! -f '/etc/squeezelite.conf' ]]; then
-    pacman -Sy archlinux-keyring
-    pacman -Scc --noconfirm
-    pacman -Syy --noconfirm
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
-    pacman -U --noconfirm /root/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
-    sed -i '/ExecStart=/iExecStartPre=/usr/bin/sleep 3' /usr/lib/systemd/system/squeezelite.service
-    cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
     [ $cpus -ge 4 ] && sed -i '/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 3 $MAINPID' /usr/lib/systemd/system/squeezelite.service
+    /usr/bin/sqzlite-cfg.sh
 fi
 
 if [[ $s0 != $s1 ]]; then
-    [[ $s1 == 'on' ]] && act='squeezelite ' || inact='squeezelite '
+    if [[ $s1 == on ]]; then
+        act+='squeezelite '
+        [ $cpus -ge 4 ] && isocpu='isolcpus=3 irqaffinity=0,1,2,4,5,6,7 '
+        [ $cpus -ge 6 ] && [ $(systemctl is-active logitechmediaserver) = active ] && isocpu='isolcpus=3,4 irqaffinity=0,1,2,5,6,7 '
+        sed -i 's/idle=poll /idle=poll '"$isocpu"'/' /etc/default/grub
+        grub-mkconfig -o /boot/grub/grub.cfg
+    else
+        inact+='squeezelite '
+        sed -i 's/isolcpus=3 irqaffinity=0,1,2,4,5,6,7 //' /etc/default/grub
+        sed -i 's/isolcpus=3,4 irqaffinity=0,1,2,5,6,7 /isolcpus=3 irqaffinity=0,1,2,4,5,6,7 /' /etc/default/grub
+    fi
 fi
+
 if [[ $a0 != $a1 ]]; then
     [[ $a1 == 'on' ]] && act+='shairport-sync ' || inact+='shairport-sync '
 fi
