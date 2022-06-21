@@ -32,12 +32,12 @@ if [[ $s0 != $s1 ]]; then
         [ $cpus -ge 4 ] && isocpu='isolcpus=3 irqaffinity=0,1,2,4,5,6,7 '
         [ $cpus -ge 6 ] && [ $(systemctl is-active logitechmediaserver) = active ] && isocpu='isolcpus=3,4 irqaffinity=0,1,2,5,6,7 '
         sed -i 's/idle=poll /idle=poll '"$isocpu"'/' /etc/default/grub
-        grub-mkconfig -o /boot/grub/grub.cfg
     else
         inact+='squeezelite '
         sed -i 's/isolcpus=3 irqaffinity=0,1,2,4,5,6,7 //' /etc/default/grub
         sed -i 's/isolcpus=3,4 irqaffinity=0,1,2,5,6,7 /isolcpus=3 irqaffinity=0,1,2,4,5,6,7 /' /etc/default/grub
     fi
+    grub-mkconfig -o /boot/grub/grub.cfg
 fi
 
 if [[ $a0 != $a1 ]]; then
