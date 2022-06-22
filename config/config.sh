@@ -4,6 +4,7 @@ num=$(cat /root/.update)
 git=$(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/update)
 
 Qver=$(uname -r | awk -F - '{print $3}')
+temp=$(sensors | grep 'Core 0' | awk '{print $3}')
 
 MENU=''
 [ -f /etc/mpd.conf ] && MENU='D MPD '
@@ -11,7 +12,7 @@ MENU=''
 [ -f /etc/shairport-sync.conf ] && MENU+='A Airplay '
 [ $git -gt $num ] && MENU+='U Update '
 
-WK=$(dialog --stdout --title "ArchQ $Qver" \
+WK=$(dialog --stdout --title "ArchQ $Qver $temp" \
     --menu "Select to config" 7 0 0 K Kernel M "Partition mount" N "NFS mount" \
         E Ethernet T Timezone X "Desktop & VNC" P "Active player" R "abCDe ripper" C "CPU frequency" ${MENU}) || exit 1
 clear
