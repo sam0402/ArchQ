@@ -12,7 +12,7 @@ MENU=''
 [ -f /etc/shairport-sync.conf ] && MENU+='A Airplay '
 [ $git -gt $num ] && MENU+='U Update '
 
-WK=$(dialog --stdout --title "ArchQ $Qver    $temp" \
+WK=$(dialog --stdout --title "ArchQ $Qver   $temp" \
     --menu "Select to config" 7 0 0 K Kernel M "Partition mount" N "NFS mount" \
         E Ethernet T Timezone X "Desktop & VNC" P "Active player" R "abCDe ripper" C "CPU frequency" ${MENU}) || exit 1
 clear
