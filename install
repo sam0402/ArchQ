@@ -225,7 +225,7 @@ fi
 # arch-chroot /mnt wpa_supplicant -B -i wlan -c /etc/wpa_supplicant/wpa_supplicant-wlan.conf
 
 ### Kernel
-ker=Q352; kver=5.18.1-1
+ker=Q352; kver=5.18.6-1
 [ $cpu = amd ] && ker=Q352AMD
 [ $server = N ] && ker=${ker}w
 echo .......................
