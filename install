@@ -253,13 +253,14 @@ case $server in
         arch-chroot /mnt systemctl enable logitechmediaserver
         ;;
     R)
+        roonver='1.8.970-1'
         echo Install Roon ...
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.952-1-x86_64.pkg.tar.xz.aa
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.952-1-x86_64.pkg.tar.xz.ab
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.952-1-x86_64.pkg.tar.xz.ac
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-1.8.952-1-x86_64.pkg.tar.xz.ad
-        cat /mnt/root/roonserver-1.8.952-1-x86_64.pkg.tar.xz.* > /mnt/root/roonserver-1.8.952-1-x86_64.pkg.tar.xz
-        arch-chroot /mnt pacman -U --noconfirm /root/roonserver-1.8.952-1-x86_64.pkg.tar.xz
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-${roonver}-x86_64.pkg.tar.xz.aa
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-${roonver}-x86_64.pkg.tar.xz.ab
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-${roonver}-x86_64.pkg.tar.xz.ac
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-${roonver}-x86_64.pkg.tar.xz.ad
+        cat /mnt/root/roonserver-${roonver}-x86_64.pkg.tar.xz.* > /mnt/root/roonserver-${roonver}-x86_64.pkg.tar.xz
+        arch-chroot /mnt pacman -U --noconfirm /root/roonserver-${roonver}-x86_64.pkg.tar.xz
         arch-chroot /mnt systemctl enable roonserver
         ;;
     M)
