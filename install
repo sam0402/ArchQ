@@ -321,8 +321,8 @@ fi
 ### other setting
 arch-chroot /mnt systemctl enable sshd.service
 arch-chroot /mnt systemctl enable cpupower.service
-arch-chroot /mnt systemctl enable ntpdate.service
-arch-chroot /mnt systemctl disable ntpd.service
+# arch-chroot /mnt systemctl enable ntpdate.service
+# arch-chroot /mnt systemctl disable ntpd.service
 echo ........................
 echo IO Scheduler setting ...
 cat >/mnt/etc/udev/rules.d/60-ioschedulers.rules <<EOF
