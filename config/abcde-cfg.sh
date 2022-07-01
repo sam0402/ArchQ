@@ -32,7 +32,7 @@ if [ \$(uname -r | awk -F - '{print \$3}') = 'Qrip' ]; then
 fi
 exit 0
 EOF
-    chmod a+r /dev/sr0
+    usermod -aG optical $user
     echo "alias abcde='eject -t; abcde'" >>/home/$user/.bashrc
     echo "alias abcde='eject -t; abcde'" >>/root/.bashrc
 fi
