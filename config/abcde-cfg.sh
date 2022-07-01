@@ -1,5 +1,7 @@
 #!/bin/bash
 config='/etc/abcde.conf'
+user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
+
 if [ ! -f $config ]; then
     pacman -Sy --noconfirm archlinux-keyring
     pacman -Scc --noconfirm
@@ -30,6 +32,8 @@ if [ \$(uname -r | awk -F - '{print \$3}') = 'Qrip' ]; then
 fi
 exit 0
 EOF
+    chmod a+r /dev/sr0
+    echo "alias abcde='eject -t; abcde'" >>/home/$user/.bashrc
     echo "alias abcde='eject -t; abcde'" >>/root/.bashrc
 fi
 
@@ -70,3 +74,4 @@ sed -i 's/^#\?OFFSET=".*/OFFSET="'"$OFFSET"'"/' $config
 sed -i 's/^#\?CDSPEEDVALUE=".*/CDSPEEDVALUE="'"$CDSPEEDVALUE"'"/' $config
 sed -i 's/^#\?EJECTCD=.*/EJECTCD='"$EJECTCD"'/' $config
 sed -i 's/^#\?CLOSETRAY=.*/CLOSETRAY='"$CLOSETRAY"'/' $config
+chown $user: ${OUTPUTDIR}
