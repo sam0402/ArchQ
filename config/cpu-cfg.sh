@@ -12,7 +12,7 @@ else
                 --inputbox "$msg" 0 0 "$current") || exit 1
     clear
 
-    sed -i 's/^#\?freq=".*/freq="'"$freq"'"/' /etc/default/cpupower
+    sed -i 's/^#\?freq=".*/freq='"$freq"'/' /etc/default/cpupower
     cpupower frequency-set -f $freq >/dev/null
 
     i=0
