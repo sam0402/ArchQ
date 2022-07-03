@@ -60,6 +60,7 @@ case $WK in
         cmd="cat /proc/interrupts | grep tick | awk '{print \$${num}}'"
         dialog --stdout --title "ArchQ $1" --infobox "\n\n    Wait for 10 seconds..." 7 35
         t1=$(eval $cmd); sleep 10; t2=$(eval $cmd)
+        [ -f /usr/bin/python ] && count=$(python -c "print(round(($t2-$t1)/10000.0),1)" | sed 's/ /./') || \
         count=$(expr $t2 / 10000 - $t1 / 10000)
         dialog --stdout --title "ArchQ $1" --msgbox "\nKernel working frequency: $count" 7 35
         ;;
