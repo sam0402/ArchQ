@@ -21,7 +21,7 @@ fi
 ifconfig=$(dialog --stdout \
             --title "ArchQ $1" \
             --ok-label "Ok" \
-            --form "Ethernet $ifport IP setting" 10 35 0 \
+            --form "Ethernet $ifport IP setting" 10 38 0 \
             "Address" 1 1   "$ifip"     1 10 15 0 \
             "Netmask" 2 1   "$ifmask"   2 10 15 0 \
             "Gateway" 3 1   "$Gateway"  3 10 15 0 \
