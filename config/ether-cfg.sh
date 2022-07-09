@@ -30,7 +30,7 @@ ifconfig=$(dialog --stdout \
 clear
 
 ifaddr=$(echo $ifconfig | cut -d' ' -f1)
-ifmast=$(echo $ifconfig | cut -d' ' -f2)
+ifmask=$(echo $ifconfig | cut -d' ' -f2)
 ifgw=$(echo $ifconfig | cut -d' ' -f3)
 ifdns=$(echo $ifconfig | cut -d' ' -f4)
 ifmtu=$(echo $ifconfig | cut -d' ' -f5)
