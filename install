@@ -2,6 +2,9 @@
 # WARNING: this script will destroy data on the selected disk.
 # This script can be run by executing the following:
 #   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install.sh | bash
+kver='5.18.6-1'
+roonver='1.8.970-1'
+
 set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
@@ -158,7 +161,7 @@ esac
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 
 pacstrap /mnt base linux linux-firmware ${cpu}-ucode grub efibootmgr gptfdisk f2fs-tools xfsprogs networkmanager openssh dhclient \
-         vim nano wget avahi sudo dialog cpupower lm_sensors cronie
+         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 
 echo "${hostname}" > /mnt/etc/hostname
@@ -166,6 +169,7 @@ echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" >> /mnt/etc/resolv.conf
 arch-chroot /mnt useradd -mU "$user"
 sed -i '0,/# %wheel/s/# %wheel/%wheel/' /mnt/etc/sudoers
 arch-chroot /mnt usermod -aG wheel $user
+echo "$user $hostname =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot" >>/mnt/etc/sudoers
 
 ### Set locale language
 echo -e "en_US.UTF-8 UTF-8\nja_JP.UTF-8 UTF-8\nzh_TW.UTF-8 UTF-8" >/mnt/etc/locale.gen
@@ -225,7 +229,7 @@ fi
 # arch-chroot /mnt wpa_supplicant -B -i wlan -c /etc/wpa_supplicant/wpa_supplicant-wlan.conf
 
 ### Kernel
-ker=Q352; kver=5.18.6-1
+ker=Q352
 [ $cpu = amd ] && ker=Q352AMD
 [ $server = N ] && ker=${ker}w
 echo .......................
@@ -253,7 +257,6 @@ case $server in
         arch-chroot /mnt systemctl enable logitechmediaserver
         ;;
     R)
-        roonver='1.8.970-1'
         echo Install Roon ...
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-${roonver}-x86_64.pkg.tar.xz.aa
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver-${roonver}-x86_64.pkg.tar.xz.ab
@@ -321,8 +324,8 @@ fi
 ### other setting
 arch-chroot /mnt systemctl enable sshd.service
 arch-chroot /mnt systemctl enable cpupower.service
-# arch-chroot /mnt systemctl enable ntpdate.service
-# arch-chroot /mnt systemctl disable ntpd.service
+arch-chroot /mnt systemctl enable ntpdate.service
+arch-chroot /mnt systemctl disable ntpd.service
 echo ........................
 echo IO Scheduler setting ...
 cat >/mnt/etc/udev/rules.d/60-ioschedulers.rules <<EOF
@@ -353,6 +356,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot
 
 echo -e "alias config='sudo config.sh'\nalias qboot='sudo qboot'" >>/mnt/home/${user}/.bashrc
+echo -e "alias poweroff='sudo systemctl poweroff'\nalias reboot='sudo systemctl reboot'" >>/mnt/home/${user}/.bashrc
 echo -e "alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && sudo systemctl stop shairport-sync || sudo systemctl start shairport-sync'" >>/mnt/home/${user}/.bashrc
 echo -e "alias config='config.sh'" >>/mnt/root/.bashrc
 echo -e "alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && systemctl stop shairport-sync || systemctl start shairport-sync'" >>/mnt/root/.bashrc
