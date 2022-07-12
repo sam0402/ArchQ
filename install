@@ -355,7 +355,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot
 
-echo -e "alias config='sudo config.sh'\nalias qrip='qboot 1'\nalias qplay='qboot 2'" >>/mnt/home/${user}/.bashrc
+echo -e "alias config='sudo config.sh'\nalias qrip='sudo qboot 1'\nalias qplay='sudo qboot 2'" >>/mnt/home/${user}/.bashrc
 echo -e "alias poweroff='sudo systemctl poweroff'\nalias reboot='sudo systemctl reboot'" >>/mnt/home/${user}/.bashrc
 echo -e "alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && sudo systemctl stop shairport-sync || sudo systemctl start shairport-sync'" >>/mnt/home/${user}/.bashrc
 echo -e "alias config='config.sh'" >>/mnt/root/.bashrc
