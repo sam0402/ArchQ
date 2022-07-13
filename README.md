@@ -69,5 +69,5 @@ Client-server:
 ![NFS](images/nfs_mount.png)
 ![desktop](images/desktop_vnc.png)
 ![abcde](images/abcde.png)
-![mdp_cantata](images/mpd_cantata.jpg)
 ![cpufreq](images/cpu_freq.png)
+![mdp_cantata](images/mpd_cantata.jpg)
