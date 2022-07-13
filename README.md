@@ -59,13 +59,13 @@ Client-server:
      
  HDMI output (Intel i915): Install and boot by Q352h
 
+![Server](images/servers.png)
 ![Kernels](images/kernels5181.png)
 ![Config](images/config.png)
 ![Squeezelite](images/squeezelite.png)
-![Server](images/servers.png)
-![Partition](images/partition_mount.png)
 ![ethernet](images/ethernet.png)
 ![NFS](images/nfs_mount.png)
+![Partition](images/partition_mount.png)
 ![Player](images/player.png)
 ![abcde](images/abcde.png)
 ![desktop](images/desktop_vnc.png)
