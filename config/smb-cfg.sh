@@ -1,5 +1,7 @@
 #!/bin/bash
 config='/etc/fstab'
+[ -f /etc/samba/smb.conf ] || ( mkdir -p /etc/samba; touch /etc/samba/smb.conf)
+
 WK=$(dialog --stdout --title "ArchQ $1" \
             --menu "SMB/CIFS mount point" 7 0 0 A "Add" M "Modify" D "Delete") || exit 1
 clear
