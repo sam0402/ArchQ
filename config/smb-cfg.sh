@@ -11,7 +11,7 @@ if [ $WK = A ]; then
         --ok-label "Ok" \
         --form "Mount setting" 0 42 0 \
         "Mount point /mnt/" 1 1 ""                  1 18 42 0 \
-        "Share name"        2 1 "//Server/share"    2 18 42 0 \
+        "Share name"        2 1 "//192.168.1.x/share"    2 18 42 0 \
         "Username"          3 1 ""                  3 18 42 0 \
         "Password"          4 1 ""                  4 18 42 0 \
         "Options"           5 1 "ro,iocharset=utf8" 5 18 42 0) || exit 1
