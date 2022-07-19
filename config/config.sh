@@ -13,7 +13,7 @@ MENU=''
 [ $git -gt $num ] && MENU+='U Update '
 
 WK=$(dialog --stdout --title "ArchQ $Qver   $temp" \
-    --menu "Select to config" 7 0 0 K Kernel M "Partition mount" N "NFS mount" \
+    --menu "Select to config" 7 0 0 K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" \
         E Ethernet T Timezone X "Desktop & VNC" P "Active player" R "abCDe ripper" C "CPU frequency" ${MENU}) || exit 1
 clear
 case $WK in
@@ -25,6 +25,9 @@ case $WK in
         ;;
     N)
         /usr/bin/nfs-cfg.sh $Qver
+        ;;
+    B)
+        /usr/bin/smb-cfg.sh $Qver
         ;;
     D)
         /usr/bin/mpd-cfg.sh $Qver

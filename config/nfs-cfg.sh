@@ -23,7 +23,7 @@ if [ $WK = A ]; then
 elif [ $WK = D ]; then
     n=1; MENU=''
     while read line; do
-      if [ $(echo $line | cut -d ' ' -f 3) = nfs ]; then
+      if [[ $(echo $line | cut -d ' ' -f 3) = nfs ]]; then
             MPs=$(echo $line | cut -d ' ' -f 2 | cut -d '/' -f 3)
             MENU=${MENU}$n' /mnt/'$MPs' '
       fi
@@ -37,12 +37,12 @@ elif [ $WK = D ]; then
                 clear
         sed -i ''"$options"'d' $config
     else
-        echo "No NFS data..."
+        dialog --stdout --title "ArchQ $1" --msgbox "\n  No NFS data." 7 25
     fi
 else
     n=1
     while read line; do
-      if [ $(echo $line | cut -d ' ' -f 3) = nfs ]; then
+      if [[ $(echo $line | cut -d ' ' -f 3) = nfs ]]; then
             IPs=$(echo $line | cut -d ' ' -f 1 | cut -d ':' -f 1)
             SNs=$(echo $line | cut -d ' ' -f 1 | cut -d ':' -f 2)
             MPs=$(echo $line | cut -d ' ' -f 2 | cut -d '/' -f 3)

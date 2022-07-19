@@ -4,6 +4,7 @@ curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/kernel-cfg.s
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/cpu-cfg.sh >/usr/bin/cpu-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/usr/bin/mpd-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/nfs-cfg.sh >/usr/bin/nfs-cfg.sh
+curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/smb-cfg.sh >/usr/bin/smb-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/partimnt-cfg.sh >/usr/bin/partimnt-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/player-cfg.sh >/usr/bin/player-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/usr/bin/shairport-cfg.sh
