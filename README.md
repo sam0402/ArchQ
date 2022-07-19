@@ -23,7 +23,7 @@ Install step:
 
 6. Use `ssh name@hostname.local` or `ssh name@ip.address` to login ArchQ system and configure. (Use [PuTTY](https://www.putty.org) for Windows)
    
-   Enter command `config` for setting kernel version, partitions, NFS client, ethernet, squeezelite and Airplay.
+   Enter command `config` for setting kernel version, partitions, NFS client, SMB/CIFS client, ethernet, squeezelite and Airplay.
 
 7. Use command `sensors` to check the temperature of CPU, which is not too high.
 
@@ -69,5 +69,6 @@ Client-server:
 ![Kernels](images/kernels5181.png)
 ![ethernet](images/ethernet.png)
 ![Partition](images/partition_mount.png)
+![SMB/CIFS](images/smbcifs.png)
 ![cpufreq](images/cpu_freq.png)
 ![mdp_cantata](images/mpd_cantata.jpg)
