@@ -36,7 +36,7 @@ Enjoy it!　[![Donate](images/buymeacoffee.png)](https://buymeacoff.ee/samshu.tw
 Supported Hardware: (Include Macbook or Mac mini Intel version)
  1. CPU: Intel(12gen) & AMD 
  2. Disk drive: SATA, USB, NVME >= 16GB
- 3. Filesystem: F2FS(default), EXT4, XFS, HFS+(Apple), NTFS3, FATs, NFS, CIFS/SMBFS
+ 3. Filesystem: F2FS(default), EXT4, XFS, HFS+(Apple), NTFS3, FATs, NFS, SMB/CIFS
  4. Ethernet: Intel e100, e1000, 82575/82576(IGB), I225-LM/I225-V (IGC), Realtek RTL8129/8130/8139/8111/8168/8411
  5. USB Ethernet: Realtek RTL8152/8153, ASIX AX88179/178A
  6. Sound card: USB(DDC, DAC) & HDMI (Intel i915)
