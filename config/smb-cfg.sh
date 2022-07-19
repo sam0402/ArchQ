@@ -73,3 +73,4 @@ else
       n=`expr $n + 1`
     done < $config
 fi
+systemctl daemon-reload
