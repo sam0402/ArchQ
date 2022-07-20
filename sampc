@@ -240,9 +240,10 @@ ker=Q396
 [ $cpu = amd ] && ker=Q352AMD
 [ $server = N ] && ker=${ker}w
 echo .......................
-echo Install Kernel Q352 ...
+echo Install Kernel ...
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/bcache-tools-1.1-1-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst /root/bcache-tools-1.1-1-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check nowatchdog intel_pstate=disable apparmor=0/' /mnt/etc/default/grub
 
 cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
@@ -363,12 +364,12 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot
 
+echo -e "alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && sudo systemctl stop shairport-sync || sudo systemctl start shairport-sync'" >>/mnt/home/${user}/.bashrc
 echo -e "alias config='sudo config.sh'\nalias qrip='sudo qboot 1'\nalias qplay='sudo qboot 2'" >>/mnt/home/${user}/.bashrc
 echo -e "alias poweroff='sudo systemctl poweroff'\nalias reboot='sudo systemctl reboot'" >>/mnt/home/${user}/.bashrc
-echo -e "alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && sudo systemctl stop shairport-sync || sudo systemctl start shairport-sync'" >>/mnt/home/${user}/.bashrc
+echo -e "alias abcde='eject -t; abcde'\nalias cdr='cd /mnt/rip'\nalias cdq='cd /media/Roon/Qrip2'\nalias mvrip='mv /mnt/rip/* /media/Roon/Qrip'" >>/mnt/home/${user}/.bashrc
 echo -e "alias config='config.sh'" >>/mnt/root/.bashrc
 echo -e "alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && systemctl stop shairport-sync || systemctl start shairport-sync'" >>/mnt/root/.bashrc
-
 # Install ramroot
 # arch-chroot /mnt wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/pkg/main/ramroot-2.0.2-1-x86_64.pkg.tar.zst | pacman -U
 # sed -i 's/ps_default=no/ps_default=yes/' /mnt/etc/ramroot.conf
