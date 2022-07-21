@@ -2,7 +2,7 @@
 
 ArchQ is headless Arch Linux with high quality music server and player for audiophiles.
 
-Powered by optimized realtime kernel(5.18) frequency works on 441/352.8 KHz.
+Powered by optimized realtime kernel(5.18) frequency works on 441/396.9/352.8 KHz.
 Thus, you do not need to upsample your music files anymore, even SQ is better than them.
 ArchQ includes the LMS, Roon(bridge), MPD(light) and optimized Squeezelite & Airplay and CD ripper(abcde), and it's easy to install and configure.
 If the cpu is more than 2 cores, LMS and squeezelite will work at isolated cpu.
@@ -34,7 +34,7 @@ Enjoy it!　[![Donate](images/buymeacoffee.png)](https://buymeacoff.ee/samshu.tw
 [ArchQ Chinese manual](http://www.stsd99.com/phpBB3/viewtopic.php?f=61&t=3210&sid=702a4898b30a89bc20ba1276940ef412) 
 
 Supported Hardware: (Include Macbook or Mac mini Intel version)
- 1. CPU: Intel(12gen) & AMD 
+ 1. CPU: Intel & AMD (x86_64)
  2. Disk drive: SATA, USB, NVME >= 16GB
  3. Filesystem: F2FS(default), EXT4, XFS, HFS+(Apple), NTFS3, FATs, NFS, SMB/CIFS
  4. Ethernet: Intel e100, e1000, 82575/82576(IGB), I225-LM/I225-V (IGC), Realtek RTL8129/8130/8139/8111/8168/8411
