@@ -27,7 +27,7 @@ Install step:
 
 7. Use command `sensors` to check the temperature of CPU, which is not too high.
 
-Enter command `sudo reboot` if need to.
+Enter command `reboot` if need to.
 
 Enjoy it!　[![Donate](images/buymeacoffee.png)](https://buymeacoff.ee/samshu.tw)
  
