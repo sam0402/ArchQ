@@ -68,7 +68,7 @@ Client-server:
 ![Config](images/config.png)
 ![Kernels](images/kernels5181.png)
 ![ethernet](images/ethernet.png)
-![Partition](images/partition_mount.png)
 ![SMB/CIFS](images/smbcifs.png)
+![Partition](images/partition_mount.png)
 ![cpufreq](images/cpu_freq.png)
 ![mdp_cantata](images/mpd_cantata.jpg)
