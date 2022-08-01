@@ -41,7 +41,7 @@ if [[ $s0 != $s1 ]]; then
 fi
 
 if [[ $a0 != $a1 ]]; then
-    [[ $a1 == 'on' ]] && act+='shairport-sync ' || inact+='shairport-sync '
+    [[ $a1 == 'on' ]] && act+='nqptp shairport-sync ' || inact+='shairport-sync nqptp '
 fi
 if [[ $r0 != $r1 ]]; then
     [[ $r1 == 'on' ]] && act+='roonbridge ' || inact+='roonbridge '
