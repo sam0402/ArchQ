@@ -9,7 +9,7 @@ if [ $WK = A ]; then
     options=$(dialog --stdout \
         --title "Add SMB/CIFS mount point" \
         --ok-label "Ok" \
-        --form "Mount setting" 0 42 0 \
+        --form "Mount setting. Blank fills with <null>" 0 42 0 \
         "Mount point /mnt/" 1 1 ""                  1 18 42 0 \
         "Share name"        2 1 "//192.168.1.x/share"    2 18 42 0 \
         "Username"          3 1 "<null>"                 3 18 42 0 \
