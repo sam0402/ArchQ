@@ -106,31 +106,38 @@ timedatectl set-ntp true
 ### Setup the disk and partitions ###
 if [ $fmt = F ]; then
 #swap_size=$(free --mebi | awk '/Mem:/ {print $2}')
-  swap_size=256
+#   swap_size=256
+#   root_size=4608
+#   swap_end=$(( $swap_size + 257 + 1 ))MiB
+#   root_end=$(( $root_size + $swap_size + 257 + 1 ))MiB
+#   parted --script "${device}" -- mklabel gpt \
+#     mkpart ESP fat32 1Mib 257MiB \
+#     set 1 boot on \
+#     mkpart primary linux-swap 257MiB ${swap_end} \
+#     mkpart primary ext4 ${swap_end} ${root_end} \
+#     mkpart primary ext4 ${root_end} 100%
   root_size=4608
-  swap_end=$(( $swap_size + 257 + 1 ))MiB
-  root_end=$(( $root_size + $swap_size + 257 + 1 ))MiB
+  root_end=$(( $root_size + 1 ))MiB
   parted --script "${device}" -- mklabel gpt \
     mkpart ESP fat32 1Mib 257MiB \
     set 1 boot on \
-    mkpart primary linux-swap 257MiB ${swap_end} \
-    mkpart primary ext4 ${swap_end} ${root_end} \
+    mkpart primary ext4 257MiB ${root_end} \
     mkpart primary ext4 ${root_end} 100%
 fi
 # Simple globbing was not enough as on one device I needed to match /dev/mmcblk0p1 
 # but not /dev/mmcblk0boot1 while being able to match /dev/sda1 on other devices.
 part_boot="$(ls ${device}* | grep -E "^${device}p?1$")"
-part_swap="$(ls ${device}* | grep -E "^${device}p?2$")"
-part_root="$(ls ${device}* | grep -E "^${device}p?3$")"
-part_data="$(ls ${device}* | grep -E "^${device}p?4$")"
+# part_swap="$(ls ${device}* | grep -E "^${device}p?2$")"
+part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
+part_data="$(ls ${device}* | grep -E "^${device}p?3$")"
 
 wipefs "${part_boot}"
-wipefs "${part_swap}"
+# wipefs "${part_swap}"
 wipefs "${part_root}"
 wipefs "${part_data}"
 
 mkfs.vfat -F32 "${part_boot}"
-mkswap "${part_swap}"
+# mkswap "${part_swap}"
 if [ $f2fs = F ]; then
     mkfs.f2fs -fl root "${part_root}"
     [ $fmt = F ] && mkfs.f2fs -fl data "${part_data}"
@@ -138,7 +145,7 @@ else
     mkfs.xfs -fL root "${part_root}"
     [ $fmt = F ] && mkfs.xfs -fL data "${part_data}"
 fi
-swapon "${part_swap}"
+# swapon "${part_swap}"
 
 mount "${part_root}" /mnt
 mkdir /mnt/boot
@@ -358,9 +365,9 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot
 
+echo -e "alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && sudo systemctl stop shairport-sync || sudo systemctl start shairport-sync'" >>/mnt/home/${user}/.bashrc
 echo -e "alias config='sudo config.sh'\nalias qrip='sudo qboot 1'\nalias qplay='sudo qboot 2'" >>/mnt/home/${user}/.bashrc
 echo -e "alias poweroff='sudo systemctl poweroff'\nalias reboot='sudo systemctl reboot'" >>/mnt/home/${user}/.bashrc
-echo -e "alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && sudo systemctl stop shairport-sync || sudo systemctl start shairport-sync'" >>/mnt/home/${user}/.bashrc
 echo -e "alias config='config.sh'" >>/mnt/root/.bashrc
 echo -e "alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && systemctl stop shairport-sync || systemctl start shairport-sync'" >>/mnt/root/.bashrc
 
