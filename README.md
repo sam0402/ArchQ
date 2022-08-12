@@ -66,7 +66,7 @@ Client-server:
 ![desktop](images/desktop_vnc.png)
 ![NFS](images/nfs_mount.png)
 ![Config](images/config.png)
-![Kernels](images/kernels5181.png)
+![Kernels](images/kernels.png)
 ![ethernet](images/ethernet.png)
 ![SMB/CIFS](images/smbcifs.png)
 ![Partition](images/partition_mount.png)
