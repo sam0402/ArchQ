@@ -243,7 +243,8 @@ echo .......................
 echo Install Kernel Q352 ...
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check nowatchdog intel_pstate=disable apparmor=0/' /mnt/etc/default/grub
+sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native rcu_nocbs=1 rcu_nocb_poll/' \
+    /mnt/etc/default/grub
 
 cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
 #cpus=$(getconf _NPROCESSORS_ONLN)
@@ -337,6 +338,7 @@ arch-chroot /mnt systemctl enable ntpdate.service
 arch-chroot /mnt systemctl disable ntpd.service
 echo ........................
 echo IO Scheduler setting ...
+echo 'ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"' >/mnt/etc/udev/rules.d/pci_pm.rules >/etc/udev/rules.d/pci_pm.rules
 cat >/mnt/etc/udev/rules.d/60-ioschedulers.rules <<EOF
 # set scheduler for NVMe
 ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/scheduler}="none"
@@ -363,13 +365,24 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh 
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
+ln -sf /mnt/usr/bin/config.sh /mnt/usr/bin/config
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot
 
-echo -e "alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && sudo systemctl stop shairport-sync || sudo systemctl start shairport-sync'" >>/mnt/home/${user}/.bashrc
-echo -e "alias config='sudo config.sh'\nalias qrip='sudo qboot 1'\nalias qplay='sudo qboot 2'" >>/mnt/home/${user}/.bashrc
-echo -e "alias poweroff='sudo systemctl poweroff'\nalias reboot='sudo systemctl reboot'" >>/mnt/home/${user}/.bashrc
-echo -e "alias config='config.sh'" >>/mnt/root/.bashrc
-echo -e "alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && systemctl stop shairport-sync || systemctl start shairport-sync'" >>/mnt/root/.bashrc
+cat >>/mnt/home/${user}/.bashrc <<EOF
+export kver=$(uname -r | cut -d- -f3)
+alias abcde='eject -t; abcde'
+alias poweroff='sudo systemctl poweroff'
+alias reboot='sudo systemctl reboot'
+alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && sudo systemctl stop shairport-sync || sudo systemctl start shairport-sync'
+EOF
+sed -i 's/\\h/\\h:\\e[0\;36m$kver\\e[m/' /mnt/home/${user}/.bashrc
+
+cat >>/mnt/root/.bashrc <<EOF
+export kver=$(uname -r | cut -d- -f3)
+PS1='[\u@\h:\e[0;36m$kver\e[m \W]\$ '
+alias abcde='eject -t; abcde'
+alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && systemctl stop shairport-sync || systemctl start shairport-sync'
+EOF
 
 # Install ramroot
 # arch-chroot /mnt wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/pkg/main/ramroot-2.0.2-1-x86_64.pkg.tar.zst | pacman -U
