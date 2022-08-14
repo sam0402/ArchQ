@@ -379,7 +379,7 @@ sed -i 's/\\h/\\h:\\e[0\;36m$kver\\e[m/' /mnt/home/${user}/.bashrc
 
 cat >>/mnt/root/.bashrc <<EOF
 export kver=\$(uname -r | cut -d- -f3)
-PS1='[\u@\h:\e[0;36m$kver\e[m \W]\$ '
+PS1='[\u@\h:\e[0;36m\$kver\e[m \W]\$ '
 alias abcde='eject -t; abcde'
 alias config='config.sh'
 alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && systemctl stop shairport-sync || systemctl start shairport-sync'
