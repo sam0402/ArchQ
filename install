@@ -365,7 +365,6 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh 
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
-ln -sf /mnt/usr/bin/config.sh /mnt/usr/bin/config
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot
 
 cat >>/mnt/home/${user}/.bashrc <<EOF
@@ -382,6 +381,7 @@ cat >>/mnt/root/.bashrc <<EOF
 export kver=$(uname -r | cut -d- -f3)
 PS1='[\u@\h:\e[0;36m$kver\e[m \W]\$ '
 alias abcde='eject -t; abcde'
+alias config='config.sh'
 alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && systemctl stop shairport-sync || systemctl start shairport-sync'
 EOF
 
