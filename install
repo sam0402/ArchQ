@@ -368,7 +368,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot
 
 cat >>/mnt/home/${user}/.bashrc <<EOF
-export kver=$(uname -r | cut -d- -f3)
+export kver=\$(uname -r | cut -d- -f3)
 alias abcde='eject -t; abcde'
 alias poweroff='sudo systemctl poweroff'
 alias reboot='sudo systemctl reboot'
@@ -378,7 +378,7 @@ EOF
 sed -i 's/\\h/\\h:\\e[0\;36m$kver\\e[m/' /mnt/home/${user}/.bashrc
 
 cat >>/mnt/root/.bashrc <<EOF
-export kver=$(uname -r | cut -d- -f3)
+export kver=\$(uname -r | cut -d- -f3)
 PS1='[\u@\h:\e[0;36m$kver\e[m \W]\$ '
 alias abcde='eject -t; abcde'
 alias config='config.sh'
