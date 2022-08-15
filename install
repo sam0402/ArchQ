@@ -260,10 +260,8 @@ case $server in
         echo Install LMS ...
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
         arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
-        [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 3 $MAINPID;s/novideo/novideo --charset=utf8/' \
-        /mnt/usr/lib/systemd/system/logitechmediaserver.service
-        [ $cpus -ge 6 ] && [[ $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 4 $MAINPID;s/novideo/novideo --charset=utf8/' \
-        /mnt/usr/lib/systemd/system/logitechmediaserver.service
+        [ $cpus -eq 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 3 $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
+        [ $cpus -ge 6 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 4 $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         arch-chroot /mnt systemctl enable logitechmediaserver
         ;;
     R)
