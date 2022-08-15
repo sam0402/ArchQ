@@ -10,7 +10,7 @@ Install ALSA library
 
 `pacman -Sd --noconfirm alsa-utils`
 
-Download PKGs for you need.
+Download PKGs for need.
 
 `wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg_S/cdparanoia-10.2-9-x86_64.pkg.tar.zst`
 
