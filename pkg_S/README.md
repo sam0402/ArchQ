@@ -6,6 +6,8 @@ Install ALSA library
 
 `wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg_S/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst`
 
+`pacman -R alsa-utils`
+
 `pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst`
 
 `pacman -Sd --noconfirm alsa-utils`
