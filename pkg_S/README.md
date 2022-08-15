@@ -26,4 +26,4 @@ Download to /root/
 
 Install PKGs
 
-$ `pacman -U /root/*-x86_64.pkg.tar.zs`
+`pacman -U /root/*-x86_64.pkg.tar.zs`
