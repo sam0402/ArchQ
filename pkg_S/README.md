@@ -1,4 +1,4 @@
-Install ArchQ PKGs with compiling optimization by file size.
+Install ArchQ PKGs with compiling optimization by file size (Os).
 
 $ `su`
 
