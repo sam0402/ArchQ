@@ -2,16 +2,6 @@ Install ArchQ PKGs on compiling optimization for file size (Os).
 
 $ `su`
 
-Install ALSA library
-
-`wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg_S/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst`
-
-`pacman -R alsa-utils`
-
-`pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst`
-
-`pacman -Sd --noconfirm alsa-utils`
-
 Download PKGs for need.
 
 `wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg_S/cdparanoia-10.2-9-x86_64.pkg.tar.zst`
@@ -29,3 +19,14 @@ Download PKGs for need.
 Install PKGs
 
 `pacman -U /root/*-x86_64.pkg.tar.zst`
+
+
+Install ALSA library
+
+`wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg_S/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst`
+
+`pacman -R alsa-utils`
+
+`pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst`
+
+`pacman -Sd --noconfirm alsa-utils`
