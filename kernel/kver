@@ -1,11 +1,9 @@
-Q396T-5.19.0-1:8Core Fast
-Q396Tw-5.19.0-1:4Core DSD Fast
-Q396S-5.19.0-1:8Core Size
-Q396Sw-5.19.0-1:4Core DSD Size
-Q396-5.19.0-12:8Core Fast AlderLake
-Q396w-5.19.0-12:4Core DSD Fast AlderLake
 Q441-5.19.0-1:8Core
 Q441w-5.19.0-1:4Core DSD
+Q396-5.19.0-12:8Core AlderLake
+Q396w-5.19.0-12:4Core DSD AlderLake
+Q396S-5.19.0-1:8Core
+Q396Sw-5.19.0-1:4Core DSD
 Q352-5.19.0-1:8Core
 Q352w-5.19.0-1:4Core DSD
 Qrip-5.19.0-1:6Core Rip CD
