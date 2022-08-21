@@ -17,7 +17,7 @@ Install step:
  
 `curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install | bash`
 
-4. After reboot, the monitor will not show any message only 'linux-Q352A ...'
+4. After reboot, the monitor will not show any message only 'linux-Q352 ...'
 
 5. Enter URL `http://name@hostname.local:9000` or `http://ip.address:9000` in browser to configure LMS.
 
