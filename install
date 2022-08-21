@@ -2,7 +2,7 @@
 # WARNING: this script will destroy data on the selected disk.
 # This script can be run by executing the following:
 #   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install.sh | bash
-kver='5.19.0-1'
+kver='5.19.2-12'
 roonver='1.8.1021-1'
 
 set -uo pipefail
