@@ -42,7 +42,7 @@ fi
 
 if [[ $a0 != $a1 ]]; then
     NQPTP=''
-    (systemctl | grep -q nqptp) && NQPTP=nqptp
+    (systemctl list-unit-files | grep -q nqptp) && NQPTP=nqptp
     [[ $a1 == 'on' ]] && act+=$NQPTP' shairport-sync ' || inact+='shairport-sync '$NQPTP 
 fi
 if [[ $r0 != $r1 ]]; then
