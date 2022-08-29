@@ -46,7 +46,7 @@ Config()
   if [[ $a0 != $a1 ]]; then
     if [[ $a1 == 'on' ]]; then
         NQPTP=''
-        (systemctl | grep -q nqptp) && NQPTP=nqptp
+        (systemctl list-unit-files | grep -q nqptp) && NQPTP=nqptp
         systemctl enable $NQPTP shairport-sync
         systemctl start $NQPTP shairport-sync
     else
