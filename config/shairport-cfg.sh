@@ -45,11 +45,13 @@ Config()
   fi
   if [[ $a0 != $a1 ]]; then
     if [[ $a1 == 'on' ]]; then
-        systemctl enable nqptp shairport-sync
-        systemctl start nqptp shairport-sync
+        NQPTP=''
+        (systemctl | grep -q nqptp) && NQPTP=nqptp
+        systemctl enable $NQPTP shairport-sync
+        systemctl start $NQPTP shairport-sync
     else
-        systemctl disable shairport-sync nqptp
-        systemctl stop shairport-sync nqptp
+        systemctl disable shairport-sync $NQPTP
+        systemctl stop shairport-sync $NQPTP
     fi
   fi
 }
