@@ -41,9 +41,7 @@ if [[ $s0 != $s1 ]]; then
 fi
 
 if [[ $a0 != $a1 ]]; then
-    NQPTP=''
-    (systemctl list-unit-files | grep -q nqptp) && NQPTP=nqptp
-    [[ $a1 == 'on' ]] && act+=$NQPTP' shairport-sync ' || inact+='shairport-sync '$NQPTP 
+    [[ $a1 == 'on' ]] && act+='shairport-sync ' || inact+='shairport-sync '
 fi
 if [[ $r0 != $r1 ]]; then
     [[ $r1 == 'on' ]] && act+='roonbridge ' || inact+='roonbridge '

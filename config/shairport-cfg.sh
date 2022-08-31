@@ -45,13 +45,11 @@ Config()
   fi
   if [[ $a0 != $a1 ]]; then
     if [[ $a1 == 'on' ]]; then
-        NQPTP=''
-        (systemctl list-unit-files | grep -q nqptp) && NQPTP=nqptp
-        systemctl enable $NQPTP shairport-sync
-        systemctl start $NQPTP shairport-sync
+        systemctl enable shairport-sync
+        systemctl start shairport-sync
     else
-        systemctl disable shairport-sync $NQPTP
-        systemctl stop shairport-sync $NQPTP
+        systemctl disable shairport-sync
+        systemctl stop shairport-sync
     fi
   fi
 }
@@ -76,8 +74,8 @@ clear
 case $WK in
   S)
       SelDevice
-      systemctl enable nqptp shairport-sync
-      systemctl restart nqptp shairport-sync
+      systemctl enable shairport-sync
+      systemctl restart shairport-sync
       echo shAirport is started.
     ;;
   V)
