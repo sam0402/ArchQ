@@ -46,7 +46,7 @@ done < $config
 if [[ ${inst[$ver]^^} =~ DSD ]]; then
     DOP='0:u32be'
     echo $CODEC | grep -q dsd || CODEC=$CODEC',dsd'
-    INFO="\nDSD format: dop, u8, u16le, u16be, u32le, u32le"
+    INFO="\nDSD format: dop, u8, u16le, u16be, u32le, u32be"
 else
     DOP='<null>'
     CODEC=$(echo $CODEC | sed 's/,dsd//')
