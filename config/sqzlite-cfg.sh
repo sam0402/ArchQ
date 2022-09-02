@@ -43,12 +43,19 @@ eval $(grep -v '#' | sed 's/-. //')
 #echo $(grep -v '#' | sed 's/-. //')
 done < $config
 
-[[ ${inst[$ver]^^} =~ PCM ]] && DOP='<null>' || DOP='0:u32be'
+if [[ ${inst[$ver]^^} =~ DSD ]]; then
+    DOP='0:u32be'
+    echo $CODEC | grep -q dsd || CODEC=$CODEC',dsd'
+    INFO="\nDSD format: dop, u8, u16le, u16be, u32le, u32le"
+else
+    DOP='<null>'
+    CODEC=$(echo $CODEC | sed 's/,dsd//')
+fi
 
 options=$(dialog --stdout \
     --title "Squeezelite ${inst[$ver]^^}" \
     --ok-label "Ok" \
-    --form "Modify settings. Blank fills with <null>" 0 60 0 \
+    --form "Modify settings. Blank fills with <null>$INFO" 0 60 0 \
     "Name of Player"        1 1   "$NAME"          1 25 60 0 \
     "ALSA setting"          2 1   "$ALSA_PARAMS"   2 25 60 0 \
     "Buffer Size setting"   3 1   "$BUFFER"        3 25 60 0 \
