@@ -243,14 +243,14 @@ echo .......................
 echo Install Kernel Q352 ...
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native rcu_nocb_poll/' \
+sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
     /mnt/etc/default/grub
 
 cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
 #cpus=$(getconf _NPROCESSORS_ONLN)
 isocpu=''
-[ $cpus -ge 4 ] && [ $server = L ] || [[ $player =~ S ]] && isocpu='isolcpus=3 rcu_nocbs=3 irqaffinity=0,1,2,4,5,6,7 '
-[ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu='isolcpus=3,4 rcu_nocbs=3,4 irqaffinity=0,1,2,5,6,7 '
+[ $cpus -ge 4 ] && [ $server = L ] || [[ $player =~ S ]] && isocpu='isolcpus=1 rcu_nocbs=1 irqaffinity=0,2,3,4,5,6,7 '
+[ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu='isolcpus=1,4 rcu_nocbs=1,4 irqaffinity=0,2,3,5,6,7 '
 sed -i 's/idle=poll /idle=poll '"$isocpu"'/' /mnt/etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 ## server
@@ -260,7 +260,7 @@ case $server in
         echo Install LMS ...
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
         arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
-        [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 3 $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
+        [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 1 $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         [ $cpus -ge 6 ] && [[ $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 4 $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         arch-chroot /mnt systemctl enable logitechmediaserver
@@ -313,7 +313,7 @@ if [[ $player =~ S ]]; then
     arch-chroot /mnt pacman -U --noconfirm /root/squzlite/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
     [[ -n "$scard" ]] && sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/squeezelite.conf
     sed -i '/ExecStart=/iExecStartPre=/usr/bin/sleep 3' /mnt/usr/lib/systemd/system/squeezelite.service
-    [ $cpus -ge 4 ] && sed -i '/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 3 $MAINPID' /mnt/usr/lib/systemd/system/squeezelite.service
+    [ $cpus -ge 4 ] && sed -i '/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 1 $MAINPID' /mnt/usr/lib/systemd/system/squeezelite.service
     arch-chroot /mnt systemctl enable squeezelite
 fi
 if [[ $player =~ A ]]; then
@@ -367,6 +367,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot
 
 cat >>/mnt/home/${user}/.bashrc <<EOF
+\$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
 export kver=\$(uname -r | cut -d- -f3)
 alias abcde='eject -t; abcde'
 alias poweroff='sudo systemctl poweroff'
@@ -375,14 +376,15 @@ alias config='sudo config.sh'
 alias qboot='sudo qboot'
 alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && sudo systemctl stop shairport-sync || sudo systemctl start shairport-sync'
 EOF
-sed -i 's/\\h/\\h:\\e[0\;36m$kver\\e[m/' /mnt/home/${user}/.bashrc
+sed -i 's/\\h/\\h:\\e[0\;${PSC}m$kver\\e[m/' /mnt/home/${user}/.bashrc
 
 cat >>/mnt/root/.bashrc <<EOF
+\$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
 export kver=\$(uname -r | cut -d- -f3)
-PS1='[\u@\h:\e[0;36m\$kver\e[m \W]\$ '
-alias abcde='eject -t; abcde'
+PS1='[\u@\h:\e[0;\${PSC}m\$kver\e[m \W]\$ '
 alias config='config.sh'
 alias airplay='[ \$(systemctl is-active shairport-sync) == active ] && systemctl stop shairport-sync || systemctl start shairport-sync'
+alias abcde='eject -t; abcde'
 EOF
 
 # Install ramroot
