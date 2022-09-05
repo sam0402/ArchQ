@@ -20,7 +20,7 @@ cpus=$(getconf _NPROCESSORS_ONLN)
 if [[ $player =~ A && ! -f '/etc/shairport-sync.conf' ]]; then
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
-    sed -i '/Group=/iNice=-10' /usr/lib/systemd/system/shairport-sync.service
+#     sed -i '/Group=/iNice=-10' /usr/lib/systemd/system/shairport-sync.service
     systemctl daemon-reload
 fi
 if [[ $player =~ S && ! -f '/etc/squeezelite.conf' ]]; then
