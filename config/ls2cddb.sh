@@ -2,7 +2,7 @@
 # file format included the wav
 format='flac'
 cdpath='/mnt/Music/'
-dropchar=2
+dropchar=
 
 cddbfile=$(ls abcde.*/cddbread.0)
 sed -i '/DTITLE/,$d' $cddbfile
