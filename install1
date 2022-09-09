@@ -292,7 +292,6 @@ EOF
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roon_copyright >/mnt/usr/share/licenses/roonserver/COPYING
         sed -i 's/exec "$HARDLINK" "$SCRIPT.dll" "$@"/exec taskset -c 1 nice -n -20 "$HARDLINK" "$SCRIPT.dll" "$@"/g' /mnt/opt/RoonServer/Appliance/RAATServer
         arch-chroot /mnt systemctl enable roonserver
-        rm /mnt/root/RoonServer_linuxx64.tar.bz2
         ;;
     M)
         echo Install MPD ...
