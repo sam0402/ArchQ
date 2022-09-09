@@ -269,7 +269,7 @@ case $server in
         echo Install Roon ...
         arch-chroot /mnt pacman -S --noconfirm ffmpeg cifs-utils icu
         arch-chroot /mnt wget -qP /root http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2
-        mkdir -p /mnt/var/roon /mnt/opt/RoonServer
+        mkdir -p /mnt/opt/RoonServer
         bsdtar xf /mnt/root/RoonServer_linuxx64.tar.bz2 -C /mnt/opt
         cat >>/mnt/usr/lib/systemd/system/roonserver.service <<EOF
 [Unit]
