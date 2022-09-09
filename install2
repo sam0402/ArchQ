@@ -267,7 +267,7 @@ case $server in
         ;;
     R)
         echo Install Roon ...
-        arch-chroot /mnt pacman -S ffmpeg cifs-utils icu
+        arch-chroot /mnt pacman -S --noconfirm ffmpeg cifs-utils icu
         arch-chroot /mnt wget -qP /root http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2
         mkdir -p /mnt/var/roon /mnt/opt/RoonServer
         bsdtar xf /mnt/tmp/RoonServer_linuxx64.tar.bz2 -C /mnt/opt
