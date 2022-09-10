@@ -21,9 +21,9 @@ fi
 
 [ -z $input ] && input=1
 
-# if [ ! -d /opt/logitechmediaserver ]; then
-#     [ $input = 1 ] && sed -i 's/idle=poll /idle=poll '"$isocpu"'/' $grub_def || sed -i 's/'"$isocpu"'//g' $grub_def
-# fi
+if [ ! -d /opt/logitechmediaserver ]; then
+    [ $input = 1 ] && sed -i 's/idle=poll /idle=poll '"$isocpu"'/' $grub_def || sed -i 's/'"$isocpu"'//g' $grub_def
+fi
 
 (( boot = input * 2 - 2 ))
 sed -i 's/^#\?GRUB_DEFAULT=.*$/GRUB_DEFAULT='"$boot"'/' $grub_def
