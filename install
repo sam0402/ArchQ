@@ -249,7 +249,7 @@ cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
 #cpus=$(getconf _NPROCESSORS_ONLN)
 isocpu=''
 [ $cpus -ge 4 ] && [[ $server = L || $server = R || $player =~ S ]] && isocpu='isolcpus=1 rcu_nocbs=1 irqaffinity=0,2-7 '
-[ $cpus -ge 6 ] && [[ $server = L || $server = R ]] && [ $player != N ] && isocpu='isolcpus=1,4 rcu_nocbs=1,4 irqaffinity=0,2,3,5-7 '
+[ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu='isolcpus=1,4 rcu_nocbs=1,4 irqaffinity=0,2,3,5-7 '
 sed -i 's/idle=poll /idle=poll '"$isocpu"'/' /mnt/etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
@@ -289,7 +289,7 @@ WantedBy=multi-user.target
 EOF
         chmod 644 /mnt/usr/lib/systemd/system/roonserver.service
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roon_copyright >/mnt/usr/share/licenses/roonserver/COPYING
-        sed -i 's/exec "$HARDLINK" "$SCRIPT.dll" "$@"/exec taskset -c 1 nice -n -20 "$HARDLINK" "$SCRIPT.dll" "$@"/g' /mnt/opt/RoonServer/Appliance/RAATServer
+        sed -i 's/exec "$HARDLINK" "$SCRIPT.dll" "$@"/exec nice -n -20 "$HARDLINK" "$SCRIPT.dll" "$@"/g' /mnt/opt/RoonServer/Appliance/RAATServer
         arch-chroot /mnt systemctl enable roonserver
         ;;
     M)
