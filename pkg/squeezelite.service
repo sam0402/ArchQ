@@ -1,0 +1,27 @@
+[Unit]
+Description=Squeezelite Player
+After=network.target
+
+[Service]
+Type=idle
+Nice=-20
+LimitRTPRIO=98
+LimitMEMLOCK=infinity
+#ControlGroup=cpu:/
+User=squeezelite
+Group=squeezelite
+SupplementaryGroups=audio
+EnvironmentFile=-/etc/squeezelite.conf
+ExecStartPost=/usr/bin/sleep 1
+ExecStartPost=/bin/sh -c "ps x -TA|grep squeezelite|grep -v grep|sed 's/^[[:space:]]*//'|awk -F' *' '{print $2}'| \
+  while read PROC; do [ $(chrt -p $PROC|grep policy|cut -d ':' -f2) = "SCHED_FIFO" ] && (taskset -cp 1 $PROC;chrt -p 95 $PROC);done;exit 0"
+ExecStart=/usr/bin/squeezelite\
+ $OPTIONS\
+ $NAME $MAC $PRIORITY\
+ $MAX_RATE $AUDIO_DEV\
+ $BUFFER $CODEC $ALSA_PARAMS $VOLUME\
+ $LOG_FILE $LOG_LEVEL\
+ $UPSAMPLE $DOP $VISULIZER $SERVER_IP
+
+[Install]
+WantedBy=multi-user.target
