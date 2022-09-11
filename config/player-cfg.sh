@@ -24,7 +24,7 @@ if [[ $player =~ A && ! -f '/etc/shairport-sync.conf' ]]; then
     systemctl daemon-reload
 fi
 if [[ $player =~ S && ! -f '/etc/squeezelite.conf' ]]; then
-    [ $cpus -ge 4 ] && sed -i '/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp 3 $MAINPID' /usr/lib/systemd/system/squeezelite.service
+    curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite.service >/mnt/usr/lib/systemd/system/squeezelite.service
     /usr/bin/sqzlite-cfg.sh
 fi
 
