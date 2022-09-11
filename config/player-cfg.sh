@@ -24,7 +24,10 @@ if [[ $player =~ A && ! -f '/etc/shairport-sync.conf' ]]; then
     systemctl daemon-reload
 fi
 if [[ $player =~ S && ! -f '/etc/squeezelite.conf' ]]; then
+    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
+    pacman -U --noconfirm /root/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite.service >/mnt/usr/lib/systemd/system/squeezelite.service
+    systemctl daemon-reload
     /usr/bin/sqzlite-cfg.sh
 fi
 
