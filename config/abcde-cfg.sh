@@ -67,6 +67,9 @@ CLOSETRAY=$(echo $options |  awk '//{print $6 }')
 [ -z $EJECTCD ] && echo "Fail! Eject CD is null." && exit 1
 [ -z $CLOSETRAY ] && echo "Fail! Auto Close Tray is null." && exit 1
 
+# umount ${OUTPUTDIR}
+chown $user: ${OUTPUTDIR}
+# mount ${OUTPUTDIR}
 OUTPUTDIR=$(echo $OUTPUTDIR | sed 's"/"\\\/"g')
 sed -i 's/^#\?OUTPUTDIR=".*/OUTPUTDIR="'"$OUTPUTDIR"'"/' $config
 sed -i 's/^#\?OUTPUTTYPE=".*/OUTPUTTYPE="'"$OUTPUTTYPE"'"/' $config
@@ -74,4 +77,3 @@ sed -i 's/^#\?OFFSET=".*/OFFSET="'"$OFFSET"'"/' $config
 sed -i 's/^#\?CDSPEEDVALUE=".*/CDSPEEDVALUE="'"$CDSPEEDVALUE"'"/' $config
 sed -i 's/^#\?EJECTCD=.*/EJECTCD='"$EJECTCD"'/' $config
 sed -i 's/^#\?CLOSETRAY=.*/CLOSETRAY='"$CLOSETRAY"'/' $config
-chown $user: ${OUTPUTDIR}
