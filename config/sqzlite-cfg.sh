@@ -12,8 +12,7 @@ if [ $ver -ne $option ]; then
     cpus=$(getconf _NPROCESSORS_ONLN)
     [ -f /root/squzlite/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst ] || wget -qP /root/squzlite https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/squzlite/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
-    sed -i '/ExecStart=/iExecStartPre=/usr/bin/sleep 3' /usr/lib/systemd/system/squeezelite.service
-    [ $cpus -ge 4 ] && sed -i '/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 3 $MAINPID' /usr/lib/systemd/system/squeezelite.service
+    curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite.service >/mnt/usr/lib/systemd/system/squeezelite.service
     systemctl daemon-reload
     ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
 fi
