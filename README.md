@@ -2,7 +2,7 @@
 
 ArchQ is headless Arch Linux with high quality music server and player for audiophiles.
 
-Powered by optimized realtime kernel(5.18) frequency works on 441/396.9/352.8 KHz.
+Powered by optimized realtime kernel(5.19) frequency works on 441/396.9/352.8 KHz.
 Thus, you do not need to upsample your music files anymore, even SQ is better than them.
 ArchQ includes the LMS, Roon(bridge), MPD(light) and optimized Squeezelite & Airplay and CD ripper(abcde), and it's easy to install and configure.
 If the cpu is more than 2 cores, LMS and squeezelite will work at isolated cpu.
