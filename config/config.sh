@@ -62,4 +62,14 @@ case $WK in
         /usr/bin/update_scpt.sh
         echo $git >/root/.update
         ;;
+    H)
+        pacman -Sy --noconfirm archlinux-keyring
+        pacman -Scc --noconfirm
+        pacman -Syy --noconfirm
+        pacman -Syu --noconfirm
+        wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
+        pacman -R --noconfirm alsa-utils
+        pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
+        pacman -Sd --noconfirm alsa-utils
+        ;;
 esac
