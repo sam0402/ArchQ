@@ -2,12 +2,13 @@
 # WARNING: this script will destroy data on the selected disk.
 # This script can be run by executing the following:
 #   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install.sh | bash
-kver='5.19.2-12'
+kver='5.19.8-12'
 
 set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
+echo 'ArchQ will ping "Arch Linux Server" 30 times before install.'
 ping -c 30 archlinux.org
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
 
