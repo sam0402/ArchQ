@@ -236,7 +236,7 @@ fi
 
 ### Kernel
 ker=Q352
-[ $cpu = amd ] && ker=Q352AMD
+[ $cpu = amd ] && (ker=Q308AMD; kver='5.19.2-1')
 [ $server = N ] && ker=${ker}w
 echo .......................
 echo Install Kernel ...
