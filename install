@@ -2,7 +2,7 @@
 # WARNING: this script will destroy data on the selected disk.
 # This script can be run by executing the following:
 #   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install.sh | bash
-kver='5.19.2-12'
+kver='5.19.8-12'
 
 set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
