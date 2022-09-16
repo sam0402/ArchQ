@@ -243,7 +243,7 @@ echo .......................
 echo Install Kernel ...
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable threadirqs no_timer_check intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
+sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
     /mnt/etc/default/grub
 
 cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
