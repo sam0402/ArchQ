@@ -6,7 +6,7 @@ server {
     root /var/lib/rompr;
     index index.php index.html index.htm;
 
-    server_name hostname;
+    server_name hostname.local;
 
     client_max_body_size 256M;
 
