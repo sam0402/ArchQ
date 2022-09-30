@@ -69,7 +69,7 @@ ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
 player=N
-server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS R Roon M MPD T MPD-lit N None) || exit 1
+server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS R Roon T "MPD-lit & RompЯ" N None) || exit 1
 clear
 case $server in
     L)
@@ -307,6 +307,7 @@ case $server in
             mv /mnt/var/lib/mopidy /mnt/var/lib/mpd/
         fi
         cat >>/mnt/etc/mopidy/mopidy.conf <<EOF
+
 [mpd]
 enabled = true
 hostname = 127.0.0.1
@@ -329,8 +330,9 @@ EOF
         sed -i 's/hostname/'"${hostname,,}"'/' /mnt/etc/nginx/sites-available/rompr
         sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /mnt/etc/php/php.ini
         sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /mnt/etc/php/php.ini
+        arch-chroot /mnt ln -s /var/lib/mpd/mopidy /var/lib/mopidy
         arch-chroot /mnt ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
-        chmod 644 /mnt/etc/nginx/sites-enabled/rompr
+        arch-chroot /mnt chmod 644 /etc/nginx/sites-enabled/rompr
 ### Start mpd.. etc. service
         arch-chroot /mnt systemctl enable mpd mopidy nginx php-fpm
         ;;
@@ -370,10 +372,8 @@ if  [[ $player =~ R ]]; then
 fi
 
 ### other setting
-arch-chroot /mnt systemctl enable sshd.service
-arch-chroot /mnt systemctl enable cpupower.service
-arch-chroot /mnt systemctl enable ntpdate.service
-arch-chroot /mnt systemctl disable ntpd.service
+arch-chroot /mnt systemctl enable sshd cpupower ntpdate
+arch-chroot /mnt systemctl disable ntpd
 echo ........................
 echo IO Scheduler setting ...
 echo 'ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"' >/mnt/etc/udev/rules.d/pci_pm.rules >/etc/udev/rules.d/pci_pm.rules
