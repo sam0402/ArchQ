@@ -1,9 +1,9 @@
 server {
 
-    listen 80;
+    listen 6660;
 #    listen [::]:80;
 
-    root /usr/share/webapps;
+    root /usr/share/webapps/rompr;
     index index.php index.html index.htm;
 
     server_name hostname.local;
@@ -11,7 +11,7 @@ server {
     client_max_body_size 256M;
 
     # This section can be copied into an existing default setup
-    location /rompr/ {
+    location / {
         allow all;
         index index.php;
         location ~ \.php {
@@ -22,7 +22,7 @@ server {
                 include /etc/nginx/fastcgi_params;
                 fastcgi_read_timeout 1800;
         }
-        error_page 404 = /rompr/404.php;
+        error_page 404 = /404.php;
         try_files $uri $uri/ =404;
         location ~ /albumart/* {
                 expires -1s;
