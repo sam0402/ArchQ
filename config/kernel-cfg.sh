@@ -55,7 +55,7 @@ case $WK in
         grub-mkconfig -o /boot/grub/grub.cfg
         ;;
     F)
-        cpus=2
+        cpus=$(($(getconf _NPROCESSORS_ONLN)-1))
         num=`expr $cpus + 1`
         cmd="cat /proc/interrupts | grep tick | awk '{print \$${num}}'"
         dialog --stdout --title "ArchQ $1" --infobox "\n\n    Wait for 10 seconds..." 7 35
