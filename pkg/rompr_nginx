@@ -3,7 +3,7 @@ server {
     listen 80;
     listen [::]:80;
 
-    root /var/lib/rompr;
+    root /usr/share/webapps;
     index index.php index.html index.htm;
 
     server_name hostname.local;
