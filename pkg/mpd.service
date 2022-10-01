@@ -9,7 +9,6 @@ Type=notify
 ExecStartPre=/usr/bin/sleep 2
 ExecStartPost=/bin/sh -c "ps x -TA|grep mpd|grep -v grep|sed 's/^[[:space:]]*//'|awk -F' *' '{print $2}'| \
   while read PROC; do chrt -p $PROC | grep -q SCHED_FIFO && chrt -p 95 $PROC ;done;exit 0"
-ExecStart=/usr/bin/squeezelite\
 ExecStart=/usr/bin/mpd --systemd
 
 # Enable this setting to ask systemd to watch over MPD, see
