@@ -44,8 +44,8 @@ Supported Hardware: (Include Macbook or Mac mini Intel version)
 Stand-alone: Install
  1. LMS + Squeezelite
  2. Roon
- 4. MPD, MPD-light
- 5. Airplay
+ 3. MPD & RompЯ
+ 4. Airplay
 
 Client-server:
 
@@ -71,4 +71,4 @@ Client-server:
 ![SMB/CIFS](images/smbcifs.png)
 ![Partition](images/partition_mount.png)
 ![cpufreq](images/cpu_freq.png)
-![mdp_cantata](images/mpd_cantata.jpg)
+![Rompr](images/Rompr.png)
