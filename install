@@ -283,7 +283,6 @@ case $server in
         arch-chroot /mnt pacman -S --noconfirm mpd mopidy
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd.conf >/mnt/etc/mpd.conf
         [[ -n "$scard" ]] &&  sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
-        sed -i '/ExecStart=/iExecStartPre=/usr/bin/sleep 3' /mnt/usr/lib/systemd/system/mpd.service
         arch-chroot /mnt systemctl enable mpd
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
@@ -298,7 +297,6 @@ case $server in
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.9-3-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mopidy-mpd-3.3.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
-        sed -i 's/LimitRTPRIO=.*/LimitRTPRIO=95/;/ExecStart=/iExecStartPre=/usr/bin/sleep 3' /mnt/usr/lib/systemd/system/mpd.service
 ### setup mopidy 
         if [ -d /mnt/var/lib/mpd/mopidy ]; then
             rm -rf /mnt/var/lib/mpd/mopidy
