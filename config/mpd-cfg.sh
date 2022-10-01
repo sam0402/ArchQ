@@ -26,6 +26,15 @@ mdir=$(dialog --stdout \
     --form "Music directory" 0 30 0 \
     " /mnt/"  1 1 $mdir 1 7 30 0) || exit 1
 clear
+grep -q '#[[:space:]]mixer_type "soft' $config && volctl=off || volctl=on
+vol=$(dialog --stdout \
+    --title "ArchQ MPD" \
+    --checklist "Volume Control" 7 0 0 \
+    E Enable $volctl ) || exit 1
+clear
+
+[ -n "$vol" ] && sed -i 's/^#.\?mixer_type.*"/\tmixer_type "software"/' $config \
+              || sed -i 's/^.\?mixer_type.*"/#\tmixer_type "software"/' $config
 
 sed -i 's/^#\?music_directory.*"/music_directory "\/mnt\/'"$mdir"'"/' $config
 
