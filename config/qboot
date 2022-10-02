@@ -1,6 +1,7 @@
 #!/bin/bash
 grub_def='/etc/default/grub'
-isocpu='isolcpus=1 rcu_nocbs=1 irqaffinity=0,2-7 '
+iso_1st=$(($(getconf _NPROCESSORS_ONLN)-1))
+isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
 
 n=2;
 options=()
