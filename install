@@ -290,7 +290,7 @@ case $server in
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
 # ### setup mopidy 
-        # [ -d /mnt/var/lib/mpd/mopidy ]; && rm -rf /mnt/var/lib/mpd/mopidy || mv /mnt/var/lib/mopidy /mnt/var/lib/mpd/
+        # [ -d /mnt/var/lib/mpd/mopidy ] && rm -rf /mnt/var/lib/mpd/mopidy || mv /mnt/var/lib/mopidy /mnt/var/lib/mpd/
         # arch-chroot /mnt ln -s /var/lib/mpd/mopidy /var/lib/mopidy
         # cat >>/mnt/etc/mopidy/mopidy.conf <<EOF
 
