@@ -2,7 +2,7 @@
 config='/etc/abcde.conf'
 user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
 
-if [ ! -f $config ]; then
+if ! pacman -Q abcde >/dev/null 2>&1 ; then
     pacman -Sy --noconfirm archlinux-keyring
     pacman -Scc --noconfirm
     pacman -Syy --noconfirm
