@@ -69,7 +69,7 @@ ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
 player=N
-server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS R Roon T "MPD & RompR" N None) || exit 1
+server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS R Roon M "MPD & RompR" N None) || exit 1
 clear
 case $server in
     L)
@@ -281,16 +281,7 @@ case $server in
         ;;
     M)
         echo Install MPD ...
-        arch-chroot /mnt pacman -S --noconfirm mpd mopidy
-        curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd.conf >/mnt/etc/mpd.conf
-        [[ -n "$scard" ]] &&  sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
-        arch-chroot /mnt systemctl enable mpd
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
-        ;;
-    T)
-        echo Install MPD ...
-        arch-chroot /mnt pacman -S --noconfirm mopidy nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl
+        arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.9-3-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mopidy-mpd-3.3.0-1-any.pkg.tar.zst
@@ -298,30 +289,27 @@ case $server in
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.9-3-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mopidy-mpd-3.3.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
-### setup mopidy 
-        if [ -d /mnt/var/lib/mpd/mopidy ]; then
-            rm -rf /mnt/var/lib/mpd/mopidy
-            arch-chroot /mnt ln -s /var/lib/mpd/mopidy /var/lib/mopidy
-        else        
-            mv /mnt/var/lib/mopidy /mnt/var/lib/mpd/
-        fi
-        cat >>/mnt/etc/mopidy/mopidy.conf <<EOF
+# ### setup mopidy 
+        # [ -d /mnt/var/lib/mpd/mopidy ]; && rm -rf /mnt/var/lib/mpd/mopidy || mv /mnt/var/lib/mopidy /mnt/var/lib/mpd/
+        # arch-chroot /mnt ln -s /var/lib/mpd/mopidy /var/lib/mopidy
+        # cat >>/mnt/etc/mopidy/mopidy.conf <<EOF
 
-[mpd]
-enabled = true
-hostname = 127.0.0.1
-port = 6600
-# password =
-max_connections = 20
-connection_timeout = 120
-# zeroconf = Mopidy MPD server on $hostname
+# [mpd]
+# enabled = true
+# hostname = 127.0.0.1
+# port = 6600
+# # password =
+# max_connections = 20
+# connection_timeout = 120
+# # zeroconf = Mopidy MPD server on $hostname
 
-[http]
-enabled=true
-hostname = 0.0.0.0
-port=6680
-csrf_protection=false
-EOF
+# [http]
+# enabled=true
+# hostname = 0.0.0.0
+# port=6680
+# csrf_protection=false
+# EOF
+
 ### Setup RompR
         mkdir -p /mnt/etc/nginx/sites-available /mnt/etc/nginx/sites-enabled
         sed -i '$i include /etc/nginx/sites-enabled/*;' /mnt/etc/nginx/nginx.conf
@@ -329,11 +317,11 @@ EOF
         sed -i 's/hostname/'"${hostname,,}"'/' /mnt/etc/nginx/sites-available/rompr
         sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /mnt/etc/php/php.ini
         sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /mnt/etc/php/php.ini
-        arch-chroot /mnt ln -s /var/lib/mpd/mopidy /var/lib/mopidy
+
         arch-chroot /mnt ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
         arch-chroot /mnt chmod 644 /etc/nginx/sites-enabled/rompr
 ### Start mpd.. etc. service
-        arch-chroot /mnt systemctl enable mpd mopidy nginx php-fpm
+        arch-chroot /mnt systemctl enable mpd nginx php-fpm
         ;;
 esac
 ### Install Player
