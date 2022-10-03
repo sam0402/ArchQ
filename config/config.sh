@@ -10,7 +10,7 @@ MENU=''
 pacman -Q mpd >/dev/null 2>&1 && MENU='D MPD '
 pacman -Q squeezelite >/dev/null 2>&1 && MENU+='S Squeezelite '
 pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='A Airplay '
-pacman -Q ffmpeg >/dev/null 2>&1 && MENU+='F FFmpeg '
+#pacman -Q ffmpeg >/dev/null 2>&1 && MENU+='F FFmpeg '
 [ $git -gt $num ] && MENU+='U Update '
 
 WK=$(dialog --stdout --title "ArchQ $Qver   $temp" \
