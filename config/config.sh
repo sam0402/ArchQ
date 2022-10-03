@@ -64,7 +64,7 @@ case $WK in
             --checklist "Use ArchQ FFmpeg" 7 0 0 \
             E Enable $ff ) || exit 1
         if [ $ffen == 'E' ]; then
-            wget -qP /root/squzlite https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2:5.1.2-12-x86_64.pkg.tar.zst
+            wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A5.1.2-12-x86_64.pkg.tar.zst
             pacman -U --noconfirm /root/ffmpeg-2:5.1.2-12-x86_64.pkg.tar.zst
         else
             pacman -S --noconfirm ffmpeg
