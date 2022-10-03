@@ -7,9 +7,10 @@ Qver=$(uname -r | awk -F - '{print $3}')
 temp=$(sensors | grep 'Core 0' | awk '{print $3}')
 
 MENU=''
-[ -f /etc/mpd.conf ] && MENU='D MPD '
-[ -f /etc/squeezelite.conf ] && MENU+='S Squeezelite '
-[ -f /etc/shairport-sync.conf ] && MENU+='A Airplay '
+pacman -Q mpd >/dev/null 2>&1 && MENU='D MPD '
+pacman -Q squeezelite >/dev/null 2>&1 && MENU+='S Squeezelite '
+pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='A Airplay '
+pacman -Q ffmpeg >/dev/null 2>&1 && MENU+='F FFmpeg '
 [ $git -gt $num ] && MENU+='U Update '
 
 WK=$(dialog --stdout --title "ArchQ $Qver   $temp" \
@@ -55,6 +56,19 @@ case $WK in
         ;;
     T)
         /usr/bin/timezone.sh $Qver
+        ;;
+    F)
+        pacman -Q ffmpeg | grep -q '\-12' && ff=on || ff=off
+        ffen=$(dialog --stdout \
+            --title "ArchQ $Qver   $temp" \
+            --checklist "Use ArchQ FFmpeg" 7 0 0 \
+            E Enable $ff ) || exit 1
+        if [ $ffen == 'E' ]; then
+            wget -qP /root/squzlite https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2:5.1.2-12-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /root/ffmpeg-2:5.1.2-12-x86_64.pkg.tar.zst
+        else
+            pacman -S --noconfirm ffmpeg
+        fi
         ;;
     U)
         curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/usr/bin/update_scpt.sh
