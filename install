@@ -289,6 +289,14 @@ case $server in
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.9-3-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mopidy-mpd-3.3.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
+        cat >>/mnt/etc/mpd.conf <<EOF
+
+#audio_output {
+#    type    "pulse"
+#    name    "Local MPD"
+#    server  "127.0.0.1"
+#}
+EOF
 # ### setup mopidy 
         # [ -d /mnt/var/lib/mpd/mopidy ] && rm -rf /mnt/var/lib/mpd/mopidy || mv /mnt/var/lib/mopidy /mnt/var/lib/mpd/
         # arch-chroot /mnt ln -s /var/lib/mpd/mopidy /var/lib/mopidy
