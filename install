@@ -297,10 +297,10 @@ case $server in
         cat >>/mnt/etc/mpd.conf <<EOF
 
 #audio_output {
-#   type "pulse"
-#   name "MPD Airplay"
-#   mixer_type "software"
-#   sink "raop_output.Airplay.local"
+#       type "pulse"
+#       name "MPD Airplay"
+#       mixer_type "software"
+#       sink "raop_output.Airplay.local"
 #}
 EOF
 # ### setup mopidy 
