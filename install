@@ -289,7 +289,7 @@ case $server in
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.9-3-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mopidy-mpd-3.3.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst
 
 ### setup pulseaudio
-        echo "load-module module-raop-discover" >>/mnt//etc/pulse/default.pa
+        echo "load-module module-raop-discover" >>/mnt/etc/pulse/default.pa
         sed -i 's/autospawn = no/\; autospawn = no/;s/\; autospawn = yes/autospawn = yes/' /mnt/etc/pulse/client.conf
         arch-chroot /mnt su $user -c "systemctl --user enable pulseaudio"
 ### setup mpd
@@ -297,10 +297,10 @@ case $server in
         cat >>/mnt/etc/mpd.conf <<EOF
 
 #audio_output {
-#   type    "pulse"
-#   name    "MPD Airplay"
-#   mixer_type  "software"
-#   sink    "raop_output.Airplay.local"
+#   type "pulse"
+#   name "MPD Airplay"
+#   mixer_type "software"
+#   sink "raop_output.Airplay.local"
 #}
 EOF
 # ### setup mopidy 
