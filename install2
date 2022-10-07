@@ -334,7 +334,7 @@ EOF
         arch-chroot /mnt ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
         arch-chroot /mnt chmod 644 /etc/nginx/sites-enabled/rompr
 ### Start mpd.. etc. service
-        arch-chroot /mnt systemctl enable mpd nginx php-fpm avahi-daemon pulseaudio
+        arch-chroot /mnt systemctl enable mpd nginx php-fpm avahi-daemon
         ;;
 esac
 ### Install Player
