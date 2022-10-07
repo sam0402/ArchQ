@@ -290,6 +290,7 @@ case $server in
 
 ### setup pulseaudio
         echo "load-module module-raop-discover" >>/mnt//etc/pulse/default.pa
+        sed -i 's/autospawn = no/\; autospawn = no/;s/\; autospawn = yes/autospawn = yes/' /mnt/etc/pulse/client.conf
         arch-chroot /mnt su $user -c "systemctl --user enable pulseaudio"
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
