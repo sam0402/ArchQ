@@ -281,24 +281,29 @@ case $server in
         ;;
     M)
         echo Install MPD ...
-        arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which
+        arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi pulseaudio-zeroconf pulseaudio-rtp
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.9-3-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mopidy-mpd-3.3.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-1.61-1-any.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.9-3-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mopidy-mpd-3.3.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst
+
+### setup pulseaudio
+        echo "load-module module-raop-discover" >>/mnt//etc/pulse/default.pa
+        arch-chroot /mnt su $user -c "systemctl --user enable pulseaudio"
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
         cat >>/mnt/etc/mpd.conf <<EOF
 
 #audio_output {
-#    type    "pulse"
-#    name    "Local MPD"
-#    server  "127.0.0.1"
+#   type    "pulse"
+#   name    "MPD Airplay"
+#   mixer_type  "software"
+#   sink    "raop_output.Airplay.local"
 #}
 EOF
 # ### setup mopidy 
-        # [ -d /mnt/var/lib/mpd/mopidy ] && rm -rf /mnt/var/lib/mpd/mopidy || mv /mnt/var/lib/mopidy /mnt/var/lib/mpd/
+        # [ -d /mnt/var/lib/mpd/mopidy ]; && rm -rf /mnt/var/lib/mpd/mopidy || mv /mnt/var/lib/mopidy /mnt/var/lib/mpd/
         # arch-chroot /mnt ln -s /var/lib/mpd/mopidy /var/lib/mopidy
         # cat >>/mnt/etc/mopidy/mopidy.conf <<EOF
 
@@ -329,7 +334,7 @@ EOF
         arch-chroot /mnt ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
         arch-chroot /mnt chmod 644 /etc/nginx/sites-enabled/rompr
 ### Start mpd.. etc. service
-        arch-chroot /mnt systemctl enable mpd nginx php-fpm
+        arch-chroot /mnt systemctl enable mpd nginx php-fpm avahi-daemon
         ;;
 esac
 ### Install Player
