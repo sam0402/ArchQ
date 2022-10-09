@@ -1,0 +1,12 @@
+#!/bin/bash
+systemctl is-failed pulseaudio >/dev/null 2>&1 && systemctl --user --now enable pulseaudio
+while read line; do
+    devs+=${line}' 　 '
+done <<< $(pacmd list-sinks | grep  -E 'name:' | cut -d. -f2)
+
+airplay=$(dialog --stdout \
+        --title "ArchQ $1" \
+        --menu "Airport ouput" 7 0 0 ${devs}) || exit 1
+
+pacmd set-default-sink raop_output.$airplay.local
+echo Airplay to device: $airplay 
