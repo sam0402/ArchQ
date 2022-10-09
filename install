@@ -284,25 +284,16 @@ case $server in
         arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi pulseaudio-zeroconf pulseaudio-rtp
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.9-3-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mopidy-mpd-3.3.0-1-any.pkg.tar.zst
+        # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mopidy-mpd-3.3.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-1.61-1-any.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.9-3-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mopidy-mpd-3.3.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.9-3-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst
 
 ### setup pulseaudio
         echo "load-module module-raop-discover" >>/mnt/etc/pulse/default.pa
         sed -i 's/autospawn = no/\; autospawn = no/;s/\; autospawn = yes/autospawn = yes/' /mnt/etc/pulse/client.conf
-        arch-chroot /mnt su $user -c "systemctl --user enable pulseaudio"
+        # arch-chroot /mnt su $user -c "systemctl --user enable pulseaudio"
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
-        cat >>/mnt/etc/mpd.conf <<EOF
-
-#audio_output {
-#       type "pulse"
-#       name "MPD Airplay"
-#       mixer_type "software"
-#       sink "raop_output.Airplay.local"
-#}
-EOF
 # ### setup mopidy 
         # [ -d /mnt/var/lib/mpd/mopidy ]; && rm -rf /mnt/var/lib/mpd/mopidy || mv /mnt/var/lib/mopidy /mnt/var/lib/mpd/
         # arch-chroot /mnt ln -s /var/lib/mpd/mopidy /var/lib/mopidy
@@ -401,6 +392,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/player-cfg.
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg.sh >/mnt/usr/bin/desktop-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/mnt/usr/bin/shairport-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pulse_airport >/mnt/usr/bin/pulse_airport
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
