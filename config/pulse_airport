@@ -1,4 +1,6 @@
 #!/bin/bash
+config='/etc/mpd.conf'
+
 systemctl is-active pulseaudio >/dev/null 2>&1 || systemctl --user --now enable pulseaudio
 while read line; do
     devs+=${line}' 　 '
@@ -8,5 +10,7 @@ airplay=$(dialog --stdout \
         --title "ArchQ $1" \
         --menu "Airport ouput" 7 0 0 ${devs}) || exit 1
 
-pacmd set-default-sink raop_output.$airplay.local
-echo Airplay to device: $airplay 
+grep -q sink $config || sudo sed -i '$i\ \tsink "raop_output.airplay.local"' $config
+sudo sed -i 's/output.*.local/output.'"$airplay"'.local/' $config
+sudo systemctl restart mpd
+echo Airplay to device: $airplay
