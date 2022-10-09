@@ -1,5 +1,5 @@
 #!/bin/bash
-systemctl is-failed pulseaudio >/dev/null 2>&1 && systemctl --user --now enable pulseaudio
+systemctl is-active pulseaudio >/dev/null 2>&1 || systemctl --user --now enable pulseaudio
 while read line; do
     devs+=${line}' 　 '
 done <<< $(pacmd list-sinks | grep  -E 'name:' | cut -d. -f2)
