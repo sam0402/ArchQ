@@ -53,7 +53,7 @@ case $output in
                     || sed -i 's/^.\?mixer_type.*"/#\tmixer_type "software"/' $config
     ;;
     A)
-        sed -i 's/type "alsa"/type "pulse"/;s/^#.\?mixer_type.*"/\tmixer_type "software"/' $config
+        sed -i 's/type "alsa"/type "pulse"/' $config
         user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
         echo "Use command 'pulse_airport' to set Airport output device @$user."
     ;;
