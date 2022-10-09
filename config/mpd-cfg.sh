@@ -12,17 +12,6 @@ mdir=$(dialog --stdout \
 clear
 sed -i 's/^#\?music_directory.*"/music_directory "\/mnt\/'"$mdir"'"/' $config
 
-### Volume Control
-grep -q '#[[:space:]]mixer_type "soft' $config && volctl=off || volctl=on
-vol=$(dialog --stdout \
-    --title "ArchQ MPD" \
-    --checklist "Volume Control" 7 0 0 \
-    E Enable $volctl ) || exit 1
-clear
-
-[ -n "$vol" ] && sed -i 's/^#.\?mixer_type.*"/\tmixer_type "software"/' $config \
-              || sed -i 's/^.\?mixer_type.*"/#\tmixer_type "software"/' $config
-
 ### Audio output
 alsa=on; pulse=off
 if grep -q 'pulse' $config ; then
@@ -51,9 +40,20 @@ case $output in
                 --menu "MPD ouput device" 7 0 0 ${devs}) || exit 1
         clear
         sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$device\""'/' $config
+
+        ### Volume Control
+        grep -q '#[[:space:]]mixer_type "soft' $config && volctl=off || volctl=on
+        vol=$(dialog --stdout \
+            --title "ArchQ MPD" \
+            --checklist "Volume Control" 7 0 0 \
+            E Enable $volctl ) || exit 1
+        clear
+
+        [ -n "$vol" ] && sed -i 's/^#.\?mixer_type.*"/\tmixer_type "software"/' $config \
+                    || sed -i 's/^.\?mixer_type.*"/#\tmixer_type "software"/' $config
     ;;
     A)
-        sed -i 's/type "alsa"/type "pulse"/' $config
+        sed -i 's/type "alsa"/type "pulse"/;s/^#.\?mixer_type.*"/\tmixer_type "software"/' $config
         user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
         echo "Use command 'pulse_airport' to set Airport output device @$user."
     ;;
