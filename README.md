@@ -46,7 +46,7 @@ Supported Hardware: (Include Macbook or Mac mini Intel version)
 Stand-alone: Install
  1. LMS + Squeezelite
  2. Roon
- 3. MPD & RompЯ
+ 3. MPD & RompЯ with CD play
  4. Airplay
 
 Client-server:
