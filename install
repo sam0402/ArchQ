@@ -281,17 +281,20 @@ case $server in
         ;;
     M)
         echo Install MPD ...
-        arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi pulseaudio-zeroconf pulseaudio-rtp
+        arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi pipewire-zeroconf pipewire-pulse wireplumber
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.9-3-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mopidy-mpd-3.3.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-1.61-1-any.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.9-3-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst
 
-### setup pulseaudio
-        echo "load-module module-raop-discover" >>/mnt/etc/pulse/default.pa
-        sed -i 's/autospawn = no/\; autospawn = no/;s/\; autospawn = yes/autospawn = yes/' /mnt/etc/pulse/client.conf
-        # arch-chroot /mnt su $user -c "systemctl --user enable pulseaudio"
+### setup pipewire
+        cp -a /mnt/usr/share/pipewire /mnt/etc/
+        sed -i '/Loads a module/i\\t{ name = libpipewire-module-raop-discover\n    args = { }\n    }' /mnt/etc/pipewire/pipewire.conf
+        sed -i 's/#"tcp:4713"/"tcp:4713"/;s/#{ path = "\/usr\/bin\/sh"/{ path = "\/usr\/bin\/sh"/' /mnt/etc/pipewire/pipewire-pulse.conf
+        mkdir -p /mnt/$user/.config/pipewire
+        curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/sink_default.pw >/mnt/$user/.config/pipewire/default.pw
+        arch-chroot /mnt su $user -c "systemctl --user enable pipewire pipewire-pulse"
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
 # ### setup mopidy 
