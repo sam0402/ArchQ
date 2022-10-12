@@ -295,6 +295,7 @@ case $server in
         arch-chroot /mnt su $user -c "systemctl --user enable pipewire pipewire-pulse"
         mkdir -p /mnt/home/$user/.config/pipewire
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/sink_default.pw >/mnt/home/$user/.config/pipewire/default.pw
+        arch-chroot /mnt chown -R ${user}: /home/$user/.config/pipewire
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
 # ### setup mopidy 
