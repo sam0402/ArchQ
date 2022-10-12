@@ -1,6 +1,4 @@
 #!/bin/bash
-# systemctl is-active pulseaudio >/dev/null 2>&1 || systemctl --user --now enable pulseaudio
-
 while read line; do
     names+=$line' '
 done <<< $(pactl list sinks | grep -E "Name:" | cut -d- -f3-4)
@@ -22,5 +20,5 @@ sel=$(dialog --stdout \
         --menu "Select Airport ouput to" 7 0 0 $menu) || exit 1
 
 pactl set-default-sink raop-sink-${a_name[$sel]}
-echo ${a_desc[$sel]} >~/.config/pipewire/default_sink
+echo ${a_desc[$sel]} >~/.default_sink
 echo Airplay to ${a_desc[$sel]}.

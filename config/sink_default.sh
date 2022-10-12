@@ -11,5 +11,5 @@ a_name=($names)
 a_desc=($desc)
 for ((i=0; i < ${#a_name[@]}; i++))
 do
-    [ ${a_desc[$i]} == $(cat ~/.config/pipewire/default_sink) ] && pactl set-default-sink raop-sink-${a_name[$i]}
+    [ ${a_desc[$i]} == $(cat ~/.default_sink) ] && pactl set-default-sink raop-sink-${a_name[$i]}
 done
