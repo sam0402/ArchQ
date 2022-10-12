@@ -9,6 +9,8 @@ done <<< $(pactl list sinks | grep -E "Description:" | cut -d: -f2)
 
 a_name=($names)
 a_desc=($desc)
+
+[ -f ~/.default_sink ] || touch ~/.default_sink
 for ((i=0; i < ${#a_name[@]}; i++))
 do
     [ ${a_desc[$i]} == $(cat ~/.default_sink) ] && pactl set-default-sink raop-sink-${a_name[$i]}
