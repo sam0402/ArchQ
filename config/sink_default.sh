@@ -1,4 +1,5 @@
 #!/bin/sh
+sleep 3
 while read line; do
     names+=$line' '
 done <<< $(pactl list sinks | grep -E "Name:" | cut -d- -f3-4)
