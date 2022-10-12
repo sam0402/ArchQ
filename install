@@ -292,9 +292,9 @@ case $server in
         cp -a /mnt/usr/share/pipewire /mnt/etc/
         sed -i '/Loads a module/i\\t{ name = libpipewire-module-raop-discover\n    args = { }\n    }' /mnt/etc/pipewire/pipewire.conf
         sed -i 's/#"tcp:4713"/"tcp:4713"/;s/#{ path = "\/usr\/bin\/sh"/{ path = "\/usr\/bin\/sh"/' /mnt/etc/pipewire/pipewire-pulse.conf
+        arch-chroot /mnt su $user -c "systemctl --user enable pipewire pipewire-pulse"
         mkdir -p /mnt/$user/.config/pipewire
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/sink_default.pw >/mnt/$user/.config/pipewire/default.pw
-        arch-chroot /mnt su $user -c "systemctl --user enable pipewire pipewire-pulse"
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
 # ### setup mopidy 
