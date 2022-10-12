@@ -292,7 +292,7 @@ case $server in
         cp -a /mnt/usr/share/pipewire /mnt/etc/
         sed -i '/Loads a module/i\\t{ name = libpipewire-module-raop-discover\n    args = { }\n    }' /mnt/etc/pipewire/pipewire.conf
         sed -i 's/#"tcp:4713"/"tcp:4713"/' /mnt/etc/pipewire/pipewire-pulse.conf
-        cat >/mnt/usr/lib/systemd/user/defsink.service <<EOF
+        cat >/mnt/usr/lib/systemd/user/sinkdef.service <<EOF
 [Unit]
 Description=Sink Default
 
@@ -305,7 +305,7 @@ RemainAfterExit=yes
 [Install]
 WantedBy=default.target
 EOF
-        arch-chroot /mnt su $user -c "systemctl --user enable pipewire pipewire-pulse defsink"
+        arch-chroot /mnt su $user -c "systemctl --user enable pipewire pipewire-pulse sinkdef"
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
 # ### setup mopidy 
