@@ -14,6 +14,6 @@ a_desc=($desc)
 [ -f ~/.default_sink ] || touch ~/.default_sink
 for ((i=0; i < ${#a_name[@]}; i++))
 do
-    [ ${a_desc[$i]} == $(cat ~/.default_sink) ] && pactl set-default-sink raop-sink-${a_name[$i]}
+    [ ${a_desc[$i]} == $(cat ~/.sink_def) ] && pactl set-default-sink raop-sink-${a_name[$i]}
 done
 exit 0
