@@ -298,6 +298,7 @@ Description=Sink Default
 
 [Service]
 Type=idle
+ExecStartPre=/bin/sleep 10
 ExecStart=/bin/sh /usr/bin/sink_default.sh
 RemainAfterExit=yes
 
