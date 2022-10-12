@@ -297,7 +297,7 @@ case $server in
 Description=Sink Default
 
 [Service]
-Type=forking
+Type=idle
 ExecStart=/bin/sh /usr/bin/sink_default.sh
 RemainAfterExit=yes
 
