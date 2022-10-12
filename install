@@ -289,13 +289,22 @@ case $server in
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.9-3-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst
 
 ### setup pipewire
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rc-local-4-1-any.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/rc-local-4-1-any.pkg.tar.zst
-        sed -i '/exit 0/isu $(grep '1000' /etc/passwd | awk -F: '{print $1}') -c "/usr/bin/sink_default.sh"' /mnt/etc/rc.local
         cp -a /mnt/usr/share/pipewire /mnt/etc/
         sed -i '/Loads a module/i\\t{ name = libpipewire-module-raop-discover\n    args = { }\n    }' /mnt/etc/pipewire/pipewire.conf
         sed -i 's/#"tcp:4713"/"tcp:4713"/' /mnt/etc/pipewire/pipewire-pulse.conf
-        arch-chroot /mnt su $user -c "systemctl --user enable pipewire pipewire-pulse rc-local"
+    cat >>/mnt/usr/lib/systemd/user/pipewire.service <<EOF
+[Unit]
+Description=Sink Default
+
+[Service]
+Type=forking
+ExecStart=/bin/sh /usr/bin/sink_default.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=default.target
+EOF
+        arch-chroot /mnt su $user -c "systemctl --user enable pipewire pipewire-pulse defsink"
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
 # ### setup mopidy 
