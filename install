@@ -292,12 +292,8 @@ case $server in
         cp -a /mnt/usr/share/pipewire /mnt/etc/
         sed -i '/Loads a module/i\\t{ name = libpipewire-module-raop-discover\n    args = { }\n    }' /mnt/etc/pipewire/pipewire.conf
         sed -i 's/#"tcp:4713"/"tcp:4713"/' /mnt/etc/pipewire/pipewire-pulse.conf
+        sed -i '/ExecStart=/iExecStartPost=/usr/bin/default_sink.sh' /mnt/usr/lib/systemd/user/pipewire-pulse.service
         arch-chroot /mnt su $user -c "systemctl --user enable pipewire pipewire-pulse"
-        mkdir -p /mnt/home/$user/.config/pipewire
-        curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/sink_default.pw >/mnt/home/$user/.config/pipewire/default.pw
-        cp /mnt/etc/pipewire/pipewire-pulse.conf /mnt/home/$user/.config/pipewire/
-        sed -i 's/#{ path = "\/usr\/bin\/sh"/{ path = "\/usr\/bin\/sh"/' /mnt/home/$user/.config/pipewire/pipewire-pulse.conf
-        arch-chroot /mnt chown -R ${user}: /home/$user/.config/pipewire
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
 # ### setup mopidy 
@@ -401,6 +397,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh 
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pulse_airport >/mnt/usr/bin/pulse_airport
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sink_default.sh >/mnt/usr/bin/sink_default.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/pulse_airport
 
