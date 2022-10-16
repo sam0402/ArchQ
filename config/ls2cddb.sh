@@ -4,7 +4,7 @@ cdpath='/media/Music/BR-Rip/'
 #cdpath='/media/Music/Hi-Res/'
 dropchar=2
 
-cddbfile=$(ls abcde.*/cddbread.0)
+cddbfile=$(ls abcde.*/cddbread.?)
 sed -i '/DTITLE/,$d' $cddbfile
 
 ARTIST=$(echo $1 | awk -F '(' '{print $2}'|sed 's/).*//;s/^ //')
