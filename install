@@ -345,8 +345,8 @@ EOF
 esac
 ### Install Player
 echo Install alsa-lib ......
-arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.2.7.2-1-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.2.7.2-1-x86_64.pkg.tar.zst
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -Sd --noconfirm alsa-utils
 
 if [[ $player =~ S ]]; then
