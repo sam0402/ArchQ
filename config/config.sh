@@ -73,17 +73,17 @@ case $WK in
     U)
         curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/usr/bin/update_scpt.sh
         chmod +x /usr/bin/update_scpt.sh
+        [ -f /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst ] || wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
+        pacman -R --noconfirm alsa-utils
+        pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
+        pacman -Sd --noconfirm alsa-utils
         /usr/bin/update_scpt.sh
         echo $git >/root/.update
         ;;
     H)
-        pacman -Sy --noconfirm archlinux-keyring
-        pacman -Scc --noconfirm
-        pacman -Syy --noconfirm
-        pacman -Syu --noconfirm
-        # [ -f /root/alsa-lib-1.2.7.2-1-x86_64.pkg.tar.zst ] || wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.2.7.2-1-x86_64.pkg.tar.zst
-        # pacman -R --noconfirm alsa-utils
-        # pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.2.7.2-1-x86_64.pkg.tar.zst
-        # pacman -Sd --noconfirm alsa-utils
+        # pacman -Sy --noconfirm archlinux-keyring
+        # pacman -Scc --noconfirm
+        # pacman -Syy --noconfirm
+        # pacman -Syu --noconfirm
         ;;
 esac
