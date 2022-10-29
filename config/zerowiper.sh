@@ -16,11 +16,11 @@ case $WK in
         partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1
         times=$(dialog --stdout \
             --title "Partition $(echo $partition|cut -d/ -f3)" \
-            --inputbox "Wipe (6GB/min)" 0 22 1) || exit 1
+            --inputbox "Wipe times (6GB/min)" 0 25 1) || exit 1
         
         for ((i=0; i < $times; i++))
         do
-            echo scrub -fp fillzero $partition
+            scrub -fp fillzero $partition
         done
         ;;
     F)
