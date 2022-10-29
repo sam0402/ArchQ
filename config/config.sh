@@ -15,7 +15,7 @@ pacman -Q ffmpeg >/dev/null 2>&1 && MENU+='F FFmpeg '
 
 WK=$(dialog --stdout --title "ArchQ $Qver   $temp" \
     --menu "Select to config" 7 0 0 K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" \
-        E Ethernet T Timezone X "Desktop & VNC" P "Active player" R "abCDe ripper" C "CPU frequency" ${MENU}) || exit 1
+        E Ethernet T Timezone X "Desktop & VNC" P "Active player" R "abCDe ripper" C "CPU frequency" Z "Zero Wiper" ${MENU}) || exit 1
 clear
 case $WK in
     K)
@@ -70,13 +70,12 @@ case $WK in
             pacman -S --noconfirm ffmpeg
         fi
         ;;
+    Z)
+        /usr/bin/zerowiper.sh $Qver
+        ;;
     U)
         curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/usr/bin/update_scpt.sh
         chmod +x /usr/bin/update_scpt.sh
-        [ -f /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst ] || wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
-        pacman -R --noconfirm alsa-utils
-        pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
-        pacman -Sd --noconfirm alsa-utils
         /usr/bin/update_scpt.sh
         echo $git >/root/.update
         ;;
