@@ -1,7 +1,7 @@
 #!/bin/bash
 config='/etc/fstab'
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "!!! HDD Zero Wiper !!! \n Will clean device data!" 8 0 0 W "Wipe disk" F "Format XFS")
+            --menu " !!! HDD Zero Wiper !!! \n Will clean device data!" 8 0 0 W "Wipe disk" F "Format XFS")
 clear
 case $WK in
     W)
