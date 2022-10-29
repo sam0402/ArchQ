@@ -1,7 +1,7 @@
 #!/bin/bash
 config='/etc/fstab'
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "!!! HDD Zero Wiper !!! Will clean device data!!" 8 0 0 W "Wipe disk" F "Format XFS")
+            --menu "!!! HDD Zero Wiper !!! \n Will clean device data!" 8 0 0 W "Wipe disk" F "Format XFS")
 clear
 case $WK in
     W)
@@ -16,7 +16,7 @@ case $WK in
         partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1
         times=$(dialog --stdout \
             --title "Partition $(echo $partition|cut -d/ -f3)" \
-            --inputbox "Wipe times (6GB/min)" 0 25 1) || exit 1
+            --inputbox "May reduce disk lifespan!\nWipe times (6GB/min)" 0 30 1) || exit 1
         
         for ((i=0; i < $times; i++))
         do
@@ -30,7 +30,7 @@ case $WK in
         partitionlist=$(lsblk -pln -o name,size $device | sed -e '1d;s/\s\+/ /g')
         partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1
         yes1=$(dialog --stdout --title "Format" --yesno "Partition $(echo $partition|cut -d/ -f3) to XFS" 0 0) || exit 1
-        yes2=$(dialog --stdout --title "Format XFS" --yesno "Format $(echo $partition|cut -d/ -f3) conform" 0 0) || exit 1
+        yes2=$(dialog --stdout --title "Format XFS" --yesno "   Will clean all data!!\n   Format $(echo $partition|cut -d/ -f3) conform!" 0 0) || exit 1
         [[ $yes1] && [$yes2 ]] && mkfs.xfs $partition
         ;;
 esac
