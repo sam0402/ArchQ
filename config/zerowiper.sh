@@ -17,8 +17,9 @@ case $WK in
         times=$(dialog --stdout \
             --title "Wipe $(echo $partition|cut -d/ -f3)" \
             --inputbox "May reduce disk lifespan!\nWipe times (6GB/min)" 0 30 1) || exit 1
+        wipetime=$(($(fdisk -s $partition) * $times / 6291456))
         yes=$(dialog --stdout --title "Wipe $(echo $partition|cut -d/ -f3)" \
-        --yesno "   Will clean all data!!\n   Conform to wipe $(echo $partition|cut -d/ -f3)!!" 0 0) || exit 1
+        --yesno "It will take about $wipetime minutes to clean all data!\nConform to wipe $(echo $partition|cut -d/ -f3)!|!" 0 0) || exit 1
 
         for ((i=0; i < $times; i++))
         do
