@@ -408,7 +408,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-c
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pulse_airport >/mnt/usr/bin/pulse_airport
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
-curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/zerowiper.sh >/mnt/usr/bin/zerowiper.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/zerowipe.sh >/mnt/usr/bin/zerowipe.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sink_default.sh >/mnt/usr/bin/sink_default.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
