@@ -15,7 +15,7 @@ pacman -Q ffmpeg >/dev/null 2>&1 && MENU+='F FFmpeg '
 
 WK=$(dialog --stdout --title "ArchQ $Qver   $temp" \
     --menu "Select to config" 7 0 0 K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" \
-        E Ethernet T Timezone X "Desktop & VNC" P "Active player" R "abCDe ripper" C "CPU frequency" Z "Zero Wiper" ${MENU}) || exit 1
+        E Ethernet T Timezone X "Desktop & VNC" P "Active player" R "abCDe ripper" C "CPU frequency" Z "Zero Wipe" ${MENU}) || exit 1
 clear
 case $WK in
     K)
@@ -71,7 +71,7 @@ case $WK in
         fi
         ;;
     Z)
-        /usr/bin/zerowiper.sh $Qver
+        /usr/bin/zerowipe.sh $Qver
         ;;
     U)
         curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/usr/bin/update_scpt.sh
