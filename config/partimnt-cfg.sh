@@ -1,22 +1,24 @@
 #!/bin/bash
 config='/etc/fstab'
+user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
+
 WK=$(dialog --stdout --title "ArchQ $1" \
             --menu "Partition mount point" 7 0 0 M Mount E Eject)
 clear
 case $WK in
     M)
         devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
-        device=$(dialog --stdout --title "Mount partition" --menu "Select device" 7 0 0 ${devicelist}) || exit 1
+        device=$(dialog --stdout --title "Mount partition" --menu "Select device" 7 0 0 $devicelist) || exit 1
         clear
-        partitionlist=$(lsblk -pln -o name,size,fstype ${device} | sed -e '1d;s/\s\+/ /g;s/\s/,/2')
-        partition=$(dialog --stdout --title "Device ${device}" --menu "Select partition" 7 0 0 ${partitionlist}) || exit 1
+        partitionlist=$(lsblk -pln -o name,size,fstype $device | sed -e '1d;s/\s\+/ /g;s/\s/,/2')
+        partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1
         clear
-        partdata=$(lsblk -pln -o name,fstype,uuid ${partition})
+        partdata=$(lsblk -pln -o name,fstype,uuid $partition)
         PT=$(echo $partdata | cut -d ' ' -f 1)
         FS=$(echo $partdata | cut -d ' ' -f 2)
         ID=$(echo $partdata | cut -d ' ' -f 3)
 
-        OP='rw'
+        OP='rw' 
         [ $FS = ext4 ] && OP='defaults'
         [ $FS = hfsplus ] && OP='rw,force,noatime'
         [ $FS = apfs ] && OP='readwrite'
@@ -26,7 +28,7 @@ case $WK in
         fi
 
         options=$(dialog --stdout \
-            --title "Partition ${partition} ($FS)" \
+            --title "Partition $partition ($FS)" \
             --ok-label "Ok" \
             --form "Mount setting" 0 40 0 \
             "Mount Point /mnt/" 1 1   ""  1 18 40 0 \
@@ -37,10 +39,24 @@ case $WK in
         [ $FS = f2fs ] && OP+=',noatime,background_gc=on,nodiscard,no_heap,inline_xattr,inline_data,inline_dentry,flush_merge,extent_cache,mode=adaptive,active_logs=6,alloc_mode=reuse,checkpoint_merge,fsync_mode=posix,discard_unit=block'
         [ -z $OP ] && echo "Fail! Mount point is null." && exit 1
 
-        echo "UUID=${ID} /mnt/${MP} $FS ${OP} 0 0" >>$config
-        echo "Add $partition ($FS) to /mnt/$MP mount point."
+        echo "UUID=$ID /mnt/$MP $FS $OP 0 0" >>$config
         systemctl daemon-reload
-        [ -d "/mnt/${MP}" ] && mount -o remount /mnt/${MP} && echo and mounting.
+
+        mntuser=$(dialog --stdout --title "Mount point /mnt/$MP" \
+            --radiolist "Set permission to" 7 0 0 \
+             root '　' on \
+            $user '　' off) || exit 1
+        clear
+        echo "Add $partition ($FS) to /mnt/$MP mount point."
+        
+        if [ ! $mntuser = "root" ]; then
+            mkdir /mnt/$MP
+            mount /mnt/$MP && echo "and mounting."
+            chown $user: /mnt/$MP && echo "Set /mnt/$MP permission to $user."
+           
+        fi
+
+        [ -d "/mnt/$MP" ] && mount -o remount /mnt/$MP && echo "and mounting."
         ;;
     E)
         MENU=''
@@ -54,7 +70,7 @@ case $WK in
                 --menu "Select to delete" 7 0 0 $MENU) || exit 1
                 clear
         MP=$(echo $options | cut -d '/' -f 3)
-        umount /mnt/${MP}
+        umount /mnt/$MP
         sed -i '/\/mnt\/'"$MP"'/d' $config
         systemctl daemon-reload
         echo Eject /mnt/$MP and delete mount point.
