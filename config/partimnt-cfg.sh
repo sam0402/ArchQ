@@ -23,6 +23,7 @@ case $WK in
         [ $FS = hfsplus ] && OP='rw,force,noatime'
         [ $FS = apfs ] && OP='readwrite'
         [ $FS = f2fs ] && OP='rw'
+        [[ $FS =~ fat ]] && OP='rw,uid=1000,gid=1000'
         if [ $FS = ntfs ]; then
             FS=ntfs3; OP='iocharset=utf8'
         fi
@@ -51,12 +52,8 @@ case $WK in
         
         if [ ! $mntuser = "root" ]; then
             mkdir /mnt/$MP
-            if [[ $FS =~ fat ]]; then 
-                mount -o uid=1000,gid=1000 /mnt/$MP
-            else
-                mount /mnt/$MP
-                chown $user: /mnt/$MP && echo "Set /mnt/$MP permission to $user."
-            fi    
+            mount /mnt/$MP
+            chown $user: /mnt/$MP && echo "Set /mnt/$MP permission to $user."
         fi
 
         [ -d "/mnt/$MP" ] && mount -o remount /mnt/$MP && echo "and mounting."
