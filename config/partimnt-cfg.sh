@@ -53,7 +53,7 @@ case $WK in
         if [ ! $mntuser = "root" ]; then
             mkdir /mnt/$MP
             mount /mnt/$MP
-            chown $user: /mnt/$MP && echo "Set /mnt/$MP permission to $user."
+            [[ $FS =~ fat ]] || chown $user: /mnt/$MP && echo "Set /mnt/$MP permission to $user."
         fi
 
         [ -d "/mnt/$MP" ] && mount -o remount /mnt/$MP && echo "and mounting."
