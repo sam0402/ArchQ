@@ -14,13 +14,15 @@ case $WK in
         clear
         partitionlist=$(lsblk -pln -o name,size $device | sed -e '1d;s/\s\+/ /g')
         partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1
+        clear
         times=$(dialog --stdout \
             --title "Wipe $(echo $partition|cut -d/ -f3)" \
             --inputbox "May reduce disk lifespan!\nWipe times (6GB/min)" 0 30 1) || exit 1
+        clear
         wipetime=$(($(fdisk -s $partition) * $times / 6291456))
         yes=$(dialog --stdout --title "Wipe $(echo $partition|cut -d/ -f3)" \
         --yesno "It will take about $wipetime minutes to clean all data!\nConform to wipe $(echo $partition|cut -d/ -f3)!!!" 0 0) || exit 1
-
+        clear
         for ((i=0; i < $times; i++))
         do
             scrub -fp fillzero $partition
@@ -29,11 +31,13 @@ case $WK in
     F)
         devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | grep sd | tac)
         device=$(dialog --stdout --title "Format disk" --menu "Select HDD device" 7 0 0 $devicelist) || exit 1
-        clear
         partitionlist=$(lsblk -pln -o name,size $device | sed -e '1d;s/\s\+/ /g')
         partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1
+        clear
         yes1=$(dialog --stdout --title "Format" --yesno "Partition $(echo $partition|cut -d/ -f3) to XFS" 0 0) || exit 1
+        clear
         yes2=$(dialog --stdout --title "Format XFS" --yesno "   Will clean all data!!\n   Conform to format $(echo $partition|cut -d/ -f3)!!" 0 0) || exit 1
+        clear
         [[ $yes1] && [$yes2 ]] && mkfs.xfs $partition
         ;;
 esac
