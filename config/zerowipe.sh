@@ -26,7 +26,7 @@ case $WK in
         echo "It will take about $wipetime minutes..."
         for ((i=0; i < $times; i++))
         do
-            echo "Zero fill $times"
+            echo "Zero fill $i"
             scrub -fp fillzero $partition
         done
         ;;
