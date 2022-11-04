@@ -24,7 +24,7 @@ case $WK in
         --yesno "It will take about $wipetime minutes to clean all data!\nConform to wipe $(echo $partition|cut -d/ -f3)!!!" 0 0) || exit 1
         clear
         echo "Fill zero $times time(s). It will take about $wipetime minutes..."
-        for ((i=0; i < $times; i++))
+        for ((i=1; i <= $times; i++))
         do
             echo "Fill zero $i"
             scrub -fp fillzero $partition
