@@ -17,13 +17,13 @@ clear
 [[ $player =~ R ]] && r1=on
 
 cpus=$(getconf _NPROCESSORS_ONLN)
-if [[ $player =~ A && ! pacman -Q shairport-sync >/dev/null 2>&1 ]]; then
+if [[ $player =~ A ]] && [ ! pacman -Q shairport-sync >/dev/null 2>&1 ]; then
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     # sed -i '/Group=/iNice=-10' /usr/lib/systemd/system/shairport-sync.service
     systemctl daemon-reload
 fi
-if [[ $player =~ S && ! pacman -Q squeezelite >/dev/null 2>&1 ]]; then
+if [[ $player =~ S ]] && [ ! pacman -Q squeezelite >/dev/null 2>&1 ]; then
     mkdir -p /root/squzlite
     [ -f /root/squzlite/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst ] || wget -qP /root/squzlite https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
