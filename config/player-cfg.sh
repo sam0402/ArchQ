@@ -26,9 +26,7 @@ fi
 if [[ $player =~ S ]] && ! pacman -Q squeezelite >/dev/null 2>&1; then
     mkdir -p /root/squzlite
     [ -f /root/squzlite/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst ] || wget -qP /root/squzlite https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/squzlite/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
-    # curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite.service >/mnt/usr/lib/systemd/system/squeezelite.service
     systemctl daemon-reload
     /usr/bin/sqzlite-cfg.sh
 fi
