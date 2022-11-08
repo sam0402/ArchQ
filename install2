@@ -39,7 +39,7 @@ devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1
 clear
 
-zerofill=$(dialog --stdout --title "Wipe disk with zero" --inputbox "Wipe ${device} times" 0 30 0) || exit 1
+zerofill=$(dialog --stdout --title "Wipe disk with zero" --inputbox "Wipe $(echo $device|cut -d/ -f3) times" 0 25 0) || exit 1
 clear
 
 fmt=$(dialog  --stdout --title "ArchQ" --menu "Format ${device}" 7 0 0 F "Full disk" R "Retain database") || exit 1
