@@ -39,20 +39,19 @@ devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1
 clear
 
-fmt=$(dialog  --stdout --title "ArchQ" --menu "Format ${device}" 7 0 0 F "Full disk" R "Retain database") || exit 1
+fmt=$(dialog --stdout --title "ArchQ" --menu "Format ${device}" 7 0 0 F "Full disk" R "Retain database") || exit 1
 clear
 
-zerofill=0
-[ $fmt = F ] && zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe $device times" 0 30 0) || exit 1
+zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe disk times" 0 30 0) || exit 1
 clear
 
-f2fs=$(dialog  --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1
+f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1
 clear
 
-lang=$(dialog  --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
+lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
 clear
 
-ip=$(dialog  --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1
+ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1
 clear
 
 if [ $ip = S ]; then
@@ -111,12 +110,7 @@ timedatectl set-ntp true
 
 ### Setup the disk and partitions ###
 if [ $fmt = F ]; then
-    # Wipe disk with zerofill
-    for ((i=1; i <= $zerofill; i++))
-    do
-        echo "Fill zero -> $i"
-        scrub -Sp fillzero $device
-    done
+    wipedevice=$device
 #swap_size=$(free --mebi | awk '/Mem:/ {print $2}')
 #   swap_size=256
 #   root_size=4608
@@ -142,6 +136,14 @@ part_boot="$(ls ${device}* | grep -E "^${device}p?1$")"
 # part_swap="$(ls ${device}* | grep -E "^${device}p?2$")"
 part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
 part_data="$(ls ${device}* | grep -E "^${device}p?3$")"
+
+# Wipe disk with zerofill
+[ -z $wipedevice ] && wipedevice=$part_root
+for ((i=1; i <= $zerofill; i++))
+do
+    echo "Fill zero -> $i"
+    scrub -Sp fillzero $wipedevice
+done
 
 wipefs "${part_boot}"
 # wipefs "${part_swap}"
