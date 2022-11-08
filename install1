@@ -10,9 +10,9 @@ trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
 echo -e "\n\nArchQ will ping "Arch Linux Server" 30 times before installation.\n\n"
 ping -c 30 archlinux.org
-pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog wget
-wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/scrub-2.6.1-1-x86_64.pkg.tar.zst
-pacman -U --noconfirm /root/scrub-2.6.1-1-x86_64.pkg.tar.zst
+pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
+curl -O https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/scrub-2.6.1-1-x86_64.pkg.tar.zst
+pacman -U --noconfirm scrub-2.6.1-1-x86_64.pkg.tar.zst
 
 echo "Updating mirror list"
 curl -s "$MIRRORLIST_URL" | \
