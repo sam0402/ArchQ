@@ -417,6 +417,7 @@ sed -i 's/#Storage=auto/Storage=none/' /mnt/etc/systemd/journald.conf
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/timezone.sh >/mnt/usr/bin/timezone.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sqzlite-cfg.sh >/mnt/usr/bin/sqzlite-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/nfs-cfg.sh >/mnt/usr/bin/nfs-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/nfserver-cfg.sh >/mnt/usr/bin/nfserver-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/smb-cfg.sh >/mnt/usr/bin/smb-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/ether-cfg.sh >/mnt/usr/bin/ether-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/kernel-cfg.sh >/mnt/usr/bin/kernel-cfg.sh
