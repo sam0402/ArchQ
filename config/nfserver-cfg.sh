@@ -41,8 +41,10 @@ case $WK in
     D)
         n=1; MENU=''
         while read line; do
-            DIRs=$(echo $line | cut -d ' ' -f1)
-            MENU=${MENU}$n' '$DIRs' '
+            if echo $line | grep -v '#'; then
+                DIRs=$(echo $line | cut -d ' ' -f1)
+                MENU=${MENU}$n' '$DIRs' '
+            fi
         n=`expr $n + 1`
         done < $config
 
