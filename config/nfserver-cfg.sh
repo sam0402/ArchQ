@@ -1,7 +1,7 @@
 #!/bin/bash
 config='/etc/exports'
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "NFS Server" 7 0 0 A "Add" M "Modify" D "Delete") || exit 1
+            --menu "NFS Server share" 7 0 0 A "Add" M "Modify" D "Delete") || exit 1
 clear
 
 if ! pacman -Q nfs-utils >/dev/null 2>&1; then
