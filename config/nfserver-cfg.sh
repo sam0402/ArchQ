@@ -17,11 +17,11 @@ case $WK in
     A)
         ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
         ifport=$(echo $ethers | cut -d ' ' -f1)
-        if [ $(echo $ethers | wc -l) -gt 1 ]; then
+        if [ $(echo $ethers | wc -w) -gt 2 ]; then
         ifport=$(dialog --stdout --title "ArchQ $1" \
             --menu "Select ethernet device" 7 0 0 ${ethers}) || exit 1
         fi
-        ifnetwk=$(ip route list | grep -v default | cut -d' ' -f1)
+        ifnetwk=$(ip route list | grep -v default | grep $ifport | cut -d' ' -f1)
         options=$(dialog --stdout \
             --title "ArchQ $1" \
             --ok-label "Ok" \
