@@ -1,9 +1,12 @@
 #!/bin/bash
 ifmask=24; ifdns=8.8.8.8
 ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
-ifport=$(dialog --stdout --title "ArchQ $1" \
-        --menu "Select ethernet device" 7 0 0 ${ethers}) || exit 1
-clear
+ifport=$(echo $ethers | cut -d ' ' -f1)
+if [ $(echo $ethers | wc -w) -gt 2 ]; then
+    ifport=$(dialog --stdout --title "ArchQ $1" \
+            --menu "Select ethernet device" 7 0 0 ${ethers}) || exit 1
+    clear
+fi
 
 if [ -f "/etc/systemd/network/10-static-${ifport}.network" ]; then
     config="/etc/systemd/network/10-static-${ifport}.network"
