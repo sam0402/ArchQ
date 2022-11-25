@@ -61,27 +61,28 @@ case $WK in
     M)
         n=1
         while read line; do
-            DIRs=$(echo $line | cut -d' ' -f1)
-            NWKs=$(echo $line | cut -d' ' -f2 | cut -d'(' -f1)
-            OPTs=$(echo $line | cut -d' ' -f2 | cut -d'(' -f2 | sed 's/)//')
-            options=$(dialog --stdout \
-                    --title "ArchQ $1" \
-                    --ok-label "Ok" \
-                    --form "Modify NFS shared" 0 32 0 \
-                "Directory" 1 1 "$DIRs" 1 12 32 0 \
-                "Network"   2 1 "$NWKs" 2 12 32 0 \
-                "Options"   3 1 "$OPTs" 3 12 32 0) || exit 1
-            clear
+            if echo $line | grep -v '#'; then       
+                DIRs=$(echo $line | cut -d' ' -f1)
+                NWKs=$(echo $line | cut -d' ' -f2 | cut -d'(' -f1)
+                OPTs=$(echo $line | cut -d' ' -f2 | cut -d'(' -f2 | sed 's/)//')
+                options=$(dialog --stdout \
+                        --title "ArchQ $1" \
+                        --ok-label "Ok" \
+                        --form "Modify NFS shared" 0 32 0 \
+                    "Directory" 1 1 "$DIRs" 1 12 32 0 \
+                    "Network"   2 1 "$NWKs" 2 12 32 0 \
+                    "Options"   3 1 "$OPTs" 3 12 32 0) || exit 1
+                clear
 
-            DIR=$(echo $options | cut -d ' ' -f1)
-            NWK=$(echo $options | cut -d ' ' -f2)
-            OPT=$(echo $options | cut -d ' ' -f3)
-            DIR=$(echo $DIR | sed 's"/"\\\/"g')
-            DIRs=$(echo $DIRs | sed 's"/"\\\/"g')
-            NWK=$(echo $NWK | sed 's"/"\\\/"g')
-            NWKs=$(echo $NWKs | sed 's"/"\\\/"g')
-            sed -i ''"$n"'s/'"$DIRs"'/'"$DIR"'/;s/'"$NWKs"'/'"$NWK"'/;s/'"$OPTs"'/'"$OPT"'/' $config
-
+                DIR=$(echo $options | cut -d ' ' -f1)
+                NWK=$(echo $options | cut -d ' ' -f2)
+                OPT=$(echo $options | cut -d ' ' -f3)
+                DIR=$(echo $DIR | sed 's"/"\\\/"g')
+                DIRs=$(echo $DIRs | sed 's"/"\\\/"g')
+                NWK=$(echo $NWK | sed 's"/"\\\/"g')
+                NWKs=$(echo $NWKs | sed 's"/"\\\/"g')
+                sed -i ''"$n"'s/'"$DIRs"'/'"$DIR"'/;s/'"$NWKs"'/'"$NWK"'/;s/'"$OPTs"'/'"$OPT"'/' $config
+            fi
         n=`expr $n + 1`
         done < $config
     ;;
