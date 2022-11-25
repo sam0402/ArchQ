@@ -71,7 +71,7 @@ Client-server:
 ![Kernels](images/kernels.png)
 ![ethernet](images/ethernet.png)
 ![SMB/CIFS](images/smbcifs.png)
-![NFServer](images/sNFServer.png)
+![NFServer](images/NFServer.png)
 ![Partition](images/partition_mount.png)
 ![cpufreq](images/cpu_freq.png)
 ![Rompr](images/Rompr.png)
