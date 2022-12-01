@@ -2,7 +2,7 @@
 config='/etc/mpd.conf'
 
 ### Music direcroty
-mdir=$(grep 'music_directory' $config | awk -F \" '{print $2}' | awk -F \/ '{print $3}')
+mdir=$(grep 'music_directory' $config | awk -F \" '{print $2}' | cut -d'/' -f3-)
 
 mdir=$(dialog --stdout \
     --title "ArchQ MPD" \
