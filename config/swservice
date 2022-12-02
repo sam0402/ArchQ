@@ -1,0 +1,15 @@
+#!/bin/sh
+service=$(echo $0 | awk -F/ '{print $NF}')
+case $service in
+    airplay)
+	service=shairport-sync
+	;;
+	roon)
+	service=roonserver
+	;;
+	lms)
+	service=logitechmediaserver
+	;;
+esac
+[ $(systemctl is-active $service) == active ] && sudo systemctl stop $service || sudo systemctl start $service
+echo Service $service is $(systemctl is-active $service).
