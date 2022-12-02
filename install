@@ -445,6 +445,7 @@ alias poweroff='sudo systemctl poweroff'
 alias reboot='sudo systemctl reboot'
 alias config='sudo config.sh'
 alias qboot='sudo qboot'
+alias sw='sudo sw'
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$kver\\e[m/' /mnt/home/${user}/.bashrc
 
@@ -453,8 +454,6 @@ cat >>/mnt/root/.bashrc <<EOF
 export kver=\$(uname -r | cut -d- -f3)
 PS1='[\u@\h:\e[0;\${PSC}m\$kver\e[m \W]\$ '
 alias config='config.sh'
-alias airplay='sw airplay'
-alias abcde='eject -t; abcde'
 EOF
 
 # Install ramroot
