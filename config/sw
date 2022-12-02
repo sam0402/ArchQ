@@ -1,3 +1,4 @@
+#!/bin/sh
 service=$1
 case $service in
 	airplay)
