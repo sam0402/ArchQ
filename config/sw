@@ -1,15 +1,24 @@
 #!/bin/sh
+#service=$(echo $0 | awk -F/ '{print $NF}')
+serv=$1
 service=$1
-case $service in
-	airplay)
-	service=shairport-sync
+case $1 in
+    airplay)
+	serv=shairport-sync
+	service="shairport-sync nqptp"
 	;;
 	roon)
+	serv=roonserver
 	service=roonserver
 	;;
+	rompr)
+	serv=mpd
+	service="mpd mpd.socket nginx php-fpm"
+	;;
 	lms)
-	service=logitechmediaserver
+	serv=logitechmediaserver
+	service="logitechmediaserver squeezelite"
 	;;
 esac
-[ $(systemctl is-active $service) == active ] && sudo systemctl stop $service || sudo systemctl start $service
-echo Service $service is $(systemctl is-active $service).
+[ $(systemctl is-active $serv) == active ] && sudo systemctl stop $service || sudo systemctl start $service
+echo Service $service is $(systemctl is-active $serv).
