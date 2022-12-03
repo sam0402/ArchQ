@@ -5,6 +5,10 @@ service=$1
 case $1 in
     airplay)
 	serv=shairport-sync
+	service="shairport-sync"
+	;;
+    airplay2)
+	serv=shairport-sync
 	service="shairport-sync nqptp"
 	;;
 	roon)
