@@ -130,7 +130,7 @@ if [ $fmt = F ]; then
 #     mkpart primary linux-swap 257MiB ${swap_end} \
 #     mkpart primary ext4 ${swap_end} ${root_end} \
 #     mkpart primary ext4 ${root_end} 100%
-  root_size=5500
+  root_size=7200
   root_end=$(( $root_size + 1 ))MiB
   parted --script "${device}" -- mklabel gpt \
     mkpart ESP fat32 1Mib 257MiB \
