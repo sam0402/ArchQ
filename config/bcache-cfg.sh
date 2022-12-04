@@ -43,7 +43,9 @@ case $WK in
             parted --script $hdd rm ${hddpart:0-1}
             parted --script $hdd mkpart primary xfs $starts $ends
         else
-            wipefs -a $hddpart
+            yes=$(dialog --stdout --title "Bache creat" --yesno "\n  It will clean all data.\nConform to clean $hddpart" 0 0) || exit 1
+            clear
+            [ $yes ] && wipefs -a $hddpart || exit 1
         fi
         # Build Bcache
         wipefs -a $nvmepart
