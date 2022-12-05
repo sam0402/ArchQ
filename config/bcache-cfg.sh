@@ -49,10 +49,10 @@ case $WK in
                 fi
                 # Rebuild parititon
                 if "$work"; then
-                    echo 'Create befort' >>$log
+                    echo -e "Remove befort\n-------------" >>$log
                     date >>$log
                     parted $hdd 'unit s' print >>$log
-                    echo '--------' >>$log
+                    echo "-------------" >>$log
                     parted --script $hdd rm ${hddpart:0-1}
                     parted --script $hdd mkpart primary xfs $starts $ends
                     make-bcache -B $hddpart
@@ -94,10 +94,10 @@ case $WK in
                 start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $3 }')
                 starts=$(expr ${start::-1} + 16)s
                 ends=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $4 }')
-                echo 'Remove befort' >>$log
+                echo -e "Remove befort\n-------------" >>$log
                 date >>$log
                 parted $hdd 'unit s' print >>$log
-                echo '--------' >>$log
+                echo "-------------" >>$log
                 parted --script $hdd rm ${hddpart:0-1}
                 parted --script $hdd mkpart primary xfs $starts $ends
             fi
