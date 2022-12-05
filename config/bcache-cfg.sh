@@ -1,7 +1,7 @@
 #!/bin/bash
 # set -e
-WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Bcache" 7 0 0 C Create R Remove) || exit 1
+WK=$(dialog --stdout --title "ArchQ Bcache $1" \
+            --menu "!! Caution !! Backup your data befort use." 8 0 0 C Create R Remove) || exit 1
 clear
 
 if ! pacman -Q bcache-tools >/dev/null 2>&1; then
