@@ -9,7 +9,7 @@ if ! pacman -Q nfs-utils >/dev/null 2>&1; then
     pacman -S --noconfirm nfs-utils
     systemctl enable --now nfs-server
     kver=$(pacman -Q | grep linux-Q | grep -v headers | awk 'NR==1{print $2}')
-    wget -qP /root https://raw.githubusercontent.com/sam0322/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
+    wget -qP /root https://raw.githubusercontent.com/sam02/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/linux-Qrip-${kver}-x86_64.pkg.tar.zst
 fi
 
