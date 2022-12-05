@@ -132,23 +132,24 @@ if [ $fmt = F ]; then
 #     mkpart primary linux-swap 257MiB ${swap_end} \
 #     mkpart primary ext4 ${swap_end} ${root_end} \
 #     mkpart primary ext4 ${root_end} 100%
-  root_size=4608
-  root_end=$(( $root_size + 257 + 1 ))MiB
-if [ $bcache = D ]; then
-  parted --script "${device}" -- mklabel gpt \
-    mkpart ESP fat32 1Mib 257MiB \
-    set 1 boot on \
-    mkpart primary ext4 257MiB ${root_end} \
-    mkpart primary ext4 ${root_end} 100%
-else
-  data_size=4068
-  data_end=$(( $data_size + $root_size + 257 + 1 ))MiB
-  parted --script "${device}" -- mklabel gpt \
-    mkpart ESP fat32 1Mib 257MiB \
-    set 1 boot on \
-    mkpart primary ext4 257MiB ${root_end} \
-    mkpart primary ext4 ${root_end} ${data_end} \
-    mkpart primary ext4 ${data_end} 100%
+    root_size=4608
+    root_end=$(( $root_size + 257 + 1 ))MiB
+    if [ $bcache = D ]; then
+        parted --script "${device}" -- mklabel gpt \
+            mkpart ESP fat32 1Mib 257MiB \
+            set 1 boot on \
+            mkpart primary ext4 257MiB ${root_end} \
+            mkpart primary ext4 ${root_end} 100%
+    else
+        data_size=4068
+        data_end=$(( $data_size + $root_size + 257 + 1 ))MiB
+        parted --script "${device}" -- mklabel gpt \
+            mkpart ESP fat32 1Mib 257MiB \
+            set 1 boot on \
+            mkpart primary ext4 257MiB ${root_end} \
+            mkpart primary ext4 ${root_end} ${data_end} \
+            mkpart primary ext4 ${data_end} 100%
+    fi
 fi
 
 # Simple globbing was not enough as on one device I needed to match /dev/mmcblk0p1 
