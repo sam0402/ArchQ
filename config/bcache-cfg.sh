@@ -15,6 +15,7 @@ case $WK in
     C)
         hddlst=$(lsblk -dplnx size -o name,size | grep "sd" | tac)
         nvmelst=$(lsblk -dplnx size -o name,size | grep "nvme" | tac)
+        [[ -z $nvmelst ]] && (echo "No SSD/NVME device." ; exit 1 )
         # Select HDD partiton
         hdd=$(dialog --stdout --title "Bache creat" --menu "Select HDD" 7 0 0 $hddlst) || exit 1
         clear
