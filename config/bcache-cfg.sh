@@ -49,6 +49,7 @@ case $WK in
                 fi
                 # Rebuild parititon
                 if "$work"; then
+                    echo 'Create befort' >>$log
                     date >>$log
                     parted $hdd 'unit s' print >>$log
                     echo '--------' >>$log
@@ -93,6 +94,7 @@ case $WK in
                 start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $3 }')
                 starts=$(expr ${start::-1} + 16)s
                 ends=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $4 }')
+                echo 'Remove befort' >>$log
                 date >>$log
                 parted $hdd 'unit s' print >>$log
                 echo '--------' >>$log
