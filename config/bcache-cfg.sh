@@ -1,5 +1,5 @@
 #!/bin/bash
-# set -e
+log='./partition_table.log'
 WK=$(dialog --stdout --title "ArchQ Bcache $1" \
             --menu "!! Caution !! Backup your data befort use." 8 0 0 C Create R Remove) || exit 1
 clear
@@ -48,8 +48,10 @@ case $WK in
                     [ ${starts::-1} -gt ${preends::-1} ] && work=true
                 fi
                 # Rebuild parititon
-                # parted $hdd 'unit s' print
                 if "$work"; then
+                    date >>$log
+                    parted $hdd 'unit s' print >>$log
+                    echo '--------' >>$log
                     parted --script $hdd rm ${hddpart:0-1}
                     parted --script $hdd mkpart primary xfs $starts $ends
                     make-bcache -B $hddpart
@@ -91,7 +93,9 @@ case $WK in
                 start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $3 }')
                 starts=$(expr ${start::-1} + 16)s
                 ends=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $4 }')
-                # parted $hdd 'unit s' print
+                date >>$log
+                parted $hdd 'unit s' print >>$log
+                echo '--------' >>$log
                 parted --script $hdd rm ${hddpart:0-1}
                 parted --script $hdd mkpart primary xfs $starts $ends
             fi
