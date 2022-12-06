@@ -1,5 +1,4 @@
 #!/bin/bash
-log='./partition_table.log'
 WK=$(dialog --stdout --title "ArchQ Bcache $1" \
             --menu "!! Caution !! Backup your data befort use." 8 0 0 C Create R Remove) || exit 1
 clear
@@ -49,10 +48,8 @@ case $WK in
                 fi
                 # Rebuild parititon
                 if "$work"; then
-                    echo -e "Remove befort\n-------------" >>$log
-                    date >>$log
-                    parted $hdd 'unit s' print >>$log
-                    echo "-------------" >>$log
+                    # parted $hdd 'unit s' print
+                    sfdisk -d $hdd >./partiton_backup_$(date +"%Y%m%d_%H.%M")
                     parted --script $hdd rm ${hddpart:0-1}
                     parted --script $hdd mkpart primary xfs $starts $ends
                     make-bcache -B $hddpart
@@ -94,10 +91,8 @@ case $WK in
                 start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $3 }')
                 starts=$(expr ${start::-1} + 16)s
                 ends=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $4 }')
-                echo -e "Remove befort\n-------------" >>$log
-                date >>$log
-                parted $hdd 'unit s' print >>$log
-                echo "-------------" >>$log
+                # parted $hdd 'unit s' print
+                sfdisk -d $hdd >./partiton_backup_$(date +"%Y%m%d_%H.%M")
                 parted --script $hdd rm ${hddpart:0-1}
                 parted --script $hdd mkpart primary xfs $starts $ends
             fi
