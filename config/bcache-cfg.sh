@@ -20,7 +20,6 @@ case $WK in
         clear
         hddpartlst=$(lsblk -pln -o name,size,fstype $hdd | sed -e '1d;s/\s\+/ /g;s/\s/,/2')
         hddpart=$(dialog --stdout --title "Device $hdd" --menu "Select partition" 7 0 0 $hddpartlst) || exit 1
-        bcache=$(lsblk -pln -o name $hddpart | grep bcache | cut -d'/' -f3)
         if lsblk -pln -o fstype $hddpart | grep -q bcache; then
             data=B
         else
@@ -60,16 +59,19 @@ case $WK in
             C)
                 yes=$(dialog --stdout --title "Bache create" --yesno "\n  It will clean all data.\nConform to clean $hddpart" 0 0) || exit 1
                 clear
-                [ $yes ] && wipefs -a $hddpart || exit 1
+                $yes && wipefs -a $hddpart || exit 1
                 make-bcache -B $hddpart
             ;;
             B)
-                echo "$bcache is exist."
+                echo "Bcache of $hddpart is exist."
             ;;
         esac
-
         # Build Bcache
-        lsblk -pln -o fstype $nvmepart | grep -q bcache || (wipefs -a $nvmepart; make-bcache -C $nvmepart)
+        sleep 3
+        bcache=$(lsblk -pln -o name "$hddpart" | grep bcache | cut -d'/' -f3)
+        echo --- $bcache ---
+        lsblk -pln -o fstype $nvmepart | grep -q bcache || (wipefs -af $nvmepart; make-bcache -C $nvmepart)
+        sleep 1
         echo $(bcache-super-show $nvmepart | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/attach
         [ $? -ne 0 ] && echo -e "\nNeet to do it again or reboot.\n"
         lsblk $hddpart $nvmepart
@@ -82,7 +84,6 @@ case $WK in
         nvme=$(lsblk -pn -o name | grep -B 1 bcache | grep nvme | awk -F '─' '{ print $2}')
         if $(dialog --stdout --title "Bache remove" --yesno "\n  Remove $bcache ?" 7 0); then   
             umount /dev/$bcache
-            echo /sys/block/$bcache/bcache/detach $nvme
             echo $(bcache-super-show $nvme | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/detach
             echo 1 >/sys/fs/bcache/`bcache-super-show $nvme | grep cset | awk '{print $2}'`/unregister
             echo 1 >/sys/block/$bcache/bcache/stop
