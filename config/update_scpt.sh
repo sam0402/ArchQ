@@ -12,6 +12,7 @@ curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cf
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sqzlite-cfg.sh >/usr/bin/sqzlite-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg.sh >/usr/bin/desktop-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/usr/bin/abcde-cfg.sh
+curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/bcache-cfg.sh >/usr/bin/bcache-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/zerowipe.sh >/usr/bin/zerowipe.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/usr/bin/config.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/usr/bin/qboot
