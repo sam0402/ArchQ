@@ -17,7 +17,7 @@ case $1 in
 	;;
 	rompr)
 	serv=mpd
-	service="mpd mpd.socket nginx php-fpm avahi-daemon"
+	service="mpd nginx php-fpm avahi-daemon"
 	;;
 	lms)
 	serv=logitechmediaserver
