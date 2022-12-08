@@ -15,7 +15,7 @@ pacman -Q ffmpeg >/dev/null 2>&1 && MENU+='F FFmpeg '
 
 WK=$(dialog --stdout --title "ArchQ $Qver   $temp" \
     --menu "Select to config" 7 0 0 K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" \
-        E Ethernet T Timezone V "NFS Server" X "Desktop & VNC" P "Active player" R "abCDe ripper" C "CPU frequency" Z "Zero Wipe" ${MENU}) || exit 1
+        E Ethernet T Timezone V "NFS Server" X "Desktop & VNC" P "Active player" R "abCDe ripper" C "CPU frequency" Y Bcache œZ "Zero Wipe" ${MENU}) || exit 1
 clear
 case $WK in
     K)
@@ -72,6 +72,9 @@ case $WK in
         else
             pacman -S --noconfirm ffmpeg
         fi
+        ;;
+    Y)
+        /usr/bin/bcache-cfg.sh $Qver
         ;;
     Z)
         /usr/bin/zerowipe.sh $Qver
