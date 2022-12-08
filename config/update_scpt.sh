@@ -15,10 +15,11 @@ curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/bcache-cfg.sh >/usr/bin/bcache-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/zerowipe.sh >/usr/bin/zerowipe.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/usr/bin/config.sh
+curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sw >/usr/bin/sw
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd_inst.sh.sh >/usr/bin/mpd_inst.sh.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/usr/bin/qboot
 # [ -f /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst ] || wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
 #  pacman -R --noconfirm alsa-utils; pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
 #  pacman -Sd --noconfirm alsa-utils
-chmod +x /usr/bin/*.sh /usr/bin/qboot
+chmod +x /usr/bin/*.sh /usr/bin/qboot /usr/bin/sw
 [ -f '/etc/squeezelite.conf' ] &&  sed -i 's/^OPTIONS="-W .*/#OPTIONS="-W "/' /etc/squeezelite.conf
