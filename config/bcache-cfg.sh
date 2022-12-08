@@ -8,6 +8,14 @@ if ! pacman -Q bcache-tools >/dev/null 2>&1; then
     pacman -S --noconfirm parted
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/bcache-tools-1.1-1-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/bcache-tools-1.1-1-x86_64.pkg.tar.zst
+    echo -e "\nSystem will reboot after 5 seconds."
+    for i in {5..1}
+    do
+        tput cup 1 25
+        echo -n "$i"
+        sleep 1
+    done
+    reboot
 fi
 
 case $WK in
