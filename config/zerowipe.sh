@@ -40,6 +40,6 @@ case $WK in
         clear
         yes2=$(dialog --stdout --title "Format XFS" --yesno "   Will clean all data!!\n   Conform to format $(echo $partition|cut -d/ -f3)!!" 0 0) || exit 1
         clear
-        [[ $yes1] && [$yes2 ]] && mkfs.xfs $partition
+        [[ $yes1] && [$yes2 ]] && mkfs.xfs -f $partition
         ;;
 esac
