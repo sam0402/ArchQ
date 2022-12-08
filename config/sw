@@ -1,7 +1,7 @@
 #!/bin/sh
-#service=$(echo $0 | awk -F/ '{print $NF}')
+#serv=$(echo $0 | awk -F/ '{print $NF}')
 serv=$1
-service=$1
+service=$serv
 case $1 in
     airplay)
 	serv=shairport-sync
@@ -15,9 +15,13 @@ case $1 in
 	serv=roonserver
 	service=roonserver
 	;;
+	mpd)
+	serv=mpd
+	service="mpd mod.socket"
+	;;
 	rompr)
 	serv=mpd
-	service="mpd nginx php-fpm avahi-daemon"
+	service="mpd mod.socket nginx php-fpm avahi-daemon avahi-daemon.socket"
 	;;
 	lms)
 	serv=logitechmediaserver
