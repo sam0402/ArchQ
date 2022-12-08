@@ -75,7 +75,7 @@ case $WK in
             ;;
         esac
         # Build Bcache
-        sleep 3
+        sleep 5
         bcache=$(lsblk -pln -o name "$hddpart" | grep bcache | cut -d'/' -f3)
         echo --- $bcache ---
         lsblk -pln -o fstype $nvmepart | grep -q bcache || (wipefs -af $nvmepart; make-bcache -C $nvmepart)
