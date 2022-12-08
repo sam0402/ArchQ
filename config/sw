@@ -3,30 +3,30 @@
 serv=$1
 service=$serv
 case $1 in
-    airplay)
-	serv=shairport-sync
-	service="shairport-sync"
-	;;
-    airplay2)
-	serv=shairport-sync
-	service="shairport-sync nqptp"
-	;;
+	airplay)
+		serv=shairport-sync
+		service="shairport-sync"
+		;;
+	airplay2)
+		serv=shairport-sync
+		service="shairport-sync nqptp"
+		;;
 	roon)
-	serv=roonserver
-	service=roonserver
-	;;
+		serv=roonserver
+		service=roonserver
+		;;
 	mpd)
-	serv=mpd
-	service="mpd"
-	;;
+		serv=mpd
+		service="mpd"
+		;;
 	rompr)
-	serv=mpd
-	service="mpd nginx php-fpm avahi-daemon avahi-daemon.socket"
-	;;
+		serv=mpd
+		service="mpd nginx php-fpm avahi-daemon avahi-daemon.socket"
+		;;
 	lms)
-	serv=logitechmediaserver
-	service="logitechmediaserver squeezelite"
-	;;
+		serv=logitechmediaserver
+		service="logitechmediaserver squeezelite"
+		;;
 esac
 [ $(systemctl is-active $serv) == active ] && sudo systemctl stop $service || sudo systemctl start $service
 echo Service $service is $(systemctl is-active $serv).
