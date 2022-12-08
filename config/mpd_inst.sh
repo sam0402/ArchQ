@@ -1,4 +1,5 @@
 #!/bin/bash
+hostname=$(uname -n)
 pacman -Sy --noconfirm archlinux-keyring
 pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi
 wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.9-3-x86_64.pkg.tar.zst
