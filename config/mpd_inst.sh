@@ -1,12 +1,4 @@
 #!/bin/bash
-if [ -d /opt/logitechmediaserver ]; then
-    mkdir -p /opt/logitechmediaserver/mpd
-    ln -s /opt/logitechmediaserver/mpd /var/lib/mpd
-fi
-if [ -d /var/roon ]; then
-    mkdir -p /var/roon/mpd
-    ln -s /var/roon/mpd /var/lib/mpd
-fi
 pacman -Sy --noconfirm archlinux-keyring
 pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi
 wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.9-3-x86_64.pkg.tar.zst
@@ -24,3 +16,12 @@ sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=
 
 ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
 chmod 644 /etc/nginx/sites-enabled/rompr
+
+if [ -d /opt/logitechmediaserver ]; then
+    mv /var/lib/mpd /opt/logitechmediaserver/
+    ln -s /opt/logitechmediaserver/mpd /var/lib/mpd
+fi
+if [ -d /var/roon ]; then
+    mv /var/lib/mpd /var/roon/
+    ln -s /var/roon/mpd /var/lib/mpd
+fi
