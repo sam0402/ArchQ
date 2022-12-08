@@ -81,6 +81,7 @@ case $WK in
         lsblk -pln -o fstype $nvmepart | grep -q bcache || (wipefs -af $nvmepart; make-bcache -C $nvmepart)
         sleep 1
         echo $(bcache-super-show $nvmepart | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/attach
+        echo writearound > /sys/block/$bcache/bcache/cache_mode
         [ $? -ne 0 ] && echo -e "\nNeet to do it again or reboot.\n"
         lsblk $hddpart $nvmepart
         ;;
