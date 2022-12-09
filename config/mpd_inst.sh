@@ -17,12 +17,3 @@ sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=
 
 ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
 chmod 644 /etc/nginx/sites-enabled/rompr
-
-if [ -d /opt/logitechmediaserver ]; then
-    mv /var/lib/mpd /opt/logitechmediaserver/
-    ln -s /opt/logitechmediaserver/mpd /var/lib/mpd
-fi
-if [ -d /var/roon ]; then
-    mv /var/lib/mpd /var/roon/
-    ln -s /var/roon/mpd /var/lib/mpd
-fi
