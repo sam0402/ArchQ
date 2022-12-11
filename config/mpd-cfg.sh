@@ -1,7 +1,7 @@
 #!/bin/bash
 config='/etc/mpd.conf'
 
-client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 R "RompR :6660" M "MyMPD :80" N "Ncmpcpp curses") || exit 1
+client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 R "RompR :6660" M "myMPD :80" N "Ncmpcpp curses") || exit 1
 case $client in
     R)
         pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd
