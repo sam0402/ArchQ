@@ -1,7 +1,24 @@
 #!/bin/bash
 config='/etc/mpd.conf'
 
-### Music direcroty
+client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 R "RompR :6660" M "MyMPD :80" N "Ncmpcpp curses") || exit 1
+case $client in
+    R)
+        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd
+        systemctl enable --now mpd nginx php-fpm avahi-daemon
+        ;;
+    M)
+        pacman -Q mympd >/dev/null 2>&1 || pacman -Sy --noconfirm archlinux-keyring mympd
+        systemctl disable --now nginx php-fpm avahi-daemon
+        systemctl enable --now mpd mympd
+        ;;
+    N)
+        pacman -Q ncmpcpp >/dev/null 2>&1 || pacman -Sy --noconfirm archlinux-keyring ncmpcpp
+        systemctl disable --now nginx php-fpm avahi-daemon
+        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd
+        ;;
+esac
+### Music direcroty 
 mdir=$(grep 'music_directory' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 
 mdir=$(dialog --stdout \

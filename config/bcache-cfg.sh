@@ -20,7 +20,8 @@ fi
 
 case $WK in
     C)
-        hddlst=$(lsblk -dplnx size -o name,size | grep "sd" | tac)
+        [ $1 = nvme ] && hddlst=$(lsblk -dplnx size -o name,size | grep -E "sd|nvme" | tac) || \
+                        hddlst=$(lsblk -dplnx size -o name,size | grep "sd" | tac)
         nvmelst=$(lsblk -dplnx size -o name,size | grep "nvme" | tac)
         [[ -z $nvmelst ]] && (echo "No SSD/NVME device." ; exit 1 )
         # Select HDD partiton
