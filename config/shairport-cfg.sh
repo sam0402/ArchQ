@@ -8,7 +8,7 @@ SelDevice()
     if [ ! $(aplay -L | grep ':') ]; then
       echo "No Sound Device" ; exit 1
     fi
-
+    devs='hw:0,0 　 '
     while read line; do
         devs+=${line}' 　 '
     done <<< $(aplay -L | grep ':')

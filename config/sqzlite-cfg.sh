@@ -22,7 +22,7 @@ if [ ! $(aplay -L | grep ':') ]; then
     dialog --stdout --title "ArchQ $1" --infobox "\n\nNo Sound Device" 7 35
     exit 1
 fi
-
+devs='hw:0,0 　 '
 while read line; do
     devs+=${line}' 　 '
 done <<< $(aplay -L | grep ':')
