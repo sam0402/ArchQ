@@ -98,6 +98,7 @@ clear
 ### select sound card
 scard=""
 if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A || $player =~ S || $server = M || $server = T ]]; then
+    devs='hw:0,0 　 '
     while read line; do
         devs+=${line}' 　 '
     done <<< $(aplay -L | grep ':')
@@ -196,7 +197,7 @@ case $server in
         [ ! -d /mnt/var/roon ] && mkdir -p /mnt/var/roon
         mount "${part_data}" /mnt/var/roon
         ;;
-    M|T)
+    M)
         [ ! -d /mnt/var/lib/mpd ] && mkdir -p /mnt/var/lib/mpd
         mount "${part_data}" /mnt/var/lib/mpd
         ;;
@@ -345,26 +346,6 @@ EOF
         arch-chroot /mnt su $user -c "systemctl --user enable pipewire pipewire-pulse sinkdef"
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
-# ### setup mopidy 
-        # [ -d /mnt/var/lib/mpd/mopidy ]; && rm -rf /mnt/var/lib/mpd/mopidy || mv /mnt/var/lib/mopidy /mnt/var/lib/mpd/
-        # arch-chroot /mnt ln -s /var/lib/mpd/mopidy /var/lib/mopidy
-        # cat >>/mnt/etc/mopidy/mopidy.conf <<EOF
-
-# [mpd]
-# enabled = true
-# hostname = 127.0.0.1
-# port = 6600
-# # password =
-# max_connections = 20
-# connection_timeout = 120
-# # zeroconf = Mopidy MPD server on $hostname
-
-# [http]
-# enabled=true
-# hostname = 0.0.0.0
-# port=6680
-# csrf_protection=false
-# EOF
 
 ### Setup RompR
         mkdir -p /mnt/etc/nginx/sites-available /mnt/etc/nginx/sites-enabled
