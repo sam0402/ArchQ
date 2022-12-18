@@ -79,13 +79,17 @@ output=$(dialog --stdout --title "ArchQ MPD" \
 [[ $output =~ A ]] && p1=on
 [[ $output =~ H ]] && h1=on
 
-[[ $p1 == on ]]  && sed -i 's/^#.\?include_optional "mpd.d\/pulse.out"/include_optional "mpd.d\/pulse.out"/' $config \
-                    || sed -i 's/^include_optional "mpd.d\/pulse.out"/#include_optional "mpd.d\/pulse.out"/' $config
+if [[ $p1 == on ]]; then
+    sed -i 's/^#.\?include_optional "mpd.d\/pulse.out"/include_optional "mpd.d\/pulse.out"/' $config
+    systemctl enable --now avahi-daemon
+    user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
+    echo "Use command 'pulse_airport' to set Airport output device @$user."
+else
+    sed -i 's/^include_optional "mpd.d\/pulse.out"/#include_optional "mpd.d\/pulse.out"/' $config
+fi
 
 if [[ $h1 == on ]]; then
     sed -i 's/^#.\?include_optional "mpd.d\/httpd.out"/include_optional "mpd.d\/httpd.out"/' $config
-    user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
-    echo "Use command 'pulse_airport' to set Airport output device @$user."
 else   
     sed -i 's/^include_optional "mpd.d\/httpd.out"/#include_optional "mpd.d\/httpd.out"/' $config
 fi
