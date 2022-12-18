@@ -13,7 +13,7 @@ case $client in
         systemctl enable --now mpd mympd
         ;;
     N)
-        pacman -Q ncmpcpp >/dev/null 2>&1 || pacman -Sy --noconfirm archlinux-keyring ncmpcpp
+        pacman -Q ncmpcpp >/dev/null 2>&1 || pacman -Sy --noconfirm archlinux-keyring ncmpcpp tmux
         systemctl disable --now nginx php-fpm avahi-daemon
         pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd
         ;;
@@ -29,6 +29,21 @@ mdir=$(dialog --stdout \
 clear
 mdir=$(echo $mdir | sed 's"/"\\\/"g')
 sed -i 's/^#\?music_directory.*"/music_directory "\/mnt\/'"$mdir"'"/' $config
+
+# ### Select sound device
+if [ ! $(aplay -L | grep ':') ]; then
+    echo "No Sound Device" ; exit 1
+fi
+devs='hw:0,0 　 '
+while read line; do
+    devs+=${line}' 　 '
+done <<< $(aplay -L | grep ':')
+
+device=$(dialog --stdout \
+        --title "ArchQ $1" \
+        --menu "MPD ouput device" 7 0 0 ${devs}) || exit 1
+clear
+sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
 
 ### Volume Control
 v_none='off'; v_soft='off'; v_hard='off'
@@ -52,40 +67,27 @@ volume=$(dialog --stdout \
 clear
 sed -i 's/mixer_type.*"/mixer_type\t"'"$volume"'"/' $config 
 
-### Audio output
-alsa=on; pulse=off
-if grep -q 'pulse' $config ; then
-    alsa=off; pulse=on
+### Include audio output
+p0=off; h0=off
+p1=off; h1=off
+cat $config | grep pulse | grep -q '#' || p0=on 
+cat $config | grep httpd | grep -q '#' || h0=on
+output=$(dialog --stdout --title "ArchQ MPD" \
+        --checklist "Include output" 7 0 0 \
+        A Airport $p0 H Httpd $h0 ) || exit 1
+
+[[ $output =~ A ]] && p1=on
+[[ $output =~ H ]] && h1=on
+
+[[ $p1 == on ]]  && sed -i 's/^#.\?include_optional "mpd.d\/pulse.out"/include_optional "mpd.d\/pulse.out"/' $config \
+                    || sed -i 's/^include_optional "mpd.d\/pulse.out"/#include_optional "mpd.d\/pulse.out"/' $config
+
+if [[ $h1 == on ]]; then
+    sed -i 's/^#.\?include_optional "mpd.d\/httpd.out"/include_optional "mpd.d\/httpd.out"/' $config
+    user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
+    echo "Use command 'pulse_airport' to set Airport output device @$user."
+else   
+    sed -i 's/^include_optional "mpd.d\/httpd.out"/#include_optional "mpd.d\/httpd.out"/' $config
 fi
-output=$(dialog --stdout \
-    --title "ArchQ MPD" \
-    --radiolist "Sound Output" 7 0 0 \
-    S "Sound Card" $alsa \
-    A "Airport" $pulse ) || exit 1
-
-case $output in
-    S)
-        sed -i 's/type[[:space:]]*"pulse"/type\t"alsa"/' $config
-        ### Select sound device
-        if [ ! $(aplay -L | grep ':') ]; then
-            echo "No Sound Device" ; exit 1
-        fi
-        devs='hw:0,0 　 '
-        while read line; do
-            devs+=${line}' 　 '
-        done <<< $(aplay -L | grep ':')
-
-        device=$(dialog --stdout \
-                --title "ArchQ $1" \
-                --menu "MPD ouput device" 7 0 0 ${devs}) || exit 1
-        clear
-        sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
-    ;;
-    A)
-        sed -i 's/type[[:space:]]*"alsa"/type\t"pulse"/' $config
-        user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
-        echo "Use command 'pulse_airport' to set Airport output device @$user."
-    ;;
-esac
 
 systemctl restart mpd
