@@ -96,7 +96,7 @@ case $WK in
             umount /dev/$bcache
             echo $(bcache-super-show $nvme | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/detach
             echo 1 >/sys/fs/bcache/`bcache-super-show $nvme | grep cset | awk '{print $2}'`/unregister
-            echo 1 >/sys/block/$bcache/bcache/stop
+            # echo 1 >/sys/block/$bcache/bcache/stop
             if lsblk -pln -o fstype $hddpart | grep -q bcache; then
                 # Rebuild partition
                 start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $3 }')
