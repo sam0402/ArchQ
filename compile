@@ -181,10 +181,10 @@ wipefs "${part_root}"
 # mkswap "${part_swap}"
 if [ $f2fs = F ]; then
     mkfs.f2fs -fl root "${part_root}"
-    [ $fmt = F ] && mkfs.f2fs -fl data "${part_data}"
+#     [ $fmt = F ] && mkfs.f2fs -fl data "${part_data}"
 else
     mkfs.xfs -fL root "${part_root}"
-    [ $fmt = F ] && mkfs.xfs -fL data "${part_data}"
+#     [ $fmt = F ] && mkfs.xfs -fL data "${part_data}"
 fi
 # swapon "${part_swap}"
 
