@@ -279,8 +279,8 @@ fi
 
 ### Kernel
 ker=Qrip
-[ $cpu = amd ] && ker=Q308AMD
-[ $server = N ] && ker=${ker}w
+# [ $cpu = amd ] && ker=Q308AMD
+# [ $server = N ] && ker=${ker}w
 echo .......................
 echo Install Kernel ...
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
