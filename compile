@@ -52,10 +52,6 @@ clear
 #     bcache=$(dialog --stdout --title "ArchQ" --menu "Add Bcache partition" 8 0 0 D "Disable" E "Enable") || exit 1
 #     clear
 # fi
-
-lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
-clear
-fi
 lang=E
 # lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
 # clear
