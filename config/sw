@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #serv=$(echo $0 | awk -F/ '{print $NF}')
 serv=$1
 service=$serv
@@ -34,8 +34,8 @@ case $1 in
 esac
 
 if echo $serv | grep -q 'user'; then
-	[ $(systemctl is-active $serv) == active ] && systemctl stop $service || systemctl start $service
+	[[ $(systemctl is-active $serv) == active ]] && systemctl stop $service || systemctl start $service
 else
-	[ $(systemctl is-active $serv) == active ] && sudo systemctl stop $service || sudo systemctl start $service
+	[[ $(systemctl is-active $serv) == active ]] && sudo systemctl stop $service || sudo systemctl start $service
 fi
 echo Service $service is $(systemctl is-active $serv).
