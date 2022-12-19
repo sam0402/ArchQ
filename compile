@@ -209,7 +209,7 @@ esac
 
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 
-pacstrap /mnt base linux linux-firmware grub efibootmgr gptfdisk f2fs-tools xfsprogs networkmanager openssh dhclient \
+pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs networkmanager openssh dhclient \
          vim wget sudo dialog cpupower lm_sensors cronie ntp exfatprogs rsync
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 
@@ -235,6 +235,7 @@ arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
 arch-chroot /mnt sh -c "echo root:$password | chpasswd"
 arch-chroot /mnt mkinitcpio -p linux
 arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=${hostname}
+arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_LINUX_UUID/GRUB_DISABLE_LINUX_UUID/;s/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf

@@ -48,10 +48,11 @@ clear
 f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1
 clear
 
-if [ $fmt = F ]; then
-    bcache=$(dialog --stdout --title "ArchQ" --menu "Add Bcache partition" 8 0 0 D "Disable" E "Enable") || exit 1
-    clear
-fi
+bcache=E
+# if [ $fmt = F ]; then
+#     bcache=$(dialog --stdout --title "ArchQ" --menu "Add Bcache partition" 8 0 0 D "Disable" E "Enable") || exit 1
+#     clear
+# fi
 lang=E
 # lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
 # clear
@@ -209,7 +210,7 @@ esac
 
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 
-pacstrap /mnt base linux linux-firmware ${cpu}-ucode grub efibootmgr gptfdisk f2fs-tools xfsprogs networkmanager openssh dhclient \
+pacstrap /mnt base linux linux-firmware ${cpu}-ucode grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs networkmanager openssh dhclient \
          vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp exfatprogs rsync htop
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 
@@ -235,6 +236,7 @@ arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
 arch-chroot /mnt sh -c "echo root:$password | chpasswd"
 arch-chroot /mnt mkinitcpio -p linux
 arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=${hostname}
+arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_LINUX_UUID/GRUB_DISABLE_LINUX_UUID/;s/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
