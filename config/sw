@@ -19,6 +19,10 @@ case $1 in
 		serv=mpd
 		service="mpd"
 		;;
+	airmpd)
+		serv="--user pipewire"
+		service="--user pipewire pipewire-pulse sinkdef"
+		;;
 	rompr)
 		serv=mpd
 		service="mpd nginx php-fpm avahi-daemon avahi-daemon.socket"
@@ -28,5 +32,10 @@ case $1 in
 		service="logitechmediaserver squeezelite"
 		;;
 esac
-[ $(systemctl is-active $serv) == active ] && sudo systemctl stop $service || sudo systemctl start $service
+
+if echo $serv | grep -q 'user'; then
+	[ $(systemctl is-active $serv) == active ] && systemctl stop $service || systemctl start $service
+else
+	[ $(systemctl is-active $serv) == active ] && sudo systemctl stop $service || sudo systemctl start $service
+fi
 echo Service $service is $(systemctl is-active $serv).
