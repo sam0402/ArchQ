@@ -20,14 +20,14 @@ curl -s "$MIRRORLIST_URL" | \
     rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
 
 ### Get infomation from user ###
-hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname" 0 0) || exit 1
-clear
-: ${hostname:?"hostname cannot be empty"}
-
-user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1
-clear
-: ${user:?"user cannot be empty"}
-
+hostname=ArchQ
+# hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname" 0 0) || exit 1
+# clear
+# : ${hostname:?"hostname cannot be empty"}
+user=sam
+# user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1
+# clear
+# : ${user:?"user cannot be empty"}
 password=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password" 0 0) || exit 1
 clear
 : ${password:?"password cannot be empty"}
@@ -55,9 +55,13 @@ clear
 
 lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
 clear
-
-ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1
-clear
+fi
+lang=E
+# lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
+# clear
+ip=S
+# ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1
+# clear
 
 if [ $ip = S ]; then
 ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
@@ -67,18 +71,19 @@ if [ $(echo $ethers | wc -w) -gt 2 ]; then
     clear
 fi
 
+ifaddr=192.168.1.100; ifgw=192.168.1.1
 ifmask=24; ifdns=8.8.8.8
-ifconfig=$(dialog --stdout --title "ArchQ" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
-            "Address" 1 1   ""          1 10 15 0 \
-            "Netmask" 2 1   "$ifmask"   2 10 15 0 \
-            "Gateway" 3 1   ""          3 10 15 0 \
-            "DNS"     4 1   "$ifdns"    4 10 15 0) || exit 1
-clear
+# ifconfig=$(dialog --stdout --title "ArchQ" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
+#             "Address" 1 1   ""          1 10 15 0 \
+#             "Netmask" 2 1   "$ifmask"   2 10 15 0 \
+#             "Gateway" 3 1   ""          3 10 15 0 \
+#             "DNS"     4 1   "$ifdns"    4 10 15 0) || exit 1
+# clear
 
-ifaddr=$(echo $ifconfig | cut -d' ' -f1)
-ifmast=$(echo $ifconfig | cut -d' ' -f2)
-ifgw=$(echo $ifconfig | cut -d' ' -f3)
-ifdns=$(echo $ifconfig | cut -d' ' -f4)
+# ifaddr=$(echo $ifconfig | cut -d' ' -f1)
+# ifmast=$(echo $ifconfig | cut -d' ' -f2)
+# ifgw=$(echo $ifconfig | cut -d' ' -f3)
+# ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
 player=N; server=N
@@ -181,10 +186,10 @@ wipefs "${part_root}"
 # mkswap "${part_swap}"
 if [ $f2fs = F ]; then
     mkfs.f2fs -fl root "${part_root}"
-#     [ $fmt = F ] && mkfs.f2fs -fl data "${part_data}"
+    # [ $fmt = F ] && mkfs.f2fs -fl data "${part_data}"
 else
     mkfs.xfs -fL root "${part_root}"
-#     [ $fmt = F ] && mkfs.xfs -fL data "${part_data}"
+    # [ $fmt = F ] && mkfs.xfs -fL data "${part_data}"
 fi
 # swapon "${part_swap}"
 
