@@ -8,8 +8,8 @@ set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
-echo -e "\n\nArchQ will ping "Arch Linux Server" 30 times before installation.\n\n"
-ping -c 30 archlinux.org
+echo -e "\n\nArchQ will ping "Arch Linux Server" 10 times before installation.\n\n"
+ping -c 10 archlinux.org
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
 curl -O https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/scrub-2.6.1-1-x86_64.pkg.tar.zst
 pacman -U --noconfirm scrub-2.6.1-1-x86_64.pkg.tar.zst
@@ -20,14 +20,14 @@ curl -s "$MIRRORLIST_URL" | \
     rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
 
 ### Get infomation from user ###
-hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname" 0 0) || exit 1
-clear
-: ${hostname:?"hostname cannot be empty"}
-
-user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1
-clear
-: ${user:?"user cannot be empty"}
-
+hostname=ArchQ
+# hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname" 0 0) || exit 1
+# clear
+# : ${hostname:?"hostname cannot be empty"}
+user=sam
+# user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1
+# clear
+# : ${user:?"user cannot be empty"}
 password=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password" 0 0) || exit 1
 clear
 : ${password:?"password cannot be empty"}
@@ -48,34 +48,39 @@ clear
 f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1
 clear
 
-if [ $fmt = F ]; then
-    bcache=$(dialog --stdout --title "ArchQ" --menu "Add Bcache partition" 8 0 0 D "Disable" E "Enable") || exit 1
-    clear
-fi
-
-lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
-clear
-
-ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1
-clear
+bcache=E
+# if [ $fmt = F ]; then
+#     bcache=$(dialog --stdout --title "ArchQ" --menu "Add Bcache partition" 8 0 0 D "Disable" E "Enable") || exit 1
+#     clear
+# fi
+lang=E
+# lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
+# clear
+ip=S
+# ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1
+# clear
 
 if [ $ip = S ]; then
 ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
-ifport=$(dialog --stdout --title "ArchQ" --menu "Select net device" 7 0 0 ${ethers}) || exit 1
-clear
+ifport=$(echo $ethers | cut -d ' ' -f1)
+if [ $(echo $ethers | wc -w) -gt 2 ]; then
+    ifport=$(dialog --stdout --title "ArchQ" --menu "Select ethernet device" 7 0 0 ${ethers}) || exit 1
+    clear
+fi
 
+ifaddr=192.168.1.100; ifgw=192.168.1.1
 ifmask=24; ifdns=8.8.8.8
-ifconfig=$(dialog --stdout --title "ArchQ" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
-            "Address" 1 1   ""          1 10 15 0 \
-            "Netmask" 2 1   "$ifmask"   2 10 15 0 \
-            "Gateway" 3 1   ""          3 10 15 0 \
-            "DNS"     4 1   "$ifdns"    4 10 15 0) || exit 1
-clear
+# ifconfig=$(dialog --stdout --title "ArchQ" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
+#             "Address" 1 1   ""          1 10 15 0 \
+#             "Netmask" 2 1   "$ifmask"   2 10 15 0 \
+#             "Gateway" 3 1   ""          3 10 15 0 \
+#             "DNS"     4 1   "$ifdns"    4 10 15 0) || exit 1
+# clear
 
-ifaddr=$(echo $ifconfig | cut -d' ' -f1)
-ifmast=$(echo $ifconfig | cut -d' ' -f2)
-ifgw=$(echo $ifconfig | cut -d' ' -f3)
-ifdns=$(echo $ifconfig | cut -d' ' -f4)
+# ifaddr=$(echo $ifconfig | cut -d' ' -f1)
+# ifmast=$(echo $ifconfig | cut -d' ' -f2)
+# ifgw=$(echo $ifconfig | cut -d' ' -f3)
+# ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
 player=N
@@ -133,7 +138,7 @@ if [ $fmt = F ]; then
 #     mkpart primary linux-swap 257MiB ${swap_end} \
 #     mkpart primary ext4 ${swap_end} ${root_end} \
 #     mkpart primary ext4 ${root_end} 100%
-    root_size=4608
+    root_size=3875
     root_end=$(( $root_size + 257 + 1 ))MiB
     if [ $bcache = D ]; then
         parted --script "${device}" -- mklabel gpt \
@@ -142,7 +147,7 @@ if [ $fmt = F ]; then
             mkpart primary ext4 257MiB ${root_end} \
             mkpart primary ext4 ${root_end} 100%
     else
-        data_size=4068
+        data_size=2048
         data_end=$(( $data_size + $root_size + 257 + 1 ))MiB
         parted --script "${device}" -- mklabel gpt \
             mkpart ESP fat32 1Mib 257MiB \
@@ -206,7 +211,7 @@ esac
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 
 pacstrap /mnt base linux linux-firmware ${cpu}-ucode grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs networkmanager openssh dhclient \
-         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp
+         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp exfatprogs rsync htop
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 
 echo "${hostname}" > /mnt/etc/hostname
@@ -231,7 +236,7 @@ arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
 arch-chroot /mnt sh -c "echo root:$password | chpasswd"
 arch-chroot /mnt mkinitcpio -p linux
 arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=${hostname}
-arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
+arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_LINUX_UUID/GRUB_DISABLE_LINUX_UUID/;s/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
@@ -275,14 +280,15 @@ fi
 # arch-chroot /mnt wpa_supplicant -B -i wlan -c /etc/wpa_supplicant/wpa_supplicant-wlan.conf
 
 ### Kernel
-ker=Q352
+ker=Q396
 [ $cpu = amd ] && ker=Q308AMD
 [ $server = N ] && ker=${ker}w
 echo .......................
 echo Install Kernel ...
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/bcache-tools-1.1-1-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst /root/bcache-tools-1.1-1-x86_64.pkg.tar.zst
+sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check intel_pstate=disable iomem=relaxed vsyscall=native/' \
     /mnt/etc/default/grub
 
 cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
@@ -398,6 +404,9 @@ if  [[ $player =~ R ]]; then
 fi
 
 ### other setting
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/uhubctl-2.4.0-1-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/uhubctl-2.4.0-1-x86_64.pkg.tar.zst
+
 arch-chroot /mnt systemctl enable sshd cpupower ntpdate
 arch-chroot /mnt systemctl disable ntpd
 echo ........................
@@ -445,7 +454,15 @@ alias poweroff='sudo systemctl poweroff'
 alias reboot='sudo systemctl reboot'
 alias config='sudo config.sh'
 alias qboot='sudo qboot'
+alias cdr='cd /mnt/rip'
+alias cdq='cd /music/BR-Rip'
+alias mvrip='mv /mnt/rip/* /music/Roon/Qrip'
+alias qrip='yes | sudo qboot 1'
+alias qplay='yes | sudo qboot 2'
 alias sw='sudo sw'
+taginfo='ffprobe -v quiet -of json -show_entries format_tags'
+alias cover='for f in *.m4a;do atomicparsley "\$f" --overWrite --artwork REMOVE_ALL --artwork *.jpg;done'
+cdr
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$kver\\e[m/' /mnt/home/${user}/.bashrc
 
@@ -454,6 +471,8 @@ cat >>/mnt/root/.bashrc <<EOF
 export kver=\$(uname -r | cut -d- -f3)
 PS1='[\u@\h:\e[0;\${PSC}m\$kver\e[m \W]\$ '
 alias config='config.sh'
+alias status='systemctl status'
+alias remount='mount -o remount,rw /data;mount -o remount,rw /music'
 EOF
 
 # Install ramroot

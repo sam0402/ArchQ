@@ -8,8 +8,8 @@ set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
-echo -e "\n\nArchQ will ping "Arch Linux Server" 30 times before installation.\n\n"
-ping -c 30 archlinux.org
+echo -e "\n\nArchQ will ping "Arch Linux Server" 10 times before installation.\n\n"
+ping -c 10 archlinux.org
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
 curl -O https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/scrub-2.6.1-1-x86_64.pkg.tar.zst
 pacman -U --noconfirm scrub-2.6.1-1-x86_64.pkg.tar.zst
@@ -20,14 +20,14 @@ curl -s "$MIRRORLIST_URL" | \
     rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
 
 ### Get infomation from user ###
-hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname" 0 0) || exit 1
-clear
-: ${hostname:?"hostname cannot be empty"}
-
-user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1
-clear
-: ${user:?"user cannot be empty"}
-
+hostname=ArchQ
+# hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname" 0 0) || exit 1
+# clear
+# : ${hostname:?"hostname cannot be empty"}
+user=sam
+# user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1
+# clear
+# : ${user:?"user cannot be empty"}
 password=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password" 0 0) || exit 1
 clear
 : ${password:?"password cannot be empty"}
@@ -39,74 +39,78 @@ devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1
 clear
 
-fmt=$(dialog --stdout --title "ArchQ" --menu "Format ${device}" 7 0 0 F "Full disk" R "Retain database") || exit 1
-clear
+# fmt=$(dialog --stdout --title "ArchQ" --menu "Format ${device}" 7 0 0 F "Full disk" R "Retain database") || exit 1
+# clear
 
-zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe disk times" 0 30 0) || exit 1
-clear
+# zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe disk times" 0 30 0) || exit 1
+# clear
 
 f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1
 clear
 
-if [ $fmt = F ]; then
-    bcache=$(dialog --stdout --title "ArchQ" --menu "Add Bcache partition" 8 0 0 D "Disable" E "Enable") || exit 1
-    clear
-fi
-
-lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
-clear
-
-ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1
-clear
+# if [ $fmt = F ]; then
+#     bcache=$(dialog --stdout --title "ArchQ" --menu "Add Bcache partition" 8 0 0 D "Disable" E "Enable") || exit 1
+#     clear
+# fi
+lang=E
+# lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
+# clear
+ip=S
+# ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1
+# clear
 
 if [ $ip = S ]; then
 ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
-ifport=$(dialog --stdout --title "ArchQ" --menu "Select net device" 7 0 0 ${ethers}) || exit 1
-clear
-
-ifmask=24; ifdns=8.8.8.8
-ifconfig=$(dialog --stdout --title "ArchQ" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
-            "Address" 1 1   ""          1 10 15 0 \
-            "Netmask" 2 1   "$ifmask"   2 10 15 0 \
-            "Gateway" 3 1   ""          3 10 15 0 \
-            "DNS"     4 1   "$ifdns"    4 10 15 0) || exit 1
-clear
-
-ifaddr=$(echo $ifconfig | cut -d' ' -f1)
-ifmast=$(echo $ifconfig | cut -d' ' -f2)
-ifgw=$(echo $ifconfig | cut -d' ' -f3)
-ifdns=$(echo $ifconfig | cut -d' ' -f4)
-fi
-
-player=N
-server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS R Roon M "MPD & RompR" N None) || exit 1
-clear
-case $server in
-    L)
-        player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
-        ;;
-    N)
-        player=$(dialog --stdout --title "ArchQ" \
-                --checklist "Select music player" 7 0 0 \
-                S Squeezelite on \
-                A Airplay off \
-                R Roonbridge off ) || exit 1
-        ;;
-esac
-clear
-
-### select sound card
-scard=""
-if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A || $player =~ S || $server = M || $server = T ]]; then
-    devs='hw:0,0 　 '
-    while read line; do
-        devs+=${line}' 　 '
-    done <<< $(aplay -L | grep ':')
-    scard=$(dialog --stdout \
-                --title "ArchQ" \
-                --menu "Select sound device" 7 0 0 ${devs}) || exit 1
+ifport=$(echo $ethers | cut -d ' ' -f1)
+if [ $(echo $ethers | wc -w) -gt 2 ]; then
+    ifport=$(dialog --stdout --title "ArchQ" --menu "Select ethernet device" 7 0 0 ${ethers}) || exit 1
     clear
 fi
+
+ifaddr=192.168.1.100; ifgw=192.168.1.1
+ifmask=24; ifdns=8.8.8.8
+# ifconfig=$(dialog --stdout --title "ArchQ" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
+#             "Address" 1 1   ""          1 10 15 0 \
+#             "Netmask" 2 1   "$ifmask"   2 10 15 0 \
+#             "Gateway" 3 1   ""          3 10 15 0 \
+#             "DNS"     4 1   "$ifdns"    4 10 15 0) || exit 1
+# clear
+
+# ifaddr=$(echo $ifconfig | cut -d' ' -f1)
+# ifmast=$(echo $ifconfig | cut -d' ' -f2)
+# ifgw=$(echo $ifconfig | cut -d' ' -f3)
+# ifdns=$(echo $ifconfig | cut -d' ' -f4)
+fi
+
+player=N; server=N
+# server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS R Roon M "MPD & RompR" N None) || exit 1
+# clear
+# case $server in
+#     L)
+#         player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
+#         ;;
+#     N)
+#         player=$(dialog --stdout --title "ArchQ" \
+#                 --checklist "Select music player" 7 0 0 \
+#                 S Squeezelite on \
+#                 A Airplay off \
+#                 R Roonbridge off ) || exit 1
+#         ;;
+# esac
+# clear
+
+### select sound card
+# scard=""
+# if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A || $player =~ S || $server = M || $server = T ]]; then
+#     devs='hw:0,0 　 '
+#     while read line; do
+#         devs+=${line}' 　 '
+#     done <<< $(aplay -L | grep ':')
+#     scard=$(dialog --stdout \
+#                 --title "ArchQ" \
+#                 --menu "Select sound device" 7 0 0 ${devs}) || exit 1
+#     clear
+# fi
 
 ### Set up logging ###
 exec 1> >(tee "stdout.log")
@@ -115,73 +119,73 @@ exec 2> >(tee "stderr.log")
 timedatectl set-ntp true
 
 ### Setup the disk and partitions ###
-if [ $fmt = F ]; then
-# Wipe disk with zerofill
-    for ((i=1; i <= $zerofill; i++))
-    do
-        echo "Fill zero -> $i"
-        scrub -Sp fillzero $device
-    done
-#swap_size=$(free --mebi | awk '/Mem:/ {print $2}')
-#   swap_size=256
-#   root_size=4608
-#   swap_end=$(( $swap_size + 257 + 1 ))MiB
-#   root_end=$(( $root_size + $swap_size + 257 + 1 ))MiB
-#   parted --script "${device}" -- mklabel gpt \
-#     mkpart ESP fat32 1Mib 257MiB \
-#     set 1 boot on \
-#     mkpart primary linux-swap 257MiB ${swap_end} \
-#     mkpart primary ext4 ${swap_end} ${root_end} \
-#     mkpart primary ext4 ${root_end} 100%
-    root_size=4608
-    root_end=$(( $root_size + 257 + 1 ))MiB
-    if [ $bcache = D ]; then
-        parted --script "${device}" -- mklabel gpt \
-            mkpart ESP fat32 1Mib 257MiB \
-            set 1 boot on \
-            mkpart primary ext4 257MiB ${root_end} \
-            mkpart primary ext4 ${root_end} 100%
-    else
-        data_size=4068
-        data_end=$(( $data_size + $root_size + 257 + 1 ))MiB
-        parted --script "${device}" -- mklabel gpt \
-            mkpart ESP fat32 1Mib 257MiB \
-            set 1 boot on \
-            mkpart primary ext4 257MiB ${root_end} \
-            mkpart primary ext4 ${root_end} ${data_end} \
-            mkpart primary ext4 ${data_end} 100%
-    fi
-fi
+# if [ $fmt = F ]; then
+# # Wipe disk with zerofill
+#     for ((i=1; i <= $zerofill; i++))
+#     do
+#         echo "Fill zero -> $i"
+#         scrub -Sp fillzero $device
+#     done
+# #swap_size=$(free --mebi | awk '/Mem:/ {print $2}')
+# #   swap_size=256
+# #   root_size=4608
+# #   swap_end=$(( $swap_size + 257 + 1 ))MiB
+# #   root_end=$(( $root_size + $swap_size + 257 + 1 ))MiB
+# #   parted --script "${device}" -- mklabel gpt \
+# #     mkpart ESP fat32 1Mib 257MiB \
+# #     set 1 boot on \
+# #     mkpart primary linux-swap 257MiB ${swap_end} \
+# #     mkpart primary ext4 ${swap_end} ${root_end} \
+# #     mkpart primary ext4 ${root_end} 100%
+#     root_size=4608
+#     root_end=$(( $root_size + 257 + 1 ))MiB
+#     if [ $bcache = D ]; then
+#         parted --script "${device}" -- mklabel gpt \
+#             mkpart ESP fat32 1Mib 257MiB \
+#             set 1 boot on \
+#             mkpart primary ext4 257MiB ${root_end} \
+#             mkpart primary ext4 ${root_end} 100%
+#     else
+#         data_size=2048
+#         data_end=$(( $data_size + $root_size + 257 + 1 ))MiB
+#         parted --script "${device}" -- mklabel gpt \
+#             mkpart ESP fat32 1Mib 257MiB \
+#             set 1 boot on \
+#             mkpart primary ext4 257MiB ${root_end} \
+#             mkpart primary ext4 ${root_end} ${data_end} \
+#             mkpart primary ext4 ${data_end} 100%
+#     fi
+# fi
 
 # Simple globbing was not enough as on one device I needed to match /dev/mmcblk0p1 
 # but not /dev/mmcblk0boot1 while being able to match /dev/sda1 on other devices.
 part_boot="$(ls ${device}* | grep -E "^${device}p?1$")"
 # part_swap="$(ls ${device}* | grep -E "^${device}p?2$")"
-part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
-part_data="$(ls ${device}* | grep -E "^${device}p?3$")"
+part_root="$(ls ${device}* | grep -E "^${device}p?4$")"
+# part_data="$(ls ${device}* | grep -E "^${device}p?3$")"
 
-if [ $fmt = R ]; then
-# Wipe partition with zerofill
-    for ((i=1; i <= $zerofill; i++))
-    do
-        echo "Fill zero -> $i"
-        scrub -Sp fillzero $part_root
-    done
-fi
+# if [ $fmt = R ]; then
+# # Wipe partition with zerofill
+#     for ((i=1; i <= $zerofill; i++))
+#     do
+#         echo "Fill zero -> $i"
+#         scrub -Sp fillzero $part_root
+#     done
+# fi
 
-wipefs "${part_boot}"
+# wipefs "${part_boot}"
 # wipefs "${part_swap}"
 wipefs "${part_root}"
-wipefs "${part_data}"
+# wipefs "${part_data}"
 
-mkfs.vfat -F32 "${part_boot}"
+# mkfs.vfat -F32 "${part_boot}"
 # mkswap "${part_swap}"
 if [ $f2fs = F ]; then
     mkfs.f2fs -fl root "${part_root}"
-    [ $fmt = F ] && mkfs.f2fs -fl data "${part_data}"
+    # [ $fmt = F ] && mkfs.f2fs -fl data "${part_data}"
 else
     mkfs.xfs -fL root "${part_root}"
-    [ $fmt = F ] && mkfs.xfs -fL data "${part_data}"
+    # [ $fmt = F ] && mkfs.xfs -fL data "${part_data}"
 fi
 # swapon "${part_swap}"
 
@@ -205,8 +209,8 @@ esac
 
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 
-pacstrap /mnt base linux linux-firmware ${cpu}-ucode grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs networkmanager openssh dhclient \
-         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp
+pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs networkmanager openssh dhclient \
+         vim wget sudo dialog cpupower lm_sensors cronie ntp exfatprogs rsync
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 
 echo "${hostname}" > /mnt/etc/hostname
@@ -231,8 +235,8 @@ arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
 arch-chroot /mnt sh -c "echo root:$password | chpasswd"
 arch-chroot /mnt mkinitcpio -p linux
 arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=${hostname}
-arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
-arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_LINUX_UUID/GRUB_DISABLE_LINUX_UUID/;s/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
+# arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
 [ $f2fs = X ] && sed -i 's/MODULES=()/MODULES=(xfs)/' /mnt/etc/mkinitcpio.conf
@@ -275,13 +279,14 @@ fi
 # arch-chroot /mnt wpa_supplicant -B -i wlan -c /etc/wpa_supplicant/wpa_supplicant-wlan.conf
 
 ### Kernel
-ker=Q352
-[ $cpu = amd ] && ker=Q308AMD
-[ $server = N ] && ker=${ker}w
+ker=Qrip
+# [ $cpu = amd ] && ker=Q308AMD
+# [ $server = N ] && ker=${ker}w
 echo .......................
 echo Install Kernel ...
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/bcache-tools-1.1-1-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst /root/bcache-tools-1.1-1-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
     /mnt/etc/default/grub
 
@@ -293,7 +298,7 @@ isocpu=''
 [ $cpus -ge 4 ] && [[ $server = L || $player =~ S ]] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
 [ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
 sed -i 's/idle=poll /idle=poll '"$isocpu"'/' /mnt/etc/default/grub
-arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+# arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 ## server
 echo ...............
@@ -366,7 +371,7 @@ esac
 echo Install alsa-lib ......
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -Sd --noconfirm alsa-utils
+# arch-chroot /mnt pacman -Sd --noconfirm alsa-utils
 
 if [[ $player =~ S ]]; then
     echo Install Squeezelite ...
@@ -398,6 +403,9 @@ if  [[ $player =~ R ]]; then
 fi
 
 ### other setting
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/uhubctl-2.4.0-1-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/uhubctl-2.4.0-1-x86_64.pkg.tar.zst
+
 arch-chroot /mnt systemctl enable sshd cpupower ntpdate
 arch-chroot /mnt systemctl disable ntpd
 echo ........................
@@ -445,7 +453,15 @@ alias poweroff='sudo systemctl poweroff'
 alias reboot='sudo systemctl reboot'
 alias config='sudo config.sh'
 alias qboot='sudo qboot'
+alias cdr='cd /mnt/rip'
+alias cdq='cd /music/BR-Rip'
+alias mvrip='mv /mnt/rip/* /music/Roon/Qrip'
+alias qrip='yes | sudo qboot 1'
+alias qplay='yes | sudo qboot 2'
 alias sw='sudo sw'
+taginfo='ffprobe -v quiet -of json -show_entries format_tags'
+alias cover='for f in *.m4a;do atomicparsley "\$f" --overWrite --artwork REMOVE_ALL --artwork *.jpg;done'
+cdr
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$kver\\e[m/' /mnt/home/${user}/.bashrc
 
@@ -454,6 +470,8 @@ cat >>/mnt/root/.bashrc <<EOF
 export kver=\$(uname -r | cut -d- -f3)
 PS1='[\u@\h:\e[0;\${PSC}m\$kver\e[m \W]\$ '
 alias config='config.sh'
+alias status='systemctl status'
+alias remount='mount -o remount,rw /data;mount -o remount,rw /music'
 EOF
 
 # Install ramroot
