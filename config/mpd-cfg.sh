@@ -1,7 +1,31 @@
 #!/bin/bash
 config='/etc/mpd.conf'
 
+vol_ctrl(){
+    v_none='off'; v_soft='off'; v_hard='off'
+    case $(grep 'mixer_type' $1 | cut -d'"' -f2) in
+        none)
+            v_none=on
+            ;;
+        software)
+            v_soft=on
+            ;;
+        hardware)
+            v_hard=on
+            ;;
+    esac
+    volume=$(dialog --stdout \
+        --title "ArchQ MPD" \
+        --radiolist "Volume Control" 7 0 0 \
+        none '　' $v_none \
+        software '　' $v_soft \
+        hardware '　' $v_hard) || exit 1
+    clear
+    sed -i 's/mixer_type.*"/mixer_type\t"'"$volume"'"/' $1 
+}
+
 client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 R "RompR :6660" M "myMPD :80" N "Ncmpcpp curses") || exit 1
+clear
 case $client in
     R)
         pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd
@@ -46,26 +70,7 @@ clear
 sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
 
 ### Volume Control
-v_none='off'; v_soft='off'; v_hard='off'
-case $(grep 'mixer_type' $config | cut -d'"' -f2) in
-    none)
-        v_none=on
-        ;;
-    software)
-        v_soft=on
-        ;;
-    hardware)
-        v_hard=on
-        ;;
-esac
-volume=$(dialog --stdout \
-    --title "ArchQ MPD" \
-    --radiolist "Volume Control" 7 0 0 \
-    none '　' $v_none \
-    software '　' $v_soft \
-    hardware '　' $v_hard) || exit 1
-clear
-sed -i 's/mixer_type.*"/mixer_type\t"'"$volume"'"/' $config 
+vol_ctrl $config
 
 ### Include audio output
 p0=off; h0=off
@@ -80,6 +85,7 @@ output=$(dialog --stdout --title "ArchQ MPD" \
 [[ $output =~ H ]] && h1=on
 
 if [[ $p1 == on ]]; then
+    vol_ctrl /etc/mpd.d/pulse.out
     sed -i 's/^#.\?include_optional "mpd.d\/pulse.out"/include_optional "mpd.d\/pulse.out"/' $config
     systemctl enable --now avahi-daemon
     user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
