@@ -5,7 +5,7 @@ pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwm
 wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.9-4-x86_64.pkg.tar.zst
 wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
 wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-1.61-1-any.pkg.tar.zst
-pacman -U --noconfirm /root/mpd-light-0.23.9-3-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst
+pacman -U --noconfirm /root/mpd-light-0.23.9-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst
 
 ### Setup RompR
 mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
