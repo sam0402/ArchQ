@@ -3,7 +3,7 @@ config='/etc/mpd.conf'
 
 vol_ctrl(){
     v_none='off'; v_soft='off'; v_hard='off'
-    case $(grep 'mixer_type' $1 | cut -d'"' -f2) in
+    case $(grep 'mixer_type' $2 | cut -d'"' -f2) in
         none)
             v_none=on
             ;;
@@ -16,12 +16,12 @@ vol_ctrl(){
     esac
     volume=$(dialog --stdout \
         --title "ArchQ MPD" \
-        --radiolist "Volume Control" 7 0 0 \
+        --radiolist "$1 volume control" 7 0 0 \
         none '　' $v_none \
         software '　' $v_soft \
         hardware '　' $v_hard) || exit 1
     clear
-    sed -i 's/mixer_type.*"/mixer_type\t"'"$volume"'"/' $1 
+    sed -i 's/mixer_type.*"/mixer_type\t"'"$volume"'"/' $2
 }
 
 client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 R "RompR :6660" M "myMPD :80" N "Ncmpcpp curses") || exit 1
@@ -70,7 +70,7 @@ clear
 sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
 
 ### Volume Control
-vol_ctrl $config
+vol_ctrl ALSA $config
 
 ### Include audio output
 p0=off; h0=off
@@ -79,13 +79,13 @@ cat $config | grep pulse | grep -q '#' || p0=on
 cat $config | grep httpd | grep -q '#' || h0=on
 output=$(dialog --stdout --title "ArchQ MPD" \
         --checklist "Include output" 7 0 0 \
-        A Airport $p0 H Httpd $h0 ) || exit 1
+        A Airplay $p0 H Httpd $h0 ) || exit 1
 
 [[ $output =~ A ]] && p1=on
 [[ $output =~ H ]] && h1=on
 
 if [[ $p1 == on ]]; then
-    vol_ctrl /etc/mpd.d/pulse.out
+    vol_ctrl Airplay /etc/mpd.d/pulse.out
     sed -i 's/^#.\?include_optional "mpd.d\/pulse.out"/include_optional "mpd.d\/pulse.out"/' $config
     systemctl enable --now avahi-daemon
     user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
