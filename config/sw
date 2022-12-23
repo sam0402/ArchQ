@@ -1,7 +1,7 @@
 #!/bin/bash
 #serv=$(echo $0 | awk -F/ '{print $NF}')
 if [ -z $1 ]; then
-	echo "Using: sw airplay, airplay2, roon, mpd, airmpd, rompr, lms and other service."
+	echo "Using: sw mpd, roon, lms, rompr, airplay, airplay2, mpd2air and other service."
 	exit 1
 fi
 serv=$1
@@ -23,7 +23,7 @@ case $1 in
 		serv=mpd
 		service="mpd"
 		;;
-	airmpd)
+	mpd2air)
 		user="--user"
 		serv="pipewire"
 		service="pipewire pipewire-pulse sinkdef"
