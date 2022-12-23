@@ -1,6 +1,6 @@
 #!/bin/bash
 #serv=$(echo $0 | awk -F/ '{print $NF}')
-if [ -n $1 ]; then
+if [ -z $1 ]; then
 	echo "Using: sw airplay, airplay2, roon, mpd, airmpd, rompr, lms and other service."
 	exit 1
 fi
@@ -24,12 +24,15 @@ case $1 in
 		service="mpd"
 		;;
 	airmpd)
-		serv="--user pipewire"
-		service="--user pipewire pipewire-pulse sinkdef"
+		user="--user"
+		serv="pipewire"
+		service="pipewire pipewire-pulse sinkdef"
+		systemctl start --now avahi-daemon.socket
 		;;
 	rompr)
 		serv=mpd
-		service="mpd nginx php-fpm avahi-daemon avahi-daemon.socket"
+		service="mpd nginx php-fpm avahi-daemon"
+		systemctl start --now avahi-daemon.socket
 		;;
 	lms)
 		serv=logitechmediaserver
@@ -37,9 +40,9 @@ case $1 in
 		;;
 esac
 
-if echo $serv | grep -q 'user'; then
-	[[ $(systemctl is-active $serv) == active ]] && systemctl stop $service || systemctl start $service
+if [[ -n $user ]]; then
+	[[ $(systemctl is-active --user $serv) == active ]] && systemctl stop --user $service || systemctl start --user $service
 else
 	[[ $(systemctl is-active $serv) == active ]] && sudo systemctl stop $service || sudo systemctl start $service
 fi
-echo Service $service is $(systemctl is-active $serv).
+echo Service $service is $(systemctl is-active $user $serv).
