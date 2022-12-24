@@ -55,19 +55,19 @@ mdir=$(echo $mdir | sed 's"/"\\\/"g')
 sed -i 's/^#\?music_directory.*"/music_directory "\/mnt\/'"$mdir"'"/' $config
 
 # ### Select sound device
-# if [ ! $(aplay -L | grep ':') ]; then
-#     echo "No Sound Device" ; exit 1
-# fi
-# devs='hw:0,0 　 '
-# while read line; do
-#     devs+=${line}' 　 '
-# done <<< $(aplay -L | grep ':')
+if [ ! $(aplay -L | grep ':') ]; then
+    echo "No Sound Device" ; exit 1
+fi
+devs='hw:0,0 　 '
+while read line; do
+    devs+=${line}' 　 '
+done <<< $(aplay -L | grep ':')
 
-# device=$(dialog --stdout \
-#         --title "ArchQ $1" \
-#         --menu "MPD ouput device" 7 0 0 ${devs}) || exit 1
-# clear
-# sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
+device=$(dialog --stdout \
+        --title "ArchQ $1" \
+        --menu "MPD ouput device" 7 0 0 ${devs}) || exit 1
+clear
+sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
 
 ### Volume Control
 vol_ctrl ALSA $config
