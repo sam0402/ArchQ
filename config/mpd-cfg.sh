@@ -1,5 +1,6 @@
 #!/bin/bash
 config='/etc/mpd.conf'
+user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
 
 vol_ctrl(){
     v_none='off'; v_soft='off'; v_hard='off'
@@ -112,6 +113,7 @@ if [[ $p1 == on ]]; then
     echo "Use command 'pulse_airport' to set Airport output device @$user."
 else
     sed -i 's/^include_optional "mpd.d\/pulse.out"/#include_optional "mpd.d\/pulse.out"/' $config
+    systemctl --user -M $user@ disable pipewire pipewire-pulse sinkdef
 fi
 
 if [[ $h1 == on ]]; then
