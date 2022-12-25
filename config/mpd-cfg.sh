@@ -108,12 +108,12 @@ clear
 if [[ $p1 == on ]]; then
     vol_ctrl Airplay /etc/mpd.d/pulse.out
     sed -i 's/^#.\?include_optional "mpd.d\/pulse.out"/include_optional "mpd.d\/pulse.out"/' $config
-    systemctl enable --now avahi-daemon
-    user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
+    systemctl --now enable avahi-daemon
+    systemctl --user --now -M $user@ enable pipewire pipewire-pulse sinkdef
     echo "Use command 'pulse_airport' to set Airport output device @$user."
 else
     sed -i 's/^include_optional "mpd.d\/pulse.out"/#include_optional "mpd.d\/pulse.out"/' $config
-    systemctl --user -M $user@ disable pipewire pipewire-pulse sinkdef
+    systemctl --user --now -M $user@ disable pipewire pipewire-pulse sinkdef
 fi
 
 if [[ $h1 == on ]]; then

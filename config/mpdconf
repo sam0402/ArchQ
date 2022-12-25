@@ -47,9 +47,11 @@ if [[ "$USER" == mpd1 ]]; then
     if [[ $p1 == on ]]; then
         vol_ctrl Airplay $pulseconf
         sed -i 's/^#.\?include_optional "pulse.out"/include_optional "pulse.out"/' $config
+        systemctl --user --now enable pipewire pipewire-pulse sinkdef
         echo "Use command 'pulse_airport' to set Airport output device @$USER."
     else
         sed -i 's/^include_optional "pulse.out"/#include_optional "pulse.out"/' $config
+        systemctl --user --now disable pipewire pipewire-pulse sinkdef
     fi
 fi
 
