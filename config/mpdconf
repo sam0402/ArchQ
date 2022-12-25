@@ -1,0 +1,89 @@
+#!/bin/bash
+config="$HOME/.config/mpd/mpd.conf"
+pulseconf="$HOME/.config/mpd/pulse.out"
+httpdconf="$HOME/.config/mpd/httpd.out"
+
+vol_ctrl(){
+    v_none='off'; v_soft='off'; v_hard='off'
+    case $(grep 'mixer_type' $2 | cut -d'"' -f2) in
+        none)
+            v_none=on
+            ;;
+        software)
+            v_soft=on
+            ;;
+        hardware)
+            v_hard=on
+            ;;
+    esac
+    volume=$(dialog --stdout \
+        --title "ArchQ MPD multi" \
+        --radiolist "$1 volume control" 7 0 0 \
+        none '　' $v_none \
+        software '　' $v_soft \
+        hardware '　' $v_hard) || exit 1
+    clear
+    sed -i 's/mixer_type.*"/mixer_type\t"'"$volume"'"/' $2
+}
+### set port number
+port=$(( $UID + 5600 ))
+sed -i 's/port.*"/port\t"'"$port"'"/' $config
+
+### Include audio output
+p0=off; h0=off
+p1=off; h1=off
+cat $config | grep pulse | grep -q '#' || p0=on 
+cat $config | grep httpd | grep -q '#' || h0=on
+output=$(dialog --stdout --title "ArchQ MPD multi" \
+        --checklist "Select output" 7 0 0 \
+        A Airplay $p0 H Httpd $h0 ) || exit 1
+clear
+
+[[ $output =~ A ]] && p1=on
+[[ $output =~ H ]] && h1=on
+
+if [[ $p1 == on ]]; then
+    vol_ctrl Airplay $pulseconf
+    sed -i 's/^#.\?include_optional "pulse.out"/include_optional "pulse.out"/' $config
+
+    echo "Use command 'pulse_airport' to set Airport output device @$USER."
+else
+    sed -i 's/^include_optional "pulse.out"/#include_optional "pulse.out"/' $config
+fi
+
+if [[ $h1 == on ]]; then
+    sed -i 's/^#.\?include_optional "httpd.out"/include_optional "httpd.out"/' $config
+    # set stream port
+    sport=$(( $UID + 7000 ))
+    sed -i 's/port.*"/port\t"'"$sport"'"/' $httpdconf
+    # Set encoder codec
+    http_flac=off; http_wave=off
+    [[ $(cat $httpdconf | grep 'encoder' $2 | cut -d'"' -f2) == 'flac' ]] && http_flac=on || http_wave=on
+    encoder=$(dialog --stdout \
+        --title "ArchQ MPD multi" \
+        --radiolist "Httpd stream encoder" 7 0 0 \
+        flac '　' $http_flac \
+        wave '　' $http_wave) || exit 1
+    clear
+    sed -i 's/encoder.*"/encoder\t"'"$encoder"'"/' $httpdconf
+
+    echo "Httpd stream is active."
+    echo "Control port: $port"
+    echo " Stream port: $sport"
+else   
+    sed -i 's/^include_optional "httpd.out"/#include_optional "httpd.out"/' $config
+fi
+
+### Music direcroty 
+mdir=$(grep 'music_directory' $config | cut -d'"' -f2 | cut -d'/' -f3-)
+
+mdir=$(dialog --stdout \
+    --title "ArchQ MPD multi" \
+    --ok-label "Ok" \
+    --form "Music directory" 0 30 0 \
+    " /mnt/"  1 1 $mdir 1 7 30 0) || exit 1
+clear
+mdir=$(echo $mdir | sed 's"/"\\\/"g')
+sed -i 's/^#\?music_directory.*"/music_directory "\/mnt\/'"$mdir"'"/' $config
+
+systemctl --user stop mpd
