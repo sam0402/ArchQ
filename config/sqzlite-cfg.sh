@@ -4,7 +4,7 @@ config='/etc/squeezelite.conf'
 ### Select squeezelite version
 ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
 inst=(0 pcmcf dsdcf pcmapl dsdapl pcm dsd)
-option=$(dialog --stdout --title "ArchQ $1" \
+option=$(dialog --stdout --title "ArchQ Squeezelite $1" \
         --menu "Select squeezelite: ${inst[$ver]^^}" 7 0 0 \
         1 "PCM CF" 2 "DSD CF" 3 "PCM Apple" 4 "DSD Apple" 5 "PCM" 6 "DSD" ) || exit 1
 
@@ -19,19 +19,19 @@ fi
 
 ## Select sound device
 if [ ! $(aplay -L | grep ':') ]; then
-    dialog --stdout --title "ArchQ $1" --infobox "\n\nNo Sound Device" 7 35
-    exit 1
-fi
-devs='hw:0,0 　 '
-while read line; do
-    devs+=${line}' 　 '
-done <<< $(aplay -L | grep ':')
+    dialog --title "ArchQ Squeezelite $1" --msgbox "No Sound Device" 7 30
+else
+    devs='hw:0,0 　 '
+    while read line; do
+        devs+=${line}' 　 '
+    done <<< $(aplay -L | grep ':')
 
-device=$(dialog --stdout \
-        --title "Squeezelite ${inst[$ver]^^}" \
-        --menu "Output device" 7 0 0 ${devs}) || exit 1
-clear
-sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$device"'"/' $config
+    device=$(dialog --stdout \
+            --title "ArchQ Squeezelite $1" \
+            --menu "Ouput device" 7 0 0 ${devs}) || exit 1
+    clear
+    sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
+fi
 
 ###
 NAME='<null>'; ALSA_PARAMS='<null>'; BUFFER='<null>'; CODEC='<null>'; PRIORITY='<null>'; OPTIONS='<null>'
@@ -52,7 +52,7 @@ else
 fi
 
 options=$(dialog --stdout \
-    --title "Squeezelite ${inst[$ver]^^}" \
+    --title "ArchQ Squeezelite ${inst[$ver]^^}" \
     --ok-label "Ok" \
     --form "Modify settings. Blank fills with <null>$INFO" 0 60 0 \
     "Name of Player"        1 1   "$NAME"          1 25 60 0 \

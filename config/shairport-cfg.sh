@@ -5,20 +5,20 @@ name=$(grep -m1 'name = ' $config | awk -F\" '{print $2}')
 
 SelDevice()
 {
-    if [ ! $(aplay -L | grep ':') ]; then
-      echo "No Sound Device" ; exit 1
-    fi
+if [ ! $(aplay -L | grep ':') ]; then
+    dialog --title "ArchQ shAirplay $1" --msgbox "No Sound Device" 7 30
+else
     devs='hw:0,0 　 '
     while read line; do
         devs+=${line}' 　 '
     done <<< $(aplay -L | grep ':')
 
     device=$(dialog --stdout \
-                    --title "Airplay" \
-                    --menu "Select ouput device" 7 0 0 ${devs}) || exit 1
+            --title "ArchQ shAirplay $1" \
+            --menu "Ouput device" 7 0 0 ${devs}) || exit 1
     clear
-
-    sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$device\""';/' $config 
+    sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
+fi
 }
 
 Config()
@@ -28,7 +28,7 @@ Config()
   [ $volctl = yes ] && v0=off || v0=on
   [ $(systemctl is-active shairport-sync) = active ] && a0=on
 
-  SEL=$(dialog --stdout --title "ArchQ $1" \
+  SEL=$(dialog --stdout --title "ArchQ shAirplay $1" \
           --checklist "Configure" 7 0 0 \
           V "Volume Control"  $v0 \
           A Active            $a0 ) || exit 1
@@ -57,7 +57,7 @@ Config()
 Name()
 {
   name=$(dialog --stdout \
-      --title "Airplay" \
+      --title "ArchQ shAirplay $1" \
       --ok-label "Ok" \
       --form "Change name" 0 20 0 \
       ""  1 1  "$name" 1 0 20 0  ) || exit 1
@@ -65,7 +65,7 @@ Name()
   sed -i 's/^\/\?\/\?\tname = ".*";/\tname = '"\"$name\""';/1' $config
 }
 
-WK=$(dialog --stdout --title "ArchQ $1" --menu "Airplay configure" 7 0 0 \
+WK=$(dialog --stdout --title "ArchQ shAirplay $1" --menu "Configure" 7 0 0 \
     S "Sound Card" \
     V "Volume & Active" \
     N "Name: $name") || exit 1
