@@ -97,24 +97,22 @@ vol_ctrl ALSA $config
 ### Include audio output
 p0=off; h0=off
 p1=off; h1=off
-cat $config | grep pulse | grep -q '#' || p0=on 
+cat $config | grep owntone | grep -q '#' || p0=on 
 cat $config | grep httpd | grep -q '#' || h0=on
 output=$(dialog --stdout --title "ArchQ MPD" \
         --checklist "Include output" 7 0 0 \
-        A Airplay $p0 H Httpd $h0 ) || exit 1
+        M Multiroom $p0 H Httpd $h0 ) || exit 1
 clear
-[[ $output =~ A ]] && p1=on
+[[ $output =~ M ]] && p1=on
 [[ $output =~ H ]] && h1=on
 
 if [[ $p1 == on ]]; then
-    vol_ctrl Airplay /etc/mpd.d/pulse.out
-    sed -i 's/^#.\?include_optional "mpd.d\/pulse.out"/include_optional "mpd.d\/pulse.out"/' $config
-    systemctl --now enable avahi-daemon
-    systemctl --user --now -M $user@ enable pipewire pipewire-pulse sinkdef
-    echo "Use command 'pulse_airport' to set Airport output device @$user."
+    sed -i 's/^#.\?include_optional "mpd.d\/owntone.out"/include_optional "mpd.d\/owntone.out"/' $config
+    systemctl --now enable avahi-daemon owntone
+    # systemctl --user --now -M $user@ enable pipewire pipewire-pulse sinkdef
 else
-    sed -i 's/^include_optional "mpd.d\/pulse.out"/#include_optional "mpd.d\/pulse.out"/' $config
-    systemctl --user --now -M $user@ disable pipewire pipewire-pulse sinkdef
+    sed -i 's/^include_optional "mpd.d\/owntone.out"/#include_optional "mpd.d\/owntone.out"/' $config
+    systemctl --now disable owntone avahi-daemon
 fi
 
 if [[ $h1 == on ]]; then
