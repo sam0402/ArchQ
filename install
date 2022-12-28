@@ -320,31 +320,13 @@ case $server in
         ;;
     M)
         echo Install MPD ...
-        arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi pipewire-zeroconf pipewire-pulse wireplumber
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.9-4-x86_64.pkg.tar.zst
+        arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.9-3-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
-        # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mopidy-mpd-3.3.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-1.61-1-any.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.9-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.5-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.9-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst /root/owntone-28.5-1-x86_64.pkg.tar.zst
 
-### setup pipewire
-        cp -a /mnt/usr/share/pipewire /mnt/etc/
-        sed -i '/Loads a module/i\\t{ name = libpipewire-module-raop-discover\n    args = { }\n    }' /mnt/etc/pipewire/pipewire.conf
-        sed -i 's/#"tcp:4713"/"tcp:4713"/' /mnt/etc/pipewire/pipewire-pulse.conf
-        cat >/mnt/usr/lib/systemd/user/sinkdef.service <<EOF
-[Unit]
-Description=Sink Default
-
-[Service]
-Type=idle
-ExecStartPre=/bin/sleep 10
-ExecStart=/bin/sh /usr/bin/sink_default.sh
-RemainAfterExit=yes
-
-[Install]
-WantedBy=default.target
-EOF
-        arch-chroot /mnt su $user -c "systemctl --user enable pipewire pipewire-pulse sinkdef"
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
 
@@ -427,15 +409,13 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/player-cfg.
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg.sh >/mnt/usr/bin/desktop-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/mnt/usr/bin/shairport-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
-curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pulse_airport >/mnt/usr/bin/pulse_airport
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/bcache-cfg.sh >/mnt/usr/bin/bcache-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/zerowipe.sh >/mnt/usr/bin/zerowipe.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
-curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sink_default.sh >/mnt/usr/bin/sink_default.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sw >/mnt/usr/bin/sw
-chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/pulse_airport /mnt/usr/bin/sw
+chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/sw
 
 cat >>/mnt/home/${user}/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
