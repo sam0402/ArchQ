@@ -1,7 +1,7 @@
 #!/bin/bash
 #serv=$(echo $0 | awk -F/ '{print $NF}')
 if [ -z $1 ]; then
-	echo "Using: sw mpd, roon, lms, rompr, airplay, airplay2, mpd2air and other service."
+	echo "Using: sw mpd, roon, lms, rompr, airplay, airplay2, mtroom and other service."
 	exit 1
 fi
 serv=$1
@@ -23,10 +23,10 @@ case $1 in
 		serv=mpd
 		service="mpd"
 		;;
-	mpd2air)
-		user="--user"
-		serv="pipewire"
-		service="pipewire pipewire-pulse sinkdef"
+	mtroom)
+		# user="--user"
+		serv="owntone"
+		service="mpd owntone"
 		systemctl start --now avahi-daemon.socket
 		;;
 	rompr)

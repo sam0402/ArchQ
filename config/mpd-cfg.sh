@@ -107,13 +107,13 @@ clear
 [[ $output =~ H ]] && h1=on
 
 if [[ $p1 == on ]]; then
-    [[ -d /var/lib/mpd/fifo/ ]] || install -o mpd -g mpd -m 755 -d /var/lib/mpd/fifo
+    [[ -d /var/lib/mpd/fifo ]] || install -o mpd -g mpd -m 755 -d /var/lib/mpd/fifo
     sed -i 's/^#.\?include_optional "mpd.d\/owntone.out"/include_optional "mpd.d\/owntone.out"/' $config
-    systemctl --now enable avahi-daemon owntone
+    systemctl start --now avahi-daemon.socket owntone
     # systemctl --user --now -M $user@ enable pipewire pipewire-pulse sinkdef
 else
     sed -i 's/^include_optional "mpd.d\/owntone.out"/#include_optional "mpd.d\/owntone.out"/' $config
-    systemctl --now disable owntone avahi-daemon
+    systemctl --now disable owntone avahi-daemon.socket
 fi
 
 if [[ $h1 == on ]]; then
