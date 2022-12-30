@@ -26,13 +26,11 @@ case $1 in
 	mtroom)
 		# user="--user"
 		serv="owntone"
-		service="mpd owntone"
-		systemctl start --now avahi-daemon.socket
+		service="mpd owntone avahi-daemon"
 		;;
 	rompr)
 		serv=mpd
 		service="mpd nginx php-fpm avahi-daemon"
-		systemctl start --now avahi-daemon.socket
 		;;
 	lms)
 		serv=logitechmediaserver
