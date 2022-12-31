@@ -26,11 +26,11 @@ case $1 in
 	mtroom)
 		# user="--user"
 		serv="owntone"
-		service=" avahi-daemon mpd owntone"
+		service="avahi-daemon mpd owntone"
 		;;
 	rompr)
 		serv=mpd
-		service=" avahi-daemon mpd nginx php-fpm"
+		service="avahi-daemon mpd nginx php-fpm"
 		;;
 	lms)
 		serv=logitechmediaserver
