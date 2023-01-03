@@ -143,5 +143,5 @@ mdir=$(dialog --stdout \
 clear
 mdir=$(echo $mdir | sed 's"/"\\\/"g')
 sed -i 's/^#\?music_directory.*"/music_directory "\/mnt\/'"$mdir"'"/' $config
-[[ -f /etc/blissify.conf ]] && sed -e 's/"mpd_base_path": ".*/"mpd_base_path": "'"$mdir"'"/' /etc/blissify.conf
+[[ -f /etc/blissify.conf ]] && sed -i 's/"mpd_base_path": ".*/"mpd_base_path": "'"$mdir"'"/' /etc/blissify.conf
 systemctl restart mpd
