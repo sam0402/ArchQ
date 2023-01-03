@@ -95,18 +95,18 @@ fi
 vol_ctrl ALSA $config
 
 ### Include audio output
-p0=off; h0=off
-p1=off; h1=off
-cat $config | grep owntone | grep -q '#' || p0=on 
+m0=off; h0=off
+m1=off; h1=off
+cat $config | grep owntone | grep -q '#' || m0=on 
 cat $config | grep httpd | grep -q '#' || h0=on
 output=$(dialog --stdout --title "ArchQ MPD" \
         --checklist "Include output" 7 0 0 \
-        M Multiroom $p0 H Httpd $h0 ) || exit 1
+        M Multiroom $m0 H Httpd $h0 ) || exit 1
 clear
-[[ $output =~ M ]] && p1=on
+[[ $output =~ M ]] && m1=on
 [[ $output =~ H ]] && h1=on
 
-if [[ $p1 == on ]]; then
+if [[ $m1 == on ]]; then
     [[ -d /var/lib/mpd/fifo ]] || install -o mpd -g mpd -m 755 -d /var/lib/mpd/fifo
     sed -i 's/^#.\?include_optional "mpd.d\/owntone.out"/include_optional "mpd.d\/owntone.out"/' $config
     systemctl start --now avahi-daemon.socket owntone
@@ -143,5 +143,5 @@ mdir=$(dialog --stdout \
 clear
 mdir=$(echo $mdir | sed 's"/"\\\/"g')
 sed -i 's/^#\?music_directory.*"/music_directory "\/mnt\/'"$mdir"'"/' $config
-
+[[ -f /etc/blissify.conf ]] && sed -e 's/"mpd_base_path": ".*/"mpd_base_path": "'"$mdir"'"/' /etc/blissify.conf
 systemctl restart mpd

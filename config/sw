@@ -21,12 +21,12 @@ case $1 in
 		;;
 	mpd)
 		serv=mpd
-		service="mpd"
+		service="mpd blissify"
 		;;
 	mtroom)
 		# user="--user"
 		serv="owntone"
-		service="avahi-daemon mpd owntone"
+		service="avahi-daemon mpd owntone blissify"
 		;;
 	rompr)
 		serv=mpd
