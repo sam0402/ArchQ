@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import argparse
 import subprocess
 from mpd import MPDClient
 
@@ -51,4 +52,38 @@ def listen():
             break
     close_connection(client)
 
-listen()
+def vol_up():
+    """
+    Set Volume of ALSA
+    """
+    client = init_connection()
+    client.volume(3)
+    close_connection(client)
+
+def vol_down():
+    client = init_connection()
+    client.volume(-3)
+    close_connection(client)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--up", help="ALSA Volume up.",
+                       action="store_true", default=False)
+    group.add_argument("--down", help="ALSA Volume down.",
+                       action="store_true", default=False)
+    group.add_argument("--listen",
+                       help="Listen for MPD IDLE signals to do live scanning.",
+                       action="store_true", default=False)
+
+    args = parser.parse_args()
+
+    if args.listen:
+        listen()
+    elif args.up:
+        vol_up()
+    elif args.down:
+        vol_down()
+    else:
+        sys.exit()
