@@ -8,7 +8,7 @@ Group=mpd
 Type=simple
 Restart=always
 ExecStartPost=/usr/bin/sleep 2
-ExecStart=/usr/bin/python3 /usr/bin/mpdalsavol.py
+ExecStart=/usr/bin/python3 /usr/bin/mpdalsavol.py --listen
 
 [Install]
 WantedBy=multi-user.target
