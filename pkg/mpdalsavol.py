@@ -47,7 +47,8 @@ def listen():
         try:
             if client.idle() == ['mixer']:
                 volume = str(round(float(client.status()['volume']) * 0.9, 1)) + '%'
-                subprocess.check_call(['amixer', '-M', 'set', 'MPD', volume, 'unmute', '>/dev/null', '2>&1'])
+                subprocess.check_call(['amixer', '-Mq', 'set', 'MPD', volume, '2>&1'])
+                subprocess.check_call(['amixer', '-q', 'set', 'PCM', 'unmute'])
         except KeyboardInterrupt:
             break
     close_connection(client)
@@ -58,13 +59,11 @@ def vol_up():
     """
     client = init_connection()
     client.volume(3)
-    subprocess.check_call(['amixer', 'set', 'MPD', 'unmute', '>/dev/null', '2>&1'])
     close_connection(client)
 
 def vol_down():
     client = init_connection()
     client.volume(-3)
-    subprocess.check_call(['amixer', 'set', 'MPD', 'unmute', '>/dev/null', '2>&1'])
     close_connection(client)
 
 if __name__ == "__main__":
