@@ -46,7 +46,7 @@ def listen():
     while True:
         try:
             if client.idle() == ['mixer']:
-                volume = str(round(float(client.status()['volume']) * 0.9, 1)) + '%'
+                volume = str(round(float(client.status()['volume']) * 0.75, 1)) + '%'
                 subprocess.check_call(['amixer', '-Mq', 'set', 'MPD', volume, '2>&1'])
                 subprocess.check_call(['amixer', '-q', 'set', 'PCM', 'unmute'])
         except KeyboardInterrupt:
