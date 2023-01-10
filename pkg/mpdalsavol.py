@@ -45,6 +45,8 @@ def listen():
     client = init_connection()
     while True:
         try:
+            if client.idle() == ['output']:
+                subprocess.check_call(['amixer', '-q', 'set', 'PCM', 'mute'])
             if client.idle() == ['mixer']:
                 volume = str(round(float(client.status()['volume']) * 0.8, 1)) + '%'
                 subprocess.check_call(['amixer', '-Mq', 'set', 'MPD', volume, '2>&1'])
