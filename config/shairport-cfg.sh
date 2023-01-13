@@ -17,7 +17,7 @@ else
             --title "ArchQ shAirplay $1" \
             --menu "Ouput device" 7 0 0 ${devs}) || exit 1
     clear
-    sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
+    sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$device\""';/' $config 
 fi
 }
 

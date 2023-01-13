@@ -27,10 +27,10 @@ else
     done <<< $(aplay -L | grep ':')
 
     device=$(dialog --stdout \
-            --title "ArchQ Squeezelite $1" \
+            --title "ArchQ Squeezelite ${inst[$ver]^^}" \
             --menu "Ouput device" 7 0 0 ${devs}) || exit 1
     clear
-    sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
+    sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$device"'"/' $config
 fi
 
 ###
