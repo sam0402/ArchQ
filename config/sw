@@ -9,11 +9,7 @@ service=$serv
 case $1 in
 	airplay)
 		serv=shairport-sync
-		service="shairport-sync"
-		;;
-	airplay2)
-		serv=shairport-sync
-		service="shairport-sync nqptp"
+		[[ -f /usr/bin/nqptp ]] && service="shairport-sync nqptp" || service="shairport-sync"
 		;;
 	roon)
 		serv=roonserver
