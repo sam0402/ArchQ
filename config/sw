@@ -1,7 +1,7 @@
 #!/bin/bash
 #serv=$(echo $0 | awk -F/ '{print $NF}')
 if [ -z $1 ]; then
-	echo "Using: sw mpd, roon, lms, rompr, airplay, airplay2, mtroom and other service."
+	echo "Using: sw mpd, roon, lms, rompr, airplay, mtroom and other service."
 	exit 1
 fi
 serv=$1
