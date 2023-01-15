@@ -24,7 +24,7 @@ fi
 
 SelVer()
 {
-    airver=$(dialog --stdout --title "ArchQ Airplay $1" --menu "Select version" 7 0 0 1 Classical 2 Multiroom) || exit 1; clear
+    airver=$(dialog --stdout --title "ArchQ Airplay $1" --menu "Select version" 7 0 0 1 Classic 2 Multiroom) || exit 1; clear
     if [[ $airver == '2' ]]; then
       wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nqptp-git-1.1-1-x86_64.pkg.tar.zst
       pacman -U --noconfirm /root/nqptp-git-1.1-1-x86_64.pkg.tar.zst
