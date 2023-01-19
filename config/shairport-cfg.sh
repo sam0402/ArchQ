@@ -34,7 +34,8 @@ SelVer()
     fi
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-${airver}-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/shairport-sync-3.3.9-${airver}-x86_64.pkg.tar.zst
-    sed -i '/Group=/iNice=-20\nAllowedCPUs=4' /usr/lib/systemd/system/shairport-sync.service
+    isocpu=$(($(getconf _NPROCESSORS_ONLN)-1))
+    sed -i '/Group=/iNice=-20\nAllowedCPUs='"$isocpu"'' /usr/lib/systemd/system/shairport-sync.service
     echo "Airplay $airver installed."
 }
 
