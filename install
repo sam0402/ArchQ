@@ -372,6 +372,7 @@ if [[ $player =~ A ]]; then
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     [[ -n "$scard" ]] && sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/' /mnt/etc/shairport-sync.conf
+    sed -i '/Group=/iNice=-20\nAllowedCPUs='\"$iso_1st\"'' /mnt/usr/lib/systemd/system/shairport-sync.service
     arch-chroot /mnt systemctl enable shairport-sync
 fi
 if  [[ $player =~ R ]]; then
