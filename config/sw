@@ -39,4 +39,5 @@ if [[ -n $user ]]; then
 else
 	[[ $(systemctl is-active $serv) == active ]] && sudo systemctl stop $service || sudo systemctl start $service
 fi
+ps H -q `pidof -s mpd` -o 'tid,cls' | grep FF | awk '{print $1}' | while read PROC; do chrt -p 95 $PROC; done
 echo Service $service is $(systemctl is-active $user $serv).
