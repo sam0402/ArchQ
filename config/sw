@@ -1,6 +1,5 @@
 #!/bin/bash
 #serv=$(echo $0 | awk -F/ '{print $NF}')
-key="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI2ZDIzMmU5Y2Q2Nzg0NjQ3OWU1NGE1YmViYjE3ZTU0YSIsImlhdCI6MTY3MzM1MjU3MSwiZXhwIjoxOTg4NzEyNTcxfQ.Wj5dCh2HdmdeTsrL6h0dR4N2aQn2qT5hbAUyEBuFB1o"
 
 if [ -z $1 ]; then
 	echo "Using: sw mpd, roon, lms, rompr, airplay, mtroom and other service."
@@ -47,8 +46,6 @@ else
 		sudo systemctl start $service
 		ps H -q `pidof -s mpd` -o 'tid,cls' | grep FF | awk '{print $1}' | while read PROC; do chrt -p 95 $PROC; done
 	fi
-	curl -X POST -H "Authorization: Bearer $key" -H "Content-Type: application/json" -d '{"state": "'$STATUS'"}' \
-	http://192.168.1.37:8123/api/states/switch.$1 >/dev/null 2>&1
 fi
 
 echo Service $service is $(systemctl is-active $user $serv).
