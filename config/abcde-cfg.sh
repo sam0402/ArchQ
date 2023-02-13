@@ -42,27 +42,32 @@ while read line; do
     eval $(grep '=' | grep -v '#')
 done < $config
 
+echo $ACTIONS | grep -q tag && TAGA=y || TAGA=n
+
 options=$(dialog --stdout \
     --title "abCDe ripper" \
     --ok-label "Ok" \
     --form "Modify settings" 0 40 0 \
     "Output directory"  1 1   "${OUTPUTDIR}"    1 18 40 0 \
     "Type (wav/flac)"   2 1   "${OUTPUTTYPE}"   2 18 40 0 \
-    "Read offset"       3 1   "${OFFSET}"       3 18 40 0 \
-    "Read speed"        4 1   "${CDSPEEDVALUE}" 4 18 40 0 \
-    "Eject CD (y/n)"    5 1   "${EJECTCD}"      5 18 40 0 \
-    "Close Tray (Sec)"  6 1  "${CLOSETRAY}" 6 18 40 0) || exit 1
+    "Add tags (y/n)"    3 1   "${TAGA}"         3 18 40 0 \
+    "Read offset"       4 1   "${OFFSET}"       4 18 40 0 \
+    "Read speed"        5 1   "${CDSPEEDVALUE}" 5 18 40 0 \
+    "Eject CD (y/n)"    6 1   "${EJECTCD}"      6 18 40 0 \
+    "Close Tray (Sec)"  7 1  "${CLOSETRAY}"     7 18 40 0) || exit 1
 clear
 
 OUTPUTDIR=$(echo $options |  awk '//{print $1 }')
 OUTPUTTYPE=$(echo $options |  awk '//{print $2 }')
-OFFSET=$(echo $options |  awk '//{print $3 }')
-CDSPEEDVALUE=$(echo $options |  awk '//{print $4 }')
-EJECTCD=$(echo $options |  awk '//{print $5 }')
-CLOSETRAY=$(echo $options |  awk '//{print $6 }')
+TAGS=$(echo $options |  awk '//{print $3 }')
+OFFSET=$(echo $options |  awk '//{print $4 }')
+CDSPEEDVALUE=$(echo $options |  awk '//{print $5 }')
+EJECTCD=$(echo $options |  awk '//{print $6 }')
+CLOSETRAY=$(echo $options |  awk '//{print $7 }')
 
 [ -z $OUTPUTDIR ] && echo "Fail! Output directory is null." && exit 1
 [ -z $OUTPUTTYPE ] && echo "Fail! Output type is null." && exit 1
+[ -z $TAGS ] && echo "Fail! Read tags is null." && exit 1
 [ -z $OFFSET ] && echo "Fail! Read offset is null." && exit 1
 [ -z $CDSPEEDVALUE ] && echo "Fail! Read offset is null." && exit 1
 [ -z $EJECTCD ] && echo "Fail! Eject CD is null." && exit 1
@@ -71,6 +76,11 @@ CLOSETRAY=$(echo $options |  awk '//{print $6 }')
 # umount ${OUTPUTDIR}
 chown $user: ${OUTPUTDIR}
 # mount ${OUTPUTDIR}
+
+[ $TAGS == 'n' ] && ACTIONS=$(echo $ACTIONS | sed 's/,tag//')
+[ $TAGA == 'n' ] && [ $TAGS == 'y' ] && ACTIONS=$(echo $ACTIONS | sed 's/$/,tag/')
+sed -i 's/^ACTIONS=.*/ACTIONS="'"$ACTIONS"'"/' $config
+
 OUTPUTDIR=$(echo $OUTPUTDIR | sed 's"/"\\\/"g')
 sed -i 's/^#\?OUTPUTDIR=".*/OUTPUTDIR="'"$OUTPUTDIR"'"/' $config
 sed -i 's/^#\?OUTPUTTYPE=".*/OUTPUTTYPE="'"$OUTPUTTYPE"'"/' $config
