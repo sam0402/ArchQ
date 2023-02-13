@@ -7,6 +7,7 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     pacman -Scc --noconfirm
     pacman -Syy --noconfirm
     pacman -S --noconfirm nano cdparanoia glyr imagemagick atomicparsley base-devel ffmpeg srt python-lxml python-requests
+    pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
     rm /root/*.pkg.tar.zst
     kver=$(pacman -Q | grep linux-Q | grep -v headers | awk 'NR==1{print $2}')
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
