@@ -6,7 +6,7 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     pacman -Sy --noconfirm archlinux-keyring
     pacman -Scc --noconfirm
     pacman -Syy --noconfirm
-    pacman -S --noconfirm nano cdparanoia glyr imagemagick atomicparsley base-devel ffmpeg srt python-pip python-mutagen
+    pacman -S --noconfirm nano cdparanoia glyr imagemagick atomicparsley base-devel ffmpeg srt python-lxml python-requests python-mutagen
     rm /root/*.pkg.tar.zst
     kver=$(pacman -Q | grep linux-Q | grep -v headers | awk 'NR==1{print $2}')
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
@@ -19,7 +19,6 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     systemctl enable rc-local.service
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde.conf >/etc/abcde.conf
     echo 'yes' | cpan install IO::Socket::SSL MusicBrainz::DiscID WebService::MusicBrainz
-    pip install requests lxml
     curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/ls2cddb.sh >/usr/bin/ls2cddb.sh
     chmod +x /usr/bin/ls2cddb.sh
 
