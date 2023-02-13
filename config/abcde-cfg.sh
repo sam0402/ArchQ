@@ -6,7 +6,7 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     pacman -Sy --noconfirm archlinux-keyring
     pacman -Scc --noconfirm
     pacman -Syy --noconfirm
-    pacman -S --noconfirm nano cdparanoia glyr imagemagick atomicparsley base-devel ffmpeg srt python-lxml python-requests python-mutagen
+    pacman -S --noconfirm nano cdparanoia glyr imagemagick atomicparsley base-devel ffmpeg srt python-lxml python-requests
     rm /root/*.pkg.tar.zst
     kver=$(pacman -Q | grep linux-Q | grep -v headers | awk 'NR==1{print $2}')
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
