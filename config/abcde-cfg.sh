@@ -42,7 +42,7 @@ while read line; do
     eval $(grep '=' | grep -v '#')
 done < $config
 
-echo $ACTIONS | grep -q tag && TAGA=y || TAGA=n
+[ -z $KID3CLI ] && TAGS=n || TAGS=y
 
 options=$(dialog --stdout \
     --title "abCDe ripper" \
@@ -50,7 +50,7 @@ options=$(dialog --stdout \
     --form "Modify settings" 0 40 0 \
     "Output directory"  1 1   "${OUTPUTDIR}"    1 18 40 0 \
     "Type (wav/flac)"   2 1   "${OUTPUTTYPE}"   2 18 40 0 \
-    "Add tags (y/n)"    3 1   "${TAGA}"         3 18 40 0 \
+    "Wav tags (y/n)"    3 1   "${TAGS}"         3 18 40 0 \
     "Read offset"       4 1   "${OFFSET}"       4 18 40 0 \
     "Read speed"        5 1   "${CDSPEEDVALUE}" 5 18 40 0 \
     "Eject CD (y/n)"    6 1   "${EJECTCD}"      6 18 40 0 \
@@ -67,7 +67,7 @@ CLOSETRAY=$(echo $options |  awk '//{print $7 }')
 
 [ -z $OUTPUTDIR ] && echo "Fail! Output directory is null." && exit 1
 [ -z $OUTPUTTYPE ] && echo "Fail! Output type is null." && exit 1
-[ -z $TAGS ] && echo "Fail! Read tags is null." && exit 1
+[ -z $TAGS ] && echo "Fail! Tags is null." && exit 1
 [ -z $OFFSET ] && echo "Fail! Read offset is null." && exit 1
 [ -z $CDSPEEDVALUE ] && echo "Fail! Read offset is null." && exit 1
 [ -z $EJECTCD ] && echo "Fail! Eject CD is null." && exit 1
@@ -77,10 +77,6 @@ CLOSETRAY=$(echo $options |  awk '//{print $7 }')
 chown $user: ${OUTPUTDIR}
 # mount ${OUTPUTDIR}
 
-[ $TAGS == 'n' ] && ACTIONS=$(echo $ACTIONS | sed 's/,tag//')
-[ $TAGA == 'n' ] && [ $TAGS == 'y' ] && ACTIONS=$(echo $ACTIONS | sed 's/$/,tag/')
-sed -i 's/^ACTIONS=.*/ACTIONS="'"$ACTIONS"'"/' $config
-
 OUTPUTDIR=$(echo $OUTPUTDIR | sed 's"/"\\\/"g')
 sed -i 's/^#\?OUTPUTDIR=".*/OUTPUTDIR="'"$OUTPUTDIR"'"/' $config
 sed -i 's/^#\?OUTPUTTYPE=".*/OUTPUTTYPE="'"$OUTPUTTYPE"'"/' $config
@@ -88,3 +84,4 @@ sed -i 's/^#\?OFFSET=".*/OFFSET="'"$OFFSET"'"/' $config
 sed -i 's/^#\?CDSPEEDVALUE=".*/CDSPEEDVALUE="'"$CDSPEEDVALUE"'"/' $config
 sed -i 's/^#\?EJECTCD=.*/EJECTCD='"$EJECTCD"'/' $config
 sed -i 's/^#\?CLOSETRAY=.*/CLOSETRAY='"$CLOSETRAY"'/' $config
+[ $TAGS == 'y' ] && sed -i 's/^KID3CLI=".*/KID3CLI="kid3-cli"/' $config || sed -i 's/^KID3CLI=".*/KID3CLI=""/' $config
