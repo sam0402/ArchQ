@@ -91,8 +91,21 @@ else
     sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
 fi
 
-### Volume Control
+### ALSA ###
+## Volume Control
 vol_ctrl ALSA $config
+
+## Buffer & Period Time
+buftime=$(grep 'buffer_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
+buftime=$(dialog --stdout \
+--title "ArchQ MPD" \
+    --ok-label "Ok" \
+    --form "Buffer time (μs)" 0 22 0 \
+    "<=60000"  1 1 $buftime 1 10 22 0) || exit 1
+clear
+pertime=$(expr $buftime / 4)
+sed -i 's/^#\?.* \?\tbuffer_time.*"/\tbuffer_time "'"$buftime"'"/' $config
+sed -i 's/^#\?.* \?\tperiod_time.*"/\tperiod_time "'"$pertime"'"/' $config
 
 ### Include audio output
 m0=off; h0=off
