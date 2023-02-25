@@ -57,13 +57,13 @@ options=$(dialog --stdout \
     "Close Tray (Sec)"  7 1  "${CLOSETRAY}"     7 18 40 0) || exit 1
 clear
 
-OUTPUTDIR=$(echo $options |  awk '//{print $1 }')
-OUTPUTTYPE=$(echo $options |  awk '//{print $2 }')
-TAGS=$(echo $options |  awk '//{print $3 }')
-OFFSET=$(echo $options |  awk '//{print $4 }')
-CDSPEEDVALUE=$(echo $options |  awk '//{print $5 }')
-EJECTCD=$(echo $options |  awk '//{print $6 }')
-CLOSETRAY=$(echo $options |  awk '//{print $7 }')
+OUTPUTDIR=$(echo $options | awk '//{print $1 }')
+OUTPUTTYPE=$(echo $options | awk '//{print $2 }')
+TAGS=$(echo $options | awk '//{print $3 }')
+OFFSET=$(echo $options | awk '//{print $4 }')
+CDSPEEDVALUE=$(echo $options | awk '//{print $5 }')
+EJECTCD=$(echo $options | awk '//{print $6 }')
+CLOSETRAY=$(echo $options | awk '//{print $7 }')
 
 [ -z $OUTPUTDIR ] && echo "Fail! Output directory is null." && exit 1
 [ -z $OUTPUTTYPE ] && echo "Fail! Output type is null." && exit 1

@@ -2,6 +2,7 @@
 config='/etc/mpd.conf'
 user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
 
+### Volume Control none/software/hardware
 vol_ctrl(){
     v_none='off'; v_soft='off'; v_hard='off'
     case $(grep 'mixer_type' $2 | cut -d'"' -f2) in
@@ -24,7 +25,7 @@ vol_ctrl(){
     clear
     sed -i 's/mixer_type.*"/mixer_type\t"'"$volume"'"/' $2
 }
-
+### MPD client select
 client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 R "RompR :6660" M "myMPD :80" N "Ncmpcpp curses" U "Multi user") || exit 1
 clear
 case $client in
@@ -52,6 +53,7 @@ case $client in
         clear
         num=$(grep 'mpd' /etc/passwd | wc -l)
         users=$(( $users + $num - 1 ))
+        # Httpd stream multi user
         for ((i=$num; i <= $users; i++))
         do
             useradd -mU "mpd$i"
@@ -95,30 +97,21 @@ fi
 ## Volume Control
 vol_ctrl ALSA $config
 
-## Buffer & Period Time
-buftime=$(grep 'buffer_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
-buftime=$(dialog --stdout \
---title "ArchQ MPD" \
-    --ok-label "Ok" \
-    --form "Buffer time (μs)" 0 22 0 \
-    "<=60000"  1 1 $buftime 1 10 22 0) || exit 1
-clear
-pertime=$(expr $buftime / 4)
-sed -i 's/^#\?.* \?\tbuffer_time.*"/\tbuffer_time "'"$buftime"'"/' $config
-sed -i 's/^#\?.* \?\tperiod_time.*"/\tperiod_time "'"$pertime"'"/' $config
-
-### Include audio output
-m0=off; h0=off
-m1=off; h1=off
+### Include audio output & Dop
+m0=off; h0=off; d0=off
+m1=off; h1=off; d1=off
 cat $config | grep owntone | grep -q '#' || m0=on 
 cat $config | grep httpd | grep -q '#' || h0=on
+cat $config | grep "^[[:space:]]dop" | grep -q '#' || d0=on
 output=$(dialog --stdout --title "ArchQ MPD" \
-        --checklist "Include output" 7 0 0 \
-        M Multiroom $m0 H Httpd $h0 ) || exit 1
+        --checklist "Output" 7 0 0 \
+        M Multiroom $m0 H Httpd $h0 D DoP $d0) || exit 1
 clear
 [[ $output =~ M ]] && m1=on
 [[ $output =~ H ]] && h1=on
+[[ $output =~ D ]] && d1=on
 
+## Airplay multi room on/off
 if [[ $m1 == on ]]; then
     [[ -d /var/lib/mpd/fifo ]] || install -o mpd -g mpd -m 755 -d /var/lib/mpd/fifo
     sed -i 's/^#.\?include_optional "mpd.d\/owntone.out"/include_optional "mpd.d\/owntone.out"/' $config
@@ -129,6 +122,7 @@ else
     systemctl --now disable owntone avahi-daemon.socket
 fi
 
+## Httpd stream output on/off
 if [[ $h1 == on ]]; then
     ht_conf='/etc/mpd.d/httpd.out'
     sed -i 's/^#.\?include_optional "mpd.d\/httpd.out"/include_optional "mpd.d\/httpd.out"/' $config
@@ -144,17 +138,28 @@ if [[ $h1 == on ]]; then
 else   
     sed -i 's/^include_optional "mpd.d\/httpd.out"/#include_optional "mpd.d\/httpd.out"/' $config
 fi
+## Dop on/off
+[[ $d1 == on ]] && sed -i 's/^#.\?dop.*/\tdop "yes"/' $config || sed -i 's/^[[:space:]]dop.*/#\tdop\t"yes"/' $config
 
-### Music direcroty 
+### Buffer time & Music direcroty 
 mdir=$(grep 'music_directory' $config | cut -d'"' -f2 | cut -d'/' -f3-)
-
-mdir=$(dialog --stdout \
+buftime=$(grep 'buffer_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
+options=$(dialog --stdout \
     --title "ArchQ MPD" \
     --ok-label "Ok" \
     --form "Music directory" 0 30 0 \
-    " /mnt/"  1 1 $mdir 1 7 30 0) || exit 1
+    "Buffer(μs)"    1 1 $buftime 1 12 30 0 \
+    "     /mnt/"    2 1 $mdir    2 12 30 0 ) || exit 1
 clear
-mdir=$(echo $mdir | sed 's"/"\\\/"g')
+buftime=$(echo $options | awk '//{print $1 }')
+pertime=$(expr $buftime / 4)
+mdir=$(echo $echo $options | awk '//{print $2}' | sed 's"/"\\\/"g')
+
+sed -i 's/^#\?.* \?\tbuffer_time.*"/\tbuffer_time "'"$buftime"'"/;s/^#\?.* \?\tperiod_time.*"/\tperiod_time "'"$pertime"'"/' $config
 sed -i 's/^#\?music_directory.*"/music_directory "\/mnt\/'"$mdir"'"/' $config
+
+### Blissify scan music directory as mpd
 [[ -f /etc/blissify.conf ]] && sed -i 's/"mpd_base_path": ".*/"mpd_base_path": "'"$mdir"'"/' /etc/blissify.conf
+
+### Restart MPD
 systemctl restart mpd
