@@ -147,7 +147,7 @@ buftime=$(grep 'buffer_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 options=$(dialog --stdout \
     --title "ArchQ MPD" \
     --ok-label "Ok" \
-    --form "Music directory" 0 30 0 \
+    --form "Buffer & Music directory" 0 30 0 \
     "Buffer(μs)"    1 1 $buftime 1 12 30 0 \
     "     /mnt/"    2 1 $mdir    2 12 30 0 ) || exit 1
 clear
