@@ -3,10 +3,10 @@ config='/etc/squeezelite.conf'
 
 ### Select squeezelite version
 ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
-inst=(0 pcmcf dsdcf pcmapl dsdapl pcm dsd)
+inst=(0 pcm dsd)
 option=$(dialog --stdout --title "ArchQ Squeezelite $1" \
         --menu "Select squeezelite: ${inst[$ver]^^}" 7 0 0 \
-        1 "PCM CF" 2 "DSD CF" 3 "PCM Apple" 4 "DSD Apple" 5 "PCM" 6 "DSD" ) || exit 1
+        1 "PCM" 2 "DSD" ) || exit 1
 
 if [ $ver -ne $option ]; then
     cpus=$(getconf _NPROCESSORS_ONLN)
