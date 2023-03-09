@@ -208,6 +208,7 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 pacstrap /mnt base linux linux-firmware ${cpu}-ucode grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs networkmanager openssh dhclient \
          vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
+sed -i 's/barrier,//g' /mnt/etc/fstab
 
 echo "${hostname}" > /mnt/etc/hostname
 echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" >> /mnt/etc/resolv.conf
