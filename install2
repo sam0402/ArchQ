@@ -56,13 +56,14 @@ fi
 lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
 clear
 
+ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
 ifport=$(dialog --stdout --title "ArchQ" --menu "Select net device" 7 0 0 ${ethers}) || exit 1
 clear
-ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
 
 ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1
 clear
 
+if [ $ip = S ]; then
 ifmask=24; ifdns=8.8.8.8
 ifconfig=$(dialog --stdout --title "ArchQ" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
             "Address" 1 1   ""          1 10 15 0 \
