@@ -258,8 +258,7 @@ EOF
 
 else
     echo "[Match]" >/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo "Name=${ifport}" >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo -e "\n" >>/mnt/etc/systemd/network/10-static-${ifport}.network
+    echo -e "Name=${ifport}\n" >>/mnt/etc/systemd/network/10-static-${ifport}.network
     echo "[Network]" >>/mnt/etc/systemd/network/10-static-${ifport}.network
     echo "Address=$ifaddr/$ifmask" >>/mnt/etc/systemd/network/10-static-${ifport}.network
     echo "Gateway=$ifgw" >>/mnt/etc/systemd/network/10-static-${ifport}.network
