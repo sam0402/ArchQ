@@ -56,14 +56,14 @@ fi
 lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
 clear
 
-ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1
-clear
-
-if [ $ip = S ]; then
 ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
 ifport=$(dialog --stdout --title "ArchQ" --menu "Select net device" 7 0 0 ${ethers}) || exit 1
 clear
 
+ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1
+clear
+
+if [ $ip = S ]; then
 ifmask=24; ifdns=8.8.8.8
 ifconfig=$(dialog --stdout --title "ArchQ" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
             "Address" 1 1   ""          1 10 15 0 \
@@ -242,31 +242,20 @@ arch-chroot /mnt ln -s /usr/bin/vim /usr/bin/vi
 
 ### Ethernet IP
 echo ......................
+echo "[Match]" >/mnt/etc/systemd/network/10-${ifport}.network
+echo -e "Name=${ifport}\n" >>/mnt/etc/systemd/network/10-${ifport}.network
+echo "[Network]" >>/mnt/etc/systemd/network/10-${ifport}.network
 if [ $ip = D ]; then
     echo Install DHCP Client...
-    cat >/mnt/etc/NetworkManager/conf.d/dhcp-client.conf <<EOF
-[main]
-dhcp=dhclient
-EOF
-    cat >/mnt/etc/NetworkManager/conf.d/dns.conf <<EOF
-[main]
-dns=none
-systemd-resolved=false
-EOF
-    arch-chroot /mnt systemctl enable NetworkManager.service
+    echo "DHCP=ipv4" >>/mnt/etc/systemd/network/10-${ifport}.network
+
     arch-chroot /mnt systemctl enable avahi-daemon
-
 else
-    echo "[Match]" >/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo -e "Name=${ifport}\n" >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo "[Network]" >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo "Address=$ifaddr/$ifmask" >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo "Gateway=$ifgw" >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo "DNS=$ifgw $ifdns" >>/mnt/etc/systemd/network/10-static-${ifport}.network
-
-    arch-chroot /mnt systemctl enable systemd-networkd
+    echo "Address=$ifaddr/$ifmask" >>/mnt/etc/systemd/network/10-${ifport}.network
+    echo "Gateway=$ifgw" >>/mnt/etc/systemd/network/10-${ifport}.network
+    echo "DNS=$ifgw $ifdns" >>/mnt/etc/systemd/network/10-${ifport}.network
 fi
-
+arch-chroot /mnt systemctl enable systemd-networkd
 # pacstrap /mnt iw wpa_supplicant 
 # arch-chroot cat >/etc/wpa_supplicant/wpa_supplicant-wlan.conf <<EOF
 # ctrl_interface=/run/wpa_supplicant
