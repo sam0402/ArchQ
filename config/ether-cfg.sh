@@ -8,8 +8,8 @@ if [ $(echo $ethers | wc -w) -gt 2 ]; then
     clear
 fi
 
-if [ -f "/etc/systemd/network/10-static-${ifport}.network" ]; then
-    config="/etc/systemd/network/10-static-${ifport}.network"
+if [ -f "/etc/systemd/network/10-${ifport}.network" ]; then
+    config="/etc/systemd/network/10-${ifport}.network"
     while read line; do
         eval $(grep '=' | sed 's/ /,/')
     done < $config
@@ -21,32 +21,41 @@ if [ -f "/etc/systemd/network/10-static-${ifport}.network" ]; then
 fi
 
 [ -z $ifmtu ] && ifmtu=1500
-ifconfig=$(dialog --stdout \
-            --title "ArchQ $1" \
-            --ok-label "Ok" \
-            --form "Ethernet $ifport IP setting" 10 38 0 \
-            "Address" 1 1   "$ifip"     1 10 15 0 \
-            "Netmask" 2 1   "$ifmask"   2 10 15 0 \
-            "Gateway" 3 1   "$Gateway"  3 10 15 0 \
-            "DNS"     4 1   "$ifdns"    4 10 15 0 \
-            "MTU"     5 1   "$ifmtu"    5 10 15 0) || exit 1
-clear
 
-ifaddr=$(echo $ifconfig | cut -d' ' -f1)
-ifmask=$(echo $ifconfig | cut -d' ' -f2)
-ifgw=$(echo $ifconfig | cut -d' ' -f3)
-ifdns=$(echo $ifconfig | cut -d' ' -f4)
-ifmtu=$(echo $ifconfig | cut -d' ' -f5)
+ip=$(dialog --stdout --title "ArchQ $1" --menu "Select IP setting" 7 0 0 S "Static IP" D "DHCP") || exit 1
+clear
+if [[ $ip == S ]]; then
+    ifconfig=$(dialog --stdout \
+                --title "ArchQ $1" \
+                --ok-label "Ok" \
+                --form "Ethernet $ifport IP setting" 10 38 0 \
+                "Address" 1 1   "$ifip"     1 10 15 0 \
+                "Netmask" 2 1   "$ifmask"   2 10 15 0 \
+                "Gateway" 3 1   "$Gateway"  3 10 15 0 \
+                "DNS"     4 1   "$ifdns"    4 10 15 0 \
+                "MTU"     5 1   "$ifmtu"    5 10 15 0) || exit 1
+    clear
+
+    ifaddr=$(echo $ifconfig | cut -d' ' -f1)
+    ifmask=$(echo $ifconfig | cut -d' ' -f2)
+    ifgw=$(echo $ifconfig | cut -d' ' -f3)
+    ifdns=$(echo $ifconfig | cut -d' ' -f4)
+    ifmtu=$(echo $ifconfig | cut -d' ' -f5)
+fi
 ifmac=$(ip link show $ifport | grep ether | awk '{print $2 }')
 
-echo [Match] >/etc/systemd/network/10-static-${ifport}.network
-echo Name=${ifport} >>/etc/systemd/network/10-static-${ifport}.network
-echo MACAddress=${ifmac} >>/etc/systemd/network/10-static-${ifport}.network
-echo  >>/etc/systemd/network/10-static-${ifport}.network
-echo [Network] >>/etc/systemd/network/10-static-${ifport}.network
-echo Address=$ifaddr/$ifmask >>/etc/systemd/network/10-static-${ifport}.network
-echo Gateway=$ifgw >>/etc/systemd/network/10-static-${ifport}.network
-echo DNS=$ifgw $ifdns >>/etc/systemd/network/10-static-${ifport}.network
-echo  >>/etc/systemd/network/10-static-${ifport}.network
-echo [Link] >>/etc/systemd/network/10-static-${ifport}.network
-echo MTUBytes=$ifmtu >>/etc/systemd/network/10-static-${ifport}.network
+echo [Match] >/etc/systemd/network/10-${ifport}.network
+echo Name=${ifport} >>/etc/systemd/network/10-${ifport}.network
+echo MACAddress=${ifmac} >>/etc/systemd/network/10-${ifport}.network
+echo  >>/etc/systemd/network/10-${ifport}.network
+echo [Network] >>/etc/systemd/network/10-${ifport}.network
+if [[ $ip == S ]]; then
+    echo Address=$ifaddr/$ifmask >>/etc/systemd/network/10-${ifport}.network
+    echo Gateway=$ifgw >>/etc/systemd/network/10-${ifport}.network
+    echo DNS=$ifgw $ifdns >>/etc/systemd/network/10-${ifport}.network
+else
+    echo DHCP=ipv4 >>/etc/systemd/network/10-${ifport}.network
+fi
+echo  >>/etc/systemd/network/10-${ifport}.network
+echo [Link] >>/etc/systemd/network/10-${ifport}.network
+echo MTUBytes=$ifmtu >>/etc/systemd/network/10-${ifport}.network
