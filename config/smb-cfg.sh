@@ -24,7 +24,8 @@ if [ $WK = A ]; then
     OP=$(echo $options | cut -d ' ' -f 5)
     [ $UN = '<null>' ] && UN=''
     [ $PW = '<null>' ] && PW=''
-    echo "${SN} /mnt/${MP} cifs username=$UN,password=$PW,_netdev,nofail,file_mode=0644,dir_mode=0755,$OP 0 0" >>$config
+    echo "${SN} /mnt/$MP cifs username=$UN,password=$PW,_netdev,nofail,file_mode=0644,dir_mode=0755,$OP 0 0" >>$config
+    mkdir -p /mnt/$MP
 elif [ $WK = D ]; then
     n=1; MENU=''
     while read line; do
