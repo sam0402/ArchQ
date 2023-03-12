@@ -48,7 +48,7 @@ else
         sed -i 's/ipv6.disable=1 //g' /etc/default/grub
     else
         DHCP='ipv4'
-        grep -q 'ipv6.disable=1' /etc/default/grub && sed -i 's/iomem=relaxed /iomem=relaxed ipv6.disable=1 /' /etc/default/grub
+        grep -q 'ipv6.disable=1' /etc/default/grub || sed -i 's/iomem=relaxed /iomem=relaxed ipv6.disable=1 /' /etc/default/grub
     fi
     grub-mkconfig -o /boot/grub/grub.cfg
 fi
