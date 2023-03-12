@@ -21,7 +21,7 @@ if [ -f "/etc/systemd/network/10-${ifport}.network" ]; then
 fi
 
 [ -z $ifmtu ] && ifmtu=1500
-
+[ $DHCP == 'true' ] && v6=on || v6=off
 ip=$(dialog --stdout --title "ArchQ $1" --menu "Select IP setting" 7 0 0 S "Static IP" D "DHCP") || exit 1
 clear
 if [[ $ip == S ]]; then
@@ -41,7 +41,18 @@ if [[ $ip == S ]]; then
     ifgw=$(echo $ifconfig | cut -d' ' -f3)
     ifdns=$(echo $ifconfig | cut -d' ' -f4)
     ifmtu=$(echo $ifconfig | cut -d' ' -f5)
+else
+    v6=$(dialog --stdout --title "ArchQ $1" --checklist "DHCP ${ifport}" 7 0 0 6 IPv6 $v6 ) || exit 1; clear
+    if [[ $v6 == '6' ]];then
+        DHCP='true'
+        sed -i 's/ipv6.disable=1 //g' /etc/default/grub
+    else
+        DHCP='ipv4'
+        grep -q 'ipv6.disable=1' /etc/default/grub && sed -i 's/iomem=relaxed /iomem=relaxed ipv6.disable=1 /' /etc/default/grub
+    fi
+    grub-mkconfig -o /boot/grub/grub.cfg
 fi
+
 ifmac=$(ip link show $ifport | grep ether | awk '{print $2 }')
 
 echo [Match] >/etc/systemd/network/10-${ifport}.network
@@ -54,8 +65,10 @@ if [[ $ip == S ]]; then
     echo Gateway=$ifgw >>/etc/systemd/network/10-${ifport}.network
     echo DNS=$ifgw $ifdns >>/etc/systemd/network/10-${ifport}.network
 else
-    echo DHCP=ipv4 >>/etc/systemd/network/10-${ifport}.network
+    echo DHCP=$DHCP >>/etc/systemd/network/10-${ifport}.network
+    echo "# IPv6PrivacyExtensions=true" >>/etc/systemd/network/10-${ifport}.network
 fi
 echo  >>/etc/systemd/network/10-${ifport}.network
 echo [Link] >>/etc/systemd/network/10-${ifport}.network
+echo NamePolicy=kernel database onboard slot path >>/etc/systemd/network/10-${ifport}.network
 echo MTUBytes=$ifmtu >>/etc/systemd/network/10-${ifport}.network
