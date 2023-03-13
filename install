@@ -248,7 +248,6 @@ echo "[Network]" >>/mnt/etc/systemd/network/10-${ifport}.network
 if [ $ip = D ]; then
     echo Install DHCP Client...
     echo "DHCP=ipv4" >>/mnt/etc/systemd/network/10-${ifport}.network
-
     arch-chroot /mnt systemctl enable avahi-daemon
 else
     echo "Address=$ifaddr/$ifmask" >>/mnt/etc/systemd/network/10-${ifport}.network
@@ -381,6 +380,7 @@ ACTION=="add|change", KERNEL=="sd[a-z]|mmcblk[0-9]*", ATTR{queue/rotational}=="0
 ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
 EOF
 sed -i 's/#Storage=auto/Storage=none/' /mnt/etc/systemd/journald.conf
+sed -i 's/wait-online/wait-online --any/' /mnt/usr/lib/systemd/system/systemd-networkd-wait-online.service
 ### install config file
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/timezone.sh >/mnt/usr/bin/timezone.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sqzlite-cfg.sh >/mnt/usr/bin/sqzlite-cfg.sh
