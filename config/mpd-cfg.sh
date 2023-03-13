@@ -114,18 +114,18 @@ clear
 ## Airplay multi room on/off
 if [[ $m1 == on ]]; then
     [[ -d /var/lib/mpd/fifo ]] || install -o mpd -g mpd -m 755 -d /var/lib/mpd/fifo
-    sed -i 's/^#.\?include_optional "mpd.d\/owntone.out"/include_optional "mpd.d\/owntone.out"/' $config
+    sed -i 's/^#.\?include_optional "mpd.d\/owntone.out"/include_optional\t"mpd.d\/owntone.out"/' $config
     systemctl start --now avahi-daemon.socket owntone
     # systemctl --user --now -M $user@ enable pipewire pipewire-pulse sinkdef
 else
-    sed -i 's/^include_optional "mpd.d\/owntone.out"/#include_optional "mpd.d\/owntone.out"/' $config
+    sed -i 's/^include_optional "mpd.d\/owntone.out"/#include_optional\t"mpd.d\/owntone.out"/' $config
     systemctl --now disable owntone avahi-daemon.socket
 fi
 
 ## Httpd stream output on/off
 if [[ $h1 == on ]]; then
     ht_conf='/etc/mpd.d/httpd.out'
-    sed -i 's/^#.\?include_optional "mpd.d\/httpd.out"/include_optional "mpd.d\/httpd.out"/' $config
+    sed -i 's/^#.\?include_optional "mpd.d\/httpd.out"/include_optional\t"mpd.d\/httpd.out"/' $config
     http_flac=off; http_wave=off
     [[ $(cat $ht_conf | grep 'encoder' $2 | cut -d'"' -f2) == 'flac' ]] && http_flac=on || http_wave=on
     encoder=$(dialog --stdout \
@@ -139,24 +139,28 @@ else
     sed -i 's/^include_optional "mpd.d\/httpd.out"/#include_optional "mpd.d\/httpd.out"/' $config
 fi
 ## Dop on/off
-[[ $d1 == on ]] && sed -i 's/^#.\?dop.*/\tdop "yes"/' $config || sed -i 's/^[[:space:]]dop.*/#\tdop\t"yes"/' $config
+[[ $d1 == on ]] && sed -i 's/^#.\?dop.*/\tdop\t"yes"/' $config || sed -i 's/^[[:space:]]dop.*/#\tdop\t"yes"/' $config
 
 ### Buffer time & Music direcroty 
 mdir=$(grep 'music_directory' $config | cut -d'"' -f2 | cut -d'/' -f3-)
+buffer=$(grep 'audio_buffer_size' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 buftime=$(grep 'buffer_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 options=$(dialog --stdout \
     --title "ArchQ MPD" \
     --ok-label "Ok" \
-    --form "Buffer & Music directory" 0 30 0 \
-    "Buffer(μs)"    1 1 $buftime 1 12 30 0 \
-    "     /mnt/"    2 1 $mdir    2 12 30 0 ) || exit 1
+    --form "Buffer & Directory" 0 35 0 \
+    "Audio Buffer"      1 1 $buffer 1 17 35 0 \
+    "ALSA Buffer(μs)"   2 1 $buftime 2 17 35 0 \
+    "Music Dir  /mnt/"   3 1 $mdir    3 17 35 0 ) || exit 1
 clear
-buftime=$(echo $options | awk '//{print $1 }')
+beffer=$(echo $options | awk '//{print $1 }')
+buftime=$(echo $options | awk '//{print $2 }')
 pertime=$(expr $buftime / 4)
-mdir=$(echo $echo $options | awk '//{print $2}' | sed 's"/"\\\/"g')
+mdir=$(echo $echo $options | awk '//{print $3}' | sed 's"/"\\\/"g')
 
-sed -i 's/^#\?.* \?\tbuffer_time.*"/\tbuffer_time "'"$buftime"'"/;s/^#\?.* \?\tperiod_time.*"/\tperiod_time "'"$pertime"'"/' $config
-sed -i 's/^#\?music_directory.*"/music_directory "\/mnt\/'"$mdir"'"/' $config
+sed -i 's/^#\?audio_buffer_size.*"/audio_buffer_size\t"'"$beffer"'"/' $config
+sed -i 's/^#\?.* \?\tbuffer_time.*"/\tbuffer_time\t"'"$buftime"'"/;s/^#\?.* \?\tperiod_time.*"/\tperiod_time\t"'"$pertime"'"/' $config
+sed -i 's/^#\?music_directory.*"/music_directory\t"\/mnt\/'"$mdir"'"/' $config
 
 ### Blissify scan music directory as mpd
 [[ -f /etc/blissify.conf ]] && sed -i 's/"mpd_base_path": ".*/"mpd_base_path": "'"$mdir"'"/' /etc/blissify.conf
