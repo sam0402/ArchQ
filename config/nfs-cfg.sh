@@ -20,6 +20,9 @@ if [ $WK = A ]; then
     OP=$(echo $options | cut -d ' ' -f 4)
 
     echo "$IP:$SN /mnt/$MP nfs defaults,_netdev,addr=$IP,nolock,$OP 0 0" >>$config
+    if ! pacman -Q nfs-utils >/dev/null 2>&1 ; then
+        pacman -S --noconfirm nfs-utils
+    fi
 elif [ $WK = D ]; then
     n=1; MENU=''
     while read line; do
