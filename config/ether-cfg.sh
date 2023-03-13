@@ -1,5 +1,4 @@
 #!/bin/bash
-ifmask=24; ifdns=8.8.8.8
 ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
 ifport=$(echo $ethers | cut -d ' ' -f1)
 if [ $(echo $ethers | wc -w) -gt 2 ]; then
@@ -19,8 +18,10 @@ if [ -f "/etc/systemd/network/10-${ifport}.network" ]; then
     ifdns=$(echo $DNS | cut -d',' -f2)
     ifmtu=$(echo $MTUBytes | cut -d',' -f2)
 fi
-
+[ -z $ifmask ] && ifmask='24'
+[ -z $ifdns ] && ifdns='8.8.8.8'
 [ -z $ifmtu ] && ifmtu=1500
+
 [ $DHCP == 'true' ] && v6=on || v6=off
 ip=$(dialog --stdout --title "ArchQ $1" --menu "Select IP setting" 7 0 0 S "Static IP" D "DHCP") || exit 1
 clear
