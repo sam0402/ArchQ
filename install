@@ -370,7 +370,7 @@ arch-chroot /mnt systemctl enable sshd cpupower ntpdate
 arch-chroot /mnt systemctl disable ntpd
 echo ........................
 echo IO Scheduler setting ...
-echo 'ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"' >/mnt/etc/udev/rules.d/pci_pm.rules
+# echo 'ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"' >/mnt/etc/udev/rules.d/pci_pm.rules
 cat >/mnt/etc/udev/rules.d/60-ioschedulers.rules <<EOF
 # set scheduler for NVMe
 ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/scheduler}="none"
