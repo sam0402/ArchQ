@@ -401,6 +401,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-c
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/bcache-cfg.sh >/mnt/usr/bin/bcache-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/datacache-cfg.sh >/usr/bin/datacache-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/zerowipe.sh >/mnt/usr/bin/zerowipe.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
