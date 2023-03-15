@@ -15,6 +15,11 @@ do
 done
 
 options=$(dialog --stdout --title "ArchQ $1" --checklist "Data Cache" 7 0 0 ${menu}) || exit 1; clear
+if [ ! -f "/usr/bin/pagecache-management.sh" ]; then
+    curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/usr/bin/pagecache-management.sh
+    wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
+    chmod +x /usr/bin/pagecache-management.sh
+fi
 for ((i=0; i < ${#arrList[@]}; i++))
 do
     if ( echo $options | grep -q $i ); then
@@ -23,4 +28,5 @@ do
     else
         sed -i 's|ExecStart=/usr/bin/pagecache-management.sh |ExecStart=|' "${serpath}${arrService[$i]}.service"
     fi
-done                        
+done
+systemctl daemon-reload             
