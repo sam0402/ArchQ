@@ -18,47 +18,20 @@ WK=$(dialog --stdout --title "ArchQ $Qver   $temp" \
         E Ethernet T Timezone V "NFS Server" X "Desktop & VNC" P "Active player" R "abCDe ripper" C "CPU frequency" Y Bcache Z "Zero Wipe" ${MENU}) || exit 1
 clear
 case $WK in
-    K)
-        /usr/bin/kernel-cfg.sh $Qver
-        ;;
-    M)
-        /usr/bin/partimnt-cfg.sh $Qver
-        ;;
-    N)
-        /usr/bin/nfs-cfg.sh $Qver
+    A)
+        /usr/bin/shairport-cfg.sh $Qver
         ;;
     B)
         /usr/bin/smb-cfg.sh $Qver
         ;;
-    D)
-        /usr/bin/mpd-cfg.sh $Qver
-        ;;
-    P)
-        /usr/bin/player-cfg.sh $Qver
-        ;;
-    E)
-        /usr/bin/ether-cfg.sh $Qver
-        ;;
-    S)
-        /usr/bin/sqzlite-cfg.sh $Qver
-        ;;
-    A)
-        /usr/bin/shairport-cfg.sh $Qver
-        ;;
-    X)
-        /usr/bin/desktop-cfg.sh $Qver
-        ;;
-    R)
-        /usr/bin/abcde-cfg.sh $Qver
-        ;;
     C)
         /usr/bin/cpu-cfg.sh $Qver
         ;;
-    T)
-        /usr/bin/timezone.sh $Qver
+    D)
+        /usr/bin/mpd-cfg.sh $Qver
         ;;
-    V)
-        /usr/bin/nfserver-cfg.sh $Qver
+    E)
+        /usr/bin/ether-cfg.sh $Qver
         ;;
     F)
         pacman -Q ffmpeg | grep -q '\-12' && ff=on || ff=off
@@ -74,11 +47,35 @@ case $WK in
             pacman -S --noconfirm ffmpeg
         fi
         ;;
-    Y)
-        /usr/bin/bcache-cfg.sh $Qver
+    G)
+        /usr/bin/datacache-cfg.sh $Qver
         ;;
-    Z)
-        /usr/bin/zerowipe.sh $Qver
+    H)
+        # pacman -Sy --noconfirm archlinux-keyring
+        # pacman -Scc --noconfirm
+        # pacman -Syy --noconfirm
+        # pacman -Syu --noconfirm
+        ;;
+    K)
+        /usr/bin/kernel-cfg.sh $Qver
+        ;;
+    M)
+        /usr/bin/partimnt-cfg.sh $Qver
+        ;;
+    N)
+        /usr/bin/nfs-cfg.sh $Qver
+        ;;
+    P)
+        /usr/bin/player-cfg.sh $Qver
+        ;;
+    R)
+        /usr/bin/abcde-cfg.sh $Qver
+        ;;
+    S)
+        /usr/bin/sqzlite-cfg.sh $Qver
+        ;;
+    T)
+        /usr/bin/timezone.sh $Qver
         ;;
     U)
         curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/usr/bin/update_scpt.sh
@@ -86,10 +83,16 @@ case $WK in
         /usr/bin/update_scpt.sh
         echo $git >/root/.update
         ;;
-    H)
-        # pacman -Sy --noconfirm archlinux-keyring
-        # pacman -Scc --noconfirm
-        # pacman -Syy --noconfirm
-        # pacman -Syu --noconfirm
+    V)
+        /usr/bin/nfserver-cfg.sh $Qver
+        ;;
+    X)
+        /usr/bin/desktop-cfg.sh $Qver
+        ;;
+    Y)
+        /usr/bin/bcache-cfg.sh $Qver
+        ;;
+    Z)
+        /usr/bin/zerowipe.sh $Qver
         ;;
 esac
