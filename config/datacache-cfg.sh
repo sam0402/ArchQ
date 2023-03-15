@@ -2,8 +2,8 @@
 serpath='/usr/lib/systemd/system/'
 service=("mpd" "logitechmediaserver" "squeezelite" "shairport-sync")
 nickname=("MPD" "LMS" "Squeezelite" "Airplay")
-menu=''
-arrList=()
+menu=''; arrList=(); arrService=()
+
 for ((i=0; i < ${#service[@]}; i++))
 do
     if [ -f "${serpath}${service[$i]}.service" ]; then
