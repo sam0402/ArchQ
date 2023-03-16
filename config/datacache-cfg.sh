@@ -2,16 +2,21 @@
 serpath='/usr/lib/systemd/system/'
 service=("mpd" "logitechmediaserver" "squeezelite" "shairport-sync")
 nickname=("MPD" "LMS" "Squeezelite" "Airplay")
-menu=''; arrList=(); arrService=()
 
+arrList=(); arrService=()
 for ((i=0; i < ${#service[@]}; i++))
 do
     if [ -f "${serpath}${service[$i]}.service" ]; then
-        menu+=$i' '${nickname[$i]}
         arrList+=(${nickname[$i]})
         arrService+=(${service[$i]})
-        grep -q pagecache-management "${serpath}${service[$i]}.service" && menu+=' on ' || menu+=' off '
     fi
+done
+
+menu='';
+for ((i=0; i < ${#arrList[@]}; i++))
+do
+    menu+=$i' '${arrList[$i]}
+    grep -q pagecache-management "${serpath}${arrService[$i]}.service" && menu+=' on ' || menu+=' off '
 done
 
 options=$(dialog --stdout --title "ArchQ $1" --checklist "Data cache OFF" 7 0 0 ${menu}) || exit 1; clear
