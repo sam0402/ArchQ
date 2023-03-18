@@ -19,10 +19,11 @@ case $WK in
         ID=$(echo $partdata | cut -d ' ' -f 3)
 
         OP='rw' 
-        [ $FS = ext4 ] && OP='defaults'
+        [ $FS = ext4 ] && OP='defaults,noatime'
         [ $FS = hfsplus ] && OP='rw,force,noatime'
         [ $FS = apfs ] && OP='readwrite'
-        [ $FS = f2fs ] && OP='rw'
+        [ $FS = f2fs ] && OP='rw,noatime'
+        [ $FS = xfs ] && OP='rw,noatime,noquota'
         if [ $FS = ntfs ]; then
             FS=ntfs3; OP='iocharset=utf8'
         fi
@@ -37,9 +38,8 @@ case $WK in
         MP=$(echo $options |  awk '//{print $1 }')
         OP=$(echo $options |  awk '//{print $2 }')
         [ $FS = f2fs ] && OP+= \
-        ',relatime,lazytime,background_gc=on,nodiscard,no_heap,inline_xattr,inline_data,inline_dentry,flush_merge,extent_cache,mode=adaptive,active_logs=6,alloc_mode=default,checkpoint_merge,fsync_mode=posix,discard_unit=block,memory=normal'
+        ',noatime,background_gc=on,no_heap,inline_xattr,inline_data,inline_dentry,flush_merge,extent_cache,mode=adaptive,active_logs=6,alloc_mode=reuse,checkpoint_merge,fsync_mode=posix,discard_unit=block,memory=normal'
         [ -z $OP ] && echo "Fail! Mount point is null." && exit 1
-
         mntuser=$(dialog --stdout --title "Mount point /mnt/$MP" \
             --radiolist "Set permission to" 7 0 0 \
              root '　' on \
