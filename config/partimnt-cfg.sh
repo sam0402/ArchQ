@@ -23,7 +23,7 @@ case $WK in
         [ $FS = hfsplus ] && OP='rw,force,noatime'
         [ $FS = apfs ] && OP='readwrite'
         [ $FS = f2fs ] && OP='rw,noatime'
-        [ $FS = xfs ] && OP='rw,noatime,attr2,noquota'
+        [ $FS = xfs ] && OP='rw,noatime'
         if [ $FS = ntfs ]; then
             FS=ntfs3; OP='iocharset=utf8'
         fi
@@ -37,6 +37,7 @@ case $WK in
         clear
         MP=$(echo $options |  awk '//{print $1 }')
         OP=$(echo $options |  awk '//{print $2 }')
+        [ $FS = xfs ] && OP+= ',attr2,inode64,logbufs=8,logbsize=32k,noquota'
         [ $FS = f2fs ] && OP+= \
         ',background_gc=on,no_heap,inline_xattr,inline_data,inline_dentry,flush_merge,extent_cache,mode=adaptive,active_logs=6,alloc_mode=reuse,checkpoint_merge,fsync_mode=posix,discard_unit=block,memory=normal'
         [ -z $OP ] && echo "Fail! Mount point is null." && exit 1
