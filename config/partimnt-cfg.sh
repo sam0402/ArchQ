@@ -23,7 +23,7 @@ case $WK in
         [ $FS = hfsplus ] && OP='rw,force,noatime'
         [ $FS = apfs ] && OP='readwrite'
         [ $FS = f2fs ] && OP='rw,noatime'
-        [ $FS = xfs ] && OP='rw,noatime,attr2,inode64,logbufs=8,logbsize=32k,noquota'
+        [ $FS = xfs ] && OP='rw,noatime,attr2,noquota'
         if [ $FS = ntfs ]; then
             FS=ntfs3; OP='iocharset=utf8'
         fi
