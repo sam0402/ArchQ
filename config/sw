@@ -1,5 +1,6 @@
 #!/bin/bash
 #serv=$(echo $0 | awk -F/ '{print $NF}')
+key="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI2ZDIzMmU5Y2Q2Nzg0NjQ3OWU1NGE1YmViYjE3ZTU0YSIsImlhdCI6MTY3MzM1MjU3MSwiZXhwIjoxOTg4NzEyNTcxfQ.Wj5dCh2HdmdeTsrL6h0dR4N2aQn2qT5hbAUyEBuFB1o"
 
 if [ -z $1 ]; then
 	echo "Using: sw mpd, roon, lms, rompr, airplay, mtroom and other service."
@@ -39,13 +40,20 @@ if [[ -n $user ]]; then
 	[[ $(systemctl is-active --user $serv) == active ]] && systemctl stop --user $service || systemctl start --user $service
 else
 	if [[ $(systemctl is-active $serv) == active ]]; then 
+		STATUS='off'
 		sudo systemctl stop $service
 	else
+		STATUS='on'
 		sudo systemctl start $service
-		ps H -q `pidof -s mpd` -o 'tid,cls' | grep FF | awk '{print $1}' | while read PROC; do chrt -fp 95 $PROC; done
-		ps H -q `pidof -s mpd` -o 'tid,cls' | grep TS | awk '{print $1}' | while read PROC; do chrt -fp 80 $PROC; done
-		chrt -fp 85 `pgrep mpd`
+		if [ $service = mpd ]; then
+			ps H -q `pidof -s mpd` -o 'tid,cls' | grep FF | awk '{print $1}' | while read PROC; do chrt -fp 95 $PROC; done
+			ps H -q `pidof -s mpd` -o 'tid,cls' | grep TS | awk '{print $1}' | while read PROC; do chrt -fp 80 $PROC; done
+			chrt -fp 85 `pgrep mpd`
+		fi
+		# chrt -fp 90 `pgrep ksoftirqd/$(ps -eLo comm,cpuid| grep "mpd" | awk '{print $2}')`
 	fi
+	curl -X POST -H "Authorization: Bearer $key" -H "Content-Type: application/json" -d '{"state": "'$STATUS'"}' \
+	http://192.168.1.37:8123/api/states/switch.$1 >/dev/null 2>&1
 fi
 
 echo Service $service is $(systemctl is-active $user $serv).
