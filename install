@@ -386,6 +386,7 @@ fi
 ### Other setting
 echo ........................
 echo Service setting ...
+sed -i "\$i #sleep 3" /mnt/etc/rc.local
 sed -i "\$i #systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-journald-dev-log.socket systemd-journald.socket dbus.socket systemd-udevd systemd-journald dbus systemd-networkd" /mnt/etc/rc.local
 arch-chroot /mnt systemctl enable sshd cpupower ntpdate rc-local
 arch-chroot /mnt systemctl disable ntpd
