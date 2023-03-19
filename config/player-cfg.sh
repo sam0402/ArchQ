@@ -22,20 +22,20 @@ if [[ $player =~ A && ! -f '/etc/shairport-sync.conf' ]]; then
     systemctl daemon-reload
 fi
 if [[ $player =~ S && ! -f '/etc/squeezelite.conf' ]]; then
-    [ $cpus -ge 4 ] && sed -i '/ExecStart=/iType=idle\nExecStartPost=/usr/bin/taskset -cp 3 $MAINPID' /usr/lib/systemd/system/squeezelite.service
     /usr/bin/sqzlite-cfg.sh
 fi
 
 if [[ $s0 != $s1 ]]; then
     if [[ $s1 == on ]]; then
         act+='squeezelite '
-        [ $cpus -ge 4 ] && isocpu='isolcpus=1 rcu_nocbs=1 irqaffinity=0,2-7 '
-        [ $cpus -ge 6 ] && [ $(systemctl is-active logitechmediaserver) = active ] && isocpu='isolcpus=1,4 rcu_nocbs=1,4 irqaffinity=0,2,3,5-7 '
-        sed -i 's/idle=poll /idle=poll '"$isocpu"'/' /etc/default/grub
+        iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
+        isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
+        [ $cpus -ge 4 ] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
+        [ $cpus -ge 6 ] && [ $(systemctl is-active logitechmediaserver) = active ] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
+        sed -i 's/idle=poll/idle=poll '"$isocpu"'/' /etc/default/grub
     else
         inact+='squeezelite '
-        sed -i 's/isolcpus=1 rcu_nocbs=1 irqaffinity=0,2-7 //' /etc/default/grub
-        sed -i 's/isolcpus=1,4 rcu_nocbs=1,4 irqaffinity=0,2,3,5-7 /isolcpus=1 rcu_nocbs=1 irqaffinity=0,2-7 /' /etc/default/grub
+        sed -i 's/idle=poll '"$isocpu"'//' /etc/default/grub
     fi
     grub-mkconfig -o /boot/grub/grub.cfg
 fi
