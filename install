@@ -386,7 +386,7 @@ fi
 ### Other setting
 echo ........................
 echo Service setting ...
-sed -i "\$i systemctl stop systemd-udevd systemd-udevd-kernel.socket systemd-udevd-control.socket" /mnt/etc/rc.local
+sed -i "\$i systemctl stop systemd-udevd systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-journald systemd-journald-dev-log.socket systemd-journald.socket" /mnt/etc/rc.local
 arch-chroot /mnt systemctl enable sshd cpupower ntpdate rc-local
 arch-chroot /mnt systemctl disable ntpd
 ###
