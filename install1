@@ -333,8 +333,8 @@ case $server in
         sed -i '$d' /mnt/etc/rc.local
         cat >>/mnt/etc/rc.local <<EOF
 if systemctl is-active mpd >/dev/null; then
-    ps H -q `pidof -s mpd` -o 'tid,cls' | grep FF | awk '{print $1}' | while read PROC; do chrt -fp 95 $PROC; done
-    ps H -q `pidof -s mpd` -o 'tid,cls' | grep TS | awk '{print $1}' | while read PROC; do chrt -fp 80 $PROC; done
+    ps H -q `pidof -s mpd` -o 'tid,cls' | grep FF | awk '{print \$1}' | while read PROC; do chrt -fp 95 \$PROC; done
+    ps H -q `pidof -s mpd` -o 'tid,cls' | grep TS | awk '{print \$1}' | while read PROC; do chrt -fp 80 \$PROC; done
     chrt -fp 85 `pgrep mpd`
 fi
 exit 0
