@@ -20,7 +20,7 @@ do
 done
 
 options=$(dialog --stdout --title "ArchQ $1" --checklist "Data cache OFF" 7 0 0 ${menu}) || exit 1; clear
-if [ ! -f "/usr/bin/pagecache-management.sh" ]; then
+if [ ! -f "/usr/bin/pagecache-management.so" ]; then
     curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/usr/bin/pagecache-management.sh
     wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
     chmod +x /usr/bin/pagecache-management.sh
