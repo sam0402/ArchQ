@@ -208,7 +208,7 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 pacstrap /mnt base linux linux-firmware ${cpu}-ucode grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
          vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
-sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard//g' /mnt/etc/fstab
+sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
 cat >>/mnt/etc/fstab <<EOF
 none /tmp tmpfs nodev,nosuid,noexec,mode=1777 0 0
 none /var/log tmpfs nodev,nosuid,noexec,size=10M 0 0
