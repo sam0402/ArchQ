@@ -345,6 +345,7 @@ EOF
         sed -i 's/hostname/'"${hostname,,}"'/' /mnt/etc/nginx/sites-available/rompr
         sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /mnt/etc/php/php.ini
         sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /mnt/etc/php/php.ini
+        sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /mnt/usr/lib/systemd/system/nginx.service
 
         arch-chroot /mnt ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
         arch-chroot /mnt chmod 644 /etc/nginx/sites-enabled/rompr
