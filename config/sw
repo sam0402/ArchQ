@@ -45,7 +45,7 @@ else
 	else
 		STATUS='on'
 		sudo systemctl start $service
-		if [ $service = mpd ]; then
+		if systemctl is-active mpd >/dev/null; then
 			ps H -q `pidof -s mpd` -o 'tid,cls' | grep FF | awk '{print $1}' | while read PROC; do chrt -p 95 $PROC; done
 			chrt -fp 85 `pgrep mpd`
 		fi
