@@ -7,15 +7,15 @@ Qver=$(uname -r | awk -F - '{print $3}')
 temp=$(sensors | grep 'Core 0' | awk '{print $3}')
 
 MENU=''
-pacman -Q mpd >/dev/null 2>&1 && MENU='D MPD '
+[ $git -gt $num ] && MENU+='U Update '
+pacman -Q mpd >/dev/null 2>&1 && MENU+='D MPD '
 pacman -Q squeezelite >/dev/null 2>&1 && MENU+='S Squeezelite '
 pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='A Airplay '
 pacman -Q ffmpeg >/dev/null 2>&1 && MENU+='F FFmpeg '
-[ $git -gt $num ] && MENU+='U Update '
 
 WK=$(dialog --stdout --title "ArchQ $Qver   $temp" \
-    --menu "Select to config" 7 0 0 K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" \
-        E Ethernet T Timezone V "NFS Server" X "Desktop & VNC" P "Active player" R "abCDe ripper" C "CPU frequency" G "Data cache" Y Bcache Z "Zero Wipe" ${MENU}) || exit 1
+    --menu "Select to config" 7 0 0 ${MENU} K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P "Active player"  \
+    G "Data cache" C "CPU frequency" R "abCDe ripper" E Ethernet Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone X "Desktop & VNC") || exit 1
 clear
 case $WK in
     A)
