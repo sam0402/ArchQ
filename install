@@ -322,10 +322,10 @@ case $server in
         arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.11-4-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-1.61-1-any.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/blissify-0.3.3-1-x86_64.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.11-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.11-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-2.00-1-any.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.5-1-x86_64.pkg.tar.zst /root/blissify-0.3.3-1-x86_64.pkg.tar.zst
 
 ### setup mpd
@@ -346,7 +346,6 @@ EOF
         sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /mnt/etc/php/php.ini
         sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /mnt/etc/php/php.ini
         sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /mnt/usr/lib/systemd/system/nginx.service
-
         arch-chroot /mnt ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
         arch-chroot /mnt chmod 644 /etc/nginx/sites-enabled/rompr
 ### Start mpd.. etc. service
