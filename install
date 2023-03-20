@@ -388,9 +388,11 @@ echo Setting service ...
 sed -i "\$i sleep 3" /mnt/etc/rc.local
 sed -i '$d' /mnt/etc/rc.local
 cat >>/mnt/etc/rc.local <<EOF
-systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald dbus.socket dbus 
+systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
 # systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-udevd 
+# systemctl stop dbus.socket dbus 
 # systemctl stop systemd-networkd
+# hdparm -a0 /dev/sda >/dev/null 2>&1
 exit 0
 EOF
 arch-chroot /mnt systemctl enable sshd cpupower ntpdate rc-local
