@@ -30,10 +30,10 @@ user=sam
 # : ${user:?"user cannot be empty"}
 password=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password" 0 0) || exit 1
 clear
-: ${password:?"password cannot be empty"}
-password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password again" 0 0) || exit 1
-clear
-[[ "$password" == "$password2" ]] || ( echo "Passwords did not match"; exit 1; )
+# : ${password:?"password cannot be empty"}
+# password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password again" 0 0) || exit 1
+# clear
+# [[ "$password" == "$password2" ]] || ( echo "Passwords did not match"; exit 1; )
 
 devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1
