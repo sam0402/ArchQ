@@ -1,0 +1,471 @@
+#!/bin/bash
+# WARNING: this script will destroy data on the selected disk.
+# This script can be run by executing the following:
+#   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install.sh | bash
+kver='6.0.1-12'
+
+set -uo pipefail
+trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
+
+MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
+echo -e "\n\nArchQ will ping "Arch Linux Server" 10 times before installation.\n\n"
+ping -c 10 archlinux.org
+pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
+curl -O https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/scrub-2.6.1-1-x86_64.pkg.tar.zst
+pacman -U --noconfirm scrub-2.6.1-1-x86_64.pkg.tar.zst
+
+echo "Updating mirror list"
+curl -s "$MIRRORLIST_URL" | \
+    sed -e 's/^#Server/Server/' -e '/^#/d' | \
+    rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
+
+### Get infomation from user ###
+hostname=ArchQ
+# hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname" 0 0) || exit 1
+# clear
+# : ${hostname:?"hostname cannot be empty"}
+user=sam
+# user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1
+# clear
+# : ${user:?"user cannot be empty"}
+password=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password" 0 0) || exit 1
+clear
+: ${password:?"password cannot be empty"}
+password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password again" 0 0) || exit 1
+clear
+[[ "$password" == "$password2" ]] || ( echo "Passwords did not match"; exit 1; )
+
+devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
+device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1
+clear
+
+fmt=$(dialog --stdout --title "ArchQ" --menu "Format ${device}" 7 0 0 F "Full disk" R "Retain database") || exit 1
+clear
+
+zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe disk times" 0 30 0) || exit 1
+clear
+
+f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1
+clear
+
+# if [ $fmt = F ]; then
+#     bcache=$(dialog --stdout --title "ArchQ" --menu "Add Bcache partition" 8 0 0 D "Disable" E "Enable") || exit 1
+#     clear
+# fi
+lang=E
+# lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
+# clear
+ip=S
+# ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1
+# clear
+
+if [ $ip = S ]; then
+ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
+ifport=$(echo $ethers | cut -d ' ' -f1)
+if [ $(echo $ethers | wc -w) -gt 2 ]; then
+    ifport=$(dialog --stdout --title "ArchQ" --menu "Select ethernet device" 7 0 0 ${ethers}) || exit 1
+    clear
+fi
+
+ifaddr=192.168.1.100; ifgw=192.168.1.1
+ifmask=24; ifdns=8.8.8.8
+# ifconfig=$(dialog --stdout --title "ArchQ" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
+#             "Address" 1 1   ""          1 10 15 0 \
+#             "Netmask" 2 1   "$ifmask"   2 10 15 0 \
+#             "Gateway" 3 1   ""          3 10 15 0 \
+#             "DNS"     4 1   "$ifdns"    4 10 15 0) || exit 1
+# clear
+
+# ifaddr=$(echo $ifconfig | cut -d' ' -f1)
+# ifmast=$(echo $ifconfig | cut -d' ' -f2)
+# ifgw=$(echo $ifconfig | cut -d' ' -f3)
+# ifdns=$(echo $ifconfig | cut -d' ' -f4)
+fi
+
+player=A
+server=M
+clear
+case $server in
+    L)
+        player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
+        ;;
+    N)
+        player=$(dialog --stdout --title "ArchQ" \
+                --checklist "Select music player" 7 0 0 \
+                S Squeezelite on \
+                A Airplay off \
+                R Roonbridge off ) || exit 1
+        ;;
+esac
+clear
+
+### select sound card
+scard=""
+if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A || $player =~ S || $server = M || $server = T ]]; then
+    devs='hw:0,0 　 '
+    while read line; do
+        devs+=${line}' 　 '
+    done <<< $(aplay -L | grep ':')
+    scard=$(dialog --stdout \
+                --title "ArchQ" \
+                --menu "Select sound device" 7 0 0 ${devs}) || exit 1
+    clear
+fi
+
+### Set up logging ###
+exec 1> >(tee "stdout.log")
+exec 2> >(tee "stderr.log")
+
+timedatectl set-ntp true
+
+### Setup the disk and partitions ###
+if [ $fmt = F ]; then
+# Wipe disk with zerofill
+    for ((i=1; i <= $zerofill; i++))
+    do
+        echo "Fill zero -> $i"
+        scrub -Sp fillzero $device
+    done
+#swap_size=$(free --mebi | awk '/Mem:/ {print $2}')
+#   swap_size=256
+#   root_size=4608
+#   swap_end=$(( $swap_size + 257 + 1 ))MiB
+#   root_end=$(( $root_size + $swap_size + 257 + 1 ))MiB
+#   parted --script "${device}" -- mklabel gpt \
+#     mkpart ESP fat32 1Mib 257MiB \
+#     set 1 boot on \
+#     mkpart primary linux-swap 257MiB ${swap_end} \
+#     mkpart primary ext4 ${swap_end} ${root_end} \
+#     mkpart primary ext4 ${root_end} 100%
+    root_size=3875
+    root_end=$(( $root_size + 257 + 1 ))MiB
+    if [ $bcache = D ]; then
+        parted --script "${device}" -- mklabel gpt \
+            mkpart ESP fat32 1Mib 257MiB \
+            set 1 boot on \
+            mkpart primary ext4 257MiB ${root_end} \
+            mkpart primary ext4 ${root_end} 100%
+    else
+        data_size=2048
+        data_end=$(( $data_size + $root_size + 257 + 1 ))MiB
+        parted --script "${device}" -- mklabel gpt \
+            mkpart ESP fat32 1Mib 257MiB \
+            set 1 boot on \
+            mkpart primary ext4 257MiB ${root_end} \
+            mkpart primary ext4 ${root_end} ${data_end} \
+            mkpart primary ext4 ${data_end} 100%
+    fi
+fi
+
+# Simple globbing was not enough as on one device I needed to match /dev/mmcblk0p1 
+# but not /dev/mmcblk0boot1 while being able to match /dev/sda1 on other devices.
+part_boot="$(ls ${device}* | grep -E "^${device}p?1$")"
+# part_swap="$(ls ${device}* | grep -E "^${device}p?2$")"
+part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
+part_data="$(ls ${device}* | grep -E "^${device}p?3$")"
+
+if [ $fmt = R ]; then
+# Wipe partition with zerofill
+    for ((i=1; i <= $zerofill; i++))
+    do
+        echo "Fill zero -> $i"
+        scrub -Sp fillzero $part_root
+    done
+fi
+
+wipefs "${part_boot}"
+# wipefs "${part_swap}"
+wipefs "${part_root}"
+wipefs "${part_data}"
+
+mkfs.vfat -F32 "${part_boot}"
+# mkswap "${part_swap}"
+if [ $f2fs = F ]; then
+    mkfs.f2fs -fl root "${part_root}"
+    [ $fmt = F ] && mkfs.f2fs -fl data "${part_data}"
+else
+    mkfs.xfs -fL root "${part_root}"
+    [ $fmt = F ] && mkfs.xfs -fL data "${part_data}"
+fi
+# swapon "${part_swap}"
+
+mount "${part_root}" /mnt
+mkdir /mnt/boot
+mount "${part_boot}" /mnt/boot
+case $server in
+    L)
+        [ ! -d /mnt/opt/logitechmediaserver ] && mkdir -p /mnt/opt/logitechmediaserver
+        mount "${part_data}" /mnt/opt/logitechmediaserver
+        ;;
+    R)
+        [ ! -d /mnt/var/roon ] && mkdir -p /mnt/var/roon
+        mount "${part_data}" /mnt/var/roon
+        ;;
+    M)
+        [ ! -d /mnt/var/lib/mpd ] && mkdir -p /mnt/var/lib/mpd
+        mount "${part_data}" /mnt/var/lib/mpd
+        ;;
+esac
+
+cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
+
+pacstrap /mnt base linux linux-firmware ${cpu}-ucode grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
+         vim wget avahi sudo dialog lm_sensors cronie ntp rsync htop hdparm
+genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
+sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
+cat >>/mnt/etc/fstab <<EOF
+none /tmp tmpfs nodev,nosuid,noexec,mode=1777 0 0
+none /var/log tmpfs nodev,nosuid,noexec,size=10M 0 0
+none /var/tmp tmpfs nodev,nosuid,noexec,size=20M 0 0
+EOF
+
+echo "${hostname}" > /mnt/etc/hostname
+echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" >> /mnt/etc/resolv.conf
+arch-chroot /mnt useradd -mU "$user"
+sed -i '0,/# %wheel/s/# %wheel/%wheel/' /mnt/etc/sudoers
+arch-chroot /mnt usermod -aG wheel $user
+echo "$user $hostname =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot,/usr/bin/qboot,/usr/bin/sw,/usr/bin/amixer" >>/mnt/etc/sudoers
+
+### Set locale language
+echo -e "en_US.UTF-8 UTF-8\nja_JP.UTF-8 UTF-8\nzh_TW.UTF-8 UTF-8" >/mnt/etc/locale.gen
+arch-chroot /mnt locale-gen
+echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
+[ $lang = J ] && echo "LANG=ja_JP.UTF-8" > /mnt/etc/locale.conf
+[ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/etc/locale.conf
+arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime
+[ $lang = J ] && arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+
+# echo "$user:$password" | chpasswd --root /mnt
+arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
+# echo "root:$password" | chpasswd --root /mnt
+arch-chroot /mnt sh -c "echo root:$password | chpasswd"
+arch-chroot /mnt mkinitcpio -p linux
+arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=${hostname}
+arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+
+echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
+[ $f2fs = X ] && sed -i 's/MODULES=()/MODULES=(xfs)/' /mnt/etc/mkinitcpio.conf
+
+arch-chroot /mnt ln -s /usr/bin/vim /usr/bin/vi
+
+### Ethernet IP
+echo ......................
+echo "[Match]" >/mnt/etc/systemd/network/10-${ifport}.network
+echo -e "Name=${ifport}\n" >>/mnt/etc/systemd/network/10-${ifport}.network
+echo "[Network]" >>/mnt/etc/systemd/network/10-${ifport}.network
+if [ $ip = D ]; then
+    echo Install DHCP Client...
+    echo "DHCP=ipv4" >>/mnt/etc/systemd/network/10-${ifport}.network
+    arch-chroot /mnt systemctl enable avahi-daemon
+else
+    echo "Address=$ifaddr/$ifmask" >>/mnt/etc/systemd/network/10-${ifport}.network
+    echo "Gateway=$ifgw" >>/mnt/etc/systemd/network/10-${ifport}.network
+    echo "DNS=$ifgw $ifdns" >>/mnt/etc/systemd/network/10-${ifport}.network
+fi
+    arch-chroot /mnt systemctl enable systemd-networkd
+# pacstrap /mnt iw wpa_supplicant 
+# arch-chroot cat >/etc/wpa_supplicant/wpa_supplicant-wlan.conf <<EOF
+# ctrl_interface=/run/wpa_supplicant
+# update_config=1
+# EOF
+# arch-chroot /mnt wpa_supplicant -B -i wlan -c /etc/wpa_supplicant/wpa_supplicant-wlan.conf
+
+### Kernel
+ker=Q396
+[ $cpu = amd ] && ker=Q308AMD
+[ $server = N ] && ker=${ker}w
+echo .......................
+echo Install Kernel ...
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll acpi_pm_good nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
+    /mnt/etc/default/grub
+
+cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
+iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
+#cpus=$(getconf _NPROCESSORS_ONLN)
+isocpu=''
+[ $cpus -ge 4 ] && [[ $server = L || $player =~ S ]] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
+[ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
+sed -i 's/idle=poll /idle=poll '"$isocpu"'/' /mnt/etc/default/grub
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+
+# Add /etc/rc.local
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rc-local-4-1-any.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/rc-local-4-1-any.pkg.tar.zst
+
+## server
+echo ...............
+case $server in
+    L)
+        echo Install LMS ...
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
+        arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
+        [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
+        [ $cpus -ge 6 ] && [[ $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
+        sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/logitechmediaserver.service
+        arch-chroot /mnt systemctl enable logitechmediaserver
+        ;;
+    R)
+        echo Install Roon ...
+        arch-chroot /mnt pacman -S --noconfirm alsa-lib glibc ffmpeg cifs-utils icu
+        mkdir -p /mnt/opt/RoonServer /mnt/usr/share/licenses/roonserver
+        arch-chroot /mnt wget -qO - http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2 | bsdtar xf - -C /mnt/opt
+        curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver.service >/mnt/usr/lib/systemd/system/roonserver.service
+        chmod 644 /mnt/usr/lib/systemd/system/roonserver.service
+        curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roon_copyright >/mnt/usr/share/licenses/roonserver/COPYING
+        sed -i 's/exec "$HARDLINK" "$SCRIPT.dll" "$@"/exec nice -n -20 "$HARDLINK" "$SCRIPT.dll" "$@"/g' /mnt/opt/RoonServer/Appliance/RAATServer
+        arch-chroot /mnt systemctl enable roonserver
+        ;;
+    M)
+        echo Install MPD ...
+        arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.11-4-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
+
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.5-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/blissify-0.3.3-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.11-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.5-1-x86_64.pkg.tar.zst /root/blissify-0.3.3-1-x86_64.pkg.tar.zst
+
+# [Install]
+# WantedBy=default.target
+# EOF
+#         arch-chroot /mnt su $user -c "systemctl --user enable pipewire pipewire-pulse sinkdef"
+### setup mpd
+        [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
+
+### Setup RompR
+
+### Start mpd.. etc. service
+        arch-chroot /mnt systemctl enable mpd
+        ;;
+esac
+### Install Player
+echo Install alsa-lib ......
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -Sd --noconfirm alsa-utils
+
+if [[ $player =~ S ]]; then
+    echo Install Squeezelite ...
+    mkdir -p /mnt/root/squzlite
+    arch-chroot /mnt wget -qP /root/squzlite https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-pcm-x86_64.pkg.tar.zst
+    arch-chroot /mnt wget -qP /root/squzlite https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
+    arch-chroot /mnt wget -qP /root/squzlite https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-pcmapl-x86_64.pkg.tar.zst
+    arch-chroot /mnt wget -qP /root/squzlite https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsdapl-x86_64.pkg.tar.zst
+    arch-chroot /mnt wget -qP /root/squzlite https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-pcmcf-x86_64.pkg.tar.zst
+    arch-chroot /mnt wget -qP /root/squzlite https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsdcf-x86_64.pkg.tar.zst
+    arch-chroot /mnt pacman -U --noconfirm /root/squzlite/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
+    [[ -n "$scard" ]] && sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/squeezelite.conf
+    arch-chroot /mnt systemctl enable squeezelite
+fi
+if [[ $player =~ A ]]; then
+    echo Install Airplay ...
+    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
+    arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
+    [[ -n "$scard" ]] && sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/' /mnt/etc/shairport-sync.conf
+    arch-chroot /mnt systemctl enable shairport-sync
+fi
+if  [[ $player =~ R ]]; then
+    echo Install Roonbridge ...
+    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonbridge-1.8.880-1-x86_64.pkg.tar.zst
+    arch-chroot /mnt pacman -U --noconfirm /root/roonbridge-1.8.880-1-x86_64.pkg.tar.zst
+    arch-chroot /mnt systemctl enable roonbridge
+fi
+
+### other setting
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/uhubctl-2.4.0-1-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/uhubctl-2.4.0-1-x86_64.pkg.tar.zst
+
+arch-chroot /mnt systemctl enable sshd ntpdate rc-local
+arch-chroot /mnt systemctl disable ntpd
+###
+echo 'ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"' >/mnt/etc/udev/rules.d/pci_pm.rules
+cat >/mnt/etc/udev/rules.d/60-ioschedulers.rules <<EOF
+# set scheduler for NVMe
+ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/scheduler}="none"
+# set scheduler for SSD and eMMC
+ACTION=="add|change", KERNEL=="sd[a-z]|mmcblk[0-9]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="kyber"
+# set scheduler for rotating disks
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
+EOF
+# cat >/mnt/etc/udev/rules.d/69-hdparm.rules <<EOF
+# ACTION=="add|change", KERNEL=="sd[a-z]", ATTRS{queue/rotational}=="1", RUN+="/usr/bin/hdparm -a 0 -A 0 /dev/%k"
+# EOF
+sed -i 's/#Storage=auto/Storage=none/' /mnt/etc/systemd/journald.conf
+sed -i 's/wait-online/wait-online --any/' /mnt/usr/lib/systemd/system/systemd-networkd-wait-online.service
+### install config file
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/timezone.sh >/mnt/usr/bin/timezone.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sqzlite-cfg.sh >/mnt/usr/bin/sqzlite-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/nfs-cfg.sh >/mnt/usr/bin/nfs-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/nfserver-cfg.sh >/mnt/usr/bin/nfserver-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/smb-cfg.sh >/mnt/usr/bin/smb-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/ether-cfg.sh >/mnt/usr/bin/ether-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/kernel-cfg.sh >/mnt/usr/bin/kernel-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/cpu-cfg.sh >/mnt/usr/bin/cpu-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/partimnt-cfg.sh >/mnt/usr/bin/partimnt-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/mnt/usr/bin/update_scpt.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/player-cfg.sh >/mnt/usr/bin/player-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg.sh >/mnt/usr/bin/desktop-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/mnt/usr/bin/shairport-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/bcache-cfg.sh >/mnt/usr/bin/bcache-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/datacache-cfg.sh >/mnt/usr/bin/datacache-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/zerowipe.sh >/mnt/usr/bin/zerowipe.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sw >/mnt/usr/bin/sw
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/mnt/usr/bin/pagecache-management.sh
+arch-chroot /mnt wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
+chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/sw
+
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpdalsavol.service >/mnt/usr/lib/systemd/system/mpdalsavol.service
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpdalsavol.py >/mnt/usr/bin/mpdalsavol.py
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/asound.conf >/mnt/etc/asound.conf
+chmod +x /mnt/usr/bin/mpdalsavol.py
+arch-chroot /mnt systemctl enable mpdalsavol
+
+cat >>/mnt/home/${user}/.bashrc <<EOF
+\$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
+export kver=\$(uname -r | cut -d- -f3)
+alias abcde='eject -t; abcde'
+alias poweroff='sudo systemctl poweroff'
+alias reboot='sudo systemctl reboot'
+alias config='sudo config.sh'
+alias qboot='sudo qboot'
+alias cdr='cd /mnt/rip'
+alias cdq='cd /music/BR-Rip'
+alias mvrip='mv /mnt/rip/* /music/Roon/Qrip'
+alias qrip='yes | sudo qboot 1'
+alias qplay='yes | sudo qboot 2'
+alias sw='sudo sw'
+taginfo='ffprobe -v quiet -of json -show_entries format_tags'
+alias hddoff='sudo hdparm -Y /dev/sda'
+cdr
+EOF
+sed -i 's/\\h/\\h:\\e[0\;${PSC}m$kver\\e[m/' /mnt/home/${user}/.bashrc
+# alias fcover='metaflac --import-picture-from=Cover.jpg *.flac'
+# alias cover='for f in *.m4a;do atomicparsley "\$f" --overWrite --artwork REMOVE_ALL --artwork *.jpg;done'
+# alias cdnum='for f in *.m4a;do atomicparsley "\$f" --overWrite --disk "\\!:1" ;done'
+
+cat >>/mnt/root/.bashrc <<EOF
+\$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
+export kver=\$(uname -r | cut -d- -f3)
+PS1='[\u@\h:\e[0;\${PSC}m\$kver\e[m \W]\$ '
+alias config='config.sh'
+alias status='systemctl status'
+alias hddoff='hdparm -Y /dev/sda'
+alias remount='mount -o remount,rw /data;mount -o remount,rw /music'
+EOF
+
+# Install ramroot
+# arch-chroot /mnt wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/pkg/main/ramroot-2.0.2-1-x86_64.pkg.tar.zst | pacman -U
+# sed -i 's/ps_default=no/ps_default=yes/' /mnt/etc/ramroot.conf
+# arch-chroot /mnt mkinitcpio -P
+
+dialog --stdout --title "ArchQ" --pause \
+    "\n  ArchQ is installed, unplug the USB driver.\n\n  System will reboot after 10 seconds." 12 50 10
+reboot
