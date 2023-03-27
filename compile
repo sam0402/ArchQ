@@ -30,10 +30,10 @@ user=sam
 # : ${user:?"user cannot be empty"}
 password=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password" 0 0) || exit 1
 clear
-: ${password:?"password cannot be empty"}
-password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password again" 0 0) || exit 1
-clear
-[[ "$password" == "$password2" ]] || ( echo "Passwords did not match"; exit 1; )
+# : ${password:?"password cannot be empty"}
+# password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password again" 0 0) || exit 1
+# clear
+# [[ "$password" == "$password2" ]] || ( echo "Passwords did not match"; exit 1; )
 
 devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1
@@ -209,9 +209,15 @@ esac
 
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 
-pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs networkmanager openssh dhclient \
-         vim wget sudo dialog cpupower lm_sensors cronie ntp exfatprogs rsync htop
+pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
+         vim wget sudo dialog lm_sensors cronie ntp rsync htop hdparm
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
+sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
+cat >>/mnt/etc/fstab <<EOF
+none /tmp tmpfs nodev,nosuid,noexec,mode=1777 0 0
+none /var/log tmpfs nodev,nosuid,noexec,size=10M 0 0
+none /var/tmp tmpfs nodev,nosuid,noexec,size=20M 0 0
+EOF
 
 echo "${hostname}" > /mnt/etc/hostname
 echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" >> /mnt/etc/resolv.conf
@@ -236,7 +242,7 @@ arch-chroot /mnt sh -c "echo root:$password | chpasswd"
 arch-chroot /mnt mkinitcpio -p linux
 arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=${hostname}
 arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
-# arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
 [ $f2fs = X ] && sed -i 's/MODULES=()/MODULES=(xfs)/' /mnt/etc/mkinitcpio.conf
@@ -245,32 +251,19 @@ arch-chroot /mnt ln -s /usr/bin/vim /usr/bin/vi
 
 ### Ethernet IP
 echo ......................
+echo "[Match]" >/mnt/etc/systemd/network/10-${ifport}.network
+echo -e "Name=${ifport}\n" >>/mnt/etc/systemd/network/10-${ifport}.network
+echo "[Network]" >>/mnt/etc/systemd/network/10-${ifport}.network
 if [ $ip = D ]; then
     echo Install DHCP Client...
-    cat >/mnt/etc/NetworkManager/conf.d/dhcp-client.conf <<EOF
-[main]
-dhcp=dhclient
-EOF
-    cat >/mnt/etc/NetworkManager/conf.d/dns.conf <<EOF
-[main]
-dns=none
-systemd-resolved=false
-EOF
-    arch-chroot /mnt systemctl enable NetworkManager.service
+    echo "DHCP=ipv4" >>/mnt/etc/systemd/network/10-${ifport}.network
     arch-chroot /mnt systemctl enable avahi-daemon
-
 else
-    echo "[Match]" >/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo "Name=${ifport}" >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo -e "\n" >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo "[Network]" >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo "Address=$ifaddr/$ifmask" >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo "Gateway=$ifgw" >>/mnt/etc/systemd/network/10-static-${ifport}.network
-    echo "DNS=$ifgw $ifdns" >>/mnt/etc/systemd/network/10-static-${ifport}.network
-
-    arch-chroot /mnt systemctl enable systemd-networkd
+    echo "Address=$ifaddr/$ifmask" >>/mnt/etc/systemd/network/10-${ifport}.network
+    echo "Gateway=$ifgw" >>/mnt/etc/systemd/network/10-${ifport}.network
+    echo "DNS=$ifgw $ifdns" >>/mnt/etc/systemd/network/10-${ifport}.network
 fi
-
+    arch-chroot /mnt systemctl enable systemd-networkd
 # pacstrap /mnt iw wpa_supplicant 
 # arch-chroot cat >/etc/wpa_supplicant/wpa_supplicant-wlan.conf <<EOF
 # ctrl_interface=/run/wpa_supplicant
@@ -285,20 +278,22 @@ ker=Qrip
 echo .......................
 echo Install Kernel ...
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/bcache-tools-1.1-1-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst /root/bcache-tools-1.1-1-x86_64.pkg.tar.zst
-sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll nosmt clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable no_timer_check intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
+arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll acpi_pm_good nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
     /mnt/etc/default/grub
 
 cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
 iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
 #cpus=$(getconf _NPROCESSORS_ONLN)
 isocpu=''
-# isocpu="isolcpus=1 rcu_nocbs=1 irqaffinity=0,2-7 "
 [ $cpus -ge 4 ] && [[ $server = L || $player =~ S ]] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
 [ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
 sed -i 's/idle=poll /idle=poll '"$isocpu"'/' /mnt/etc/default/grub
-# arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+
+# Add /etc/rc.local
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rc-local-4-1-any.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/rc-local-4-1-any.pkg.tar.zst
 
 ## server
 echo ...............
@@ -328,25 +323,14 @@ case $server in
         arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.9-3-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
-        # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mopidy-mpd-3.3.0-1-any.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-1.61-1-any.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.9-3-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-1.61-1-any.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.9-3-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
 
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
 
 ### Setup RompR
-        mkdir -p /mnt/etc/nginx/sites-available /mnt/etc/nginx/sites-enabled
-        sed -i '$i include /etc/nginx/sites-enabled/*;' /mnt/etc/nginx/nginx.conf
-        curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/mnt/etc/nginx/sites-available/rompr
-        sed -i 's/hostname/'"${hostname,,}"'/' /mnt/etc/nginx/sites-available/rompr
-        sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /mnt/etc/php/php.ini
-        sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /mnt/etc/php/php.ini
 
-        arch-chroot /mnt ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
-        arch-chroot /mnt chmod 644 /etc/nginx/sites-enabled/rompr
 ### Start mpd.. etc. service
-        arch-chroot /mnt systemctl enable mpd nginx php-fpm avahi-daemon
         ;;
 esac
 ### Install Player
@@ -366,8 +350,6 @@ if [[ $player =~ S ]]; then
     arch-chroot /mnt wget -qP /root/squzlite https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsdcf-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/squzlite/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
     [[ -n "$scard" ]] && sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/squeezelite.conf
-    curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite.service >/mnt/usr/lib/systemd/system/squeezelite.service
-    arch-chroot /mnt systemctl daemon-reload
     arch-chroot /mnt systemctl enable squeezelite
 fi
 if [[ $player =~ A ]]; then
@@ -388,11 +370,10 @@ fi
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/uhubctl-2.4.0-1-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/uhubctl-2.4.0-1-x86_64.pkg.tar.zst
 
-arch-chroot /mnt systemctl enable sshd cpupower ntpdate
+arch-chroot /mnt systemctl enable sshd ntpdate rc-local
 arch-chroot /mnt systemctl disable ntpd
-echo ........................
-echo IO Scheduler setting ...
-echo 'ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"' >/mnt/etc/udev/rules.d/pci_pm.rules >/etc/udev/rules.d/pci_pm.rules
+###
+echo 'ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"' >/mnt/etc/udev/rules.d/pci_pm.rules
 cat >/mnt/etc/udev/rules.d/60-ioschedulers.rules <<EOF
 # set scheduler for NVMe
 ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/scheduler}="none"
@@ -419,10 +400,13 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-c
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/bcache-cfg.sh >/mnt/usr/bin/bcache-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/datacache-cfg.sh >/mnt/usr/bin/datacache-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/zerowipe.sh >/mnt/usr/bin/zerowipe.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sw >/mnt/usr/bin/sw
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/mnt/usr/bin/pagecache-management.sh
+arch-chroot /mnt wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/sw
 
 cat >>/mnt/home/${user}/.bashrc <<EOF
@@ -440,7 +424,7 @@ alias qrip='yes | sudo qboot 1'
 alias qplay='yes | sudo qboot 2'
 alias sw='sudo sw'
 taginfo='ffprobe -v quiet -of json -show_entries format_tags'
-alias cover='for f in *.m4a;do atomicparsley "\$f" --overWrite --artwork REMOVE_ALL --artwork *.jpg;done'
+alias hddoff='sudo hdparm -Y /dev/sda'
 cdr
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$kver\\e[m/' /mnt/home/${user}/.bashrc
@@ -451,6 +435,7 @@ export kver=\$(uname -r | cut -d- -f3)
 PS1='[\u@\h:\e[0;\${PSC}m\$kver\e[m \W]\$ '
 alias config='config.sh'
 alias status='systemctl status'
+alias hddoff='hdparm -Y /dev/sda'
 alias remount='mount -o remount,rw /data;mount -o remount,rw /music'
 EOF
 
