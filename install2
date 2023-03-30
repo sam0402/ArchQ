@@ -34,7 +34,7 @@ devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
 fmt=$(dialog --stdout --title "ArchQ" --menu "Format ${device}" 7 0 0 F "Full disk" P "Partition") || exit 1; clear
 if [ $fmt = P ]; then
-    partlst=$(lsblk -pln -o name,size,fstype $device | sed -e '1d;s/\s\+/ /g;s/\s/,/2')
+    partlst=$(lsblk -pln -o name,size,partlabel,fstype $device | sed -e '1d;s/\s\+/ /g;s/\s/,/2;s/\s/,/2')
     part_root=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partlst) || exit 1; clear
     part_boot=$(lsblk -pln -o name,partlabel | grep ESP | awk '{print $1}')
     [ -z $part_boot ] && part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
