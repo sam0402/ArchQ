@@ -440,7 +440,7 @@ EOF
 # arch-chroot /mnt mkinitcpio -P
 
 # Detect other OS
-if [ -z "$old_efi" ]; then
+if [ ! -z "$old_efi" ]; then
     mount "${old_efi}" /mnt/mnt
     arch-chroot /mnt os-prober
     arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
