@@ -39,8 +39,9 @@ case $WK in
     B)
         mount "$part_boot" /mnt
         os-prober
-        umount /mnt
+        sleep 1
         grub-mkconfig -o $grub_cfg
+        umount /mnt
         grub_def='/etc/default/grub'
         if [ -n "$(grep '#GRUB_DISABLE_SUBMENU' $grub_def)" ]; then 
             sed -i 's/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' $grub_def
