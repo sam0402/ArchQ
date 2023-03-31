@@ -111,7 +111,7 @@ if [ $fmt = F ]; then
 #     mkpart primary ext4 ${swap_end} ${root_end} \
 #     mkpart primary ext4 ${root_end} 100%
     root_size=4608
-    root_end=$(( $root_size + 257 + 1 ))MiB
+    [ $server = R ] && root_end='100%' || root_end=$(( $root_size + 257 + 1 ))MiB
     parted --script "${device}" -- mklabel gpt \
         mkpart ESP fat32 1Mib 257MiB \
         set 1 boot on \
