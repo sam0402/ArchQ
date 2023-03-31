@@ -9,7 +9,6 @@ mkgrub(){
     mount "$part_boot" /mnt
     sleep 1
     os-prober
-    sleep 1
     grub-mkconfig -o /boot/grub/grub.cfg
     umount /mnt
 }
