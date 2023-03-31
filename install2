@@ -98,6 +98,15 @@ exec 2> >(tee "stderr.log")
 
 timedatectl set-ntp true
 
+# Wipe root partition with zerofill
+if [ $fmt = P ]; then
+    for ((i=1; i <= $zerofill; i++))
+    do
+        echo "Fill zero -> $i"
+        scrub -Sp fillzero $part_root
+    done
+fi
+
 if [ $fmt = F ]; then
 #swap_size=$(free --mebi | awk '/Mem:/ {print $2}')
 #   swap_size=256
@@ -105,23 +114,24 @@ if [ $fmt = F ]; then
 #   swap_end=$(( $swap_size + 257 + 1 ))MiB
 #   root_end=$(( $root_size + $swap_size + 257 + 1 ))MiB
 #   parted --script "${device}" -- mklabel gpt \
-#     mkpart ESP fat32 1Mib 257MiB \
+#     mkpart EFI fat32 1Mib 257MiB \
 #     set 1 boot on \
 #     mkpart primary linux-swap 257MiB ${swap_end} \
 #     mkpart primary ext4 ${swap_end} ${root_end} \
 #     mkpart primary ext4 ${root_end} 100%
     root_size=4608
-    [ $server = R ] && root_end='100%' || root_end=$(( $root_size + 257 + 1 ))MiB
+    root_end=$(( $root_size + 257 + 1 ))MiB
     parted --script "${device}" -- mklabel gpt \
-        mkpart ESP fat32 1Mib 257MiB \
+        mkpart EFI fat32 1Mib 257MiB \
         set 1 boot on \
-        mkpart ArchQ ext4 257MiB ${root_end}
-        # mkpart Data ext4 ${root_end} 100%
+        mkpart ArchQ ext4 257MiB ${root_end} \
+        mkpart Database ext4 ${root_end} 100%
 
     # Simple globbing was not enough as on one device I needed to match /dev/mmcblk0p1
     # but not /dev/mmcblk0boot1 while being able to match /dev/sda1 on other devices.
     part_boot="$(ls ${device}* | grep -E "^${device}p?1$")"
     part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
+    part_data="$(ls ${device}* | grep -E "^${device}p?3$")"
 
     # Format boot partition (EFI/ESP)
     wipefs "${part_boot}"
@@ -133,6 +143,7 @@ for ((i=1; i <= $zerofill; i++))
 do
     echo "Fill zero -> $i"
     scrub -Sp fillzero $part_root
+    scrub -Sp fillzero $part_data
 done
 
 # Format root partition by F2FS || XFS
@@ -141,12 +152,13 @@ done
 mount "${part_root}" /mnt
 mkdir /mnt/boot
 mount "${part_boot}" /mnt/boot
-# case $server in
-#     R)
-#         [ ! -d /mnt/var/roon ] && mkdir -p /mnt/var/roon
-#         mount "${part_data}" /mnt/var/roon
-#         ;;
-# esac
+
+fi [ $server = R ]; then
+        wipefs "${part_data}"
+        [ $f2fs = F ] && mkfs.f2fs -fl Database "${part_data}" || mkfs.xfs -fL Database "${part_data}"
+        [ ! -d /mnt/var/roon ] && mkdir -p /mnt/var/roon
+        mount "${part_data}" /mnt/var/roon
+fi
 
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 [ -f /mnt/boot/${cpu}-ucode.img ] || pacstrap /mnt ${cpu}-ucode
