@@ -32,7 +32,7 @@ password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password aga
     
 devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
-fmt=$(dialog --stdout --title "ArchQ" --menu "Format ${device}" 7 0 0 F "Full disk" P "Partition") || exit 1; clear
+fmt=$(dialog --stdout --title "ArchQ" --menu "Format ${device}" 7 0 0 E "Entire disk" P "Partition") || exit 1; clear
 if [ $fmt = P ]; then
     partlst='dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 '
     while read line; do
@@ -98,27 +98,35 @@ exec 2> >(tee "stderr.log")
 
 timedatectl set-ntp true
 
-# Wipe root partition with zerofill
+# Foramt and install in one partition
 if [ $fmt = P ]; then
+    # Rebuild partition if EFI < 200MB
+    if [ $(lsblk $part_boot -pln -o size | tr -d [:alpha:]) -lt 200 ]; then
+        boot_start=$(parted $device 'unit s' print | grep "^ ${part_root:0-1}" | tail -1 | awk -F '[[:space:]]*' '{ print $3 }')
+        boot_end=$(expr ${boot_start::-1} + 524287)s
+        root_start=$(expr ${boot_start::-1} + 524288)s
+        parted --script "${device}" -- \
+            rm "${part_root:0-1}" \
+            mkpart EFI fat32 $boot_start $boot_end \
+            set "${part_root:0-1}" boot on \
+            mkpart ArchQ ext4 $root_start 100%
+         old_boot=$part_boot
+        part_boot=$part_root
+        part_root=$(ls ${device}* | grep -E "^${device}p?$((${part_root:0-1} + 1))$")
+        mkdir /old_boot
+        mount $old_boot /old_boot
+    fi
+    # Wipe root partition with zerofill
     for ((i=1; i <= $zerofill; i++))
     do
         echo "Fill zero -> $i"
         scrub -Sp fillzero $part_root
     done
-fi
 
-if [ $fmt = F ]; then
-#swap_size=$(free --mebi | awk '/Mem:/ {print $2}')
-#   swap_size=256
-#   root_size=4608
-#   swap_end=$(( $swap_size + 257 + 1 ))MiB
-#   root_end=$(( $root_size + $swap_size + 257 + 1 ))MiB
-#   parted --script "${device}" -- mklabel gpt \
-#     mkpart EFI fat32 1Mib 257MiB \
-#     set 1 boot on \
-#     mkpart primary linux-swap 257MiB ${swap_end} \
-#     mkpart primary ext4 ${swap_end} ${root_end} \
-#     mkpart primary ext4 ${root_end} 100%
+    wipefs "${part_boot}"
+    mkfs.vfat -F32 "${part_boot}"
+else
+    # Install in entire disk
     root_size=4608
     root_end=$(( $root_size + 257 + 1 ))MiB
     parted --script "${device}" -- mklabel gpt \
@@ -152,6 +160,8 @@ done
 mount "${part_root}" /mnt
 mkdir /mnt/boot
 mount "${part_boot}" /mnt/boot
+# Copy EFI entire data to new ESP
+[ -d /old_boot ] && cp -a /old_boot/. /mnt/boot/.
 
 if [ $server = R ]; then
         wipefs "${part_data}"
