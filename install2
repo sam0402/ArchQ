@@ -40,7 +40,7 @@ if [ $fmt = P ]; then
         partlable=$(echo $line | awk '{print substr($0,index($0,$2))}')
         partlst+=$partname' '\"$partlable\"' '
     done <<< $(lsblk -pln -o name,size,partlabel,fstype $device | sed -e '1d')
-    optipart_rootons=$(eval $partlst) || exit 1; clear
+    part_root=$(eval $partlst) || exit 1; clear
     part_boot=$(lsblk -pln -o name,partlabel | grep ESP | awk '{print $1}')
     [ -z $part_boot ] && part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
 fi
