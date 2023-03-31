@@ -233,9 +233,6 @@ arch-chroot /mnt systemctl enable systemd-networkd
 # EOF
 # arch-chroot /mnt wpa_supplicant -B -i wlan -c /etc/wpa_supplicant/wpa_supplicant-wlan.conf
 
-# Detect other OS
-[ -z "$old_efi" ] || (mount "${old_efi}" /mnt/mnt; arch-chroot /mnt os-prober)
-
 ### Kernel
 ker=Q352
 [ $cpu = amd ] && ker=Q308AMD
@@ -441,6 +438,13 @@ EOF
 # arch-chroot /mnt wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/pkg/main/ramroot-2.0.2-1-x86_64.pkg.tar.zst | pacman -U
 # sed -i 's/ps_default=no/ps_default=yes/' /mnt/etc/ramroot.conf
 # arch-chroot /mnt mkinitcpio -P
+
+# Detect other OS
+if [ -z "$old_efi" ]; then
+    mount "${old_efi}" /mnt/mnt
+    arch-chroot /mnt os-prober
+    arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+fi
 
 dialog --stdout --title "ArchQ" --pause \
     "\n  ArchQ is installed, unplug the USB driver.\n\n  System will reboot after 10 seconds." 12 50 10
