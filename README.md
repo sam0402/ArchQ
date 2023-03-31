@@ -15,7 +15,7 @@ Install step:
 
 3. Boot up with USB drive with UEFI mode, than typing as below. (Use 'ip addr' to check if conneted on the network or not.)
  
-`curl https://raw.githubusercontent.com/sam0402/ArchQ/main/install | bash`
+   `curl https://raw.githubusercontent.com/sam0402/ArchQ/main/install | bash`
 
 4. After reboot, the monitor will not show any message only 'linux-Q352 ...'
 
