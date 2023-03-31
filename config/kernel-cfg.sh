@@ -4,6 +4,9 @@ grub_cfg='/boot/grub/grub.cfg'
 WK=$(dialog --stdout --title "ArchQ $1" \
             --menu "Select command" 7 0 0 B "Boot" I "Install" R "Remove" F "Frequency") || exit 1; clear
 part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
+mount "$part_boot" /mnt
+sleep 1
+os-prober
 case $WK in
     I)
         exec='dialog --stdout --title "ArchQ '$1'" --menu "Select to install" 7 0 0 '
@@ -37,11 +40,6 @@ case $WK in
         grub-mkconfig -o $grub_cfg
         ;;
     B)
-        mount "$part_boot" /mnt
-        os-prober
-        sleep 1
-        grub-mkconfig -o $grub_cfg
-        umount /mnt
         grub_def='/etc/default/grub'
         if [ -n "$(grep '#GRUB_DISABLE_SUBMENU' $grub_def)" ]; then 
             sed -i 's/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' $grub_def
@@ -69,3 +67,4 @@ case $WK in
         dialog --stdout --title "ArchQ $1" --msgbox "\nKernel working frequency: $count" 7 35
         ;;
 esac
+umount /mnt
