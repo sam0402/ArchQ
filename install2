@@ -158,8 +158,6 @@ done
 mount "${part_root}" /mnt
 mkdir /mnt/boot
 mount "${part_boot}" /mnt/boot
-# Detect other OS
-[ -z "$old_efi" ] || (mount "${old_efi}" /mnt/mnt; arch-chroot /mnt os-prober)
 
 if [ $server = R ]; then
         wipefs "${part_data}"
@@ -226,12 +224,16 @@ else
     echo "DNS=$ifgw $ifdns" >>/mnt/etc/systemd/network/10-${ifport}.network
 fi
 arch-chroot /mnt systemctl enable systemd-networkd
+
 # pacstrap /mnt iw wpa_supplicant 
 # arch-chroot cat >/etc/wpa_supplicant/wpa_supplicant-wlan.conf <<EOF
 # ctrl_interface=/run/wpa_supplicant
 # update_config=1
 # EOF
 # arch-chroot /mnt wpa_supplicant -B -i wlan -c /etc/wpa_supplicant/wpa_supplicant-wlan.conf
+
+# Detect other OS
+[ -z "$old_efi" ] || (mount "${old_efi}" /mnt/mnt; arch-chroot /mnt os-prober)
 
 ### Kernel
 ker=Q352
