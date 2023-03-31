@@ -101,7 +101,7 @@ timedatectl set-ntp true
 # Foramt and install in one partition
 if [ $fmt = P ]; then
     # Rebuild partition if EFI < 200MB
-    if [ $(lsblk $part_boot -pln -o size | tr -d [:alpha:]) -lt 200 ]; then
+    if [ $(lsblk $part_boot -pln -o size | tr -d [:alpha:]) -lt 300 ]; then
         boot_start=$(parted $device 'unit s' print | grep "^ ${part_root:0-1}" | tail -1 | awk -F '[[:space:]]*' '{ print $3 }')
         boot_end=$(expr ${boot_start::-1} + 524287)s
         root_start=$(expr ${boot_start::-1} + 524288)s
