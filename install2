@@ -7,8 +7,8 @@ set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
-echo -e "\n\nArchQ will ping "Arch Linux Server" 30 times before installation.\n\n"
-ping -c 30 archlinux.org
+echo -e "\n\nArchQ will ping "Arch Linux Server" 25 times before installation.\n\n"
+ping -c 25 archlinux.org
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
 curl -O https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/scrub-2.6.1-1-x86_64.pkg.tar.zst
 pacman -U --noconfirm scrub-2.6.1-1-x86_64.pkg.tar.zst
@@ -145,9 +145,11 @@ mount "${part_boot}" /mnt/boot
 # esac
 
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
+[ -f /mnt/boot/${cpu}-ucode.img ] || pacstrap /mnt ${cpu}-ucode
 
-pacstrap /mnt base linux linux-firmware ${cpu}-ucode grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
+pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
          vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm
+
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
 cat >>/mnt/etc/fstab <<EOF
