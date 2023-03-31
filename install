@@ -447,6 +447,6 @@ if [ ! -z "$old_efi" ]; then
     arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 fi
 
-# dialog --stdout --title "ArchQ" --pause \
-#     "\n  ArchQ is installed, unplug the USB driver.\n\n  System will reboot after 10 seconds." 12 50 10
-# reboot
+dialog --stdout --title "ArchQ" --pause \
+    "\n  ArchQ is installed, unplug the USB driver.\n\n  System will reboot after 10 seconds." 12 50 10
+reboot
