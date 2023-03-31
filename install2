@@ -34,8 +34,13 @@ devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
 fmt=$(dialog --stdout --title "ArchQ" --menu "Format ${device}" 7 0 0 F "Full disk" P "Partition") || exit 1; clear
 if [ $fmt = P ]; then
-    partlst=$(lsblk -pln -o name,size,partlabel,fstype $device | sed -e '1d;s/\s\+/ /g;s/\s/,/2;s/\s/,/2')
-    part_root=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partlst) || exit 1; clear
+    partlst='dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 '
+    while read line; do
+        partname=$(echo $line | awk '{print $1}')
+        partlable=$(echo $line | awk '{print substr($0,index($0,$2))}')
+        partlst+=$partname' '\"$partlable\"' '
+    done <<< $(lsblk -pln -o name,size,partlabel,fstype $device | sed -e '1d')
+    optipart_rootons=$(eval $partlst) || exit 1; clear
     part_boot=$(lsblk -pln -o name,partlabel | grep ESP | awk '{print $1}')
     [ -z $part_boot ] && part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
 fi
@@ -132,7 +137,7 @@ do
 done
 
 # Format root partition by F2FS || XFS
-[ $f2fs = F ] && mkfs.f2fs -fl root "${part_root}" || mkfs.xfs -fL root "${part_root}"
+[ $f2fs = F ] && mkfs.f2fs -fl ArchQ "${part_root}" || mkfs.xfs -fL ArchQ "${part_root}"
 
 mount "${part_root}" /mnt
 mkdir /mnt/boot
