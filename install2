@@ -28,7 +28,7 @@ user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) ||
 password=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password" 0 0) || exit 1; clear
 : ${password:?"password cannot be empty"}
 password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password again" 0 0) || exit 1; clear
-[[ "$password" == "$password2" ]] || (dialog --stdout --title "ArchQ" --pause "\n  Passwords did not match.\n\n  Install again." 12 40 5; exit 1)
+[[ "$password" == "$password2" ]] || (dialog --stdout --title "ArchQ" --pause "\n  Passwords did not match.\n\n  Install again." 12 40 5; exit 1; clear)
     
 devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
@@ -85,9 +85,7 @@ if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A || $player =~ S || $server = 
     while read line; do
         devs+=${line}' 　 '
     done <<< $(aplay -L | grep ':')
-    scard=$(dialog --stdout \
-                --title "ArchQ" \
-                --menu "Select sound device" 7 0 0 ${devs}) || exit 1; clear
+    scard=$(dialog --stdout --title "ArchQ" --menu "Select sound device" 7 0 0 ${devs}) || exit 1; clear
 fi
 
 ### Set up logging ###
@@ -96,6 +94,7 @@ exec 2> >(tee "stderr.log")
 
 timedatectl set-ntp true
 
+if [ $fmt = F ]; then
 #swap_size=$(free --mebi | awk '/Mem:/ {print $2}')
 #   swap_size=256
 #   root_size=4608
@@ -112,14 +111,18 @@ timedatectl set-ntp true
     parted --script "${device}" -- mklabel gpt \
         mkpart ESP fat32 1Mib 257MiB \
         set 1 boot on \
-        mkpart primary ext4 257MiB ${root_end} \
-        mkpart primary ext4 ${root_end} 100%
-fi
+        mkpart ArchQ ext4 257MiB ${root_end}
+        # mkpart Data ext4 ${root_end} 100%
 
-# Simple globbing was not enough as on one device I needed to match /dev/mmcblk0p1
-# but not /dev/mmcblk0boot1 while being able to match /dev/sda1 on other devices.
-part_boot="$(ls ${device}* | grep -E "^${device}p?1$")"
-part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
+    # Simple globbing was not enough as on one device I needed to match /dev/mmcblk0p1
+    # but not /dev/mmcblk0boot1 while being able to match /dev/sda1 on other devices.
+    part_boot="$(ls ${device}* | grep -E "^${device}p?1$")"
+    part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
+
+    # Format boot partition (EFI/ESP)
+    wipefs "${part_boot}"
+    mkfs.vfat -F32 "${part_boot}"
+fi
 
 # Wipe root partition with zerofill
 for ((i=1; i <= $zerofill; i++))
@@ -127,11 +130,7 @@ do
     echo "Fill zero -> $i"
     scrub -Sp fillzero $part_root
 done
-# Format boot partition (EFI/ESP)
-if [ $fmt = F ]; then
-    wipefs "${part_boot}"
-    mkfs.vfat -F32 "${part_boot}"
-if
+
 # Format root partition by F2FS || XFS
 [ $f2fs = F ] && mkfs.f2fs -fl root "${part_root}" || mkfs.xfs -fL root "${part_root}"
 
@@ -382,6 +381,12 @@ chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/sw
 cat >>/mnt/home/${user}/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
 export kver=\$(uname -r | cut -d- -f3)
+alias ...='cd ../../'
+alias dir='command ls -lSrah'
+alias egrep='egrep --color=auto'
+alias grep='grep --color=auto'
+alias ll='command ls -l --color=auto -v'
+alias ls='command ls --color=auto -v'
 alias abcde='eject -t; abcde'
 alias poweroff='sudo systemctl poweroff'
 alias reboot='sudo systemctl reboot'
@@ -395,6 +400,12 @@ cat >>/mnt/root/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
 export kver=\$(uname -r | cut -d- -f3)
 PS1='[\u@\h:\e[0;\${PSC}m\$kver\e[m \W]\$ '
+alias ...='cd ../../'
+alias dir='command ls -lSrah'
+alias egrep='egrep --color=auto'
+alias grep='grep --color=auto'
+alias ll='command ls -l --color=auto -v'
+alias ls='command ls --color=auto -v'
 alias config='config.sh'
 EOF
 
