@@ -153,7 +153,7 @@ mount "${part_root}" /mnt
 mkdir /mnt/boot
 mount "${part_boot}" /mnt/boot
 
-fi [ $server = R ]; then
+if [ $server = R ]; then
         wipefs "${part_data}"
         [ $f2fs = F ] && mkfs.f2fs -fl Database "${part_data}" || mkfs.xfs -fL Database "${part_data}"
         [ ! -d /mnt/var/roon ] && mkdir -p /mnt/var/roon
