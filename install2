@@ -41,8 +41,7 @@ if [ $fmt = P ]; then
         partlst+=$partname' '\"$partlable\"' '
     done <<< $(lsblk -pln -o name,size,partlabel,fstype $device | sed -e '1d')
     part_root=$(eval $partlst) || exit 1; clear
-    part_boot=$(lsblk -pln -o name,partlabel | grep ESP | awk '{print $1}')
-    [ -z $part_boot ] && part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
+    part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
 fi
 
 zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe disk times" 0 30 0) || exit 1; clear
