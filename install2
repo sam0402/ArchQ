@@ -110,11 +110,9 @@ if [ $fmt = P ]; then
             mkpart EFI fat32 $boot_start $boot_end \
             set "${part_root:0-1}" boot on \
             mkpart ArchQ ext4 $root_start 100%
-         old_boot=$part_boot
+        old_efi=$part_boot
         part_boot=$part_root
         part_root=$(ls ${device}* | grep -E "^${device}p?$((${part_root:0-1} + 1))$")
-        mkdir /old_boot
-        mount $old_boot /old_boot
     fi
     # Wipe root partition with zerofill
     for ((i=1; i <= $zerofill; i++))
@@ -160,8 +158,8 @@ done
 mount "${part_root}" /mnt
 mkdir /mnt/boot
 mount "${part_boot}" /mnt/boot
-# Copy EFI entire data to new ESP
-[ -d /old_boot ] && cp -a /old_boot/. /mnt/boot/.
+# Detect other OS
+[ -z "$old_efi" ] || (mount "${old_efi}" /mnt/mnt; arch-chroot /mnt os-prober)
 
 if [ $server = R ]; then
         wipefs "${part_data}"
@@ -255,7 +253,6 @@ isocpu=''
 [ $cpus -ge 4 ] && [[ $server = L || $player =~ S ]] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
 [ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
 sed -i 's/idle=poll /idle=poll '"$isocpu"'/' /mnt/etc/default/grub
-arch-chroot /mnt os-prober
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 # Add /etc/rc.local
