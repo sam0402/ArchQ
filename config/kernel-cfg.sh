@@ -10,7 +10,6 @@ mkgrub(){
     sleep 1
     os-prober
     grub-mkconfig -o /boot/grub/grub.cfg
-    umount /mnt
 }
 
 case $WK in
