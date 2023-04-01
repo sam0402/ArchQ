@@ -3,17 +3,17 @@ grub_def='/etc/default/grub'
 iso_1st=$(($(getconf _NPROCESSORS_ONLN)-1))
 isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
 
-n=2;
+n=1;
 options=()
 while read line; do
-    options[ ((n / 2 )) ]=${line}
-    ((n += 2 ))
-done <<< $(grep 'with' /boot/grub/grub.cfg | grep -v 'fallback' | cut -d "'" -f2 | cut -d ' ' -f5)
+    options[$n]=${line}
+    ((n += 1 ))
+done <<< $(grep 'menuentry ' /boot/grub/grub.cfg | cut -d "'" -f2 | sed '$d;s/Arch Linux, with Linux //;s/ initramfs//'|cut -d' ' -f1-2)
 
 input=$1
 if [ ! $1 ]; then
     for i in ${!options[@]}; do
-        echo "$i" "${options[i]}"
+        $(echo ${options[i]} | grep -qv 'fallback') && echo "$i" "${options[i]}"
         (( n += 1 ))
     done
     echo -n "Select kernel to boot: "
@@ -26,12 +26,10 @@ if [ ! -d /opt/logitechmediaserver ]; then
     [ $input = 1 ] && sed -i 's/idle=poll /idle=poll '"$isocpu"'/' $grub_def || sed -i 's/'"$isocpu"'//g' $grub_def
 fi
 
-(( boot = input * 2 - 2 ))
+(( boot = input -1 ))
 sed -i 's/^#\?GRUB_DEFAULT=.*$/GRUB_DEFAULT='"$boot"'/' $grub_def
-grub-mkconfig -o /boot/grub/grub.cfg
 
 echo "......"
 echo -n "ArchQ will boot with '${options[$input]}', reboot now [Y/n]? "
-input=''
-read input
+input=''; read input
 [[ -z $input || $input = y ]] && reboot
