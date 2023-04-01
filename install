@@ -224,7 +224,7 @@ else
     echo "DNS=$ifgw $ifdns" >>/mnt/etc/systemd/network/10-${ifport}.network
 fi
 arch-chroot /mnt systemctl enable systemd-networkd
-yes | arch-chroot /mnt pacman -Scc
+
 # pacstrap /mnt iw wpa_supplicant 
 # arch-chroot cat >/etc/wpa_supplicant/wpa_supplicant-wlan.conf <<EOF
 # ctrl_interface=/run/wpa_supplicant
@@ -432,7 +432,6 @@ alias ls='command ls --color=auto -v'
 alias config='config.sh'
 EOF
 
-yes | arch-chroot /mnt pacman -Scc
 # Detect other OS
 if [ -n "$old_efi" ]; then
     arch-chroot /mnt mount "$old_efi" /mnt
