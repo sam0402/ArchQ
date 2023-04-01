@@ -169,7 +169,7 @@ fi
 
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 [ -f /mnt/boot/${cpu}-ucode.img ] || pacstrap /mnt ${cpu}-ucode
-
+yes | arch-chroot /mnt pacman -Scc
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
          vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm
 
