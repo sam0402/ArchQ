@@ -225,7 +225,7 @@ else
     echo "DNS=$ifgw $ifdns" >>/mnt/etc/systemd/network/10-${ifport}.network
 fi
 arch-chroot /mnt systemctl enable systemd-networkd
-arch-chroot /mnt pacman -Scc --noconfirm >/dev/null 2>&1
+arch-chroot /mnt yes | pacman -Scc >/dev/null 2>&1
 # pacstrap /mnt iw wpa_supplicant 
 # arch-chroot cat >/etc/wpa_supplicant/wpa_supplicant-wlan.conf <<EOF
 # ctrl_interface=/run/wpa_supplicant
@@ -341,8 +341,8 @@ if [[ $player =~ A ]]; then
 fi
 if  [[ $player =~ R ]]; then
     echo Install Roonbridge ...
-    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonbridge-1.8.880-1-x86_64.pkg.tar.zst
-    arch-chroot /mnt pacman -U --noconfirm /root/roonbridge-1.8.880-1-x86_64.pkg.tar.zst
+    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
+    arch-chroot /mnt pacman -U --noconfirm /root/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
     arch-chroot /mnt systemctl enable roonbridge
 fi
 
@@ -433,7 +433,7 @@ alias ls='command ls --color=auto -v'
 alias config='config.sh'
 EOF
 
-arch-chroot /mnt pacman -Scc --noconfirm >/dev/null 2>&1
+arch-chroot /mnt yes | pacman -Scc >/dev/null 2>&1
 # Detect other OS
 if [ -n "$old_efi" ]; then
     arch-chroot /mnt mount "$old_efi" /mnt
