@@ -1,8 +1,7 @@
 #!/bin/bash
 config='/etc/fstab'
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "NFS mount point" 7 0 0 A "Add" M "Modify" D "Delete") || exit 1
-clear
+            --menu "NFS mount point" 7 0 0 A "Add" M "Modify" D "Delete") || exit 1; clear
 if [ $WK = A ]; then
     options=$(dialog --stdout \
         --title "Add NFS mount point" \
@@ -57,8 +56,7 @@ else
                 "Mount Point /mnt/" 1 1   "$MPs"        1 18 40 0 \
                 "IP Address"        2 1   "$IPs"        2 18 40 0 \
                 "Share Name"        3 1   "$SNs"        3 18 40 0 \
-                "Options"           4 1   "$OPs"        4 18 40 0) || exit 1
-            clear
+                "Options"           4 1   "$OPs"        4 18 40 0) || exit 1; clear
 
             MP=$(echo $options | cut -d ' ' -f 1)
             IP=$(echo $options | cut -d ' ' -f 2)

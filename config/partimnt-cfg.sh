@@ -3,16 +3,13 @@ config='/etc/fstab'
 user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
 
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Partition mount point" 7 0 0 M Mount E Eject)
-clear
+            --menu "Partition mount point" 7 0 0 M Mount E Eject) || exit 1; clear
 case $WK in
     M)
         devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
-        device=$(dialog --stdout --title "Mount partition" --menu "Select device" 7 0 0 $devicelist) || exit 1
-        clear
+        device=$(dialog --stdout --title "Mount partition" --menu "Select device" 7 0 0 $devicelist) || exit 1; clear
         partitionlist=$(lsblk -pln -o name,size,fstype $device | sed -e '1d;s/\s\+/ /g;s/\s/,/2')
-        partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1
-        clear
+        partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1; clear
         partdata=$(lsblk -pln -o name,fstype,uuid $partition)
         PT=$(echo $partdata | cut -d ' ' -f 1)
         FS=$(echo $partdata | cut -d ' ' -f 2)
@@ -37,14 +34,14 @@ case $WK in
         clear
         MP=$(echo $options |  awk '//{print $1 }')
         OP=$(echo $options |  awk '//{print $2 }')
-        [ $FS = xfs ] && OP+=',attr2,inode64,logbufs=8,logbsize=32k,noquota'
-        [ $FS = f2fs ] && OP+=',background_gc=on,no_heap,inline_xattr,inline_data,inline_dentry,flush_merge,extent_cache,mode=adaptive,active_logs=6,alloc_mode=reuse,checkpoint_merge,fsync_mode=posix,discard_unit=block,memory=normal'
+        [ $FS = xfs ] && OP+= ',attr2,inode64,logbufs=8,logbsize=32k,noquota'
+        [ $FS = f2fs ] && OP+= \
+        ',background_gc=on,no_heap,inline_xattr,inline_data,inline_dentry,flush_merge,extent_cache,mode=adaptive,active_logs=6,alloc_mode=reuse,checkpoint_merge,fsync_mode=posix,discard_unit=block,memory=normal'
         [ -z $OP ] && echo "Fail! Mount point is null." && exit 1
         mntuser=$(dialog --stdout --title "Mount point /mnt/$MP" \
             --radiolist "Set permission to" 7 0 0 \
              root '　' on \
-            $user '　' off) || exit 1
-        clear
+            $user '　' off) || exit 1; clear
 
         [[ $mntuser != root && $FS =~ fat ]] && OP='rw,uid=1000,gid=1000'
         [[ $mntuser != root && $FS =~ ntfs ]] && OP='iocharset=utf8,uid=1000,gid=1000'
@@ -71,8 +68,7 @@ case $WK in
 
         options=$(dialog --stdout \
                 --title "Eject partition" \
-                --menu "Select to delete" 7 0 0 $MENU) || exit 1
-                clear
+                --menu "Select to delete" 7 0 0 $MENU) || exit 1; clear
         MP=$(echo $options | cut -d '/' -f 3)
         umount /mnt/$MP
         sed -i '/\/mnt\/'"$MP"'/d' $config

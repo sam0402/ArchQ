@@ -34,12 +34,12 @@ case $client in
         systemctl enable --now mpd nginx php-fpm avahi-daemon
         ;;
     M)
-        pacman -Q mympd >/dev/null 2>&1 || (pacman -Sy --noconfirm archlinux-keyring mympd; pacman -Scc --noconfirm >/dev/null 2>&1)
+        pacman -Q mympd >/dev/null 2>&1 || (pacman -Sy --noconfirm archlinux-keyring mympd; yes | pacman -Scc >/dev/null 2>&1)
         systemctl disable --now nginx php-fpm avahi-daemon
         systemctl enable --now mpd mympd
         ;;
     N)
-        pacman -Q ncmpcpp >/dev/null 2>&1 || (pacman -Sy --noconfirm archlinux-keyring ncmpcpp; pacman -Scc --noconfirm >/dev/null 2>&1)
+        pacman -Q ncmpcpp >/dev/null 2>&1 || (pacman -Sy --noconfirm archlinux-keyring ncmpcpp; yes | pacman -Scc >/dev/null 2>&1)
         systemctl disable --now nginx php-fpm avahi-daemon
         pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd
         ;;

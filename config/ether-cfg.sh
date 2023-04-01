@@ -1,12 +1,20 @@
 #!/bin/bash
+mkgrub(){
+    grub_cfg='/boot/grub/grub.cfg'
+    part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
+    mount "$part_boot" /mnt
+    sleep 2
+    os-prober
+    grub-mkconfig -o $grub_cfg
+    pacman -Q ramroot >/dev/null 2>&1 && sed -i 's/fallback/ramroot/g' $grub_cfg
+}
 ifmask=24; ifdns=8.8.8.8; ifmtu=1500
 ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
 ifport=$(echo $ethers | cut -d ' ' -f1)
 
 if [ $(echo $ethers | wc -w) -gt 2 ]; then
     ifport=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select ethernet device" 7 0 0 ${ethers}) || exit 1
-    clear
+            --menu "Select ethernet device" 7 0 0 ${ethers}) || exit 1; clear
 fi
 
 if [ -f "/etc/systemd/network/10-${ifport}.network" ]; then
@@ -22,8 +30,7 @@ if [ -f "/etc/systemd/network/10-${ifport}.network" ]; then
 fi
 
 [ $DHCP == 'true' ] && v6=on || v6=off
-ip=$(dialog --stdout --title "ArchQ $1" --menu "Select IP setting" 7 0 0 S "Static IP" D "DHCP") || exit 1
-clear
+ip=$(dialog --stdout --title "ArchQ $1" --menu "Select IP setting" 7 0 0 S "Static IP" D "DHCP") || exit 1; clear
 if [[ $ip == S ]]; then
     ifconfig=$(dialog --stdout \
                 --title "ArchQ $1" \
@@ -50,7 +57,7 @@ else
         DHCP='ipv4'
         grep -q 'ipv6.disable=1' /etc/default/grub || sed -i 's/iomem=relaxed /iomem=relaxed ipv6.disable=1 /' /etc/default/grub
     fi
-    grub-mkconfig -o /boot/grub/grub.cfg
+    mkgrub
 fi
 
 ifmac=$(ip link show $ifport | grep ether | awk '{print $2 }')

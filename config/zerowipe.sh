@@ -10,19 +10,15 @@ case $WK in
             pacman -U --noconfirm /root/scrub-2.6.1-1-x86_64.pkg.tar.zst
         fi
         devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | grep sd | tac)
-        device=$(dialog --stdout --title "Wipe disk" --menu "Select HDD device" 7 0 0 $devicelist) || exit 1
-        clear
+        device=$(dialog --stdout --title "Wipe disk" --menu "Select HDD device" 7 0 0 $devicelist) || exit 1; clear
         partitionlist=$(lsblk -pln -o name,size $device | sed -e '1d;s/\s\+/ /g')
-        partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1
-        clear
+        partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1; clear
         times=$(dialog --stdout \
             --title "Wipe $(echo $partition|cut -d/ -f3)" \
-            --inputbox "May reduce disk lifespan!\nWipe times (10GB/min)" 0 30 1) || exit 1
-        clear
+            --inputbox "May reduce disk lifespan!\nWipe times (10GB/min)" 0 30 1) || exit 1; clear
         wipetime=$(($(fdisk -s $partition) * $times / 10485760))
         yes=$(dialog --stdout --title "Wipe $(echo $partition|cut -d/ -f3)" \
-        --yesno "It will take about $wipetime minutes to clean all data!\nConform to wipe $(echo $partition|cut -d/ -f3)!!!" 0 0) || exit 1
-        clear
+        --yesno "It will take about $wipetime minutes to clean all data!\nConform to wipe $(echo $partition|cut -d/ -f3)!!!" 0 0) || exit 1; clear
         echo "Fill zero $times time(s). It will take about $wipetime minutes..."
         for ((i=1; i <= $times; i++))
         do
@@ -34,12 +30,9 @@ case $WK in
         devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | grep sd | tac)
         device=$(dialog --stdout --title "Format disk" --menu "Select HDD device" 7 0 0 $devicelist) || exit 1
         partitionlist=$(lsblk -pln -o name,size $device | sed -e '1d;s/\s\+/ /g')
-        partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1
-        clear
-        yes1=$(dialog --stdout --title "Format" --yesno "Partition $(echo $partition|cut -d/ -f3) to XFS" 0 0) || exit 1
-        clear
-        yes2=$(dialog --stdout --title "Format XFS" --yesno "   Will clean all data!!\n   Conform to format $(echo $partition|cut -d/ -f3)!!" 0 0) || exit 1
-        clear
+        partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1; clear
+        yes1=$(dialog --stdout --title "Format" --yesno "Partition $(echo $partition|cut -d/ -f3) to XFS" 0 0) || exit 1; clear
+        yes2=$(dialog --stdout --title "Format XFS" --yesno "   Will clean all data!!\n   Conform to format $(echo $partition|cut -d/ -f3)!!" 0 0) || exit 1; clear
         [[ $yes1] && [$yes2 ]] && mkfs.xfs -f $partition
         ;;
 esac

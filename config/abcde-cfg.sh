@@ -4,7 +4,7 @@ user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
 
 if ! pacman -Q abcde >/dev/null 2>&1 ; then
     pacman -Sy --noconfirm archlinux-keyring
-    pacman -Scc --noconfirm >/dev/null 2>&1
+    yes | pacman -Scc >/dev/null 2>&1
     pacman -Syy --noconfirm
     pacman -S --noconfirm nano cdparanoia glyr imagemagick atomicparsley base-devel ffmpeg srt python-lxml python-requests
     pacman -Sdd --noconfirm qt5-base kid3-common double-conversion

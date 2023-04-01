@@ -3,8 +3,7 @@ config='/etc/fstab'
 # [ -f /etc/samba/smb.conf ] || ( mkdir -p /etc/samba; touch /etc/samba/smb.conf)
 
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "SMB/CIFS mount point" 7 0 0 A "Add" M "Modify" D "Delete") || exit 1
-clear
+            --menu "SMB/CIFS mount point" 7 0 0 A "Add" M "Modify" D "Delete") || exit 1; clear
 if [ $WK = A ]; then
     options=$(dialog --stdout \
         --title "Add SMB/CIFS mount point" \
@@ -14,8 +13,7 @@ if [ $WK = A ]; then
         "Share name"        2 1 "//192.168.1.x/share"    2 18 42 0 \
         "Username"          3 1 "<null>"                 3 18 42 0 \
         "Password"          4 1 "<null>"                 4 18 42 0 \
-        "Options"           5 1 "ro,iocharset=utf8" 5 18 42 0) || exit 1
-    clear
+        "Options"           5 1 "ro,iocharset=utf8" 5 18 42 0) || exit 1; clear
 
     MP=$(echo $options | cut -d ' ' -f 1)
     SN=$(echo $options | cut -d ' ' -f 2)
@@ -24,7 +22,7 @@ if [ $WK = A ]; then
     OP=$(echo $options | cut -d ' ' -f 5)
     [ $UN = '<null>' ] && UN=''
     [ $PW = '<null>' ] && PW=''
-    echo "$SN /mnt/$MP cifs username=$UN,password=$PW,_netdev,nofail,file_mode=0644,dir_mode=0755,$OP 0 0" >>$config
+    echo "${SN} /mnt/$MP cifs username=$UN,password=$PW,_netdev,nofail,file_mode=0644,dir_mode=0755,$OP 0 0" >>$config
 elif [ $WK = D ]; then
     n=1; MENU=''
     while read line; do
@@ -63,8 +61,7 @@ else
                 "Share Name"        2 1   "$SNs"        2 18 42 0 \
                 "Username"          3 1   "$UNs"        3 18 42 0 \
                 "Password"          4 1   "$PWs"        4 18 42 0 \
-                "Options"           5 1   "$OPs"        5 18 42 0) || exit 1
-            clear
+                "Options"           5 1   "$OPs"        5 18 42 0) || exit 1; clear
 
             MP=$(echo $options | cut -d ' ' -f 1)
             SN=$(echo $options | cut -d ' ' -f 2)
