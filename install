@@ -99,8 +99,8 @@ exec 2> >(tee "stderr.log")
 timedatectl set-ntp true
 
 # Foramt and install in one partition
+old_efi=''
 if [ $fmt = P ]; then
-    old_efi=''
     # Rebuild partition if EFI < 200MB
     if [ $(lsblk $part_boot -pln -o size | tr -d [:alpha:]) -lt 200 ]; then
         boot_start=$(parted $device 'unit s' print | grep "^ ${part_root:0-1}" | tail -1 | awk -F '[[:space:]]*' '{ print $3 }')
@@ -440,7 +440,7 @@ EOF
 # arch-chroot /mnt mkinitcpio -P
 
 # Detect other OS
-if [ ! -z "$old_efi" ]; then
+if [ -n "$old_efi" ]; then
     arch-chroot /mnt mount "$old_efi" /mnt
     arch-chroot /mnt os-prober
     sleep 2
