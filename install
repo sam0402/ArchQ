@@ -329,7 +329,6 @@ if [[ $player =~ S ]]; then
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
     [[ -n "$scard" ]] && sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/squeezelite.conf
-    # curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite.service >/mnt/usr/lib/systemd/system/squeezelite.service
     arch-chroot /mnt systemctl enable squeezelite
 fi
 if [[ $player =~ A ]]; then
@@ -434,11 +433,6 @@ alias ls='command ls --color=auto -v'
 alias config='config.sh'
 EOF
 
-# Install ramroot
-# arch-chroot /mnt wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/pkg/main/ramroot-2.0.2-1-x86_64.pkg.tar.zst | pacman -U
-# sed -i 's/ps_default=no/ps_default=yes/' /mnt/etc/ramroot.conf
-# arch-chroot /mnt mkinitcpio -P
-
 # Detect other OS
 if [ -n "$old_efi" ]; then
     arch-chroot /mnt mount "$old_efi" /mnt
@@ -447,6 +441,5 @@ if [ -n "$old_efi" ]; then
     arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 fi
 
-dialog --stdout --title "ArchQ" --pause \
-    "\n  ArchQ is installed, unplug the USB driver.\n\n  System will reboot after 10 seconds." 12 50 10
+dialog --stdout --title "ArchQ" --pause "\n  ArchQ is installed, unplug the USB driver.\n\n  System will reboot after 10 seconds." 12 50 10; clear
 reboot
