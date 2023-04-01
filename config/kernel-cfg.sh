@@ -63,6 +63,8 @@ case $WK in
     R)
         wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ramroot-2.0.2-2-x86_64.pkg.tar.zst
         pacman -U --noconfirm /root/ramroot-2.0.2-2-x86_64.pkg.tar.zst
+        pacman -Scc --noconfirm
+        rm -f /root/*.tar.zst
         ;;
     F)
         num=$(getconf _NPROCESSORS_ONLN)
