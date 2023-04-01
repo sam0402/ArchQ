@@ -34,12 +34,12 @@ case $client in
         systemctl enable --now mpd nginx php-fpm avahi-daemon
         ;;
     M)
-        pacman -Q mympd >/dev/null 2>&1 || pacman -Sy --noconfirm archlinux-keyring mympd
+        pacman -Q mympd >/dev/null 2>&1 || (pacman -Sy --noconfirm archlinux-keyring mympd; pacman -Scc --noconfirm >/dev/null 2>&1)
         systemctl disable --now nginx php-fpm avahi-daemon
         systemctl enable --now mpd mympd
         ;;
     N)
-        pacman -Q ncmpcpp >/dev/null 2>&1 || pacman -Sy --noconfirm archlinux-keyring ncmpcpp tmux
+        pacman -Q ncmpcpp >/dev/null 2>&1 || (pacman -Sy --noconfirm archlinux-keyring ncmpcpp; pacman -Scc --noconfirm >/dev/null 2>&1)
         systemctl disable --now nginx php-fpm avahi-daemon
         pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd
         ;;
@@ -49,8 +49,7 @@ case $client in
             curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpdconf >/usr/bin/mpdconf
             chmod +x /usr/bin/mpdconf
         fi
-        users=$(dialog --stdout --title "ArchQ MPD multi" --inputbox "Add users" 0 25 0) || exit 1
-        clear
+        users=$(dialog --stdout --title "ArchQ MPD multi" --inputbox "Add users" 0 25 0) || exit 1; clear
         num=$(grep 'mpd' /etc/passwd | wc -l)
         users=$(( $users + $num - 1 ))
         # Httpd stream multi user
@@ -88,8 +87,7 @@ else
 
     device=$(dialog --stdout \
             --title "ArchQ MPD $1" \
-            --menu "Ouput device" 7 0 0 ${devs}) || exit 1
-    clear
+            --menu "Ouput device" 7 0 0 ${devs}) || exit 1; clear
     sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
 fi
 
@@ -105,8 +103,7 @@ cat $config | grep httpd | grep -q '#' || h0=on
 cat $config | grep "^[[:space:]]dop" | grep -q '#' || d0=on
 output=$(dialog --stdout --title "ArchQ MPD" \
         --checklist "Output" 7 0 0 \
-        M Multiroom $m0 H Httpd $h0 D DoP $d0) || exit 1
-clear
+        M Multiroom $m0 H Httpd $h0 D DoP $d0) || exit 1; clear
 [[ $output =~ M ]] && m1=on
 [[ $output =~ H ]] && h1=on
 [[ $output =~ D ]] && d1=on
@@ -151,8 +148,7 @@ options=$(dialog --stdout \
     --form "Buffer & Directory" 0 35 0 \
     "Audio Buffer"      1 1 $buffer 1 17 35 0 \
     "ALSA Buffer(μs)"   2 1 $buftime 2 17 35 0 \
-    "Music Dir  /mnt/"   3 1 $mdir    3 17 35 0 ) || exit 1
-clear
+    "Music Dir  /mnt/"   3 1 $mdir    3 17 35 0 ) || exit 1; clear
 beffer=$(echo $options | awk '//{print $1 }')
 buftime=$(echo $options | awk '//{print $2 }')
 pertime=$(expr $buftime / 4)

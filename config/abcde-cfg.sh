@@ -4,7 +4,7 @@ user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
 
 if ! pacman -Q abcde >/dev/null 2>&1 ; then
     pacman -Sy --noconfirm archlinux-keyring
-    pacman -Scc --noconfirm
+    pacman -Scc --noconfirm >/dev/null 2>&1
     pacman -Syy --noconfirm
     pacman -S --noconfirm nano cdparanoia glyr imagemagick atomicparsley base-devel ffmpeg srt python-lxml python-requests
     pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
@@ -36,6 +36,7 @@ EOF
     usermod -aG optical $user
     echo "alias abcde='eject -t; abcde'" >>/home/$user/.bashrc
     echo "alias abcde='eject -t; abcde'" >>/root/.bashrc
+    pacman -Scc --noconfirm >/dev/null 2>&1
 fi
 
 while read line; do

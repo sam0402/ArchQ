@@ -4,11 +4,11 @@ grub_cfg='/boot/grub/grub.cfg'
 pacman -Q ramroot >/dev/null 2>&1 || ramroot='R Ramroot'
 WK=$(dialog --stdout --title "ArchQ $1" \
             --menu "Select command" 7 0 0 B Boot I Install M Remove $ramroot F Frequency) || exit 1; clear
-part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
 
 mkgrub(){
+    part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
     mount "$part_boot" /mnt
-    sleep 1
+    sleep 2
     os-prober
     grub-mkconfig -o $grub_cfg
     pacman -Q ramroot >/dev/null 2>&1 && sed -i 's/fallback/ramroot/g' $grub_cfg

@@ -5,8 +5,8 @@ config='/etc/squeezelite.conf'
 ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
 inst=(0 1 2 3 4 pcm dsd)
 option=$(dialog --stdout --title "ArchQ Squeezelite $1" \
-        --menu "Select squeezelite: ${inst[$ver]^^}" 7 0 0 \
-        5 "PCM" 6 "DSD" ) || exit 1
+        --menu "Select: ${inst[$ver]^^}" 7 0 0 \
+        5 "PCM" 6 "DSD" ) || exit 1; clear
 
 if [ "$ver" != ${inst[$option]} ]; then
     cpus=$(getconf _NPROCESSORS_ONLN)
@@ -26,8 +26,7 @@ else
 
     device=$(dialog --stdout \
             --title "ArchQ Squeezelite ${inst[$ver]^^}" \
-            --menu "Ouput device" 7 0 0 ${devs}) || exit 1
-    clear
+            --menu "Ouput device" 7 0 0 ${devs}) || exit 1; clear
     sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$device"'"/' $config
 fi
 
@@ -63,8 +62,7 @@ options=$(dialog --stdout \
     "MAC address"           8 1   "$MAC"           8 25 60 0 \
     "LMS ip"                9 1   "$SERVER_IP"     9 25 60 0 \
     "Device supports DSD/DoP"  10 1   "$DOP"      10 25 60 0 \
-    "ALSA volume control"   11 1   "$VOLUME"      11 25 60 0 ) || exit 1
-clear
+    "ALSA volume control"   11 1   "$VOLUME"      11 25 60 0 ) || exit 1; clear
     # "other Options"         12 1   "$OPTIONS"     12 25 60 0
 NAME=$(echo $options | cut -d ' ' -f 1)
 sed -i 's/^#\?NAME="-n .*/NAME="-n '"$NAME"'"/' $config
