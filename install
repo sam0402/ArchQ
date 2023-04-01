@@ -441,7 +441,7 @@ EOF
 
 # Detect other OS
 if [ ! -z "$old_efi" ]; then
-    mount "${old_efi}" /mnt/mnt
+    arch-chroot /mnt mount "$old_efi" /mnt
     arch-chroot /mnt os-prober
     sleep 2
     arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
