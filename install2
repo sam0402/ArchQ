@@ -203,8 +203,8 @@ arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
 arch-chroot /mnt sh -c "echo root:$password | chpasswd"
 arch-chroot /mnt mkinitcpio -p linux
 
-[ $fmt = U ] && USBST="--removable --recheck"
-arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=$hostname $USBST
+[ $fmt = U ] && usbstorage='--removable'
+arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot $usbstorage --bootloader-id=$hostname
 arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
 
 echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
@@ -227,7 +227,7 @@ else
     echo "DNS=$ifgw $ifdns" >>/mnt/etc/systemd/network/10-${ifport}.network
 fi
 arch-chroot /mnt systemctl enable systemd-networkd
-echo 'y\ny' | arch-chroot /mnt pacman -Scc
+echo 'y\ny\n' | arch-chroot /mnt pacman -Scc
 # pacstrap /mnt iw wpa_supplicant 
 # arch-chroot cat >/etc/wpa_supplicant/wpa_supplicant-wlan.conf <<EOF
 # ctrl_interface=/run/wpa_supplicant
@@ -436,7 +436,7 @@ alias ls='command ls --color=auto -v'
 alias config='config.sh'
 EOF
 
-echo 'y\ny' | arch-chroot /mnt pacman -Scc
+echo 'y\ny\n' | arch-chroot /mnt pacman -Scc
 rm -f /mnt/root/*.tar.zst /mnt/root/*.tar.xz
 # Detect other OS
 if [ -n "$old_efi" ]; then
