@@ -65,6 +65,7 @@ case $WK in
         pacman -U --noconfirm /root/ramroot-2.0.2-2-x86_64.pkg.tar.zst
         pacman -Scc --noconfirm >/dev/null 2>&1
         rm -f /root/*.tar.zst /root/*.tar.xz
+        mkgrub
         ;;
     F)
         num=$(getconf _NPROCESSORS_ONLN)
