@@ -5,9 +5,16 @@
 kver='6.0.1-12'
 set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
+c_blue_b=$'\e[1;38;5;27m'
+c_green_b=$'\e[1;38;5;46m'
+c_red_b=$'\e[1;38;5;196m'
+c_yellow_b=$'\e[1;33m'
+c_white=$'\e[0;38;5;15m'
+c_white_b=$'\e[1;37m'
+c_gray=$'\e[0;37m'
 
 MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
-echo -e "\n\nArchQ will ping "Arch Linux Server" 25 times before installation.\n\n"
+echo -e "${c_blue_b}\n\nArchQ will ping "Arch Linux Server" 25 times before installation.\n\n${c_gray}"
 ping -c 25 archlinux.org
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
 curl -O https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/scrub-2.6.1-1-x86_64.pkg.tar.zst
@@ -32,7 +39,7 @@ password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password aga
     
 devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
-fmt=$(dialog --stdout --title "ArchQ" --menu "Format ${device}" 7 0 0 E "Entire disk" P Partition) || exit 1; clear
+fmt=$(dialog --stdout --title "ArchQ" --menu "Format device ${device}" 7 0 0 E Entire P Partition) || exit 1; clear
 if [ $fmt = P ]; then
     partlst='dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 '
     while read line; do
@@ -202,8 +209,6 @@ arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
 # echo "root:$password" | chpasswd --root /mnt
 arch-chroot /mnt sh -c "echo root:$password | chpasswd"
 arch-chroot /mnt mkinitcpio -p linux
-
-# [ $fmt = U ] && usbstorage='--removable'
 arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --removable --bootloader-id=$hostname
 arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
 
