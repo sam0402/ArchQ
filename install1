@@ -240,11 +240,10 @@ arch-chroot /mnt systemctl enable systemd-networkd
 # arch-chroot /mnt wpa_supplicant -B -i wlan -c /etc/wpa_supplicant/wpa_supplicant-wlan.conf
 
 ### Kernel
+echo -e "\n${c_yellow_b}Install ArchQ Kernel ...${c_gray}\n"
 ker=Q352
 [ $cpu = amd ] && ker=Q308AMD
 [ $server = N ] && ker=${ker}w
-echo .......................
-echo Install Kernel ...
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll acpi_pm_good nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
@@ -266,10 +265,9 @@ arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/
 arch-chroot /mnt pacman -U --noconfirm /root/rc-local-4-1-any.pkg.tar.zst
 
 ## server
-echo ...............
 case $server in
     L)
-        echo Install LMS ...
+        echo -e "\n${c_yellow_b}Install Logitech Media Server ...${c_gray}\n"
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
         arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
         [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
@@ -278,7 +276,7 @@ case $server in
         arch-chroot /mnt systemctl enable logitechmediaserver
         ;;
     R)
-        echo Install Roon ...
+        echo -e "\n${c_yellow_b}Install Roon Server ...${c_gray}\n"
         arch-chroot /mnt pacman -S --noconfirm alsa-lib glibc ffmpeg cifs-utils icu
         mkdir -p /mnt/opt/RoonServer /mnt/usr/share/licenses/roonserver
         arch-chroot /mnt wget -qO - http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2 | bsdtar xf - -C /mnt/opt
@@ -289,7 +287,7 @@ case $server in
         arch-chroot /mnt systemctl enable roonserver
         ;;
     M)
-        echo Install MPD ...
+        echo -e "\n${c_yellow_b}Install MPD ...${c_gray}\n"
         arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.11-4-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
@@ -324,13 +322,12 @@ EOF
         ;;
 esac
 ### Install Player
-echo Install alsa-lib ......
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -Sd --noconfirm alsa-utils
 
 if [[ $player =~ S ]]; then
-    echo Install Squeezelite ...
+    echo -e "\n${c_yellow_b}Install Squeezelite ...${c_gray}\n"
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-pcm-x86_64.pkg.tar.zst
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
@@ -338,7 +335,7 @@ if [[ $player =~ S ]]; then
     arch-chroot /mnt systemctl enable squeezelite
 fi
 if [[ $player =~ A ]]; then
-    echo Install Airplay ...
+    echo -e "\n${c_yellow_b}Install Airplay ...${c_gray}\n"
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     [[ -n "$scard" ]] && sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/' /mnt/etc/shairport-sync.conf
@@ -346,15 +343,14 @@ if [[ $player =~ A ]]; then
     arch-chroot /mnt systemctl enable shairport-sync
 fi
 if  [[ $player =~ R ]]; then
-    echo Install Roonbridge ...
+    echo echo -e "\n${c_yellow_b}Install Roonbridge ...${c_gray}\n"
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
     arch-chroot /mnt systemctl enable roonbridge
 fi
 
 ### Other setting
-echo ........................
-echo Setting service ...
+echo -e "\n${c_yellow_b}Setting service ...${c_gray}\n"
 sed -i '$i sleep 3' /mnt/etc/rc.local
 sed -i '$d' /mnt/etc/rc.local
 cat >>/mnt/etc/rc.local <<EOF
