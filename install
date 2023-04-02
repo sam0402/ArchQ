@@ -8,13 +8,13 @@ trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 c_blue_b=$'\e[1;38;5;27m'
 c_green_b=$'\e[1;38;5;46m'
 c_red_b=$'\e[1;38;5;196m'
-c_yellow_b=$'\e[1;33m'
+c_red_b=$'\e[1;33m'
 c_white=$'\e[0;38;5;15m'
 c_white_b=$'\e[1;37m'
 c_gray=$'\e[0;37m'
 
 MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
-echo -e "${c_blue_b}\n\nArchQ will ping "Arch Linux Server" 25 times before installation.\n\n${c_gray}"
+echo -e "${c_blue_b}\n\nArchQ will ping "Arch Linux Server" 25 times before installation.\n${c_gray}"
 ping -c 25 archlinux.org
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
 curl -O https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/scrub-2.6.1-1-x86_64.pkg.tar.zst
@@ -177,6 +177,7 @@ fi
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 [ -f /mnt/boot/${cpu}-ucode.img ] || pacstrap /mnt ${cpu}-ucode
 
+echo -e "\n${c_red_b}Download Arch Linux package and install ...${c_gray}\n"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
          vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm
 
@@ -240,7 +241,7 @@ arch-chroot /mnt systemctl enable systemd-networkd
 # arch-chroot /mnt wpa_supplicant -B -i wlan -c /etc/wpa_supplicant/wpa_supplicant-wlan.conf
 
 ### Kernel
-echo -e "\n${c_yellow_b}Install ArchQ Kernel ...${c_gray}\n"
+echo -e "\n${c_red_b}Install ArchQ Kernel ...${c_gray}\n"
 ker=Q352
 [ $cpu = amd ] && ker=Q308AMD
 [ $server = N ] && ker=${ker}w
@@ -267,7 +268,7 @@ arch-chroot /mnt pacman -U --noconfirm /root/rc-local-4-1-any.pkg.tar.zst
 ## server
 case $server in
     L)
-        echo -e "\n${c_yellow_b}Install Logitech Media Server ...${c_gray}\n"
+        echo -e "\n${c_red_b}Install Logitech Media Server ...${c_gray}\n"
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
         arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
         [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
@@ -276,7 +277,7 @@ case $server in
         arch-chroot /mnt systemctl enable logitechmediaserver
         ;;
     R)
-        echo -e "\n${c_yellow_b}Install Roon Server ...${c_gray}\n"
+        echo -e "\n${c_red_b}Install Roon Server ...${c_gray}\n"
         arch-chroot /mnt pacman -S --noconfirm alsa-lib glibc ffmpeg cifs-utils icu
         mkdir -p /mnt/opt/RoonServer /mnt/usr/share/licenses/roonserver
         arch-chroot /mnt wget -qO - http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2 | bsdtar xf - -C /mnt/opt
@@ -287,7 +288,7 @@ case $server in
         arch-chroot /mnt systemctl enable roonserver
         ;;
     M)
-        echo -e "\n${c_yellow_b}Install MPD ...${c_gray}\n"
+        echo -e "\n${c_red_b}Install MPD ...${c_gray}\n"
         arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.11-4-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
@@ -327,7 +328,7 @@ arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x8
 arch-chroot /mnt pacman -Sd --noconfirm alsa-utils
 
 if [[ $player =~ S ]]; then
-    echo -e "\n${c_yellow_b}Install Squeezelite ...${c_gray}\n"
+    echo -e "\n${c_red_b}Install Squeezelite ...${c_gray}\n"
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-pcm-x86_64.pkg.tar.zst
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
@@ -335,7 +336,7 @@ if [[ $player =~ S ]]; then
     arch-chroot /mnt systemctl enable squeezelite
 fi
 if [[ $player =~ A ]]; then
-    echo -e "\n${c_yellow_b}Install Airplay ...${c_gray}\n"
+    echo -e "\n${c_red_b}Install Airplay ...${c_gray}\n"
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     [[ -n "$scard" ]] && sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/' /mnt/etc/shairport-sync.conf
@@ -343,14 +344,14 @@ if [[ $player =~ A ]]; then
     arch-chroot /mnt systemctl enable shairport-sync
 fi
 if  [[ $player =~ R ]]; then
-    echo echo -e "\n${c_yellow_b}Install Roonbridge ...${c_gray}\n"
+    echo echo -e "\n${c_red_b}Install Roonbridge ...${c_gray}\n"
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
     arch-chroot /mnt systemctl enable roonbridge
 fi
 
 ### Other setting
-echo -e "\n${c_yellow_b}Setting service ...${c_gray}\n"
+echo -e "\n${c_red_b}Setting service ...${c_gray}\n"
 sed -i '$i sleep 3' /mnt/etc/rc.local
 sed -i '$d' /mnt/etc/rc.local
 cat >>/mnt/etc/rc.local <<EOF
