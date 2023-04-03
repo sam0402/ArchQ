@@ -5,7 +5,7 @@ git=$(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/update)
 
 Qver=$(uname -r | awk -F - '{print $3}')
 temp=$(sensors | grep 'Core 0' | awk '{print $3}')
-
+ipaddr=$(ip -o addr | grep en | awk '{print $4}')
 MENU=''
 [ $git -gt $num ] && MENU+='U Update '
 pacman -Q mpd >/dev/null 2>&1 && MENU+='D MPD '
@@ -13,10 +13,9 @@ pacman -Q squeezelite >/dev/null 2>&1 && MENU+='S Squeezelite '
 pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='A Airplay '
 pacman -Q ffmpeg >/dev/null 2>&1 && MENU+='F FFmpeg '
 
-WK=$(dialog --stdout --title "ArchQ $Qver   $temp" \
-    --menu "Select to config" 7 0 0 ${MENU} K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P "Active player"  \
-    G "Data cache" C "CPU frequency" R "abCDe ripper" E Ethernet Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone X "Desktop & VNC") || exit 1
-clear
+WK=$(dialog --stdout --title "$ipaddr   $temp" \
+    --menu " ArchQ $Qver Config" 7 0 0 ${MENU} K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P "Active player"  \
+    G "Data cache" C "CPU frequency" R "abCDe ripper" E Ethernet Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone X "Desktop & VNC") || exit 1;clear
 case $WK in
     A)
         /usr/bin/shairport-cfg.sh $Qver
@@ -38,8 +37,7 @@ case $WK in
         ffen=$(dialog --stdout \
             --title "ArchQ $Qver   $temp" \
             --checklist "Use ArchQ FFmpeg" 7 0 0 \
-            E Enable $ff ) || exit 1
-        clear
+            E Enable $ff ) || exit 1; clear
         if [ $ffen == 'E' ]; then
             wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A5.1.2-12-x86_64.pkg.tar.zst
             pacman -U --noconfirm /root/ffmpeg-2:5.1.2-12-x86_64.pkg.tar.zst
