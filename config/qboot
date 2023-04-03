@@ -41,6 +41,6 @@ fi
 sed -i 's/^#\?GRUB_DEFAULT=.*$/GRUB_DEFAULT='"$boot"'/' $grub_def
 mkgrub
 
-echo -n "${c_red_b}ArchQ will boot with '${options[$input]}', reboot now [Y/n]? ${c_gray}"
+echo -n "ArchQ will boot with ${c_red_b}'${options[$input]}'${c_gray}, reboot now [Y/n]?"
 input=''; read input
 [[ -z $input || $input = y ]] && reboot
