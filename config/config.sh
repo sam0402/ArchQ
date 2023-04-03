@@ -11,11 +11,11 @@ MENU=''
 pacman -Q mpd >/dev/null 2>&1 && MENU+='D MPD '
 pacman -Q squeezelite >/dev/null 2>&1 && MENU+='S Squeezelite '
 pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='A Airplay '
-pacman -Q ffmpeg >/dev/null 2>&1 && MENU+='F FFmpeg '
+[[ $(pacman -Q ffmpeg) != 'ffmpeg 2:5.1.2-12' ]] && pacman -Q ffmpeg >/dev/null 2>&1 && MENU+='F FFmpeg '
 
 WK=$(dialog --stdout --title "$ipaddr   $temp" \
-    --menu " ArchQ $Qver Config" 7 0 0 ${MENU} K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P "Active player"  \
-    G "Data cache" C "CPU frequency" R "abCDe ripper" E Ethernet Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone X "Desktop & VNC") || exit 1;clear
+    --menu " ArchQ $Qver Config" 7 0 0 ${MENU} K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P "Active player" R "abCDe ripper" \
+     E Ethernet G "Data cache" C "CPU frequency" Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone X "Desktop & VNC") || exit 1;clear
 case $WK in
     A)
         /usr/bin/shairport-cfg.sh $Qver
