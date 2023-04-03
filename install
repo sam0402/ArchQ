@@ -8,7 +8,7 @@ trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 c_blue_b=$'\e[1;38;5;27m'
 c_green_b=$'\e[1;38;5;46m'
 c_red_b=$'\e[1;38;5;196m'
-c_red_b=$'\e[1;33m'
+c_red=$'\e[1;33m'
 c_white=$'\e[0;38;5;15m'
 c_white_b=$'\e[1;37m'
 c_gray=$'\e[0;37m'
@@ -39,7 +39,7 @@ password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password aga
     
 devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
-fmt=$(dialog --stdout --title "ArchQ" --menu "Format device ${device}" 7 0 0 E Entire P Partition) || exit 1; clear
+fmt=$(dialog --stdout --title "ArchQ" --menu "Format device ${device}" 7 0 0 E Entire P Partition U "USB Storage") || exit 1; clear
 if [ $fmt = P ]; then
     partlst='dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 '
     while read line; do
@@ -245,6 +245,8 @@ echo -e "\n${c_red_b}Install ArchQ Kernel ...${c_gray}\n"
 ker=Q352
 [ $cpu = amd ] && ker=Q308AMD
 [ $server = N ] && ker=${ker}w
+[ $fmt = U ] && ker=Q352u
+[ $fmt = U ] && kver=6.1.15-12
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll acpi_pm_good nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
@@ -355,6 +357,18 @@ echo -e "\n${c_red_b}Setting service ...${c_gray}\n"
 sed -i '$i sleep 3' /mnt/etc/rc.local
 sed -i '$d' /mnt/etc/rc.local
 cat >>/mnt/etc/rc.local <<EOF
+# ethernet auto detect
+ethers=\$(ip -o link show | awk '{print \$2,\$9}' | grep '^en' | sed 's/://' | awk '{print \$1}' | head -n 1)
+npath='/etc/systemd/network/'
+if [ ! -f "\$npath""10-\${ethers}.network" ]; then
+    cd \$npath
+    source=\$(ls 10-*.network | head -n 1)
+    cp \$source 10-\${ethers}.network
+    sed -i 's/Name=.*/Name='"\$ethers"'/' 10-\${ethers}.network
+    systemctl restart systemd-networkd
+    cd -
+fi
+
 yes | pacman -Scc
 # systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
 # systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-udevd 
