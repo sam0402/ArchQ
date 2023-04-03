@@ -422,7 +422,7 @@ chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/sw
 
 cat >>/mnt/home/${user}/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
-export kver=\$(uname -r | cut -d- -f3)
+export KVER=\$(uname -r | cut -d- -f3)
 alias ...='cd ../../'
 alias dir='command ls -lSrah'
 alias egrep='egrep --color=auto'
@@ -436,12 +436,12 @@ alias config='sudo config.sh'
 alias qboot='sudo qboot'
 alias sw='sudo sw'
 EOF
-sed -i 's/\\h/\\h:\\e[0\;${PSC}m$kver\\e[m/' /mnt/home/${user}/.bashrc
+sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
 
 cat >>/mnt/root/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
-export kver=\$(uname -r | cut -d- -f3)
-PS1='[\u@\h:\e[0;\${PSC}m\$kver\e[m \W]\$ '
+export KVER=\$(uname -r | cut -d- -f3)
+PS1='[\u@\h:\e[0;\${PSC}m\$KVER\e[m \W]\$ '
 alias ...='cd ../../'
 alias dir='command ls -lSrah'
 alias egrep='egrep --color=auto'
