@@ -133,7 +133,7 @@ if [ $fmt = P ]; then
     mkfs.vfat -F32 "${part_boot}"
 else
     # Install in entire disk
-    root_size=3584
+    root_size=3800
     root_end=$(( $root_size + 257 + 1 ))MiB
     parted --script "${device}" -- mklabel gpt \
         mkpart EFI fat32 1Mib 257MiB \
