@@ -1,7 +1,14 @@
 #!/bin/bash
 config='/etc/abcde.conf'
 user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
-
+mkgrub(){
+    part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
+    mount "$part_boot" /mnt
+    sleep 2
+    os-prober | grep -q Windows || umount /mnt
+    grub-mkconfig -o $grub_cfg
+    pacman -Q ramroot >/dev/null 2>&1 && sed -i 's/fallback/ramroot/g' $grub_cfg
+}
 if ! pacman -Q abcde >/dev/null 2>&1 ; then
     pacman -Sy --noconfirm archlinux-keyring
     yes | pacman -Scc >/dev/null 2>&1
@@ -16,7 +23,7 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cd-discid-1.4-3-x86_64.pkg.tar.zst
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rc-local-4-1-any.pkg.tar.zst
     pacman -U --noconfirm /root/*.pkg.tar.zst
-    grub-mkconfig -o /boot/grub/grub.cfg
+    mkgrub
     systemctl enable rc-local.service
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde.conf >/etc/abcde.conf
     echo 'yes' | cpan install IO::Socket::SSL MusicBrainz::DiscID WebService::MusicBrainz

@@ -9,7 +9,7 @@ mkgrub(){
     part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
     mount "$part_boot" /mnt
     sleep 2
-    os-prober
+    os-prober | grep -q Windows || umount /mnt
     grub-mkconfig -o $grub_cfg
     pacman -Q ramroot >/dev/null 2>&1 && sed -i 's/fallback/ramroot/g' $grub_cfg
 }
