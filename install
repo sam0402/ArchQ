@@ -138,8 +138,8 @@ else
     parted --script "${device}" -- mklabel gpt \
         mkpart EFI fat32 1Mib 257MiB \
         set 1 boot on \
-        mkpart ArchQ ext4 257MiB ${root_end} \
-        mkpart Database ext4 ${root_end} 100%
+        mkpart ArchQ ext4 257MiB ${root_end}
+        # mkpart Database ext4 ${root_end} 100%
 
     # Simple globbing was not enough as on one device I needed to match /dev/mmcblk0p1
     # but not /dev/mmcblk0boot1 while being able to match /dev/sda1 on other devices.
@@ -167,10 +167,12 @@ mkdir /mnt/boot
 mount "${part_boot}" /mnt/boot
 
 if [ $server = R ]; then
-        wipefs "${part_data}"
-        [ $f2fs = F ] && mkfs.f2fs -fl Database "${part_data}" || mkfs.xfs -fL Database "${part_data}"
-        [ ! -d /mnt/var/roon ] && mkdir -p /mnt/var/roon
-        mount "${part_data}" /mnt/var/roon
+    parted --script "${device}" -- \
+        mkpart Database ext4 ${root_end} 100%
+    wipefs "${part_data}"
+    [ $f2fs = F ] && mkfs.f2fs -fl Database "${part_data}" || mkfs.xfs -fL Database "${part_data}"
+    [ ! -d /mnt/var/roon ] && mkdir -p /mnt/var/roon
+    mount "${part_data}" /mnt/var/roon
 fi
 
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
