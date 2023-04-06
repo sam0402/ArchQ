@@ -200,9 +200,9 @@ EOF
 
 echo "${hostname}" > /mnt/etc/hostname
 echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" >> /mnt/etc/resolv.conf
-arch-chroot /mnt useradd -mU "$user"
+# arch-chroot /mnt useradd -mU "$user"
 sed -i '0,/# %wheel/s/# %wheel/%wheel/' /mnt/etc/sudoers
-arch-chroot /mnt usermod -aG wheel $user
+# arch-chroot /mnt usermod -aG wheel $user
 
 ### Set locale language
 echo -e "en_US.UTF-8 UTF-8\nja_JP.UTF-8 UTF-8\nzh_TW.UTF-8 UTF-8" >/mnt/etc/locale.gen
@@ -389,7 +389,6 @@ yes | pacman -Scc
 # systemctl stop dbus.socket dbus 
 # systemctl stop systemd-networkd
 # hdparm -a0 /dev/sda >/dev/null 2>&1
-name-cfg.sh
 exit 0
 EOF
 arch-chroot /mnt systemctl enable sshd ntpdate rc-local cpupower
@@ -436,26 +435,6 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sw >/mnt/us
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/mnt/usr/bin/pagecache-management.sh
 arch-chroot /mnt wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/sw
-
-cat >>/mnt/home/${user}/.bashrc <<EOF
-\$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
-export KVER=\$(uname -r | cut -d- -f3)
-alias ...='cd ../../'
-alias dir='command ls -lSrah'
-alias egrep='egrep --color=auto'
-alias grep='grep --color=auto'
-alias ll='command ls -l --color=auto -v'
-alias ls='command ls --color=auto -v'
-alias abcde='eject -t; abcde'
-alias poweroff='sudo systemctl poweroff'
-alias reboot='sudo systemctl reboot'
-alias config='sudo config.sh'
-alias qboot='sudo qboot'
-alias qrip='yes | sudo qboot 1'
-alias qplay='yes | sudo qboot 2'
-alias sw='sudo sw'
-EOF
-sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
 
 cat >>/mnt/root/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
