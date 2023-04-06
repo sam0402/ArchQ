@@ -38,5 +38,25 @@ echo "root:$password" | chpasswd --root
 sh -c "echo root:$password | chpasswd"
 echo "$user $hostname =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot,/usr/bin/qboot,/usr/bin/sw" >>/etc/sudoers
 ###
+cat >>/home/${user}/.bashrc <<EOF
+\$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
+export KVER=\$(uname -r | cut -d- -f3)
+alias ...='cd ../../'
+alias dir='command ls -lSrah'
+alias egrep='egrep --color=auto'
+alias grep='grep --color=auto'
+alias ll='command ls -l --color=auto -v'
+alias ls='command ls --color=auto -v'
+alias abcde='eject -t; abcde'
+alias poweroff='sudo systemctl poweroff'
+alias reboot='sudo systemctl reboot'
+alias config='sudo config.sh'
+alias qboot='sudo qboot'
+alias qrip='yes | sudo qboot 1'
+alias qplay='yes | sudo qboot 2'
+alias sw='sudo sw'
+EOF
+sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
+##
 rm /root/.bash_profile
 /usr/bin/server-cfg.sh

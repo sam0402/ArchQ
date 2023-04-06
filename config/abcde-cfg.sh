@@ -3,7 +3,7 @@ config='/etc/abcde.conf'
 user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
 mkgrub(){
     part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
-    mount "$part_boot" /mnt
+    lsblk -pln -o name,partlabel | grep -q Microsoft && mount "$part_boot" /mnt
     sleep 2
     os-prober | grep -q Windows || umount /mnt
     grub-mkconfig -o $grub_cfg
@@ -32,8 +32,9 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
 
     sed -i '$d' /etc/rc.local
 cat >>/etc/rc.local <<EOF
-server="roonserver squeezelite mpd logitechmediaserver squeezelite shairport-sync"
+# Stop service on Qrip
 if [ \$(uname -r | awk -F - '{print \$3}') = 'Qrip' ]; then
+    server="roonserver squeezelite mpd logitechmediaserver squeezelite shairport-sync"
     for i in \$server; do   
         [ \$(systemctl status \$i 2>&1 | grep -c 'Started') = 1 ] && systemctl stop \$i 
     done
