@@ -1,8 +1,11 @@
 #!/bin/bash
 c_red_b=$'\e[1;38;5;196m'
 c_gray=$'\e[m'
-server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon) || exit 1; clear
+server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon P Player) || exit 1; clear
 case $server in
+    P)
+        /usr/bin/player-cfg.sh
+        ;;
     L)
         if ! pacman -Q logitechmediaserver >/dev/null 2>&1; then
             cpus=$(getconf _NPROCESSORS_ONLN)
@@ -74,3 +77,4 @@ EOF
 esac
 yes | pacman -Scc
 rm -f /root/*.tar.zst /root/*.tar.xz
+sed -i 's/name-cfg.sh//' /etc/rc.local
