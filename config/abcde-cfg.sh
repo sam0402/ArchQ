@@ -13,7 +13,7 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     pacman -Sy --noconfirm archlinux-keyring
     yes | pacman -Scc >/dev/null 2>&1
     pacman -Syy --noconfirm
-    pacman -S --noconfirm nano cdparanoia glyr imagemagick atomicparsley srt python-lxml python-requests perl-net-ssleay
+    pacman -S --noconfirm cdparanoia glyr imagemagick atomicparsley srt python-lxml python-requests perl-net-ssleay
     pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
     rm /root/*.pkg.tar.zst
     kver=$(pacman -Q | grep linux-Q | grep -v headers | awk 'NR==1{print $2}')
