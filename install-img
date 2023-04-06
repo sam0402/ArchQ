@@ -203,7 +203,6 @@ echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" >> /mnt/etc/resolv.conf
 arch-chroot /mnt useradd -mU "$user"
 sed -i '0,/# %wheel/s/# %wheel/%wheel/' /mnt/etc/sudoers
 arch-chroot /mnt usermod -aG wheel $user
-echo "$user $hostname =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot,/usr/bin/qboot,/usr/bin/sw" >>/mnt/etc/sudoers
 
 ### Set locale language
 echo -e "en_US.UTF-8 UTF-8\nja_JP.UTF-8 UTF-8\nzh_TW.UTF-8 UTF-8" >/mnt/etc/locale.gen
@@ -256,8 +255,8 @@ ker=Q352
 [ $server = N ] && ker=${ker}w
 [ $fmt = U ] && ker=Q352u
 [ $fmt = U ] && kver=6.1.15-12
-arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+# arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+# arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll acpi_pm_good nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
 /mnt/etc/default/grub
 # sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll acpi_pm_good rcu_nocb_poll nosmt noirqdebug norandmaps no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable \
@@ -280,6 +279,7 @@ arch-chroot /mnt pacman -U --noconfirm /root/rc-local-4-1-any.pkg.tar.zst
 case $server in
     O)
         arch-chroot /mnt pacman -S --noconfirm which avahi glibc cifs-utils icu parted \
+            confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
             nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl \
             ffmpeg mympd ncmpcpp mpc 
         ;;
@@ -389,6 +389,7 @@ yes | pacman -Scc
 # systemctl stop dbus.socket dbus 
 # systemctl stop systemd-networkd
 # hdparm -a0 /dev/sda >/dev/null 2>&1
+name-cfg.sh
 exit 0
 EOF
 arch-chroot /mnt systemctl enable sshd ntpdate rc-local cpupower
@@ -420,6 +421,8 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/cpu-cfg.sh 
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/partimnt-cfg.sh >/mnt/usr/bin/partimnt-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/mnt/usr/bin/update_scpt.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/player-cfg.sh >/mnt/usr/bin/player-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/server-cfg.sh >/mnt/usr/bin/server-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/name-cfg.sh >/mnt/usr/bin/name-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg.sh >/mnt/usr/bin/desktop-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/mnt/usr/bin/shairport-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
