@@ -469,7 +469,7 @@ alias ll='command ls -l --color=auto -v'
 alias ls='command ls --color=auto -v'
 alias config='config.sh'
 EOF
-
+echo 'name-cfg.sh' >/mnt/root/.bash_profile
 # echo 'y\ny\n' | arch-chroot /mnt pacman -Scc
 rm -f /mnt/root/*.tar.zst /mnt/root/*.tar.xz
 # Detect other OS
