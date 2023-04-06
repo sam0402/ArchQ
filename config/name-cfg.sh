@@ -38,5 +38,5 @@ echo "root:$password" | chpasswd --root
 sh -c "echo root:$password | chpasswd"
 echo "$user $hostname =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot,/usr/bin/qboot,/usr/bin/sw" >>/etc/sudoers
 ###
-sed -i 's/name-cfg.sh//' /etc/rc.local
+rm /root/.bash_profile
 /usr/bin/server-cfg.sh
