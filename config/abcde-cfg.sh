@@ -13,7 +13,7 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     pacman -Sy --noconfirm archlinux-keyring
     yes | pacman -Scc >/dev/null 2>&1
     pacman -Syy --noconfirm
-    pacman -S --noconfirm nano cdparanoia glyr imagemagick atomicparsley base-devel ffmpeg srt python-lxml python-requests
+    pacman -S --noconfirm nano cdparanoia glyr imagemagick atomicparsley base-devel ffmpeg srt python-lxml python-requests perl-net-ssleay
     pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
     rm /root/*.pkg.tar.zst
     kver=$(pacman -Q | grep linux-Q | grep -v headers | awk 'NR==1{print $2}')
@@ -21,7 +21,6 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde-2.9.3-6-any.pkg.tar.zst
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cdparanoia-10.2-9-x86_64.pkg.tar.zst
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cd-discid-1.4-3-x86_64.pkg.tar.zst
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rc-local-4-1-any.pkg.tar.zst
     pacman -U --noconfirm /root/*.pkg.tar.zst
     mkgrub
     systemctl enable rc-local.service
