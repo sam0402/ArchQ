@@ -4,8 +4,7 @@ WK=$(dialog --stdout --title "ArchQ Bcache $1" \
 clear
 
 if ! pacman -Q bcache-tools >/dev/null 2>&1; then
-    pacman -Sy --noconfirm archlinux-keyring
-    pacman -S --noconfirm parted
+    pacman -Sy --noconfirm archlinux-keyring parted
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/bcache-tools-1.1-1-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/bcache-tools-1.1-1-x86_64.pkg.tar.zst
     echo -e "\nSystem will reboot after 5 seconds."
