@@ -11,7 +11,7 @@ pacman -Q mpd >/dev/null 2>&1 && MENU+='D MPD '
 pacman -Q squeezelite >/dev/null 2>&1 && MENU+='S Squeezelite '
 pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='A Airplay '
 if pacman -Q ffmpeg >/dev/null 2>&1; then
-    [[ $(pacman -Q ffmpeg) != 'ffmpeg 2:5.1.2-12' ]] || pacman -Q roonsever >/dev/null 2>&1 && MENU+='F FFmpeg '
+    [[ $(pacman -Q ffmpeg) != 'ffmpeg 2:5.1.2-12' ]] || [[ -d '/opt/RoonServer' ]] && MENU+='F FFmpeg '
 fi
 WK=$(dialog --stdout --title "$ipaddr   $temp" \
     --menu "$HOSTNAME.local Config" 7 0 0 ${MENU} K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P "Active player" R "abCDe ripper" \
