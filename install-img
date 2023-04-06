@@ -14,8 +14,8 @@ c_white_b=$'\e[1;37m'
 c_gray=$'\e[0;37m'
 
 MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
-echo -e "\n\nArchQ will ping "Arch Linux Server" 10 times before installation.\n\n"
-ping -c 10 archlinux.org
+echo -e "\n\nArchQ will ping "Arch Linux Server" 5 times before installation.\n\n"
+ping -c 5 archlinux.org
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
 curl -O https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/scrub-2.6.1-1-x86_64.pkg.tar.zst
 pacman -U --noconfirm scrub-2.6.1-1-x86_64.pkg.tar.zst
