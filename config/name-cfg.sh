@@ -56,7 +56,7 @@ alias qrip='yes | sudo qboot 1'
 alias qplay='yes | sudo qboot 2'
 alias sw='sudo sw'
 EOF
-sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
+sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /home/${user}/.bashrc
 ##
 rm /root/.bash_profile
 /usr/bin/server-cfg.sh
