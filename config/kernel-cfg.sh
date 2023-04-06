@@ -7,9 +7,11 @@ WK=$(dialog --stdout --title "ArchQ $1" \
 
 mkgrub(){
     part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
-    lsblk -pln -o name,partlabel | grep -q Microsoft && mount "$part_boot" /mnt
-    sleep 2
-    os-prober | grep -q Windows || umount /mnt
+    if lsblk -pln -o name,partlabel | grep -q Microsoft;
+        mount "$part_boot" /mnt
+        sleep 2
+        os-prober | grep -q Windows || umount /mnt
+    fi
     grub-mkconfig -o $grub_cfg
     pacman -Q ramroot >/dev/null 2>&1 && sed -i 's/fallback/ramroot/g' $grub_cfg
 }
