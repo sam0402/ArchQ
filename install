@@ -145,7 +145,6 @@ else
     # but not /dev/mmcblk0boot1 while being able to match /dev/sda1 on other devices.
     part_boot="$(ls ${device}* | grep -E "^${device}p?1$")"
     part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
-    part_data="$(ls ${device}* | grep -E "^${device}p?3$")"
 
     # Format boot partition (EFI/ESP)
     wipefs "${part_boot}"
@@ -169,6 +168,7 @@ mount "${part_boot}" /mnt/boot
 if [ $server = R ]; then
     parted --script "${device}" -- \
         mkpart Database ext4 ${root_end} 100%
+    part_data="$(ls ${device}* | grep -E "^${device}p?3$")"
     wipefs "${part_data}"
     [ $f2fs = F ] && mkfs.f2fs -fl Database "${part_data}" || mkfs.xfs -fL Database "${part_data}"
     [ ! -d /mnt/var/roon ] && mkdir -p /mnt/var/roon
