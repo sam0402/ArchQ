@@ -113,6 +113,17 @@ exec 2> >(tee "stderr.log")
 
 timedatectl set-ntp true
 
+mkboot(){
+    # Wipe boot
+    for ((i=1; i <= $zerofill; i++))
+    do
+        echo -e "${c_red_b}Boot parition fills with zero -> $i${c_white_b}"
+        scrub -Sp fillzero $part_boot
+    done
+    wipefs "${part_boot}"
+    mkfs.vfat -F32 "${part_boot}"
+}
+
 # Foramt and install in one partition
 old_efi=''
 if [ $fmt = P ]; then
@@ -129,16 +140,9 @@ if [ $fmt = P ]; then
         old_efi=$part_boot
         part_boot=$part_root
         part_root=$(ls ${device}* | grep -E "^${device}p?$((${part_root:0-1} + 1))$")
+        # Format boot partition (EFI/ESP)
+        mkboot
     fi
-    # Wipe root partition with zerofill
-    for ((i=1; i <= $zerofill; i++))
-    do
-        echo "Fill zero -> $i"
-        scrub -Sp fillzero $part_root
-    done
-
-    wipefs "${part_boot}"
-    mkfs.vfat -F32 "${part_boot}"
 else
     # Install in entire disk
     root_size=3800
@@ -153,26 +157,24 @@ else
     # but not /dev/mmcblk0boot1 while being able to match /dev/sda1 on other devices.
     part_boot="$(ls ${device}* | grep -E "^${device}p?1$")"
     part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
-
     # Format boot partition (EFI/ESP)
-    wipefs "${part_boot}"
-    mkfs.vfat -F32 "${part_boot}"
+    mkboot
 fi
 
-# Wipe root partition with zerofill
+# Wipe & format root partition
 for ((i=1; i <= $zerofill; i++))
 do
-    echo "Fill zero -> $i"
+    echo -e "${c_red_b}Root parition fills with zero -> $i${c_white_b}"
     scrub -Sp fillzero $part_root
 done
-
-# Format root partition by F2FS || XFS
 [ $f2fs = F ] && mkfs.f2fs -fl ArchQ "${part_root}" || mkfs.xfs -fL ArchQ "${part_root}"
 
+## Mount partition
 mount "${part_root}" /mnt
 mkdir /mnt/boot
 mount "${part_boot}" /mnt/boot
 
+## Roon server data partition
 if [ $server = R ]; then
     parted --script "${device}" -- \
         mkpart Database ext4 ${root_end} 100%
