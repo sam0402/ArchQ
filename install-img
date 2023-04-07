@@ -54,7 +54,7 @@ if [ $fmt = P ]; then
     part_root=$(eval $partlst) || exit 1; clear
     part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
 fi
-zerofill=1
+zerofill=0
 # zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe disk times" 0 30 0) || exit 1; clear
 f2fs=F
 # f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1; clear
