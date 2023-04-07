@@ -26,17 +26,34 @@ curl -s "$MIRRORLIST_URL" | \
     rankmirrors -n 5 - > /etc/pacman.d/mirrorlist
 
 ### Get infomation from user ###
+password(){
+    password=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password" 0 0) || exit 1; clear
+    if [[ -z "$password" ]];then
+        dialog --stdout --title "ArchQ" --pause "\n Passwd cannot be empty.\n\n Setting password again." 12 0 3 || exit 1; clear
+        password
+    fi
+    password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password again" 0 0) || exit 1; clear
+    if [[ "$password" != "$password2" ]]; then
+        dialog --stdout --title "ArchQ" --pause "\n Passwd did not match.\n\n Setting password again." 12 0 3 || exit 1; clear
+        password
+    fi
+}
+
 hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname" 0 0) || exit 1; clear
-: ${hostname:?"hostname cannot be empty"}
+if [ -z "$hostname" ];then
+    dialog --stdout --title "ArchQ" --pause "\n Hostname cannot be empty.\n\n Default will be 'ArchQ'." 12 0 3 || exit 1; clear
+    hostname=ArchQ
+    hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname again" 0 0) || exit 1; clear
+fi
 
 user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1; clear
-: ${user:?"user cannot be empty"}
+if [ -z "$user" ];then
+    dialog --stdout --title "ArchQ" --pause "\n Username cannot be empty.\n\n Default will be 'archq'." 12 0 3 || exit 1; clear
+    user=archq
+    user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username again" 0 0) || exit 1; clear
+fi
+password
 
-password=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password" 0 0) || exit 1; clear
-: ${password:?"password cannot be empty"}
-password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password again" 0 0) || exit 1; clear
-[[ "$password" == "$password2" ]] || (dialog --stdout --title "ArchQ" --pause "\n  Passwords did not match.\n\n  Install again." 12 40 5; exit 1; clear)
-    
 devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
 fmt=$(dialog --stdout --title "ArchQ" --menu "Format device ${device}" 7 0 0 E Entire P Partition U "USB Storage") || exit 1; clear
@@ -121,16 +138,16 @@ if [ $fmt = P ]; then
         old_efi=$part_boot
         part_boot=$part_root
         part_root=$(ls ${device}* | grep -E "^${device}p?$((${part_root:0-1} + 1))$")
+        # Format boot partition (EFI/ESP)
+        wipefs "${part_boot}"
+        mkfs.vfat -F32 "${part_boot}"
+        # Wipe boot
+        for ((i=1; i <= $zerofill; i++))
+        do
+            echo -e "${c_red_b}Boot parition fills with zero -> $i${c_white_b}"
+            scrub -Sp fillzero $part_boot
+        done
     fi
-    # Wipe root partition with zerofill
-    for ((i=1; i <= $zerofill; i++))
-    do
-        echo "Fill zero -> $i"
-        scrub -Sp fillzero $part_root
-    done
-
-    wipefs "${part_boot}"
-    mkfs.vfat -F32 "${part_boot}"
 else
     # Install in entire disk
     root_size=3800
@@ -145,26 +162,31 @@ else
     # but not /dev/mmcblk0boot1 while being able to match /dev/sda1 on other devices.
     part_boot="$(ls ${device}* | grep -E "^${device}p?1$")"
     part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
-
     # Format boot partition (EFI/ESP)
     wipefs "${part_boot}"
     mkfs.vfat -F32 "${part_boot}"
+    # Wipe boot
+    for ((i=1; i <= $zerofill; i++))
+    do
+        echo -e "${c_red_b}Boot parition fills with zero -> $i${c_white_b}"
+        scrub -Sp fillzero $part_boot
+    done
 fi
 
-# Wipe root partition with zerofill
+# Wipe & format root partition
 for ((i=1; i <= $zerofill; i++))
 do
-    echo "Fill zero -> $i"
+    echo -e "${c_red_b}Root parition fills with zero -> $i${c_white_b}"
     scrub -Sp fillzero $part_root
 done
-
-# Format root partition by F2FS || XFS
 [ $f2fs = F ] && mkfs.f2fs -fl ArchQ "${part_root}" || mkfs.xfs -fL ArchQ "${part_root}"
 
+## Mount partition
 mount "${part_root}" /mnt
 mkdir /mnt/boot
 mount "${part_boot}" /mnt/boot
 
+## Roon server data partition
 if [ $server = R ]; then
     parted --script "${device}" -- \
         mkpart Database ext4 ${root_end} 100%
