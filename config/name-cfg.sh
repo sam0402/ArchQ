@@ -11,22 +11,21 @@ password(){
         password
     fi
 }
-
 hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname" 0 0) || exit 1; clear
 if [ -z "$hostname" ];then
     dialog --stdout --title "ArchQ" --pause "\n Hostname cannot be empty.\n\n Default will be 'ArchQ'." 12 0 3 || exit 1; clear
     hostname=ArchQ
     hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname again" 0 0) || exit 1; clear
 fi
-
 user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1; clear
 if [ -z "$user" ];then
     dialog --stdout --title "ArchQ" --pause "\n Username cannot be empty.\n\n Default will be 'archq'." 12 0 3 || exit 1; clear
     user=archq
     user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username again" 0 0) || exit 1; clear
 fi
-
 password
+
+lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1; clear
 
 ### Setting
 echo "${hostname}" > /etc/hostname
@@ -58,5 +57,11 @@ alias sw='sudo sw'
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /home/${user}/.bashrc
 ##
+[ $lang = J ] && echo "LANG=ja_JP.UTF-8" > /etc/locale.conf
+[ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /etc/locale.conf
+arch-chroot  ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime
+[ $lang = J ] && arch-chroot ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+##
 rm /root/.bash_profile
 /usr/bin/server-cfg.sh
+logout
