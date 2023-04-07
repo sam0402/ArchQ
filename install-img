@@ -81,7 +81,7 @@ ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
 player=N
-server=O
+server=Z
 #server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon N None) || exit 1; clear
 case $server in
     L)
@@ -190,7 +190,11 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 
 echo -e "\n${c_red_b}Download Arch Linux package and install ...${c_gray}\n"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
-         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm
+        vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm \
+        which avahi glibc cifs-utils icu parted \
+        confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
+        nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl \
+        ffmpeg mympd ncmpcpp mpc 
 
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
@@ -279,12 +283,6 @@ arch-chroot /mnt pacman -U --noconfirm /root/rc-local-4-1-any.pkg.tar.zst
 
 ## server
 case $server in
-    O)
-        arch-chroot /mnt pacman -S --noconfirm which avahi glibc cifs-utils icu parted \
-            confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
-            nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl \
-            ffmpeg mympd ncmpcpp mpc 
-        ;;
     L)
         echo -e "\n${c_red_b}Install Logitech Media Server ...${c_gray}\n"
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
