@@ -64,4 +64,3 @@ arch-chroot  ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime
 ##
 rm /root/.bash_profile
 /usr/bin/server-cfg.sh
-logout
