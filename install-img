@@ -60,11 +60,11 @@ f2fs=F
 # f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1; clear
 
 lang=E
-# lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1
-# clear
+# lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1; clear
 
-ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
-ifport=$(dialog --stdout --title "ArchQ" --menu "Select net device" 7 0 0 ${ethers}) || exit 1; clear
+# ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
+ifport=$(ip -o link show | awk '{print $2}' | grep '^en' | sed 's/://'| head -n 1)
+# ifport=$(dialog --stdout --title "ArchQ" --menu "Select net device" 7 0 0 ${ethers}) || exit 1; clear
 ip=D
 # ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1; clear
 if [ $ip = S ]; then
@@ -98,14 +98,14 @@ esac
 clear
 
 ### select sound card
-scard=""
-if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A || $player =~ S || $server = M || $server = T ]]; then
-    devs='hw:0,0 　 '
-    while read line; do
-        devs+=${line}' 　 '
-    done <<< $(aplay -L | grep ':')
-    scard=$(dialog --stdout --title "ArchQ" --menu "Select sound device" 7 0 0 ${devs}) || exit 1; clear
-fi
+scard="hw:0,0"
+# if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A || $player =~ S || $server = M || $server = T ]]; then
+#     devs='hw:0,0 　 '
+#     while read line; do
+#         devs+=${line}' 　 '
+#     done <<< $(aplay -L | grep ':')
+#     scard=$(dialog --stdout --title "ArchQ" --menu "Select sound device" 7 0 0 ${devs}) || exit 1; clear
+# fi
 
 ### Set up logging ###
 exec 1> >(tee "stdout.log")
