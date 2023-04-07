@@ -3,7 +3,7 @@ config='/etc/abcde.conf'
 user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
 mkgrub(){
     part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
-    if lsblk -pln -o name,partlabel | grep -q Microsoft;
+    if lsblk -pln -o name,partlabel | grep -q Microsoft; then
         mount "$part_boot" /mnt
         sleep 2
         os-prober | grep -q Windows || umount /mnt
