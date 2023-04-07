@@ -6,8 +6,8 @@ WK=$(dialog --stdout --title "ArchQ $1" \
             --menu "Select command" 7 0 0 B Boot I Install M Remove $ramroot F Frequency) || exit 1; clear
 
 mkgrub(){
-    part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
+        part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
         mount "$part_boot" /mnt
         sleep 2
         os-prober | grep -q Windows || umount /mnt
