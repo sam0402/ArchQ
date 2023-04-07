@@ -73,8 +73,8 @@ EOF
         pacman -Q logitechmediaserver >/dev/null 2>&1 && systemctl disable --now logitechmediaserver
         [[ -d '/opt/RoonServer' ]] && systemctl disable --now roonserver
         /usr/bin/mpd-cfg.sh
+        systemctl enable --now mpd
         ;;
 esac
 yes | pacman -Scc
 rm -f /root/*.tar.zst /root/*.tar.xz
-sed -i 's/name-cfg.sh//' /etc/rc.local
