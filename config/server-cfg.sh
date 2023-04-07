@@ -1,5 +1,5 @@
 #!/bin/bash
-c_red_b=$'\e[1;38;5;196m'
+c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon P Player) || exit 1; clear
 case $server in
@@ -11,7 +11,7 @@ case $server in
             cpus=$(getconf _NPROCESSORS_ONLN)
             iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
             isocpu=''
-            echo -e "\n${c_red_b}Install Logitech Media Server ...${c_gray}\n"
+            echo -e "\n${c_blue_b}Install Logitech Media Server ...${c_gray}\n"
             wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
             pacman -U --noconfirm /root/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
             [ $cpus -ge 4 ] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /usr/lib/systemd/system/logitechmediaserver.service
@@ -25,7 +25,7 @@ case $server in
         ;;
     R)
         if [[ ! -d '/opt/RoonServer' ]]; then
-            echo -e "\n${c_red_b}Install Roon Server ...${c_gray}\n"
+            echo -e "\n${c_blue_b}Install Roon Server ...${c_gray}\n"
             mkdir -p /opt/RoonServer /usr/share/licenses/roonserver
             wget -qO - http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2 | bsdtar xf - -C /opt
             curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver.service >/usr/lib/systemd/system/roonserver.service
@@ -40,7 +40,7 @@ case $server in
         ;;
     M)
         if ! pacman -Q mpd-light >/dev/null 2>&1; then
-            echo -e "\n${c_red_b}Install MPD ...${c_gray}\n"
+            echo -e "\n${c_blue_b}Install MPD ...${c_gray}\n"
             wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.11-4-x86_64.pkg.tar.zst
             wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
             wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
