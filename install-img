@@ -393,7 +393,7 @@ ramdisk(){
     mount /dev/ram0 \$rd_dir
 }
 music_dir=$(grep 'music_directory' /etc/mpd.conf | awk -F'"' '{print $2}')
-[ -n $music_dir ] && ramdisk
+[ -n \$music_dir ] && ramdisk
 ##
 yes | pacman -Scc
 # systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
