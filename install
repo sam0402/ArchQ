@@ -14,8 +14,8 @@ c_white_b=$'\e[1;37m'
 c_gray=$'\e[0;37m'
 
 MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
-echo -e "${c_blue_b}\n\nArchQ will ping "Arch Linux Server" 25 times before installation.\n${c_gray}"
-ping -c 25 archlinux.org
+echo -e "${c_blue_b}\n\nArchQ will ping "Arch Linux Server" 20 times before installation.\n${c_gray}"
+ping -c 20 archlinux.org
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
 curl -O https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/scrub-2.6.1-1-x86_64.pkg.tar.zst
 pacman -U --noconfirm scrub-2.6.1-1-x86_64.pkg.tar.zst
@@ -178,7 +178,7 @@ do
 done
 [ $f2fs = F ] && mkfs.f2fs -fl ArchQ "${part_root}" || mkfs.xfs -fL ArchQ "${part_root}"
 
-## Mount partition
+## Mount root & boot partition
 mount "${part_root}" /mnt
 mkdir /mnt/boot
 mount "${part_boot}" /mnt/boot
@@ -280,7 +280,7 @@ iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
 isocpu=''
 [ $cpus -ge 4 ] && [[ $server = L || $player =~ S ]] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
 [ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
-sed -i 's/idle=poll /idle=poll '"$isocpu"'/' /mnt/etc/default/grub
+sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /mnt/etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 # Add /etc/rc.local
@@ -388,7 +388,7 @@ if [ ! -f "\$npath""10-\${ethers}.network" ]; then
     systemctl restart systemd-networkd
     cd -
 fi
-
+[ -b /dev/ram0 ] && mkfs.xfs -q /dev/ram0
 yes | pacman -Scc
 # systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
 # systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-udevd 
