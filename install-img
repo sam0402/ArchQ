@@ -190,10 +190,11 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 
 echo -e "\n${c_red_b}Download Arch Linux package and install ...${c_gray}\n"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
-        vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm \
+        vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop \
         which avahi glibc cifs-utils icu parted \
         confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
         nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl \
+        openmpi fftw boost openpmix ncmpcpp hwloc taglib lua \
         ffmpeg mympd ncmpcpp mpc 
 
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
@@ -274,7 +275,7 @@ iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
 isocpu=''
 [ $cpus -ge 4 ] && [[ $server = L || $player =~ S ]] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
 [ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
-sed -i 's/idle=poll /idle=poll '"$isocpu"'/' /mnt/etc/default/grub
+sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /mnt/etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 # Add /etc/rc.local
