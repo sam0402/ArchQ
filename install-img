@@ -145,7 +145,7 @@ if [ $fmt = P ]; then
     fi
 else
     # Install in entire disk
-    root_size=8192
+    root_size=3800
     root_end=$(( $root_size + 257 + 1 ))MiB
     parted --script "${device}" -- mklabel gpt \
         mkpart EFI fat32 1Mib 257MiB \
@@ -388,9 +388,9 @@ ramdisk(){
     # ramdisk=4GB
     modprobe brd rd_size=4194304 max_part=1 rd_nr=1
     mkfs.xfs -q /dev/ram0
-    rd_dir="$music_dir/RAMDISK"
-    [ -d $rd_dir ] || (mkdir -p $rd_dir; chmod 777 $rd_dir)
-    mount /dev/ram0 $rd_dir
+    rd_dir="\$music_dir/RAMDISK"
+    [ -d \$rd_dir ] || (mkdir -p \$rd_dir; chmod 777 \$rd_dir)
+    mount /dev/ram0 \$rd_dir
 }
 music_dir=$(grep 'music_directory' /etc/mpd.conf | awk -F'"' '{print $2}')
 [ -n $music_dir ] && ramdisk
