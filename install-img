@@ -145,7 +145,7 @@ if [ $fmt = P ]; then
     fi
 else
     # Install in entire disk
-    root_size=5800
+    root_size=3800
     root_end=$(( $root_size + 257 + 1 ))MiB
     parted --script "${device}" -- mklabel gpt \
         mkpart EFI fat32 1Mib 257MiB \
@@ -192,6 +192,7 @@ echo -e "\n${c_red_b}Download Arch Linux package and install ...${c_gray}\n"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop \
         which avahi glibc cifs-utils icu parted \
+        fmt libcdio libupnp liburing cdparanoia  libcdio-paranoia libcddb libmms \
         confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
         nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl \
         openmpi fftw boost openpmix ncmpcpp hwloc taglib lua \
@@ -224,12 +225,11 @@ arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime
 # arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
 echo "root:$password" | chpasswd --root /mnt
 arch-chroot /mnt sh -c "echo root:$password | chpasswd"
+sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
+[ $f2fs = X ] && sed -i 's/MODULES=()/MODULES=(xfs)/' /mnt/etc/mkinitcpio.conf
 arch-chroot /mnt mkinitcpio -p linux
 arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --removable --bootloader-id=$hostname
 arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
-
-echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
-[ $f2fs = X ] && sed -i 's/MODULES=()/MODULES=(xfs)/' /mnt/etc/mkinitcpio.conf
 
 arch-chroot /mnt ln -s /usr/bin/vim /usr/bin/vi
 
@@ -372,7 +372,7 @@ echo -e "\n${c_red_b}Setting service ...${c_gray}\n"
 sed -i '$i sleep 3' /mnt/etc/rc.local
 sed -i '$d' /mnt/etc/rc.local
 cat >>/mnt/etc/rc.local <<EOF
-# ethernet auto detect
+## ethernet auto detect
 ethers=\$(ip -o link show | awk '{print \$2,\$9}' | grep '^en' | sed 's/://' | awk '{print \$1}' | head -n 1)
 npath='/etc/systemd/network/'
 if [ ! -f "\$npath""10-\${ethers}.network" ]; then
@@ -383,7 +383,18 @@ if [ ! -f "\$npath""10-\${ethers}.network" ]; then
     systemctl restart systemd-networkd
     cd -
 fi
-
+## Create ramdisk for MPD
+ramdisk(){
+    # ramdisk=4GB
+    modprobe brd rd_size=4194304 max_part=1 rd_nr=1
+    mkfs.xfs -q /dev/ram0
+    rd_dir="$music_dir/RAMDISK"
+    [ -d $rd_dir ] || (mkdir -p $rd_dir; chmod 777 $rd_dir)
+    mount /dev/ram0 $rd_dir
+}
+music_dir=$(grep 'music_directory' /etc/mpd.conf | awk -F'"' '{print $2}')
+[ -n $music_dir ] && ramdisk
+##
 yes | pacman -Scc
 # systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
 # systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-udevd 
