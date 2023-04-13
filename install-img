@@ -145,7 +145,7 @@ if [ $fmt = P ]; then
     fi
 else
     # Install in entire disk
-    root_size=8192
+    root_size=
     root_end=$(( $root_size + 257 + 1 ))MiB
     parted --script "${device}" -- mklabel gpt \
         mkpart EFI fat32 1Mib 257MiB \
