@@ -3,19 +3,21 @@ c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon P Player) || exit 1; clear
 case $server in
-    P)
+    P)  
+        sed -i 's/'"$isocpu"'//' /etc/default/grub
         /usr/bin/player-cfg.sh
         ;;
     L)
         if ! pacman -Q logitechmediaserver >/dev/null 2>&1; then
             cpus=$(getconf _NPROCESSORS_ONLN)
             iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
-            isocpu=''
+            isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
             echo -e "\n${c_blue_b}Install Logitech Media Server ...${c_gray}\n"
             wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
             pacman -U --noconfirm /root/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
             [ $cpus -ge 4 ] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /usr/lib/systemd/system/logitechmediaserver.service
             [ $cpus -ge 6 ] && pacman -Q squeezelite >/dev/null 2>&1 && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /usr/lib/systemd/system/logitechmediaserver.service
+            sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
             sed -i 's/novideo/novideo --charset=utf8/' /usr/lib/systemd/system/logitechmediaserver.service
         fi
         pacman -Q mpd-light >/dev/null 2>&1 && systemctl disable --now mpd nginx php-fpm
@@ -33,6 +35,7 @@ case $server in
             curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roon_copyright >/usr/share/licenses/roonserver/COPYING
             sed -i 's/exec "$HARDLINK" "$SCRIPT.dll" "$@"/exec nice -n -20 "$HARDLINK" "$SCRIPT.dll" "$@"/g' /opt/RoonServer/Appliance/RAATServer
         fi
+        sed -i 's/'"$isocpu"'//' /etc/default/grub
         pacman -Q mpd-light >/dev/null 2>&1 && systemctl disable --now mpd nginx php-fpm
         pacman -Q mpd-light >/dev/null 2>&1 && systemctl disable --now mympd
         pacman -Q logitechmediaserver >/dev/null 2>&1 && systemctl disable --now logitechmediaserver
@@ -46,8 +49,9 @@ case $server in
             wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
             wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.5-1-x86_64.pkg.tar.zst
             wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/blissify-0.3.5-1-x86_64.pkg.tar.zst
+            wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-ramdisk-0.5-1-any.pkg.tar.zst
             pacman -U --noconfirm /root/mpd-light-0.23.11-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-2.00-1-any.pkg.tar.zst
-            pacman -U --noconfirm /root/owntone-28.5-1-x86_64.pkg.tar.zst /root/blissify-0.3.5-1-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /root/owntone-28.5-1-x86_64.pkg.tar.zst /root/blissify-0.3.5-1-x86_64.pkg.tar.zst /root/mpd-ramdisk-0.5-1-any.pkg.tar.zst
 
     ### setup mpd
             sed -i '$d' /etc/rc.local
@@ -70,6 +74,7 @@ EOF
             chmod 644 /etc/nginx/sites-enabled/rompr
         fi
         ### Start mpd.. etc. service
+        sed -i 's/'"$isocpu"'//' /etc/default/grub
         pacman -Q logitechmediaserver >/dev/null 2>&1 && systemctl disable --now logitechmediaserver
         [[ -d '/opt/RoonServer' ]] && systemctl disable --now roonserver
         /usr/bin/mpd-cfg.sh
