@@ -144,9 +144,8 @@ mdir=$(grep 'music_directory' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 buffer=$(grep 'audio_buffer_size' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 buftime=$(grep 'buffer_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 ## Ramdisk 
-
 ramdisk=$(grep 'rdsize=' /usr/bin/mpd-rdcheck.sh | awk -F'=' '{print $2}')
-[[ $(systemctl is-active mpd-ramdisk) == 'inactive' ]] && rd_GB=0 || rd_GB=$(python -c "print($ramdisk/1048576)")
+[[ $(systemctl is-active mpd-ramdisk) == 'inactive' ]] && rd_GB=0 || rd_GB=$(python -c "print(round($ramdisk/1048576,1))")
 ###
 options=$(dialog --stdout \
     --title "ArchQ MPD" \
