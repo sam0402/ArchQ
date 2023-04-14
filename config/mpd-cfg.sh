@@ -1,4 +1,5 @@
 #!/bin/bash
+## modprobe brd rd_size=2621440 max_part=1 rd_nr=1
 config='/etc/mpd.conf'
 user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
 
@@ -100,7 +101,7 @@ m0=off; h0=off; d0=off
 m1=off; h1=off; d1=off
 cat $config | grep owntone | grep -q '#' || m0=on 
 cat $config | grep httpd | grep -q '#' || h0=on
-cat $config | grep "^[[:space:]]dop" | grep -q '#' || d0=on
+cat $config | grep -q "#[[:space:]]dop" || d0=on
 output=$(dialog --stdout --title "ArchQ MPD" \
         --checklist "Output" 7 0 0 \
         M Multiroom $m0 H Httpd $h0 D DoP $d0) || exit 1; clear
@@ -138,21 +139,37 @@ fi
 ## Dop on/off
 [[ $d1 == on ]] && sed -i 's/^#.\?dop.*/\tdop\t"yes"/' $config || sed -i 's/^[[:space:]]dop.*/#\tdop\t"yes"/' $config
 
-### Buffer time & Music direcroty 
+### Buffer, RAMDISK & Music Directory 
 mdir=$(grep 'music_directory' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 buffer=$(grep 'audio_buffer_size' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 buftime=$(grep 'buffer_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
+## Ramdisk 
+
+ramdisk=$(grep 'rdsize=' /usr/bin/mpd-rdcheck.sh | awk -F'=' '{print $2}')
+[[ $(systemctl is-active mpd-ramdisk) == 'inactive' ]] && rd_GB=0 || rd_GB=$(python -c "print($ramdisk/1048576)")
+###
 options=$(dialog --stdout \
     --title "ArchQ MPD" \
     --ok-label "Ok" \
     --form "Buffer & Directory" 0 35 0 \
-    "Audio Buffer"      1 1 $buffer 1 17 35 0 \
+    "Audio Buffer"      1 1 $buffer  1 17 35 0 \
     "ALSA Buffer(μs)"   2 1 $buftime 2 17 35 0 \
-    "Music Dir  /mnt/"   3 1 $mdir    3 17 35 0 ) || exit 1; clear
+    "Ram disk(GB)"      3 1 $rd_GB   3 17 35 0 \
+    "Music Dir  /mnt/"  4 1 $mdir    4 17 35 0 ) || exit 1; clear
+
 beffer=$(echo $options | awk '//{print $1 }')
 buftime=$(echo $options | awk '//{print $2 }')
 pertime=$(expr $buftime / 4)
-mdir=$(echo $echo $options | awk '//{print $3}' | sed 's"/"\\\/"g')
+mdir=$(echo $echo $options | awk '//{print $4}' | sed 's"/"\\\/"g')
+## Set ramdisk
+rd_GB=$(echo $options | awk '//{print $3 }')
+if [ $rd_GB = '0' ]; then
+    systemctl disable --now mpd-ramdisk
+else
+    ramdisk=$(python -c "print(int($rd_GB*1048576))")
+    sed -i 's/rdsize=.*/rdsize='"$ramdisk"'/' /usr/bin/mpd-rdcheck.sh
+    systemctl enable --now mpd-ramdisk
+fi
 
 sed -i 's/^#\?audio_buffer_size.*"/audio_buffer_size\t"'"$beffer"'"/' $config
 sed -i 's/^#\?.* \?\tbuffer_time.*"/\tbuffer_time\t"'"$buftime"'"/;s/^#\?.* \?\tperiod_time.*"/\tperiod_time\t"'"$pertime"'"/' $config
