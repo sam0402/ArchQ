@@ -150,10 +150,10 @@ ramdisk=$(grep 'rdsize=' /usr/bin/mpd-rdcheck.sh | awk -F'=' '{print $2}')
 options=$(dialog --stdout \
     --title "ArchQ MPD" \
     --ok-label "Ok" \
-    --form "Buffer & Directory" 0 35 0 \
+    --form "Buffer, Ramdisk & Directory" 0 35 0 \
     "Audio Buffer"      1 1 $buffer  1 17 35 0 \
     "ALSA Buffer(μs)"   2 1 $buftime 2 17 35 0 \
-    "Ram disk(GB)"      3 1 $rd_GB   3 17 35 0 \
+    "Ramdisk(GB)"      3 1 $rd_GB   3 17 35 0 \
     "Music Dir  /mnt/"  4 1 $mdir    4 17 35 0 ) || exit 1; clear
 
 beffer=$(echo $options | awk '//{print $1 }')
