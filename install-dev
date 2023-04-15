@@ -145,7 +145,7 @@ if [ $fmt = P ]; then
     fi
 else
     # Install in entire disk
-    root_size=5120
+    root_size=4608
     root_end=$(( $root_size + 257 + 1 ))MiB
     parted --script "${device}" -- mklabel gpt \
         mkpart EFI fat32 1Mib 257MiB \
@@ -192,17 +192,8 @@ echo -e "\n${c_red_b}Download Arch Linux package and install ...${c_gray}\n"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop \
         which avahi glibc cifs-utils icu parted \
-        fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms \
-        confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
-        nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl \
-        openmpi fftw boost openpmix ncmpcpp hwloc taglib lua \
-        ffmpeg mympd ncmpcpp mpc \
-        base-devel asp bc kmod libelf cpio xmlto python-sphinx python-sphinx_rtd_theme graphviz imagemagick tar pahole tmux gtk2 \
-        audiofile libmms libid3tag libmpdclient libupnp  libnfs libgme liburing boost meson fmt libopenmpt libupnp libmicrohttpd \
-        python-bottle aspell-en id3lib python-waitress faad2 libmad expat c-ares cjson libev libuv libwebsockets libconfig mosquitto \
-        libcddb libcdio libcdio-paranoia jsoncpp rhash cmake perl-net-ssleay perl-io-socket-ssl xxhash nasm rsync yasm cifs-utils \
-        chromaprint ladspa cargo clang rust compiler-rt unzip
-
+        ffmpeg python-mpd2
+        
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
 cat >>/mnt/etc/fstab <<EOF
