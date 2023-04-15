@@ -146,6 +146,7 @@ if [ $fmt = P ]; then
 else
     # Install in entire disk
     root_size=3800
+    grep -q 'dev' $0 && root_size=4608 || root_size=3800
     root_end=$(( $root_size + 257 + 1 ))MiB
     parted --script "${device}" -- mklabel gpt \
         mkpart EFI fat32 1Mib 257MiB \
@@ -311,9 +312,10 @@ case $server in
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.5-1-x86_64.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/blissify-0.3.3-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/blissify-0.3.5-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-ramdisk-0.5-1-any.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.11-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-2.00-1-any.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.5-1-x86_64.pkg.tar.zst /root/blissify-0.3.3-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.5-1-x86_64.pkg.tar.zst /root/blissify-0.3.5-1-x86_64.pkg.tar.zst /root/mpd-ramdisk-0.5-1-any.pkg.tar.zst
 
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
@@ -372,7 +374,7 @@ echo -e "\n${c_red_b}Setting service ...${c_gray}\n"
 sed -i '$i sleep 3' /mnt/etc/rc.local
 sed -i '$d' /mnt/etc/rc.local
 cat >>/mnt/etc/rc.local <<EOF
-## ethernet auto detect
+# ethernet auto detect
 ethers=\$(ip -o link show | awk '{print \$2,\$9}' | grep '^en' | sed 's/://' | awk '{print \$1}' | head -n 1)
 npath='/etc/systemd/network/'
 if [ ! -f "\$npath""10-\${ethers}.network" ]; then
