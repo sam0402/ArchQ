@@ -1,7 +1,7 @@
 #!/bin/bash
 # WARNING: this script will destroy data on the selected disk.
 # This script can be run by executing the following:
-#   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install.sh | bash
+#   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install | bash
 kver='6.0.1-12'
 set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
@@ -316,10 +316,10 @@ case $server in
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.5-1-x86_64.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/blissify-0.3.3-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/blissify-0.3.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-ramdisk-0.5-1-any.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.11-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-2.00-1-any.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.5-1-x86_64.pkg.tar.zst /root/blissify-0.3.3-1-x86_64.pkg.tar.zst /root/mpd-ramdisk-0.5-1-any.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.5-1-x86_64.pkg.tar.zst /root/blissify-0.3.5-1-x86_64.pkg.tar.zst /root/mpd-ramdisk-0.5-1-any.pkg.tar.zst
 
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
@@ -427,6 +427,8 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/cpu-cfg.sh 
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/partimnt-cfg.sh >/mnt/usr/bin/partimnt-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/mnt/usr/bin/update_scpt.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/player-cfg.sh >/mnt/usr/bin/player-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/server-cfg.sh >/mnt/usr/bin/server-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/name-cfg.sh >/mnt/usr/bin/name-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg.sh >/mnt/usr/bin/desktop-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/mnt/usr/bin/shairport-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
