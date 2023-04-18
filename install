@@ -265,7 +265,7 @@ echo -e "\n${c_red_b}Install ArchQ Kernel ...${c_gray}\n"
 ker=Q352
 [ $cpu = amd ] && ker=Q308AMD
 [ $server = N ] && ker=${ker}w
-[ $fmt = U ] && ker=Q352u
+[ $fmt = U ] && ker=Q352wu
 [ $fmt = U ] && kver=6.1.15-12
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
