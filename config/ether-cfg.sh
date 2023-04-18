@@ -18,6 +18,7 @@ fi
 
 if echo $ifport | grep -q wlan; then
     iw_conf(){
+        # ssid_list=$(iwctl station wlan0 get-networks | awk '{print $1}')
         iw_conf=$(dialog --stdout --title "ArchQ $1" \
         --ok-label "Ok" --form "$ifport setting" 0 28 0 \
         "SSID"      1 1 ""  1 10 28 0 \
@@ -29,7 +30,7 @@ if echo $ifport | grep -q wlan; then
     if iwctl --passphrase $iwpasswd station wlan0 connect $iwssid; then
         :
     else
-        dialog --stdout --title "ArchQ $1" --pause "\n SSID or Passwd is lost!\n\n Setting $ifport again." 12 0 3 || exit 1; clear
+        dialog --stdout --title "ArchQ $1" --pause "\n Connect fail!\n\n Setting $ifport again." 12 0 3 || exit 1; clear
         iw_conf
     fi 
     systemctl enable --now iwd
@@ -41,10 +42,10 @@ if [ -f "/etc/systemd/network/10-${ifport}.network" ]; then
         eval $(grep '=' | sed 's/ /,/g')
     done < $config
 
-    ifip=$(echo $Address | cut -d'/' -f1)
-    ifmask=$(echo $Address | cut -d'/' -f2)
-    ifdns=$(echo $DNS | cut -d',' -f2)
-    ifmtu=$(echo $MTUBytes | cut -d',' -f2)
+    [[ -n $Address ]] && ifip=$(echo $Address | cut -d'/' -f1)
+    [[ -n $Address ]] && ifmask=$(echo $Address | cut -d'/' -f2)
+    [[ -n $DNS ]] && ifdns=$(echo $DNS | cut -d',' -f2)
+    [[ -n $MTUBytes ]] && ifmtu=$(echo $MTUBytes | cut -d',' -f2)
 fi
 
 [ $DHCP == 'true' ] && v6=on || v6=off
