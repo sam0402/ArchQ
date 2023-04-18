@@ -49,7 +49,11 @@ if [ -f "/etc/systemd/network/10-${ifport}.network" ]; then
 fi
 
 [ $DHCP == 'true' ] && v6=on || v6=off
-ip=$(dialog --stdout --title "ArchQ $1" --menu "Select IP setting" 7 0 0 S "Static IP" D "DHCP") || exit 1; clear
+if echo $ifport | grep -q en; then
+    ip='D'
+    ip=$(dialog --stdout --title "ArchQ $1" --menu "Select IP setting" 7 0 0 S "Static IP" D "DHCP") || exit 1; clear
+fi
+
 if [[ $ip == S ]]; then
     ifconfig=$(dialog --stdout \
                 --title "ArchQ $1" \
