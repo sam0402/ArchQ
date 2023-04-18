@@ -9,12 +9,30 @@ mkgrub(){
     pacman -Q ramroot >/dev/null 2>&1 && sed -i 's/fallback/ramroot/g' $grub_cfg
 }
 ifmask=24; ifdns=8.8.8.8; ifmtu=1500
-ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
+ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en\|^wlan' | sed 's/://')
 ifport=$(echo $ethers | cut -d ' ' -f1)
-
 if [ $(echo $ethers | wc -w) -gt 2 ]; then
     ifport=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select ethernet device" 7 0 0 ${ethers}) || exit 1; clear
+            --menu "Select network device" 7 0 0 ${ethers}) || exit 1; clear
+fi
+
+if echo $ifport | grep -q wlan; then
+    iw_conf(){
+        iw_conf=$(dialog --stdout --title "ArchQ $1" \
+        --ok-label "Ok" --form "$ifport setting" 0 28 0 \
+        "SSID"      1 1 ""  1 10 28 0 \
+        "Password"  2 1 ""  2 10 28 0 ) || exit 1; clear
+        iwssid=$(echo $iw_conf | awk '//{print $1 }')
+        iwpasswd=$(echo $iw_conf | awk '//{print $2 }')
+    }
+    iw_conf
+    if iwctl --passphrase $iwpasswd station wlan0 connect $iwssid; then
+        :
+    else
+        dialog --stdout --title "ArchQ $1" --pause "\n SSID or Passwd is lost!\n\n Setting $ifport again." 12 0 3 || exit 1; clear
+        iw_conf
+    fi 
+    systemctl enable --now iwd
 fi
 
 if [ -f "/etc/systemd/network/10-${ifport}.network" ]; then
