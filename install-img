@@ -385,7 +385,7 @@ if [ ! -f "\$npath""10-\${ethers}.network" ]; then
     cd -
 fi
 
-yes | pacman -Scc
+# yes | pacman -Scc
 # systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
 # systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-udevd 
 # systemctl stop dbus.socket dbus 
