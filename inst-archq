@@ -16,9 +16,33 @@ c_gray=$'\e[0;37m'
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog scrub
 
 ### Get infomation from user ###
+password(){
+    password=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password" 0 0) || exit 1; clear
+    if [[ -z "$password" ]];then
+        dialog --stdout --title "ArchQ" --pause "\n Passwd cannot be empty.\n\n Setting password again." 12 0 3 || exit 1; clear
+        password
+    fi
+    password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password again" 0 0) || exit 1; clear
+    if [[ "$password" != "$password2" ]]; then
+        dialog --stdout --title "ArchQ" --pause "\n Passwd did not match.\n\n Setting password again." 12 0 3 || exit 1; clear
+        password
+    fi
+}
+
+hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname" 0 0) || exit 1; clear
+if [ -z "$hostname" ];then
+    dialog --stdout --title "ArchQ" --pause "\n Hostname cannot be empty.\n\n Default will be 'ArchQ'." 12 0 3 || exit 1; clear
 hostname=ArchQ
+    hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname again" 0 0) || exit 1; clear
+fi
+
+user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1; clear
+if [ -z "$user" ];then
+    dialog --stdout --title "ArchQ" --pause "\n Username cannot be empty.\n\n Default will be 'archq'." 12 0 3 || exit 1; clear
 user=archq
-password=archq
+    user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username again" 0 0) || exit 1; clear
+fi
+password
 
 devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
@@ -144,7 +168,7 @@ pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-
         confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
         nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl \
         openmpi fftw boost openpmix ncmpcpp hwloc taglib lua \
-        alsa-lib ffmpeg mympd ncmpcpp mpc rc-local
+        alsa-lib alsa-utils ffmpeg mympd ncmpcpp mpc rc-local
 
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
@@ -156,8 +180,23 @@ EOF
 
 echo "${hostname}" > /mnt/etc/hostname
 echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" >> /mnt/etc/resolv.conf
+arch-chroot /mnt useradd -mU "$user"
 sed -i '0,/# %wheel/s/# %wheel/%wheel/' /mnt/etc/sudoers
-echo "root:$password" | chpasswd --root /mnt
+arch-chroot /mnt usermod -aG wheel $user
+echo "$user $hostname =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot,/usr/bin/qboot,/usr/bin/sw" >>/mnt/etc/sudoers
+
+### Set locale language
+echo -e "en_US.UTF-8 UTF-8\nja_JP.UTF-8 UTF-8\nzh_TW.UTF-8 UTF-8" >/mnt/etc/locale.gen
+arch-chroot /mnt locale-gen
+echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
+[ $lang = J ] && echo "LANG=ja_JP.UTF-8" > /mnt/etc/locale.conf
+[ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/etc/locale.conf
+arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime
+[ $lang = J ] && arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+
+# echo "$user:$password" | chpasswd --root /mnt
+arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
+# echo "root:$password" | chpasswd --root /mnt
 arch-chroot /mnt sh -c "echo root:$password | chpasswd"
 arch-chroot /mnt mkinitcpio -p linux
 arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --removable --bootloader-id=$hostname
@@ -263,6 +302,24 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sw >/mnt/us
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/mnt/usr/bin/pagecache-management.sh
 arch-chroot /mnt wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/sw
+
+cat >>/mnt/home/${user}/.bashrc <<EOF
+\$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
+export KVER=\$(uname -r | cut -d- -f3)
+alias ...='cd ../../'
+alias dir='command ls -lSrah'
+alias egrep='egrep --color=auto'
+alias grep='grep --color=auto'
+alias ll='command ls -l --color=auto -v'
+alias ls='command ls --color=auto -v'
+alias abcde='eject -t; abcde'
+alias poweroff='sudo systemctl poweroff'
+alias reboot='sudo systemctl reboot'
+alias config='sudo config.sh'
+alias qboot='sudo qboot'
+alias sw='sudo sw'
+EOF
+sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
 
 cat >>/mnt/root/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
