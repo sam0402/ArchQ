@@ -1,0 +1,326 @@
+#!/bin/bash
+# WARNING: this script will destroy data on the selected disk.
+# This script can be run by executing the following:
+#   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install | bash
+kver='6.0.1-12'
+set -uo pipefail
+trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
+c_blue_b=$'\e[1;38;5;27m'
+c_green_b=$'\e[1;38;5;46m'
+c_red_b=$'\e[1;38;5;196m'
+c_red=$'\e[1;33m'
+c_white=$'\e[0;38;5;15m'
+c_white_b=$'\e[1;37m'
+c_gray=$'\e[0;37m'
+
+pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
+curl -O https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/scrub-2.6.1-1-x86_64.pkg.tar.zst
+pacman -U --noconfirm scrub-2.6.1-1-x86_64.pkg.tar.zst
+
+### Get infomation from user ###
+hostname=ArchQ
+user=archq
+password=archq
+
+devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
+device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
+fmt=$(dialog --stdout --title "ArchQ" --menu "Format device ${device}" 7 0 0 E Entire P Partition U "USB Storage") || exit 1; clear
+if [ $fmt = P ]; then
+    partlst='dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 '
+    while read line; do
+        partname=$(echo $line | awk '{print $1}')
+        partlable=$(echo $line | awk '{print substr($0,index($0,$2))}')
+        partlst+=$partname' '\"$partlable\"' '
+    done <<< $(lsblk -pln -o name,size,partlabel,fstype $device | sed -e '1d')
+    part_root=$(eval $partlst) || exit 1; clear
+    part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
+fi
+
+zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe disk times" 0 30 0) || exit 1; clear
+f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1; clear
+ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
+ifport=$(dialog --stdout --title "ArchQ" --menu "Select net device" 7 0 0 ${ethers}) || exit 1; clear
+ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1; clear
+if [ $ip = S ]; then
+ifmask=24; ifdns=8.8.8.8
+ifconfig=$(dialog --stdout --title "ArchQ" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
+            "Address" 1 1   ""          1 10 15 0 \
+            "Netmask" 2 1   "$ifmask"   2 10 15 0 \
+            "Gateway" 3 1   ""          3 10 15 0 \
+            "DNS"     4 1   "$ifdns"    4 10 15 0) || exit 1; clear
+ifaddr=$(echo $ifconfig | cut -d' ' -f1)
+ifmast=$(echo $ifconfig | cut -d' ' -f2)
+ifgw=$(echo $ifconfig | cut -d' ' -f3)
+ifdns=$(echo $ifconfig | cut -d' ' -f4)
+fi
+
+### select sound card
+scard="hw:0,0"
+
+### Set up logging ###
+exec 1> >(tee "stdout.log")
+exec 2> >(tee "stderr.log")
+
+timedatectl set-ntp true
+
+mkboot(){
+    # Wipe boot
+    for ((i=1; i <= $zerofill; i++))
+    do
+        echo -e "${c_red_b}Boot parition fills with zero -> $i${c_white_b}"
+        scrub -Sp fillzero $part_boot
+    done
+    wipefs "${part_boot}"
+    mkfs.vfat -F32 "${part_boot}"
+}
+
+# Foramt and install in one partition
+old_efi=''
+if [ $fmt = P ]; then
+    # Rebuild partition if EFI < 200MB
+    if [ $(lsblk $part_boot -pln -o size | tr -d [:alpha:]) -lt 200 ]; then
+        boot_start=$(parted $device 'unit s' print | grep "^ ${part_root:0-1}" | tail -1 | awk -F '[[:space:]]*' '{ print $3 }')
+        boot_end=$(expr ${boot_start::-1} + 524287)s
+        root_start=$(expr ${boot_start::-1} + 524288)s
+        parted --script "${device}" -- \
+            rm "${part_root:0-1}" \
+            mkpart EFI fat32 $boot_start $boot_end \
+            set "${part_root:0-1}" boot on \
+            mkpart ArchQ ext4 $root_start 100%
+        old_efi=$part_boot
+        part_boot=$part_root
+        part_root=$(ls ${device}* | grep -E "^${device}p?$((${part_root:0-1} + 1))$")
+        # Format boot partition (EFI/ESP)
+        mkboot
+    fi
+else
+    # Install in entire disk
+    root_size=3800
+    root_end=$(( $root_size + 257 + 1 ))MiB
+    parted --script "${device}" -- mklabel gpt \
+        mkpart EFI fat32 1Mib 257MiB \
+        set 1 boot on \
+        mkpart ArchQ ext4 257MiB ${root_end}
+        # mkpart Database ext4 ${root_end} 100%
+
+    # Simple globbing was not enough as on one device I needed to match /dev/mmcblk0p1
+    # but not /dev/mmcblk0boot1 while being able to match /dev/sda1 on other devices.
+    part_boot="$(ls ${device}* | grep -E "^${device}p?1$")"
+    part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
+    # Format boot partition (EFI/ESP)
+    mkboot
+fi
+
+# Wipe & format root partition
+for ((i=1; i <= $zerofill; i++))
+do
+    echo -e "${c_red_b}Root parition fills with zero -> $i${c_white_b}"
+    scrub -Sp fillzero $part_root
+done
+[ $f2fs = F ] && mkfs.f2fs -fl ArchQ "${part_root}" || mkfs.xfs -fL ArchQ "${part_root}"
+
+## Mount root & boot partition
+mount "${part_root}" /mnt
+mkdir /mnt/boot
+mount "${part_boot}" /mnt/boot
+
+## Roon server data partition
+# if [ $server = R ]; then
+#     parted --script "${device}" -- \
+#         mkpart Database ext4 ${root_end} 100%
+#     part_data="$(ls ${device}* | grep -E "^${device}p?3$")"
+#     wipefs "${part_data}"
+#     [ $f2fs = F ] && mkfs.f2fs -fl Database "${part_data}" || mkfs.xfs -fL Database "${part_data}"
+#     [ ! -d /mnt/var/roon ] && mkdir -p /mnt/var/roon
+#     mount "${part_data}" /mnt/var/roon
+# fi
+
+cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
+[ -f /mnt/boot/${cpu}-ucode.img ] || pacstrap /mnt ${cpu}-ucode
+
+echo -e "\n${c_red_b}Download Arch Linux package and install ...${c_gray}\n"
+pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
+        vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop iwd \
+        which avahi glibc cifs-utils icu parted \
+        fmt libcdio libupnp liburing cdparanoia  libcdio-paranoia libcddb libmms \
+        confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
+        nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl \
+        openmpi fftw boost openpmix ncmpcpp hwloc taglib lua \
+        ffmpeg mympd ncmpcpp mpc rc-local
+
+genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
+sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
+cat >>/mnt/etc/fstab <<EOF
+none /tmp tmpfs nodev,nosuid,mode=1777 0 0
+none /var/log tmpfs nodev,nosuid,noexec,size=10M 0 0
+none /var/tmp tmpfs nodev,nosuid,noexec,size=20M 0 0
+EOF
+
+echo "${hostname}" > /mnt/etc/hostname
+echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" >> /mnt/etc/resolv.conf
+arch-chroot /mnt useradd -mU "$user"
+sed -i '0,/# %wheel/s/# %wheel/%wheel/' /mnt/etc/sudoers
+arch-chroot /mnt usermod -aG wheel $user
+echo "$user $hostname =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot,/usr/bin/qboot,/usr/bin/sw" >>/mnt/etc/sudoers
+
+### Set locale language
+# echo -e "en_US.UTF-8 UTF-8\nja_JP.UTF-8 UTF-8\nzh_TW.UTF-8 UTF-8" >/mnt/etc/locale.gen
+# arch-chroot /mnt locale-gen
+# echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
+# [ $lang = J ] && echo "LANG=ja_JP.UTF-8" > /mnt/etc/locale.conf
+# [ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/etc/locale.conf
+# arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime
+# [ $lang = J ] && arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+
+# echo "$user:$password" | chpasswd --root /mnt
+# arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
+echo "root:$password" | chpasswd --root /mnt
+arch-chroot /mnt sh -c "echo root:$password | chpasswd"
+arch-chroot /mnt mkinitcpio -p linux
+arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --removable --bootloader-id=$hostname
+arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
+
+echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
+[ $f2fs = X ] && sed -i 's/MODULES=()/MODULES=(xfs)/' /mnt/etc/mkinitcpio.conf
+
+arch-chroot /mnt ln -s /usr/bin/vim /usr/bin/vi
+
+### Ethernet IP
+echo ......................
+echo "[Match]" >/mnt/etc/systemd/network/10-${ifport}.network
+echo -e "Name=${ifport}\n" >>/mnt/etc/systemd/network/10-${ifport}.network
+echo "[Network]" >>/mnt/etc/systemd/network/10-${ifport}.network
+if [ $ip = D ]; then
+    echo Install DHCP Client...
+    echo "DHCP=ipv4" >>/mnt/etc/systemd/network/10-${ifport}.network
+    arch-chroot /mnt systemctl enable avahi-daemon
+else
+    echo "Address=$ifaddr/$ifmask" >>/mnt/etc/systemd/network/10-${ifport}.network
+    echo "Gateway=$ifgw" >>/mnt/etc/systemd/network/10-${ifport}.network
+    echo "DNS=$ifgw $ifdns" >>/mnt/etc/systemd/network/10-${ifport}.network
+fi
+arch-chroot /mnt systemctl enable systemd-networkd
+
+### Kernel
+echo -e "\n${c_red_b}Install ArchQ Kernel ...${c_gray}\n"
+ker=Q352
+[ $cpu = amd ] && ker=Q308AMD
+# [ $server = N ] && ker=${ker}w
+[ $fmt = U ] && ker=Q352u
+[ $fmt = U ] && kver=6.1.15-12
+# arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+# arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll acpi_pm_good nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
+/mnt/etc/default/grub
+# sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll acpi_pm_good rcu_nocb_poll nosmt noirqdebug norandmaps no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable \
+# intel_pstate=disable iomem=relaxed vsyscall=native ipv6.disable=1 usbcore.autosuspend=-1 thermal.off=1 rcu.blimit=0 relax_domain_level=0 skew_tick=0/' /mnt/etc/default/grub
+
+# cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
+# iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
+# #cpus=$(getconf _NPROCESSORS_ONLN)
+# isocpu=''
+# [ $cpus -ge 4 ] && [[ $server = L || $player =~ S ]] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
+# [ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
+# sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /mnt/etc/default/grub
+# arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+
+### Install Player
+# arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
+# arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
+# arch-chroot /mnt pacman -Sd --noconfirm alsa-utils
+
+### Other setting
+echo -e "\n${c_red_b}Setting service ...${c_gray}\n"
+sed -i '$i sleep 3' /mnt/etc/rc.local
+sed -i '$d' /mnt/etc/rc.local
+cat >>/mnt/etc/rc.local <<EOF
+# ethernet auto detect
+ethers=\$(ip -o link show | awk '{print \$2,\$9}' | grep '^en' | sed 's/://' | awk '{print \$1}' | head -n 1)
+npath='/etc/systemd/network/'
+if [ ! -f "\$npath""10-\${ethers}.network" ]; then
+    cd \$npath
+    source=\$(ls 10-*.network | head -n 1)
+    cp \$source 10-\${ethers}.network
+    sed -i 's/Name=.*/Name='"\$ethers"'/' 10-\${ethers}.network
+    systemctl restart systemd-networkd
+    cd -
+fi
+
+yes | pacman -Scc
+# systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
+# systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-udevd 
+# systemctl stop dbus.socket dbus 
+# systemctl stop systemd-networkd
+# hdparm -a0 /dev/sda >/dev/null 2>&1
+exit 0
+EOF
+arch-chroot /mnt systemctl enable sshd ntpdate rc-local cpupower
+arch-chroot /mnt systemctl disable ntpd
+###
+echo 'ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"' >/mnt/etc/udev/rules.d/pci_pm.rules
+cat >/mnt/etc/udev/rules.d/60-ioschedulers.rules <<EOF
+# set scheduler for NVMe
+ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/scheduler}="none"
+# set scheduler for SSD and eMMC
+ACTION=="add|change", KERNEL=="sd[a-z]|mmcblk[0-9]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="kyber"
+# set scheduler for rotating disks
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
+EOF
+# cat >/mnt/etc/udev/rules.d/69-hdparm.rules <<EOF
+# ACTION=="add|change", KERNEL=="sd[a-z]", ATTRS{queue/rotational}=="1", RUN+="/usr/bin/hdparm -a 0 -A 0 /dev/%k"
+# EOF
+sed -i 's/#Storage=auto/Storage=none/' /mnt/etc/systemd/journald.conf
+sed -i 's/wait-online/wait-online --any/' /mnt/usr/lib/systemd/system/systemd-networkd-wait-online.service
+### install config file
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/timezone.sh >/mnt/usr/bin/timezone.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sqzlite-cfg.sh >/mnt/usr/bin/sqzlite-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/nfs-cfg.sh >/mnt/usr/bin/nfs-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/nfserver-cfg.sh >/mnt/usr/bin/nfserver-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/smb-cfg.sh >/mnt/usr/bin/smb-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/ether-cfg.sh >/mnt/usr/bin/ether-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/kernel-cfg.sh >/mnt/usr/bin/kernel-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/cpu-cfg.sh >/mnt/usr/bin/cpu-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/partimnt-cfg.sh >/mnt/usr/bin/partimnt-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/mnt/usr/bin/update_scpt.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/player-cfg.sh >/mnt/usr/bin/player-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/server-cfg.sh >/mnt/usr/bin/server-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/name-cfg.sh >/mnt/usr/bin/name-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg.sh >/mnt/usr/bin/desktop-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/mnt/usr/bin/shairport-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/bcache-cfg.sh >/mnt/usr/bin/bcache-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/datacache-cfg.sh >/mnt/usr/bin/datacache-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/zerowipe.sh >/mnt/usr/bin/zerowipe.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sw >/mnt/usr/bin/sw
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/mnt/usr/bin/pagecache-management.sh
+arch-chroot /mnt wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
+chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/sw
+
+cat >>/mnt/root/.bashrc <<EOF
+\$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
+export KVER=\$(uname -r | cut -d- -f3)
+PS1='[\u@\h:\e[0;\${PSC}m\$KVER\e[m \W]\$ '
+alias ...='cd ../../'
+alias dir='command ls -lSrah'
+alias egrep='egrep --color=auto'
+alias grep='grep --color=auto'
+alias ll='command ls -l --color=auto -v'
+alias ls='command ls --color=auto -v'
+alias config='config.sh'
+EOF
+
+# echo 'y\ny\n' | arch-chroot /mnt pacman -Scc
+rm -f /mnt/root/*.tar.zst /mnt/root/*.tar.xz
+# Detect other OS
+if [ -n "$old_efi" ]; then
+    arch-chroot /mnt mount "$old_efi" /mnt
+    arch-chroot /mnt os-prober
+    sleep 2
+    arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+fi
+
+dialog --stdout --title "ArchQ" --pause "\n  ArchQ is installed, unplug the USB driver.\n\n  System will reboot after 10 seconds." 12 50 10; clear
+reboot
