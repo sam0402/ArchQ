@@ -144,7 +144,7 @@ pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-
         confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
         nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl \
         openmpi fftw boost openpmix ncmpcpp hwloc taglib lua \
-        alsa-lib alsa-utils ffmpeg mympd ncmpcpp mpc rc-local
+        alsa-lib ffmpeg mympd ncmpcpp mpc rc-local
 
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
