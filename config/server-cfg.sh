@@ -81,5 +81,5 @@ EOF
         systemctl enable --now mpd
         ;;
 esac
-yes | pacman -Scc
+# yes | pacman -Scc
 rm -f /root/*.tar.zst /root/*.tar.xz
