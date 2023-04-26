@@ -235,9 +235,9 @@ sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll acpi_pm_good no
 ### Other setting
 echo -e "\n${c_red_b}Setting service ...${c_gray}\n"
 ## Instal alsa-lib-1.1.9
-cp /archq/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst /mnt/root
+cp /archq/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst /archq/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /mnt/root
 arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -Ud --noconfirm alsa-utils-1.2.8-1-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -Ud --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst
 
 sed -i '$i sleep 3' /mnt/etc/rc.local
 sed -i '$d' /mnt/etc/rc.local
