@@ -182,7 +182,7 @@ pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-
         which avahi glibc cifs-utils icu parted \
         fmt libcdio libupnp liburing cdparanoia  libcdio-paranoia libcddb libmms \
         confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
-        nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl \
+        nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl libconfig faad2 libmad \
         openmpi fftw boost openpmix ncmpcpp hwloc taglib lua perl-net-ssleay perl-io-socket-ssl perl-uri \
         alsa-lib ffmpeg mympd ncmpcpp mpc rc-local
 
