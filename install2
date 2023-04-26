@@ -1,7 +1,7 @@
 #!/bin/bash
 # WARNING: this script will destroy data on the selected disk.
 # This script can be run by executing the following:
-#   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install-img | bash
+#   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/install | bash
 kver='6.0.1-12'
 set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
@@ -14,31 +14,42 @@ c_white_b=$'\e[1;37m'
 c_gray=$'\e[0;37m'
 
 MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
-echo -e "\n\nArchQ will ping "Arch Linux Server" 5 times before installation.\n\n"
-ping -c 5 archlinux.org
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
 curl -O https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/scrub-2.6.1-1-x86_64.pkg.tar.zst
 pacman -U --noconfirm scrub-2.6.1-1-x86_64.pkg.tar.zst
 
 ### Get infomation from user ###
-hostname=ArchQ
-# hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname" 0 0) || exit 1
-# clear
-# : ${hostname:?"hostname cannot be empty"}
-user=archq
-# user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1
-# clear
-# : ${user:?"user cannot be empty"}
-password=archq
-# : ${password:?"password cannot be empty"}
-# password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password again" 0 0) || exit 1
-# clear
-# [[ "$password" == "$password2" ]] || ( echo "Passwords did not match"; exit 1; )
+password(){
+    password=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password" 0 0) || exit 1; clear
+    if [[ -z "$password" ]];then
+        dialog --stdout --title "ArchQ" --pause "\n Passwd cannot be empty.\n\n Setting password again." 12 0 3 || exit 1; clear
+        password
+    fi
+    password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password again" 0 0) || exit 1; clear
+    if [[ "$password" != "$password2" ]]; then
+        dialog --stdout --title "ArchQ" --pause "\n Passwd did not match.\n\n Setting password again." 12 0 3 || exit 1; clear
+        password
+    fi
+}
+
+hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname" 0 0) || exit 1; clear
+if [ -z "$hostname" ];then
+    dialog --stdout --title "ArchQ" --pause "\n Hostname cannot be empty.\n\n Default will be 'ArchQ'." 12 0 3 || exit 1; clear
+    hostname=ArchQ
+    hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname again" 0 0) || exit 1; clear
+fi
+
+user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1; clear
+if [ -z "$user" ];then
+    dialog --stdout --title "ArchQ" --pause "\n Username cannot be empty.\n\n Default will be 'archq'." 12 0 3 || exit 1; clear
+    user=archq
+    user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username again" 0 0) || exit 1; clear
+fi
+password
 
 devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
-fmt=U
-# fmt=$(dialog --stdout --title "ArchQ" --menu "Format device ${device}" 7 0 0 E Entire P Partition U "USB Storage") || exit 1; clear
+fmt=$(dialog --stdout --title "ArchQ" --menu "Format device ${device}" 7 0 0 E Entire P Partition U "USB Storage") || exit 1; clear
 if [ $fmt = P ]; then
     partlst='dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 '
     while read line; do
@@ -49,19 +60,16 @@ if [ $fmt = P ]; then
     part_root=$(eval $partlst) || exit 1; clear
     part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
 fi
-zerofill=0
-# zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe disk times" 0 30 0) || exit 1; clear
-f2fs=F
-# f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1; clear
 
-lang=E
-# lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1; clear
+zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe disk times" 0 30 0) || exit 1; clear
+f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1; clear
 
-# ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
-ifport=$(ip -o link show | awk '{print $2}' | grep '^en' | sed 's/://'| head -n 1)
-# ifport=$(dialog --stdout --title "ArchQ" --menu "Select net device" 7 0 0 ${ethers}) || exit 1; clear
-ip=D
-# ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1; clear
+lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1; clear
+
+ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
+ifport=$(dialog --stdout --title "ArchQ" --menu "Select net device" 7 0 0 ${ethers}) || exit 1; clear
+
+ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1; clear
 if [ $ip = S ]; then
 ifmask=24; ifdns=8.8.8.8
 ifconfig=$(dialog --stdout --title "ArchQ" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
@@ -76,8 +84,7 @@ ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
 player=N
-server=Z
-#server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon N None) || exit 1; clear
+server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon N None) || exit 1; clear
 case $server in
     L)
         player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
@@ -93,14 +100,14 @@ esac
 clear
 
 ### select sound card
-scard="hw:0,0"
-# if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A || $player =~ S || $server = M || $server = T ]]; then
-#     devs='hw:0,0 　 '
-#     while read line; do
-#         devs+=${line}' 　 '
-#     done <<< $(aplay -L | grep ':')
-#     scard=$(dialog --stdout --title "ArchQ" --menu "Select sound device" 7 0 0 ${devs}) || exit 1; clear
-# fi
+scard=""
+if [[ $(aplay -L | grep ':') ]] && [[ $player =~ A || $player =~ S || $server = M || $server = T ]]; then
+    devs='hw:0,0 　 '
+    while read line; do
+        devs+=${line}' 　 '
+    done <<< $(aplay -L | grep ':')
+    scard=$(dialog --stdout --title "ArchQ" --menu "Select sound device" 7 0 0 ${devs}) || exit 1; clear
+fi
 
 ### Set up logging ###
 exec 1> >(tee "stdout.log")
@@ -140,7 +147,7 @@ if [ $fmt = P ]; then
     fi
 else
     # Install in entire disk
-    grep -q 'dev' $0 && root_size=4608 || root_size=3800
+    root_size=3800
     root_end=$(( $root_size + 257 + 1 ))MiB
     parted --script "${device}" -- mklabel gpt \
         mkpart EFI fat32 1Mib 257MiB \
@@ -164,7 +171,7 @@ do
 done
 [ $f2fs = F ] && mkfs.f2fs -fl ArchQ "${part_root}" || mkfs.xfs -fL ArchQ "${part_root}"
 
-## Mount partition
+## Mount root & boot partition
 mount "${part_root}" /mnt
 mkdir /mnt/boot
 mount "${part_boot}" /mnt/boot
@@ -184,28 +191,23 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 [ -f /mnt/boot/${cpu}-ucode.img ] || pacstrap /mnt ${cpu}-ucode
 
 echo -e "\n${c_red_b}Download Arch Linux package and install ...${c_gray}\n"
-pacstrap /mnt base linux-Q352wu linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
-        vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop iwd \
-        which avahi glibc cifs-utils icu parted \
-        fmt libcdio libupnp liburing cdparanoia  libcdio-paranoia libcddb libmms \
-        confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
-        nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl \
-        openmpi fftw boost openpmix ncmpcpp hwloc taglib lua \
-        ffmpeg mympd ncmpcpp mpc 
+pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
+        vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm iwd
 
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
 cat >>/mnt/etc/fstab <<EOF
-none /tmp tmpfs nodev,nosuid,mode=1777 0 0
+none /tmp tmpfs nodev,nosuid,noexec,mode=1777 0 0
 none /var/log tmpfs nodev,nosuid,noexec,size=10M 0 0
 none /var/tmp tmpfs nodev,nosuid,noexec,size=20M 0 0
 EOF
 
 echo "${hostname}" > /mnt/etc/hostname
 echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" >> /mnt/etc/resolv.conf
-# arch-chroot /mnt useradd -mU "$user"
+arch-chroot /mnt useradd -mU "$user"
 sed -i '0,/# %wheel/s/# %wheel/%wheel/' /mnt/etc/sudoers
-# arch-chroot /mnt usermod -aG wheel $user
+arch-chroot /mnt usermod -aG wheel $user
+echo "$user $hostname =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot,/usr/bin/qboot,/usr/bin/sw" >>/mnt/etc/sudoers
 
 ### Set locale language
 echo -e "en_US.UTF-8 UTF-8\nja_JP.UTF-8 UTF-8\nzh_TW.UTF-8 UTF-8" >/mnt/etc/locale.gen
@@ -217,14 +219,15 @@ arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime
 [ $lang = J ] && arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
 # echo "$user:$password" | chpasswd --root /mnt
-# arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
-echo "root:$password" | chpasswd --root /mnt
+arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
+# echo "root:$password" | chpasswd --root /mnt
 arch-chroot /mnt sh -c "echo root:$password | chpasswd"
-sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
-[ $f2fs = X ] && sed -i 's/MODULES=()/MODULES=(xfs)/' /mnt/etc/mkinitcpio.conf
 arch-chroot /mnt mkinitcpio -p linux
 arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --removable --bootloader-id=$hostname
 arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
+
+echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
+[ $f2fs = X ] && sed -i 's/MODULES=()/MODULES=(xfs)/' /mnt/etc/mkinitcpio.conf
 
 arch-chroot /mnt ln -s /usr/bin/vim /usr/bin/vi
 
@@ -243,12 +246,6 @@ else
     echo "DNS=$ifgw $ifdns" >>/mnt/etc/systemd/network/10-${ifport}.network
 fi
 arch-chroot /mnt systemctl enable systemd-networkd
-# pacstrap /mnt iw wpa_supplicant 
-# arch-chroot cat >/etc/wpa_supplicant/wpa_supplicant-wlan.conf <<EOF
-# ctrl_interface=/run/wpa_supplicant
-# update_config=1
-# EOF
-# arch-chroot /mnt wpa_supplicant -B -i wlan -c /etc/wpa_supplicant/wpa_supplicant-wlan.conf
 
 ### Kernel
 echo -e "\n${c_red_b}Install ArchQ Kernel ...${c_gray}\n"
@@ -257,8 +254,8 @@ ker=Q352
 [ $server = N ] && ker=${ker}w
 [ $fmt = U ] && ker=Q352u
 [ $fmt = U ] && kver=6.1.15-12
-# arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-# arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll acpi_pm_good nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
 /mnt/etc/default/grub
 # sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll acpi_pm_good rcu_nocb_poll nosmt noirqdebug norandmaps no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable \
@@ -290,7 +287,7 @@ case $server in
         ;;
     R)
         echo -e "\n${c_red_b}Install Roon Server ...${c_gray}\n"
-        arch-chroot /mnt pacman -S --noconfirm alsa-lib glibc ffmpeg cifs-utils icu
+        pacstrap /mnt alsa-lib glibc ffmpeg cifs-utils icu
         mkdir -p /mnt/opt/RoonServer /mnt/usr/share/licenses/roonserver
         arch-chroot /mnt wget -qO - http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2 | bsdtar xf - -C /mnt/opt
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver.service >/mnt/usr/lib/systemd/system/roonserver.service
@@ -301,7 +298,7 @@ case $server in
         ;;
     M)
         echo -e "\n${c_red_b}Install MPD ...${c_gray}\n"
-        arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi
+        pacstrap /mnt nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.11-4-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
@@ -433,6 +430,24 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-m
 arch-chroot /mnt wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/sw
 
+cat >>/mnt/home/${user}/.bashrc <<EOF
+\$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
+export KVER=\$(uname -r | cut -d- -f3)
+alias ...='cd ../../'
+alias dir='command ls -lSrah'
+alias egrep='egrep --color=auto'
+alias grep='grep --color=auto'
+alias ll='command ls -l --color=auto -v'
+alias ls='command ls --color=auto -v'
+alias abcde='eject -t; abcde'
+alias poweroff='sudo systemctl poweroff'
+alias reboot='sudo systemctl reboot'
+alias config='sudo config.sh'
+alias qboot='sudo qboot'
+alias sw='sudo sw'
+EOF
+sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
+
 cat >>/mnt/root/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
 export KVER=\$(uname -r | cut -d- -f3)
@@ -445,7 +460,7 @@ alias ll='command ls -l --color=auto -v'
 alias ls='command ls --color=auto -v'
 alias config='config.sh'
 EOF
-echo 'name-cfg.sh' >/mnt/root/.bash_profile
+
 # echo 'y\ny\n' | arch-chroot /mnt pacman -Scc
 rm -f /mnt/root/*.tar.zst /mnt/root/*.tar.xz
 # Detect other OS
