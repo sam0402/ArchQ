@@ -273,7 +273,6 @@ case $server in
         ;;
     R)
         echo -e "\n${c_red_b}Install Roon Server ...${c_gray}\n"
-        arch-chroot /mnt pacman -S --noconfirm alsa-lib glibc ffmpeg cifs-utils icu
         mkdir -p /mnt/opt/RoonServer /mnt/usr/share/licenses/roonserver
         arch-chroot /mnt wget -qO - http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2 | bsdtar xf - -C /mnt/opt
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonserver.service >/mnt/usr/lib/systemd/system/roonserver.service
@@ -284,7 +283,6 @@ case $server in
         ;;
     M)
         echo -e "\n${c_red_b}Install MPD ...${c_gray}\n"
-        arch-chroot /mnt pacman -S --noconfirm nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl mpc which avahi
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.11-4-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
