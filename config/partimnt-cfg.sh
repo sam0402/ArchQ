@@ -52,8 +52,7 @@ case $WK in
         echo "Add $partition ($FS) to /mnt/$MP mount point."
         
         if [ $mntuser != root ]; then
-            mkdir /mnt/$MP
-            mount /mnt/$MP
+            mount -m /mnt/$MP
             [[ $FS =~ fat ]] || chown $user: /mnt/$MP && echo "Set /mnt/$MP permission to $user."
         fi
 
