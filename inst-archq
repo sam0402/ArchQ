@@ -348,7 +348,7 @@ echo -e "\n${c_red_b}Setting service ...${c_gray}\n"
 cp /archq/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst /archq/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /mnt/root
 cp /archq/qt5-base-5.15.9+kde+r151-1-x86_64.pkg.tar.zst /archq/kid3-common-3.9.3-2-x86_64.pkg.tar.zst /archq/double-conversion-3.2.1-1-x86_64.pkg.tar.zst /mnt/root
 arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -Ud --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /root/qt5-base-5.15.9+kde+r151-1-x86_64.pkg.tar.zst /root/kid3-common-3.9.3-2-x86_64.pkg.tar.zst /root/double-conversion-3.2.1-1-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /root/qt5-base-5.15.9+kde+r151-1-x86_64.pkg.tar.zst /root/kid3-common-3.9.3-2-x86_64.pkg.tar.zst /root/double-conversion-3.2.1-1-x86_64.pkg.tar.zst
 
 pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
 sed -i '$i sleep 3' /mnt/etc/rc.local
