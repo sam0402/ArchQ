@@ -14,9 +14,7 @@ https://miya.teracloud.jp/share/11d19e899ed2b3d5)
 
 2. Flash ISO image to USB drive by [Etcher](https://www.balena.io/etcher/?).
 
-3. Boot up with USB drive with UEFI mode, than typing as below. (Use 'ip addr' to check if conneted on the network or not.)
- 
-   `curl https://raw.githubusercontent.com/sam0402/ArchQ/main/install | bash`
+3. Boot up with USB drive with UEFI mode, than use `install` command. (Use 'ip addr' to check if conneted on the network or not.)
 
 4. After reboot, the monitor will not show any message only 'linux-Q352 ...'
 
