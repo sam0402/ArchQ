@@ -12,12 +12,12 @@ mkgrub(){
     pacman -Q ramroot >/dev/null 2>&1 && sed -i 's/fallback/ramroot/g' $grub_cfg
 }
 if ! pacman -Q abcde >/dev/null 2>&1 ; then
-    pacman -Sy --noconfirm archlinux-keyring
-    yes | pacman -Scc >/dev/null 2>&1
-    pacman -Syy --noconfirm
-    pacman -S --noconfirm cdparanoia glyr imagemagick atomicparsley srt python-lxml python-requests perl-net-ssleay
-    pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
-    rm /root/*.pkg.tar.zst
+    # pacman -Sy --noconfirm archlinux-keyring
+    # yes | pacman -Scc >/dev/null 2>&1
+    # pacman -Syy --noconfirm
+    # pacman -S --noconfirm cdparanoia glyr imagemagick atomicparsley srt python-lxml python-requests perl-net-ssleay
+    # pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
+    # rm /root/*.pkg.tar.zst
     kver=$(pacman -Q | grep linux-Q | grep -v headers | awk 'NR==1{print $2}')
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde-2.9.3-6-any.pkg.tar.zst
@@ -26,7 +26,6 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A5.1.2-12-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/*.pkg.tar.zst
     mkgrub
-    systemctl enable rc-local.service
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde.conf >/etc/abcde.conf
     echo 'yes' | cpan install IO::Socket::SSL MusicBrainz::DiscID WebService::MusicBrainz
     curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/ls2cddb.sh >/usr/bin/ls2cddb.sh
