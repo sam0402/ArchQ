@@ -372,6 +372,7 @@ yes | pacman -Scc
 # systemctl stop dbus.socket dbus 
 # systemctl stop systemd-networkd
 # hdparm -a0 /dev/sda >/dev/null 2>&1
+# xfs_fsr /mnt/music
 exit 0
 EOF
 arch-chroot /mnt systemctl enable sshd ntpdate rc-local cpupower
