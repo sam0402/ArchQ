@@ -10,7 +10,6 @@ curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/partimnt-cfg
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/player-cfg.sh >/usr/bin/player-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/usr/bin/shairport-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sqzlite-cfg.sh >/usr/bin/sqzlite-cfg.sh
-curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg.sh >/usr/bin/desktop-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/usr/bin/abcde-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/bcache-cfg.sh >/usr/bin/bcache-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/datacache-cfg.sh >/usr/bin/datacache-cfg.sh
