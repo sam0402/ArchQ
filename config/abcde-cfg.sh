@@ -27,7 +27,7 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     pacman -U --noconfirm /root/*.pkg.tar.zst
     mkgrub
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde.conf >/etc/abcde.conf
-    echo 'yes' | cpan install IO::Socket::SSL MusicBrainz::DiscID WebService::MusicBrainz
+#     echo 'yes' | cpan install IO::Socket::SSL MusicBrainz::DiscID WebService::MusicBrainz
     curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/ls2cddb.sh >/usr/bin/ls2cddb.sh
     chmod +x /usr/bin/ls2cddb.sh
 
