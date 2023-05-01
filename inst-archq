@@ -179,14 +179,14 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 echo -e "\n${c_red_b}Install Arch Linux package ...${c_gray}\n"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop iwd \
-        which avahi glibc cifs-utils nfs-utils icu parted scrub \
+        which avahi glibc cifs-utils icu parted scrub \
         fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms \
-        confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c \
+        confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
         nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl libconfig faad2 libmad \
-        openmpi fftw boost openpmix ncmpcpp hwloc taglib lua alsa-lib ffmpeg mympd mpc rc-local \
-        atomicparsley glyr libao libdiscid libxslt opusfile schedtool srt vorbis-tools \
-        perl-uri perl-io-socket-ssl perl-musicbrainz-discid perl-webservice-musicbrainz perl-net-ssleay \
-        python-chardet python-idna python-lxml python-requests python-urllib3 python-mpd2
+        openmpi fftw boost openpmix ncmpcpp hwloc taglib lua perl-net-ssleay perl-io-socket-ssl perl-uri \
+        alsa-lib ffmpeg mympd ncmpcpp mpc rc-local \
+        atomicparsley glyr imagemagick libao libdiscid libxslt opusfile schedtool srt vorbis-tools \
+        perl-net-ssleay python-chardet python-idna python-lxml python-requests python-urllib3
 
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
@@ -406,6 +406,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/partimnt-cf
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/mnt/usr/bin/update_scpt.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/player-cfg.sh >/mnt/usr/bin/player-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/server-cfg.sh >/mnt/usr/bin/server-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg.sh >/mnt/usr/bin/desktop-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/mnt/usr/bin/shairport-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
