@@ -63,13 +63,14 @@ Client-server:
 ![abcde](images/abcde.png)
 ![Player](images/player.png)
 ![Squeezelite](images/squeezelite.png)
-![desktop](images/desktop_vnc.png)
-![NFS](images/nfs_mount.png)
+
+
 ![Config](images/config.png)
 ![Kernels](images/kernels.png)
 ![ethernet](images/ethernet.png)
 ![SMB/CIFS](images/smbcifs.png)
 ![NFServer](images/NFServer.png)
+![NFS](images/nfs_mount.png)
 ![Partition](images/partition_mount.png)
 ![cpufreq](images/cpu_freq.png)
 ![multiroom](images/multiroom.jpg)
