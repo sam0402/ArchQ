@@ -43,8 +43,7 @@ EOF
     echo "alias abcde='eject -t; abcde'" >>/home/$user/.bashrc
     echo "alias abcde='eject -t; abcde'" >>/root/.bashrc
     pacman -Scc --noconfirm >/dev/null 2>&1
-    read -n 1 -p "Reboot to work for abcde,(Y/n)? " ans
-    [[ "$ans" = 'Y' ]] && reboot
+    ans=n
 fi
 
 while read line; do
@@ -94,3 +93,6 @@ sed -i 's/^#\?CDSPEEDVALUE=".*/CDSPEEDVALUE="'"$CDSPEEDVALUE"'"/' $config
 sed -i 's/^#\?EJECTCD=.*/EJECTCD='"$EJECTCD"'/' $config
 sed -i 's/^#\?CLOSETRAY=.*/CLOSETRAY='"$CLOSETRAY"'/' $config
 [ $TAGS == 'y' ] && sed -i 's/^KID3CLI=".*/KID3CLI="kid3-cli"/' $config || sed -i 's/^KID3CLI=".*/KID3CLI=""/' $config
+
+[[ -z "$ans" ]] && read -n 1 -p "Reboot to work for abcde,(Y/n)? " ans
+[[ "$ans" = 'Y' ]] && reboot
