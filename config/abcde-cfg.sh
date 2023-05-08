@@ -43,6 +43,8 @@ EOF
     echo "alias abcde='eject -t; abcde'" >>/home/$user/.bashrc
     echo "alias abcde='eject -t; abcde'" >>/root/.bashrc
     pacman -Scc --noconfirm >/dev/null 2>&1
+    read -n 1 -p "Reboot to work for abcde, (Y/n)? " ans
+    [[ "$ans" = 'Y' ]] && reboot
 fi
 
 while read line; do
