@@ -1,6 +1,7 @@
 #!/bin/bash
 config='/etc/abcde.conf'
 user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
+grub_cfg='/boot/grub/grub.cfg'
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
 
@@ -23,6 +24,7 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cd-discid-1.4-3-x86_64.pkg.tar.zst
     wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A5.1.2-12-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/*.pkg.tar.zst
+    echo -e "\nInstall kernel ${c_blue_b}Qrip${c_gray} ...\n"
     mkgrub
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde.conf >/etc/abcde.conf
     curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/ls2cddb.sh >/usr/bin/ls2cddb.sh
@@ -94,5 +96,5 @@ sed -i 's/^#\?EJECTCD=.*/EJECTCD='"$EJECTCD"'/' $config
 sed -i 's/^#\?CLOSETRAY=.*/CLOSETRAY='"$CLOSETRAY"'/' $config
 [ $TAGS == 'y' ] && sed -i 's/^KID3CLI=".*/KID3CLI="kid3-cli"/' $config || sed -i 's/^KID3CLI=".*/KID3CLI=""/' $config
 
-[[ -z "$ans" ]] && read -n 1 -p "Reboot to work for abcde,(Y/n)? " ans
-[[ "$ans" = 'Y' ]] && reboot
+[ -n "$ans" ] && read -n 1 -p "Reboot to work for abcde,(Y/n)? " ans
+[ "$ans" = 'Y' ] && reboot
