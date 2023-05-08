@@ -10,11 +10,11 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
     rm /root/*.pkg.tar.zst
     kver=$(pacman -Q | grep linux-Q | grep -v headers | awk 'NR==1{print $2}')
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde-2.9.3-6-any.pkg.tar.zst
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cdparanoia-10.2-9-x86_64.pkg.tar.zst
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cd-discid-1.4-3-x86_64.pkg.tar.zst
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rc-local-4-1-any.pkg.tar.zst
+    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
+    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde-2.9.3-6-any.pkg.tar.zst
+    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cdparanoia-10.2-9-x86_64.pkg.tar.zst
+    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cd-discid-1.4-3-x86_64.pkg.tar.zst
+    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rc-local-4-1-any.pkg.tar.zst
     pacman -U --noconfirm /root/*.pkg.tar.zst
     grub-mkconfig -o /boot/grub/grub.cfg
     systemctl enable rc-local.service
