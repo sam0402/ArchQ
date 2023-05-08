@@ -82,7 +82,7 @@ CLOSETRAY=$(echo $options | awk '//{print $7 }')
 [ -z $CLOSETRAY ] && echo "Fail! Auto Close Tray is null." && exit 1
 
 # umount ${OUTPUTDIR}
-chown $user: ${OUTPUTDIR}
+[ -f "$OUTPUTDIR" ] && chown $user: ${OUTPUTDIR}
 # mount ${OUTPUTDIR}
 
 OUTPUTDIR=$(echo $OUTPUTDIR | sed 's"/"\\\/"g')
