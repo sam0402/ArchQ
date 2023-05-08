@@ -183,10 +183,11 @@ pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-
         fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms \
         confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
         nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl libconfig faad2 libmad \
-        openmpi fftw boost openpmix ncmpcpp hwloc taglib lua perl-net-ssleay perl-io-socket-ssl perl-uri \
+        openmpi fftw boost openpmix ncmpcpp hwloc taglib lua \
+        perl-mojolicious perl-webservice-musicbrainz perl-net-ssleay perl-io-socket-ssl perl-uri \
         alsa-lib ffmpeg mympd ncmpcpp mpc rc-local \
         atomicparsley glyr imagemagick libao libdiscid libxslt opusfile schedtool srt vorbis-tools \
-        perl-net-ssleay python-chardet python-idna python-lxml python-requests python-urllib3
+        python-chardet python-idna python-lxml python-requests python-urllib3
 
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
@@ -452,7 +453,7 @@ alias config='config.sh'
 EOF
 # echo 'server-cfg.sh' >/mnt/root/.bash_profile
 # echo 'rm /root/.bash_profile' >>/mnt/root/.bash_profile
-# echo 'y\ny\n' | arch-chroot /mnt pacman -Scc
+arch-chroot /mnt sh -c 'echo 'y\ny\n' | pacman -Scc'
 rm -f /mnt/root/*.tar.zst /mnt/root/*.tar.xz
 # Detect other OS
 if [ -n "$old_efi" ]; then
