@@ -1,6 +1,9 @@
 #!/bin/bash
 config='/etc/abcde.conf'
 user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
+c_blue_b=$'\e[1;38;5;27m'
+c_gray=$'\e[m'
+
 mkgrub(){
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
         part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
@@ -12,12 +15,13 @@ mkgrub(){
     pacman -Q ramroot >/dev/null 2>&1 && sed -i 's/fallback/ramroot/g' $grub_cfg
 }
 if ! pacman -Q abcde >/dev/null 2>&1 ; then
+    echo -e "\n${c_blue_b}Install abCDe ...${c_gray}\n"
     kver=$(pacman -Q | grep linux-Q | grep -v headers | awk 'NR==1{print $2}')
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde-2.9.3-6-any.pkg.tar.zst
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cdparanoia-10.2-9-x86_64.pkg.tar.zst
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cd-discid-1.4-3-x86_64.pkg.tar.zst
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A5.1.2-12-x86_64.pkg.tar.zst
+    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
+    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde-2.9.3-6-any.pkg.tar.zst
+    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cdparanoia-10.2-9-x86_64.pkg.tar.zst
+    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cd-discid-1.4-3-x86_64.pkg.tar.zst
+    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A5.1.2-12-x86_64.pkg.tar.zst
     pacman -U --noconfirm /root/*.pkg.tar.zst
     mkgrub
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde.conf >/etc/abcde.conf
