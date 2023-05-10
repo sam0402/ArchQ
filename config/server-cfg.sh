@@ -1,7 +1,7 @@
 #!/bin/bash
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
-server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon P Player) || exit 1; clear
+server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon H "HQPlayer Embedded" P Player) || exit 1; clear
 case $server in
     P)  
         sed -i 's/'"$isocpu"'//' /etc/default/grub
@@ -23,6 +23,8 @@ case $server in
         pacman -Q mpd-light >/dev/null 2>&1 && systemctl disable --now mpd nginx php-fpm
         pacman -Q mpd-light >/dev/null 2>&1 && systemctl disable --now mympd
         [[ -d '/opt/RoonServer' ]] && systemctl disable --now roonserver
+        [[ -d '/opt/hqplayerd' ]] && systemctl disable --now hqplayerd
+        
         systemctl enable --now logitechmediaserver
         ;;
     R)
@@ -39,6 +41,7 @@ case $server in
         pacman -Q mpd-light >/dev/null 2>&1 && systemctl disable --now mpd nginx php-fpm
         pacman -Q mpd-light >/dev/null 2>&1 && systemctl disable --now mympd
         pacman -Q logitechmediaserver >/dev/null 2>&1 && systemctl disable --now logitechmediaserver
+        [[ -d '/opt/hqplayerd' ]] && systemctl disable --now hqplayerd
         systemctl enable --now roonserver
         ;;
     M)
@@ -77,8 +80,43 @@ EOF
         sed -i 's/'"$isocpu"'//' /etc/default/grub
         pacman -Q logitechmediaserver >/dev/null 2>&1 && systemctl disable --now logitechmediaserver
         [[ -d '/opt/RoonServer' ]] && systemctl disable --now roonserver
+        [[ -d '/opt/hqplayerd' ]] && systemctl disable --now hqplayerd
         /usr/bin/mpd-cfg.sh
         systemctl enable --now mpd
+        ;;
+    H)
+        ver=5.0.0-2avx2
+        wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayerd-lib.tar.gz | tar zxf - -C /tmp
+        wget -O - https://www.signalyst.eu/bins/hqplayerd/jammy/hqplayerd_"$ver"_amd64.deb | bsdtar xf - -C /tmp
+        pacman -U /tmp/hqplayerd-lib/*.pkg.tar.zst
+        bsdtar xf /tmp/data.tar.zst -C /
+
+        rm -rf "/lib"
+        install -Dm644 "/usr/share/doc/hqplayerd/copyright" "/usr/share/licenses/hqplayer/COPYING"
+        rm "/usr/share/doc/hqplayerd/copyright"
+        mkdir -p /var/lib/hqplayer/home
+        chown -R root:root /var/lib/hqplayer
+        chown -R root:root /etc/hqplayer
+        curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayerd.service >/usr/lib/systemd/system/hqplayerd.service
+
+        ## lib link
+        cd /usr/lib
+        [ ! -f "libgupnp-1.2.so.0" ] && ln -s libgupnp-1.2.so.1 libgupnp-1.2.so.0
+        [ ! -f "libgupnp-av-1.0.so.2" ] && ln -s libgupnp-av-1.0.so.3 libgupnp-av-1.0.so.2
+        [ ! -f "libomp.so.5" ] && ln -s libomp.so libomp.so.5
+        [ ! -f "libFLAC.so.8" ] && ln -s libFLAC.so.12 libFLAC.so.8
+        [ ! -f "libusb-0.1.so.4" ] && ln -s libusb-1.0.so.0.3.0 libusb-0.1.so.4
+        [ ! -f "libsgllnx64-2.29.02.so" ] && [ -f "/opt/hqplayerd/lib/libsgllnx64-2.29.02.so" ] && ln -s /opt/hqplayerd/lib/libsgllnx64-2.29.02.so libsgllnx64-2.29.02.so
+        [ ! -f "libsglarm64-2.31.0.0.so" ] && [ -f "/opt/hqplayerd/lib/libsglarm64-2.31.0.0.so" ] && ln -s /opt/hqplayerd/lib/libsglarm64-2.31.0.0.so libsglarm64-2.31.0.0.so
+        if [ ! -f "/etc/pki/tls/certs/ca-bundle.crt" ]; then
+            mkdir -p /etc/pki/tls/certs
+            ln -s /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt
+        fi
+        pacman -Q mpd-light >/dev/null 2>&1 && systemctl disable --now mpd nginx php-fpm
+        pacman -Q mpd-light >/dev/null 2>&1 && systemctl disable --now mympd
+        pacman -Q logitechmediaserver >/dev/null 2>&1 && systemctl disable --now logitechmediaserver
+        [[ -d '/opt/RoonServer' ]] && systemctl disable --now roonserver
+        systemctl enable --now hqplayerd
         ;;
 esac
 yes | pacman -Scc
