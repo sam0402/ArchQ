@@ -30,14 +30,14 @@ if [[ $player =~ S ]] && ! pacman -Q squeezelite >/dev/null 2>&1; then
     /usr/bin/sqzlite-cfg.sh
 fi
 if [[ $player =~ A ]] && ! pacman -Q shairport-sync >/dev/null 2>&1; then
-    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
-    pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
+    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
+    pacman -U --noconfirm /tmp/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     sed -i '/Group=/iNice=-20\nAllowedCPUs=4' /usr/lib/systemd/system/shairport-sync.service
     systemctl daemon-reload
 fi
 if [[ $player =~ R ]] && ! pacman -Q roonbridge >/dev/null 2>&1; then
-    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
-    pacman -U --noconfirm /root/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
+    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
+    pacman -U --noconfirm /tmp/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
     systemctl daemon-reload
 fi
 if [[ $s0 != $s1 ]]; then
@@ -47,10 +47,10 @@ if [[ $s0 != $s1 ]]; then
         isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
         [ $cpus -ge 4 ] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
         [ $cpus -ge 6 ] && [ $(systemctl is-active logitechmediaserver) = active ] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
-        sed -i 's/idle=poll/idle=poll '"$isocpu"'/' /etc/default/grub
+        sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
     else
         inact+='squeezelite '
-        sed -i 's/idle=poll '"$isocpu"'//' /etc/default/grub
+        sed -i 's/'"$isocpu"'//' /etc/default/grub
     fi
     mkgrub
 fi

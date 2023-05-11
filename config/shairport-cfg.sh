@@ -16,8 +16,7 @@ else
 
     device=$(dialog --stdout \
             --title "ArchQ Airplay $1" \
-            --menu "Ouput device" 7 0 0 ${devs}) || exit 1
-    clear
+            --menu "Ouput device" 7 0 0 ${devs}) || exit 1; clear
     sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$device\""';/' $config 
 fi
 }
@@ -26,14 +25,14 @@ SelVer()
 {
     airver=$(dialog --stdout --title "ArchQ Airplay $1" --menu "Select version" 7 0 0 1 Classic 2 Multiroom) || exit 1; clear
     if [[ $airver == '2' ]]; then
-      wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nqptp-git-1.1-1-x86_64.pkg.tar.zst
-      pacman -U --noconfirm /root/nqptp-git-1.1-1-x86_64.pkg.tar.zst
+      wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nqptp-git-1.1-1-x86_64.pkg.tar.zst
+      pacman -U --noconfirm /tmp/nqptp-git-1.1-1-x86_64.pkg.tar.zst
     else
       systemctl disable --now nqptp
       pacman -R --noconfirm nqptp-git
     fi
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-${airver}-x86_64.pkg.tar.zst
-    pacman -U --noconfirm /root/shairport-sync-3.3.9-${airver}-x86_64.pkg.tar.zst
+    wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-${airver}-x86_64.pkg.tar.zst
+    pacman -U --noconfirm /tmp/shairport-sync-3.3.9-${airver}-x86_64.pkg.tar.zst
     isocpu=$(($(getconf _NPROCESSORS_ONLN)-1))
     sed -i '/Group=/iNice=-20\nAllowedCPUs='"$isocpu"'' /usr/lib/systemd/system/shairport-sync.service
     echo "Airplay $airver installed."
@@ -49,8 +48,7 @@ Config()
   SEL=$(dialog --stdout --title "ArchQ Airplay $1" \
           --checklist "Configure" 7 0 0 \
           V "Volume Control"  $v0 \
-          A Active            $a0 ) || exit 1
-  clear
+          A Active            $a0 ) || exit 1; clear
   [[ $SEL =~ V ]] && v1=on
   [[ $SEL =~ A ]] && a1=on
 

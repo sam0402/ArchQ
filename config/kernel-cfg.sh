@@ -30,8 +30,8 @@ case $WK in
             ver=$(echo $options | cut -d '-' -f 1)
             kver=$(echo $options | cut -d '-' -f 2-3)
             echo "Install Kernel ${ver}-${kver}..."
-            [ ! -f "/root/linux-${ver}-${kver}-x86_64.pkg.tar.zst" ] && wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ver}-${kver}-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /root/linux-${ver}-${kver}-x86_64.pkg.tar.zst
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ver}-${kver}-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /tmp/linux-${ver}-${kver}-x86_64.pkg.tar.zst
         fi
         pacman -Q ramroot >/dev/null 2>&1 && ramroot -E
         rm /boot/*-fallback.img
@@ -65,10 +65,9 @@ case $WK in
         mkgrub
         ;;
     R)
-        wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ramroot-2.0.2-2-x86_64.pkg.tar.zst
-        pacman -U --noconfirm /root/ramroot-2.0.2-2-x86_64.pkg.tar.zst
+        wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ramroot-2.0.2-2-x86_64.pkg.tar.zst
+        pacman -U --noconfirm /tmp/ramroot-2.0.2-2-x86_64.pkg.tar.zst
         pacman -Scc --noconfirm >/dev/null 2>&1
-        rm -f /root/*.tar.zst /root/*.tar.xz
         mkgrub
         ;;
     F)

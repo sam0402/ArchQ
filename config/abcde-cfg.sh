@@ -18,12 +18,12 @@ mkgrub(){
 if ! pacman -Q abcde >/dev/null 2>&1 ; then
     echo -e "\n${c_blue_b}Install abCDe ...${c_gray}\n"
     kver=$(pacman -Q | grep linux-Q | grep -v headers | awk 'NR==1{print $2}')
-    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
-    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde-2.9.3-6-any.pkg.tar.zst
-    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cdparanoia-10.2-9-x86_64.pkg.tar.zst
-    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cd-discid-1.4-3-x86_64.pkg.tar.zst
-    wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A5.1.2-12-x86_64.pkg.tar.zst
-    pacman -U --noconfirm /root/*.pkg.tar.zst
+    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
+    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde-2.9.3-6-any.pkg.tar.zst
+    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cdparanoia-10.2-9-x86_64.pkg.tar.zst
+    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cd-discid-1.4-3-x86_64.pkg.tar.zst
+    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A5.1.2-12-x86_64.pkg.tar.zst
+    pacman -U --noconfirm /tmp/*.pkg.tar.zst
     echo -e "\nInstall kernel ${c_blue_b}Qrip${c_gray} ...\n"
     mkgrub
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde.conf >/etc/abcde.conf
