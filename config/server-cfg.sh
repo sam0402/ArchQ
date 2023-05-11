@@ -106,7 +106,6 @@ EOF
         [ ! -f "libgupnp-av-1.0.so.2" ] && ln -s libgupnp-av-1.0.so.3 libgupnp-av-1.0.so.2
         [ ! -f "libomp.so.5" ] && ln -s libomp.so libomp.so.5
         [ ! -f "libFLAC.so.8" ] && ln -s libFLAC.so.12 libFLAC.so.8
-        [ ! -f "libusb-0.1.so.4" ] && ln -s libusb-1.0.so.0.3.0 libusb-0.1.so.4
         [ ! -f "libsgllnx64-2.29.02.so" ] && [ -f "/opt/hqplayerd/lib/libsgllnx64-2.29.02.so" ] && ln -s /opt/hqplayerd/lib/libsgllnx64-2.29.02.so libsgllnx64-2.29.02.so
         [ ! -f "libsglarm64-2.31.0.0.so" ] && [ -f "/opt/hqplayerd/lib/libsglarm64-2.31.0.0.so" ] && ln -s /opt/hqplayerd/lib/libsglarm64-2.31.0.0.so libsglarm64-2.31.0.0.so
         if [ ! -f "/etc/pki/tls/certs/ca-bundle.crt" ]; then
