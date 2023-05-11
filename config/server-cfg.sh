@@ -88,7 +88,7 @@ EOF
         ver=5.0.0-2avx2
         wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayerd-lib.tar.gz | tar zxf - -C /tmp
         wget -O - https://www.signalyst.eu/bins/hqplayerd/jammy/hqplayerd_"$ver"_amd64.deb | bsdtar xf - -C /tmp
-        pacman -U /tmp/hqplayerd-lib/*.pkg.tar.zst
+        pacman -U --noconfirm /tmp/hqplayerd-lib/*.pkg.tar.zst
         bsdtar xf /tmp/data.tar.zst -C /
 
         rm -rf "/lib"
