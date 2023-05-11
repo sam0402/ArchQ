@@ -453,7 +453,7 @@ alias config='config.sh'
 EOF
 # echo 'server-cfg.sh' >/mnt/root/.bash_profile
 # echo 'rm /root/.bash_profile' >>/mnt/root/.bash_profile
-# arch-chroot /mnt sh -c 'echo 'y\ny\n' | pacman -Scc'
+arch-chroot /mnt sh -c 'yes | pacman -Scc'
 rm -f /mnt/root/*.tar.zst /mnt/root/*.tar.xz
 # Detect other OS
 if [ -n "$old_efi" ]; then
