@@ -10,9 +10,8 @@ mkgrub(){
     grub-mkconfig -o $grub_cfg
     pacman -Q ramroot >/dev/null 2>&1 && sed -i 's/fallback/ramroot/g' $grub_cfg
 }
-s0=off; a0=off; r0=off
-s1=off; a1=off; r1=off
-h1=off; h1=off; h1=off
+s0=off; a0=off; r0=off; h0=off
+s1=off; a1=off; r1=off; h1=off
 [ $(systemctl is-active squeezelite) = active ] && s0=on
 [ $(systemctl is-active shairport-sync) = active ] && a0=on
 [ $(systemctl is-active roonbridge) = active ] && r0=on
