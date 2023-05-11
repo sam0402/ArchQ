@@ -95,12 +95,12 @@ EOF
             pacman -U --noconfirm /tmp/hqplayerd-lib/*.pkg.tar.zst
         fi
         ## install hqplayerd
-        killall hqplayerd
+        systemctl disable --now hqplayerd
         wget -O - https://www.signalyst.eu/bins/hqplayerd/jammy/hqplayerd_"$ver"_amd64.deb | bsdtar xf - -C /tmp
         mkdir -p /tmp/hqpd
         bsdtar xf /tmp/data.tar.zst -C /tmp/hqpd
         rm -rf /tmp/hqpd/lib
-        cp -a /tmp/hqpd/* /.
+        cp -af /tmp/hqpd/* /.
         install -Dm644 "/usr/share/doc/hqplayerd/copyright" "/usr/share/licenses/hqplayer/COPYING"
         rm "/usr/share/doc/hqplayerd/copyright"
         mkdir -p /var/lib/hqplayer/home
