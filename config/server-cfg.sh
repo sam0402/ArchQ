@@ -89,10 +89,13 @@ EOF
     H|Q)
         ver="5.0.0-2avx2"
         [ $server = Q ] && ver="4.35.0-159avx2"
-        wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayerd-lib.tar.gz | tar zxf - -C /tmp
-        wget -P /tmp/hqplayerd-lib https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/gtk3-1%3A3.24.37-1-x86_64.pkg.tar.zst
+        if  ! pacman -Q gupnp-dlna >/dev/null 2>&1; then
+            wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayerd-lib.tar.gz | tar zxf - -C /tmp
+            wget -P /tmp/hqplayerd-lib https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/gtk3-1%3A3.24.37-1-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /tmp/hqplayerd-lib/*.pkg.tar.zst
+        if
+        ## install hqplayerd
         wget -O - https://www.signalyst.eu/bins/hqplayerd/jammy/hqplayerd_"$ver"_amd64.deb | bsdtar xf - -C /tmp
-        pacman -U --noconfirm /tmp/hqplayerd-lib/*.pkg.tar.zst
         mkdir -p /tmp/hqpd
         bsdtar xf /tmp/data.tar.zst -C /tmp/hqpd
         rm -rf /tmp/hqpd/lib

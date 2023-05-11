@@ -12,18 +12,22 @@ mkgrub(){
 }
 s0=off; a0=off; r0=off
 s1=off; a1=off; r1=off
+h1=off; h1=off; h1=off
 [ $(systemctl is-active squeezelite) = active ] && s0=on
 [ $(systemctl is-active shairport-sync) = active ] && a0=on
 [ $(systemctl is-active roonbridge) = active ] && r0=on
+[ $(systemctl is-active networkaudio) = active ] && h0=on
 
 player=$(dialog --stdout --title "ArchQ $1" --checklist "Active player" 7 0 0 \
         S Squeezelite   $s0 \
         A Airplay       $a0 \
-        R Roonbridge    $r0 ) || exit 1; clear
+        R Roonbridge    $r0 \
+        H "HQplayer NAA" $h0 ) || exit 1; clear
 
 [[ $player =~ S ]] && s1=on
 [[ $player =~ A ]] && a1=on
 [[ $player =~ R ]] && r1=on
+[[ $player =~ H ]] && h1=on
 
 cpus=$(getconf _NPROCESSORS_ONLN)
 if [[ $player =~ S ]] && ! pacman -Q squeezelite >/dev/null 2>&1; then
@@ -40,6 +44,12 @@ if [[ $player =~ R ]] && ! pacman -Q roonbridge >/dev/null 2>&1; then
     pacman -U --noconfirm /tmp/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
     systemctl daemon-reload
 fi
+if [[ $player =~ H ]] && ! pacman -Q hqplayer-network-audio-daemon >/dev/null 2>&1; then
+    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayer-network-audio-daemon-4.4.0-1-x86_64.pkg.tar.zst
+    pacman -U --noconfirm /tmp/hqplayer-network-audio-daemon-4.4.0-1-x86_64.pkg.tar.zst
+    systemctl daemon-reload
+fi
+
 if [[ $s0 != $s1 ]]; then
     if [[ $s1 == on ]]; then
         act+='squeezelite '
@@ -64,6 +74,9 @@ if [[ $r0 != $r1 ]]; then
 fi
 if [[ $s0 != $s1 ]]; then
     [[ $s1 == 'on' ]] && act+='squeezelite ' || inact+='squeezelite '
+fi
+if [[ $h0 != $h1 ]]; then
+    [[ $h1 == 'on' ]] && act+='networkaudio ' || inact+='networkaudio '
 fi
 if [[ $act ]]; then
    systemctl enable --now $act
