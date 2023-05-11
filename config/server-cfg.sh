@@ -92,7 +92,6 @@ EOF
         pacman -U --noconfirm /tmp/hqplayerd-lib/*.pkg.tar.zst
         bsdtar xf /tmp/data.tar.zst -C /
 
-        rm -rf "/lib"
         install -Dm644 "/usr/share/doc/hqplayerd/copyright" "/usr/share/licenses/hqplayer/COPYING"
         rm "/usr/share/doc/hqplayerd/copyright"
         mkdir -p /var/lib/hqplayer/home
