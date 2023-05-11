@@ -91,8 +91,10 @@ EOF
         wget -P /tmp/hqplayerd-lib https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/gtk3-1%3A3.24.37-1-x86_64.pkg.tar.zst
         wget -O - https://www.signalyst.eu/bins/hqplayerd/jammy/hqplayerd_"$ver"_amd64.deb | bsdtar xf - -C /tmp
         pacman -U --noconfirm /tmp/hqplayerd-lib/*.pkg.tar.zst
-        bsdtar xf /tmp/data.tar.zst -C /
-
+        mkdir -p /tmp/hqpd
+        bsdtar xf /tmp/data.tar.zst -C /tmp/hqpd
+        rm -rf /tmp/hqpd/lib
+        cp -a /tmp/hqpd/* /.
         install -Dm644 "/usr/share/doc/hqplayerd/copyright" "/usr/share/licenses/hqplayer/COPYING"
         rm "/usr/share/doc/hqplayerd/copyright"
         mkdir -p /var/lib/hqplayer/home
