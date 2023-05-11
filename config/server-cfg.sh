@@ -1,7 +1,8 @@
 #!/bin/bash
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
-server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon H "HQPlayer Embedded" P Player) || exit 1; clear
+server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon \
+        H "HQPlayer Embedded 5" Q "HQPlayer Embedded 4" P Player) || exit 1; clear
 yes | pacman -Scc
 case $server in
     P)  
@@ -85,8 +86,9 @@ EOF
         /usr/bin/mpd-cfg.sh
         systemctl enable --now mpd
         ;;
-    H)
-        ver=5.0.0-2avx2
+    H|Q)
+        ver="5.0.0-2avx2"
+        [ $server = Q ] && ver="4.35.0-159avx2"
         wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayerd-lib.tar.gz | tar zxf - -C /tmp
         wget -P /tmp/hqplayerd-lib https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/gtk3-1%3A3.24.37-1-x86_64.pkg.tar.zst
         wget -O - https://www.signalyst.eu/bins/hqplayerd/jammy/hqplayerd_"$ver"_amd64.deb | bsdtar xf - -C /tmp
