@@ -95,6 +95,7 @@ EOF
             pacman -U --noconfirm /tmp/hqplayerd-lib/*.pkg.tar.zst
         if
         ## install hqplayerd
+        killall hqplayerd
         wget -O - https://www.signalyst.eu/bins/hqplayerd/jammy/hqplayerd_"$ver"_amd64.deb | bsdtar xf - -C /tmp
         mkdir -p /tmp/hqpd
         bsdtar xf /tmp/data.tar.zst -C /tmp/hqpd
