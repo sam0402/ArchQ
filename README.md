@@ -43,9 +43,10 @@ Supported Hardware: (Include Macbook or Mac mini Intel version)
 
 Stand-alone: Install
  1. LMS + Squeezelite
- 2. Roon
- 3. MPD (CD play, Multiroom, Httpd Stream)
- 4. Airplay
+ 2. MPD (CD play, Multiroom, Httpd Stream)
+ 3. Roon
+ 5. HQPlayer
+ 6. Airplay
 
 Client-server:
 
@@ -53,8 +54,9 @@ Client-server:
  
  Player:
   1. Squeezelite
-  3. Roonbridge
-  4. Airplay
+  2. Roonbridge
+  3. Airplay
+  4. HQPlayer NAA
   5. Raspberry 4 or CM4 install with [pCP8-Q264ax.img.001](https://raw.githubusercontent.com/sam0402/pcp-44.1KHz/master/pCP8-Q264ax.img.7z.001),  [pCP8-Q264ax.img.002](https://raw.githubusercontent.com/sam0402/pcp-44.1KHz/master/pCP8-Q264ax.img.7z.002)
      
  HDMI output (Intel i915): Install and boot by Q352H
