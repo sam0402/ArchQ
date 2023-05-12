@@ -1,7 +1,7 @@
 #!/bin/bash
 serpath='/usr/lib/systemd/system/'
 service=("mpd" "logitechmediaserver" "squeezelite" "shairport-sync" "hqplayerd" "networkaudio")
-nickname=("MPD" "LMS" "Squeezelite" "Airplay" "HQPlayer Embedded" "NAA")
+nickname=("MPD" "LMS" "Squeezelite" "Airplay" "HQPlayerEmbedded" "NAA")
 
 arrList=(); arrService=()
 for ((i=0; i < ${#service[@]}; i++))
