@@ -1,7 +1,7 @@
 #!/bin/bash
 serpath='/usr/lib/systemd/system/'
-service=("mpd" "logitechmediaserver" "squeezelite" "shairport-sync")
-nickname=("MPD" "LMS" "Squeezelite" "Airplay")
+service=("mpd" "logitechmediaserver" "squeezelite" "shairport-sync" "hqplayerd" "networkaudio")
+nickname=("MPD" "LMS" "Squeezelite" "Airplay" "HQPlayer Embedded" "NAA")
 
 arrList=(); arrService=()
 for ((i=0; i < ${#service[@]}; i++))
@@ -20,11 +20,6 @@ do
 done
 
 options=$(dialog --stdout --title "ArchQ $1" --checklist "Data cache OFF" 7 0 0 ${menu}) || exit 1; clear
-if [ ! -f "/usr/bin/pagecache-management.so" ]; then
-    curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/usr/bin/pagecache-management.sh
-    wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
-    chmod +x /usr/bin/pagecache-management.sh
-fi
 for ((i=0; i < ${#arrList[@]}; i++))
 do
     if ( echo $options | grep -q $i ); then

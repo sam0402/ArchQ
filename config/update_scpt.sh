@@ -1,5 +1,4 @@
 rm -f /root/*.tar.zst /root/*.tar.xz*
-yes | pacman -Scc
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/ether-cfg.sh >/usr/bin/ether-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/kernel-cfg.sh >/usr/bin/kernel-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/cpu-cfg.sh >/usr/bin/cpu-cfg.sh
@@ -9,6 +8,7 @@ curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/nfserver-cfg
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/smb-cfg.sh >/usr/bin/smb-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/partimnt-cfg.sh >/usr/bin/partimnt-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/player-cfg.sh >/usr/bin/player-cfg.sh
+curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/server-cfg.sh >/usr/bin/server-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/usr/bin/shairport-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sqzlite-cfg.sh >/usr/bin/sqzlite-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/usr/bin/abcde-cfg.sh

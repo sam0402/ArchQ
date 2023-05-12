@@ -15,7 +15,7 @@ if pacman -Q ffmpeg >/dev/null 2>&1; then
 fi
 WK=$(dialog --stdout --title "$ipaddr   $temp" \
     --menu "$HOSTNAME.local Config" 7 0 0 ${MENU} K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P "Active player" R "abCDe ripper" \
-     E Network G "Data cache" C "CPU frequency" Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone) || exit 1;clear
+    O Server E Network G "Data cache" C "CPU frequency" Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone) || exit 1;clear
 case $WK in
     A)
         /usr/bin/shairport-cfg.sh $Qver
@@ -62,6 +62,9 @@ case $WK in
         ;;
     N)
         /usr/bin/nfs-cfg.sh $Qver
+        ;;
+    O)
+        /usr/bin/server-cfg.sh $Qver
         ;;
     P)
         /usr/bin/player-cfg.sh $Qver
