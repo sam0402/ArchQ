@@ -6,6 +6,7 @@ After=network-online.target sound.target local-fs.target remote-fs.target
 [Service]
 Type=simple
 ExecStart=/usr/bin/hqplayerd
+ExecStartPost=/bin/sh -c "ps H -q \$(pidof -s hqplayerd) -o 'tid,cls' | grep FF | awk '{print \$1}' | while read PROC; do chrt -p 95 \$PROC;done;exit 0"
 Restart=always
 RestartSec=2
 EnvironmentFile=-/etc/default/hqplayerd
