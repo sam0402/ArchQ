@@ -2,7 +2,7 @@
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon \
-        H "HQPlayer Embedded 5" Q "HQPlayer Embedded 4" P Player) || exit 1; clear
+        5 "HQPlayer Embedded 5" 4 "HQPlayer Embedded 4" P Player) || exit 1; clear
 yes | pacman -Scc
 case $server in
     P)  
@@ -86,9 +86,7 @@ EOF
         /usr/bin/mpd-cfg.sh
         systemctl enable --now mpd
         ;;
-    H|Q)
-        ver="5.0.0-2avx2"
-        [ $server = Q ] && ver="4.35.0-159avx2"
+    4|5)
         if ! pacman -Q gupnp-dlna >/dev/null 2>&1; then
             wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayerd-lib.tar.gz | tar zxf - -C /tmp
             wget -P /tmp/hqplayerd-lib https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/gtk3-1%3A3.24.37-1-x86_64.pkg.tar.zst
@@ -96,7 +94,8 @@ EOF
         fi
         ## install hqplayerd
         systemctl disable --now hqplayerd
-        wget -O - https://www.signalyst.eu/bins/hqplayerd/jammy/hqplayerd_"$ver"_amd64.deb | bsdtar xf - -C /tmp
+        hqe_deb=$(wget -O - https://www.signalyst.eu/bins/hqplayerd/jammy/ | grep "hqplayerd_$server" | grep avx2_amd64.deb | tail -n1 | awk -F'"' '{print $2}')
+        wget -O - "https://www.signalyst.eu/bins/hqplayerd/jammy/$hqe_deb" | bsdtar xf - -C /tmp
         mkdir -p /tmp/hqpd
         bsdtar xf /tmp/data.tar.zst -C /tmp/hqpd
         rm -rf /tmp/hqpd/lib
