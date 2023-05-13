@@ -14,8 +14,8 @@ if pacman -Q ffmpeg >/dev/null 2>&1; then
     [[ $(pacman -Q ffmpeg) != 'ffmpeg 2:5.1.2-12' ]] || [[ -d '/opt/RoonServer' ]] && MENU+='F FFmpeg '
 fi
 WK=$(dialog --stdout --title "$ipaddr   $temp" \
-    --menu "$HOSTNAME.local Config" 7 0 0 ${MENU} K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P Player R "abCDe ripper" \
-    E Network G "Data cache" C "CPU frequency" Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone) || exit 1;clear
+    --menu "$HOSTNAME.local Config" 7 0 0 ${MENU} K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P Player O Server \
+    R "abCDe ripper" E Network G "Data cache" C "CPU frequency" Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone) || exit 1;clear
 case $WK in
     A)
         /usr/bin/shairport-cfg.sh $Qver
