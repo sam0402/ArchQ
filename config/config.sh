@@ -7,7 +7,8 @@ temp=$(sensors | grep 'Core 0' | awk '{print $3}')
 ipaddr=$(ip -o addr | grep en | awk '{print $4}')
 MENU=''
 [ $git -gt $num ] && MENU+='U Update '
-pacman -Q mpd-light >/dev/null 2>&1 && MENU+='D MPD ' || pacman -Q mpd-ffmpeg >/dev/null 2>&1 && MENU+='D MPD ' 
+pacman -Q mpd-light >/dev/null 2>&1 && MENU+='D MPD '
+pacman -Q mpd-ffmpeg >/dev/null 2>&1 && MENU+='D MPD ' 
 pacman -Q squeezelite >/dev/null 2>&1 && MENU+='S Squeezelite '
 pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='A Airplay '
 if pacman -Q ffmpeg >/dev/null 2>&1; then
@@ -15,7 +16,7 @@ if pacman -Q ffmpeg >/dev/null 2>&1; then
 fi
 
 uname -r | grep -q evl && MENU2='X Desktop' || MENU2='M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P Player O Server R "abCDe ripper" G "Data cache" C "CPU frequency" Z "Zero Wipe" V "NFS Server" Y Bcache '
-exec='dialog --stdout --title "'$ipaddr'  '$temp'" --menu "'$HOSTNAME'.local  Config" 7 0 0 K Kernel E Network T Timezone '$MENU2
+exec='dialog --stdout --title "'$ipaddr'  '$temp'" --menu "'$HOSTNAME'.local  Config" 7 0 0 '$MENU'K Kernel E Network T Timezone '$MENU2
 
 options=$(eval $exec) || exit 1; clear
 case $options in
