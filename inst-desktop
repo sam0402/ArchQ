@@ -92,13 +92,6 @@ exec 2> >(tee "stderr.log")
 timedatectl set-ntp true
 
 mkboot(){
-    # Wipe boot
-    for ((i=1; i <= $zerofill; i++))
-    do
-        echo -e "${c_red_b}Boot parition fills with zero -> $i${c_white_b}"
-        scrub -Sp fillzero $part_boot
-    done
-    wipefs "${part_boot}"
     mkfs.vfat -F32 "${part_boot}"
 }
 
