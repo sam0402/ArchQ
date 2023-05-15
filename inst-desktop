@@ -16,7 +16,7 @@ echo -e "\n\nUse ${c_red_b}Ctrl-C${c_white} to abort the PING if the network wor
 ping -c 20 archlinux.org
 
 curl -s "https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/pacman.conf" >/etc/pacman.conf
-pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
+# pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
 echo "Updating mirror list"
 MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
 curl -s "$MIRRORLIST_URL" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - >/etc/pacman.d/mirrorlist
@@ -210,6 +210,7 @@ cat /mnt/root/linux-evl-${kver}-x86_64.pkg.tar.zst.* >/mnt/root/linux-${ker}-${k
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll acpi_pm_good nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
 /mnt/etc/default/grub
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 # Add /etc/rc.local
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rc-local-4-1-any.pkg.tar.zst
@@ -287,7 +288,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg.sh >/mnt/usr/bin/desktop-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
-chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/sw
+chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot 
 mkdir /mnt/home/$user/Desktop
 arch-chroot /mnt ln -sf /usr/bin/config.sh /home/$user/Desktop/.
 arch-chroot /mnt chown -R ${user}: /home/$user/Desktop
@@ -300,12 +301,10 @@ alias egrep='egrep --color=auto'
 alias grep='grep --color=auto'
 alias ll='command ls -l --color=auto -v'
 alias ls='command ls --color=auto -v'
-alias abcde='eject -t; abcde'
 alias poweroff='sudo systemctl poweroff'
 alias reboot='sudo systemctl reboot'
 alias config='sudo config.sh'
 alias qboot='sudo qboot'
-alias sw='sudo sw'
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
 
