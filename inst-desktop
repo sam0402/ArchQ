@@ -8,14 +8,15 @@ c_blue_b=$'\e[1;38;5;27m'
 c_green_b=$'\e[1;38;5;46m'
 c_red_b=$'\e[1;38;5;196m'
 c_red=$'\e[1;33m'
-c_white=$'\e[0;38;5;15m'
+c_white=$'\e[m'
 c_white_b=$'\e[1;37m'
 c_gray=$'\e[0;37m'
 
 echo -e "\n\nUse ${c_red_b}Ctrl-C${c_white} to abort the PING if the network working well.\n"
 ping -c 20 archlinux.org
-pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
 
+curl -s "https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/pacman.conf" >/etc/pacman.conf
+pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
 echo "Updating mirror list"
 MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
 curl -s "$MIRRORLIST_URL" | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors -n 5 - >/etc/pacman.d/mirrorlist
