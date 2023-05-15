@@ -13,10 +13,12 @@ pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='A Airplay '
 if pacman -Q ffmpeg >/dev/null 2>&1; then
     [[ $(pacman -Q ffmpeg) != 'ffmpeg 2:5.1.2-12' ]] || [[ -d '/opt/RoonServer' ]] && MENU+='F FFmpeg '
 fi
-WK=$(dialog --stdout --title "$ipaddr   $temp" \
-    --menu "$HOSTNAME.local Config" 7 0 0 ${MENU} K Kernel M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P Player O Server \
-    R "abCDe ripper" E Network G "Data cache" C "CPU frequency" Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone) || exit 1;clear
-case $WK in
+
+uname -r | grep -q evl && MENU2='X Desktop' || MENU2='M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P Player O Server R "abCDe ripper" G "Data cache" C "CPU frequency" Z "Zero Wipe" V "NFS Server" Y Bcache '
+exec='dialog --stdout --title "'$ipaddr'  '$temp'" --menu "'$HOSTNAME'.local  Config" 7 0 0 K Kernel E Network T Timezone '$MENU2
+
+options=$(eval $exec) || exit 1; clear
+case $options in
     A)
         /usr/bin/shairport-cfg.sh $Qver
         ;;
@@ -87,9 +89,9 @@ case $WK in
     V)
         /usr/bin/nfserver-cfg.sh $Qver
         ;;
-    # X)
-    #     /usr/bin/desktop-cfg.sh $Qver
-    #     ;;
+    X)
+        /usr/bin/desktop-cfg.sh $Qver
+        ;;
     Y)
         /usr/bin/bcache-cfg.sh $Qver
         ;;
