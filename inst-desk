@@ -2,7 +2,6 @@
 # WARNING: this script will destroy data on the selected disk.
 # This script can be run by executing the following:
 #   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/inst-desktop | bash
-kver='5.18.1-1'
 set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 c_blue_b=$'\e[1;38;5;27m'
@@ -14,7 +13,7 @@ c_white_b=$'\e[1;37m'
 c_gray=$'\e[0;37m'
 
 MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
-echo -e "${c_blue_b}\n\nArchQ will ping "Arch Linux Server" 20 times before installation.\n${c_gray}"
+echo -e "\n\nUse ${c_red_b}Ctrl-C{c_gray} to abort the ping if the network working well.\n$"
 ping -c 20 archlinux.org
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
 
@@ -25,36 +24,36 @@ curl -s "$MIRRORLIST_URL" | \
 
 ### Get infomation from user ###
 password(){
-    password=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password" 0 0) || exit 1; clear
+    password=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter admin password" 0 0) || exit 1; clear
     if [[ -z "$password" ]];then
-        dialog --stdout --title "ArchQ" --pause "\n Passwd cannot be empty.\n\n Setting password again." 12 0 3 || exit 1; clear
+        dialog --stdout --title "ArchQ Desktop" --pause "\n Passwd cannot be empty.\n\n Setting password again." 12 0 3 || exit 1; clear
         password
     fi
-    password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password again" 0 0) || exit 1; clear
+    password2=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter admin password again" 0 0) || exit 1; clear
     if [[ "$password" != "$password2" ]]; then
-        dialog --stdout --title "ArchQ" --pause "\n Passwd did not match.\n\n Setting password again." 12 0 3 || exit 1; clear
+        dialog --stdout --title "ArchQ Desktop" --pause "\n Passwd did not match.\n\n Setting password again." 12 0 3 || exit 1; clear
         password
     fi
 }
 
-hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname" 0 0) || exit 1; clear
+hostname=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter hostname" 0 0) || exit 1; clear
 if [ -z "$hostname" ];then
-    dialog --stdout --title "ArchQ" --pause "\n Hostname cannot be empty.\n\n Default will be 'ArchQ'." 12 0 3 || exit 1; clear
-    hostname=ArchQ
-    hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname again" 0 0) || exit 1; clear
+    dialog --stdout --title "ArchQ Desktop" --pause "\n Hostname cannot be empty.\n\n Default will be 'ArchQ'." 12 0 3 || exit 1; clear
+    hostname=Desktop
+    hostname=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter hostname again" 0 0) || exit 1; clear
 fi
 
-user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1; clear
+user=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter admin username" 0 0) || exit 1; clear
 if [ -z "$user" ];then
-    dialog --stdout --title "ArchQ" --pause "\n Username cannot be empty.\n\n Default will be 'archq'." 12 0 3 || exit 1; clear
+    dialog --stdout --title "ArchQ Desktop" --pause "\n Username cannot be empty.\n\n Default will be 'archq'." 12 0 3 || exit 1; clear
     user=archq
-    user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username again" 0 0) || exit 1; clear
+    user=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter admin username again" 0 0) || exit 1; clear
 fi
 password
-lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1; clear
+lang=$(dialog --stdout --title "ArchQ Desktop" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1; clear
 devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
-device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
-fmt=$(dialog --stdout --title "ArchQ" --menu "Format device ${device}" 7 0 0 E Entire P Partition U "USB Storage") || exit 1; clear
+device=$(dialog --stdout --title "ArchQ Desktop" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
+fmt=$(dialog --stdout --title "ArchQ Desktop" --menu "Format device ${device}" 7 0 0 E Entire P Partition U "USB Storage") || exit 1; clear
 if [ $fmt = P ]; then
     partlst='dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 '
     while read line; do
@@ -66,13 +65,13 @@ if [ $fmt = P ]; then
     part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
 fi
 
-f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1; clear
+f2fs=$(dialog --stdout --title "ArchQ Desktop" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1; clear
 ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
-ifport=$(dialog --stdout --title "ArchQ" --menu "Select net device" 7 0 0 ${ethers}) || exit 1; clear
-ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1; clear
+ifport=$(dialog --stdout --title "ArchQ Desktop" --menu "Select net device" 7 0 0 ${ethers}) || exit 1; clear
+ip=$(dialog --stdout --title "ArchQ Desktop" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1; clear
 if [ $ip = S ]; then
 ifmask=24; ifdns=8.8.8.8
-ifconfig=$(dialog --stdout --title "ArchQ" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
+ifconfig=$(dialog --stdout --title "ArchQ Desktop" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
             "Address" 1 1   ""          1 10 15 0 \
             "Netmask" 2 1   "$ifmask"   2 10 15 0 \
             "Gateway" 3 1   ""          3 10 15 0 \
@@ -83,7 +82,7 @@ ifgw=$(echo $ifconfig | cut -d' ' -f3)
 ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
-desktop=$(dialog --stdout --title "ArchQ" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt N Disable) || exit 1
+desktop=$(dialog --stdout --title "ArchQ Desktop" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt N Disable) || exit 1
 
 ### Set up logging ###
 exec 1> >(tee "stdout.log")
@@ -201,10 +200,10 @@ fi
 ### Kernel
 echo .......................
 echo Install Kernel
-ker=evl
-arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.aa
-arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ab
-arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ac
+ker=evl; kver='5.18.1-1'
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst.aa
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst.ab
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst.ac
 cat /mnt/root/linux-evl-${kver}-x86_64.pkg.tar.xz.* >/mnt/root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll acpi_pm_good nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
@@ -342,5 +341,5 @@ if [ -n "$old_efi" ]; then
     arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 fi
 
-dialog --stdout --title "ArchQ" --pause "\n  ArchQ is installed, unplug the USB driver.\n\n  System will reboot after 10 seconds." 12 50 10; clear
+dialog --stdout --title "ArchQ Desktop" --pause "\n  ArchQ is installed, unplug the USB driver.\n\n  System will reboot after 10 seconds." 12 50 10; clear
 reboot
