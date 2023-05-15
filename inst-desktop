@@ -13,7 +13,7 @@ c_white_b=$'\e[1;37m'
 c_gray=$'\e[0;37m'
 
 MIRRORLIST_URL="https://archlinux.org/mirrorlist/?country=GB&protocol=https&use_mirror_status=on"
-echo -e "${c_blue_b}\n\nArchQ will ping "Arch Linux Server" 20 times before installation.\n${c_gray}"
+echo -e "\n\nUse ${c_red_b}Ctrl-C{c_gray} to abort the ping if the network working well.\n$"
 ping -c 20 archlinux.org
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog
 
@@ -204,7 +204,7 @@ ker=evl; kver='5.18.1-1'
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst.aa
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst.ab
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst.ac
-cat /mnt/root/linux-evl-${kver}-x86_64.pkg.tar.xz.* >/mnt/root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+cat /mnt/root/linux-evl-${kver}-x86_64.pkg.tar.zst.* >/mnt/root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll acpi_pm_good nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
 /mnt/etc/default/grub
