@@ -1,0 +1,9 @@
+server {
+    listen       8080;
+    server_name  localhost;
+    root /mnt/music;
+    autoindex on;
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
