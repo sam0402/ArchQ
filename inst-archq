@@ -312,10 +312,12 @@ EOF
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/mnt/etc/nginx/sites-available/rompr
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cantata_nginx >/mnt/etc/nginx/sites-available/cantata
         sed -i 's/hostname/'"${hostname,,}"'/' /mnt/etc/nginx/sites-available/rompr
+        sed -i 's/hostname/'"${hostname,,}"'/' /mnt/etc/nginx/sites-available/cantata
         sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /mnt/etc/php/php.ini
         sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /mnt/etc/php/php.ini
         sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /mnt/usr/lib/systemd/system/nginx.service
         arch-chroot /mnt ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
+        arch-chroot /mnt ln -s /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
         arch-chroot /mnt chmod 644 /etc/nginx/sites-enabled/rompr
 ### Start mpd.. etc. service
         arch-chroot /mnt systemctl enable mpd nginx php-fpm avahi-daemon
