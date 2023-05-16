@@ -71,12 +71,16 @@ EOF
             mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
             sed -i '$i include /etc/nginx/sites-enabled/*;' /etc/nginx/nginx.conf
             curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/etc/nginx/sites-available/rompr
+            curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cantata_nginx >/etc/nginx/sites-available/cantata
             sed -i 's/hostname/'"${HOSTNAME,,}"'/' /etc/nginx/sites-available/rompr
+            sed -i 's/hostname/'"${HOSTNAME,,}"'/' /etc/nginx/sites-available/cantata
             sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /etc/php/php.ini
             sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /etc/php/php.ini
             sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /usr/lib/systemd/system/nginx.service
             ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
+            ln -s /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
             chmod 644 /etc/nginx/sites-enabled/rompr
+            chmod 644 /etc/nginx/sites-enabled/cantata
         fi
         ### Start mpd.. etc. service
         sed -i 's/'"$isocpu"'//' /etc/default/grub
