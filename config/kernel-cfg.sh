@@ -71,12 +71,18 @@ case $WK in
         mkgrub
         ;;
     F)
-        num=$(getconf _NPROCESSORS_ONLN)
-        cmd="cat /proc/interrupts | grep tick | awk '{print \$${num}}'"
-        dialog --stdout --title "ArchQ $1" --infobox "\n\n    Wait for 10 seconds..." 7 35
-        t1=$(eval $cmd); sleep 10; t2=$(eval $cmd)
-        [ -f /usr/bin/python ] && count=$(python -c "print(round(($t2-$t1)/10000.0),1)" | sed 's/ /./') || \
-        count=$(expr $t2 / 10000 - $t1 / 10000)
-        dialog --stdout --title "ArchQ $1" --msgbox "\nKernel working frequency: $count" 7 35; clear
+        # dialog --stdout --title "ArchQ $1" --infobox "\n\n    Wait for 10 seconds..." 7 35[]
+        cpus=$(getconf _NPROCESSORS_ONLN)
+        l1=$(cat /proc/interrupts | grep tick); sleep 10; l2=$(cat /proc/interrupts | grep tick)
+        count='\n'
+        for (( i=2; i<=$cpus+1; i++ ))
+        do
+            t1=$(echo $l1 | grep tick | cut -d ' ' -f $i)
+            t2=$(echo $l2 | grep tick | cut -d ' ' -f $i)
+            count+='Core'$(expr $i - 1)': '
+            [ -f /usr/bin/python ] && count+=$(python -c "print(round(($t2-$t1)/10000.0),1)" | sed 's/ /./')'\n' \
+                                || count+=$(expr $t2 / 10000 - $t1 / 10000)'\n'
+        done
+        dialog --stdout --title "ArchQ $1" --msgbox "\nKernel working frequency: $count" $(expr $cpus + 6) 35; clear
         ;;
 esac
