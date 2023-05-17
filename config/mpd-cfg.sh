@@ -31,6 +31,8 @@ client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 R 
 clear
 case $client in
     R)
+        rm /etc/nginx/sites-enabled/cantata
+        ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
         pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd php-fpm
         systemctl enable --now mpd nginx php-fpm avahi-daemon
         ;;
@@ -45,6 +47,8 @@ case $client in
         pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd php-fpm
         ;;
     C)  
+        rm /etc/nginx/sites-enabled/rompr
+        ln -s /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
         pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd php-fpm
         systemctl enable --now mpd nginx
         ;;
