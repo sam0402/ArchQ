@@ -317,7 +317,6 @@ EOF
         sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /mnt/etc/php/php.ini
         sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /mnt/usr/lib/systemd/system/nginx.service
         arch-chroot /mnt ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
-        arch-chroot /mnt ln -s /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
         arch-chroot /mnt chmod 644 /etc/nginx/sites-enabled/rompr
 ### Start mpd.. etc. service
         arch-chroot /mnt systemctl enable mpd nginx php-fpm avahi-daemon
