@@ -27,11 +27,11 @@ vol_ctrl(){
     sed -i 's/mixer_type.*"/mixer_type\t"'"$volume"'"/' $2
 }
 ### MPD client select
-client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 R "RompR :6660" M "myMPD :80" N "Ncmpcpp curses" U "Multi user") || exit 1
+client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 R "RompR :6660" M "myMPD :80" C Cantata N "Ncmpcpp curses" U "Multi user") || exit 1
 clear
 case $client in
     R)
-        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd
+        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd php-fpm
         systemctl enable --now mpd nginx php-fpm avahi-daemon
         ;;
     M)
@@ -42,7 +42,11 @@ case $client in
     N)
         pacman -Q ncmpcpp >/dev/null 2>&1 || (pacman -Sy --noconfirm archlinux-keyring ncmpcpp; yes | pacman -Scc >/dev/null 2>&1)
         systemctl disable --now nginx php-fpm avahi-daemon
-        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd
+        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd php-fpm
+        ;;
+    C)  
+        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd php-fpm
+        systemctl enable --now mpd nginx
         ;;
     U)
         if [[ ! -d /usr/share/mpd ]]; then
