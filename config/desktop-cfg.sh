@@ -10,7 +10,7 @@ if ! pacman -Q lxdm >/dev/null 2>&1; then
     pacman -Sy archlinux-keyring
     pacman -Scc --noconfirm
     pacman -Syy --noconfirm
-    pacman -S --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata
+    pacman -S --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata falkon
     mkdir -p /home/$user/.vnc
     echo "session=lxqt" >/home/$user/.vnc/config
     echo "geometry=1280x960" >>/home/$user/.vnc/config
