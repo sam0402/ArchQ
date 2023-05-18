@@ -79,7 +79,7 @@ case $WK in
         do
             t1=$(echo $l1 | grep tick | cut -d ' ' -f $i)
             t2=$(echo $l2 | grep tick | cut -d ' ' -f $i)
-            count+='Core'$(expr $i - 1)': '
+            count+='Core'$(expr $i - 2)': '
             [ -f /usr/bin/python ] && count+=$(python -c "print(round(($t2-$t1)/10000.0),1)" | sed 's/ /./')'\n' \
                                 || count+=$(expr $t2 / 10000 - $t1 / 10000)'\n'
         done
