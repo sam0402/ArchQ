@@ -3,7 +3,7 @@ current=$(cpupower frequency-info | grep "current CPU" | awk '{print $4$5}')
 available=$(cpupower frequency-info | grep 'steps' | cut -d' ' -f7- | sed 's/ G/G/g;s/ M/M/g')
 
 if [[ $current =~ "Unableto" ]]; then
-    dialog --stdout --title "ArchQ $1" --msgbox "\n  Not Available to set CPU frequency." 7 45
+    dialog --stdout --title "ArchQ $1" --msgbox "\n  Intel Speedstep setting is off, \n  not available to set CPU frequency." 8 45
 else
     # fan=$(sensors | grep 'RPM' | awk '{print "\n\n"$1,$2,$3,$4}')
     msg="Frequency available:\n$available"
