@@ -27,7 +27,7 @@ vol_ctrl(){
     sed -i 's/mixer_type.*"/mixer_type\t"'"$volume"'"/' $2
 }
 ### MPD client select
-client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 R "RompR :6660" M "myMPD :80" C Cantata N "Ncmpcpp curses" U "Multi user") || exit 1
+client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 R "RompR :6660" M "myMPD :80" C "Cantata :8080" N "Ncmpcpp curses" U "Multi user") || exit 1
 clear
 case $client in
     R)
