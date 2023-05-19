@@ -133,11 +133,13 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 [ -f /mnt/boot/${cpu}-ucode.img ] || pacstrap /mnt ${cpu}-ucode
 
 echo -e "\n${c_red_b}Download Arch Linux package and install ...${c_gray}\n"
-[ $desktop = D ] && lxd="lxde lxpanel"
-[ $desktop = Q ] && lxd="lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
+# [ $desktop = D ] && lxd="lxde lxpanel"
+# [ $desktop = Q ] && lxd="lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm iwd \
-        lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool falkon ${lxd}
+        lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool falkon \
+        lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc \
+        lxde lxpanel
 
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
