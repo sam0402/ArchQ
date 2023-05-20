@@ -239,7 +239,7 @@ ethers=\$(ip -o link show | awk '{print \$2,\$9}' | grep '^en' | sed 's/://' | a
 npath='/etc/systemd/network/'
 if [ ! -f "\$npath""10-\${ethers}.network" ]; then
     cd \$npath
-    source=\$(ls 10-*.network | head -n 1)
+    source=\$(ls 10-en*.network | head -n 1)
     cp \$source 10-\${ethers}.network
     sed -i 's/Name=.*/Name='"\$ethers"'/' 10-\${ethers}.network
     systemctl restart systemd-networkd
