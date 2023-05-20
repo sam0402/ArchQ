@@ -6,29 +6,13 @@ desktop=$(dialog --stdout --title "ArchQ" --menu "Desktop & VNC :5901" 7 0 0 D L
 clear
 
 cat /etc/locale.conf >/home/$user/.xinitrc
-if ! pacman -Q lxdm >/dev/null 2>&1; then
-    pacman -Sy archlinux-keyring
-    pacman -Scc --noconfirm
-    pacman -Syy --noconfirm
-    pacman -S --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata falkon
-    mkdir -p /home/$user/.vnc
-    echo "session=lxqt" >/home/$user/.vnc/config
-    echo "geometry=1280x960" >>/home/$user/.vnc/config
-    ker=evl; kver=5.18.1-1
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.aa
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ab
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.xz.ac
-    cat /root/linux-evl-${kver}-x86_64.pkg.tar.xz.* >/root/linux-${ker}-${kver}-x86_64.pkg.tar.xz
-    rm -f /root/linux-${ker}-${kver}-x86_64.pkg.tar.xz.a?
-    pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.xz
-fi
 case $desktop in
     D)
         if ! pacman -Q lxsession >/dev/null 2>&1; then
-            pacman -S --noconfirm lxde lxpanel
+            pacman -Sy --noconfirm lxde lxpanel
             pacman -R --noconfirm lxmusic
         fi
-        sed -i 's;^# session=/usr/bin/startlx??;session=/usr/bin/startlxde;g' /etc/lxdm/lxdm.conf
+        sed -i 's;^session=.*;session=/usr/bin/startlxde;g' /etc/lxdm/lxdm.conf
         sed -i 's;^session=.*;session=LXDE;g' /home/$user/.vnc/config
         ln -sf /usr/bin/lxterminal /usr/bin/xterm
         systemctl enable --now lxdm vncserver@:1.service
@@ -36,9 +20,9 @@ case $desktop in
         ;;
     Q)
         if ! pacman -Q lxqt-session >/dev/null 2>&1; then
-            pacman -S --noconfirm lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc
+            pacman -Sy --noconfirm lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc
         fi
-        sed -i 's;^# session=/usr/bin/startlx??;session=/usr/bin/startlxqt;g' /etc/lxdm/lxdm.conf
+        sed -i 's;^session=.*;session=/usr/bin/startlxqt;g' /etc/lxdm/lxdm.conf
         sed -i 's;^session=.*;session=lxqt;g' /home/$user/.vnc/config
         ln -sf /usr/bin/qterminal /usr/bin/xterm
         systemctl enable --now lxdm vncserver@:1.service
