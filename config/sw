@@ -17,12 +17,12 @@ case $1 in
 		;;
 	mpd)
 		serv=mpd
-		service="mpd blissify"
+		service="mpd mpd-ramdisk"
 		;;
 	mtroom)
 		# user="--user"
 		serv="owntone"
-		service="avahi-daemon mpd owntone blissify"
+		service="avahi-daemon mpd mpd-ramdisk owntone"
 		;;
 	rompr)
 		serv=mpd
@@ -46,16 +46,14 @@ if [[ -n $user ]]; then
 	[[ $(systemctl is-active --user $serv) == active ]] && systemctl stop --user $service || systemctl start --user $service
 else
 	if [[ $(systemctl is-active $serv) == active ]]; then 
-		STATUS='off'
 		sudo systemctl stop $service
 	else
-		STATUS='on'
 		sudo systemctl start $service
 		if systemctl is-active mpd >/dev/null; then
-			ps H -q `pidof -s mpd` -o 'tid,cls' | grep FF | awk '{print $1}' | while read PROC; do chrt -p 95 $PROC; done
+			chrt -p 93 $(ps H -q `pidof -s mpd` -o tid,cls | grep FF | awk '{print $1}')
+			chrt -p 95 $(ps H -q `pidof -s mpd` -o tid,comm | grep ArchQ | awk '{print $1}')
 			chrt -fp 85 `pgrep mpd`
 		fi
-		# chrt -fp 90 `pgrep ksoftirqd/$(ps -eLo comm,cpuid| grep "mpd" | awk '{print $2}')`
 	fi
 fi
 
