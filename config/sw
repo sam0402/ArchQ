@@ -52,7 +52,7 @@ else
 		STATUS='on'
 		sudo systemctl start $service
 		if systemctl is-active mpd >/dev/null; then
-			ps H -q `pidof -s mpd` -o 'tid,cls' | grep FF | awk '{print $1}' | while read PROC; do chrt -fp 95 $PROC; done
+			ps H -q `pidof -s mpd` -o 'tid,cls' | grep FF | awk '{print $1}' | while read PROC; do chrt -p 95 $PROC; done
 			chrt -fp 85 `pgrep mpd`
 		fi
 		# chrt -fp 90 `pgrep ksoftirqd/$(ps -eLo comm,cpuid| grep "mpd" | awk '{print $2}')`
