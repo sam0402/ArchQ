@@ -362,11 +362,11 @@ cat >>/mnt/etc/rc.local <<EOF
 # ethernet auto detect
 while read ether; do
     npath='/etc/systemd/network/'
-    if [ ! -f "\$npath""10-\${ethers}.network" ]; then
+    if [ ! -f "\$npath""10-\${ether}.network" ]; then
         cd \$npath
         source=\$(ls 10-en*.network | head -n 1)
-        cp \$source 10-\${ethers}.network
-        sed -i 's/Name=.*/Name='"\$ethers"'/' 10-\${ethers}.network
+        cp \$source 10-\${ether}.network
+        sed -i 's/Name=.*/Name='"\$ether"'/' 10-\${ether}.network
         systemctl restart systemd-networkd
         cd -
     fi
