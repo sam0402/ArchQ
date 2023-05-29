@@ -133,6 +133,7 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 [ -f /mnt/boot/${cpu}-ucode.img ] || pacstrap /mnt ${cpu}-ucode
 
 echo -e "\n${c_red_b}Download Arch Linux package and install ...${c_gray}\n"
+lxd=''
 [ $desktop = D ] && lxd="lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool falkon lxde lxpanel"
 [ $desktop = Q ] && lxd="lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool falkon lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
