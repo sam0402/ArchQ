@@ -9,7 +9,7 @@ cat /etc/locale.conf >/home/$user/.xinitrc
 case $desktop in
     D)
         if ! pacman -Q lxsession >/dev/null 2>&1; then
-            pacman -Sy --noconfirm lxde lxpanel
+            pacman -Sy --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool falkon lxde lxpanel
             pacman -R --noconfirm lxmusic
         fi
         sed -i 's;^session=.*;session=/usr/bin/startlxde;g' /etc/lxdm/lxdm.conf
@@ -20,7 +20,9 @@ case $desktop in
         ;;
     Q)
         if ! pacman -Q lxqt-session >/dev/null 2>&1; then
-            pacman -Sy --noconfirm lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc
+            pacman -Sy --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool falkon \
+                lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc
+            pacman -R --noconfirm lxqt-powermanagement
         fi
         sed -i 's;^session=.*;session=/usr/bin/startlxqt;g' /etc/lxdm/lxdm.conf
         sed -i 's;^session=.*;session=lxqt;g' /home/$user/.vnc/config
