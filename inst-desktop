@@ -272,7 +272,7 @@ EOF
 sed -i 's/#Storage=auto/Storage=none/' /mnt/etc/systemd/journald.conf
 sed -i 's/wait-online/wait-online --any/' /mnt/usr/lib/systemd/system/systemd-networkd-wait-online.service
 # Desktop auto login
-sed -i 's/# autologin=.*/autologin='"$user"'/;s/# timeout=.*/timeout=0/' /mnt/etc/lxdm/lxdm.conf
+[ $desktop = V ] || sed -i 's/# autologin=.*/autologin='"$user"'/;s/# timeout=.*/timeout=0/' /mnt/etc/lxdm/lxdm.conf
 ### install config file
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/timezone.sh >/mnt/usr/bin/timezone.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/ether-cfg.sh >/mnt/usr/bin/ether-cfg.sh
