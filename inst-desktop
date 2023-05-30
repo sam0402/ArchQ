@@ -72,7 +72,7 @@ ifgw=$(echo $ifconfig | cut -d' ' -f3)
 ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
-desktop=$(dialog --stdout --title "ArchQ Desktop" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt N Disable) || exit 1
+desktop=$(dialog --stdout --title "ArchQ Desktop" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt N None) || exit 1
 
 ### Set up logging ###
 exec 1> >(tee "stdout.log")
