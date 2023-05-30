@@ -71,7 +71,7 @@ case $WK in
         mkgrub
         ;;
     F)
-        # dialog --stdout --title "ArchQ $1" --infobox "\n\n    Wait for 10 seconds..." 7 35[]
+        dialog --stdout --title "ArchQ $1" --infobox "\n\n    Wait for 10 seconds..." 7 35
         cpus=$(getconf _NPROCESSORS_ONLN)
         l1=$(cat /proc/interrupts | grep tick); sleep 10; l2=$(cat /proc/interrupts | grep tick)
         count='\n'
