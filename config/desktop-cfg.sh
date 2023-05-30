@@ -9,7 +9,7 @@ cat /etc/locale.conf >/home/$user/.xinitrc
 case $desktop in
     D)
         if ! pacman -Q lxsession >/dev/null 2>&1; then
-            pacman -Sy --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool falkon lxde lxpanel
+            pacman -Sy --noconfirm lxdm noto-fonts-cjk midori cantata fcitx5-im fcitx5-configtool falkon lxde lxpanel
             pacman -R --noconfirm lxmusic
             sed -i 's/# autologin=.*/autologin='"$user"'/;s/# timeout=.*/timeout=0/' /etc/lxdm/lxdm.conf
         fi
@@ -21,7 +21,7 @@ case $desktop in
         ;;
     Q)
         if ! pacman -Q lxqt-session >/dev/null 2>&1; then
-            pacman -Sy --noconfirm lxdm noto-fonts-cjk tigervnc midori cantata fcitx5-im fcitx5-configtool falkon \
+            pacman -Sy --noconfirm lxdm noto-fonts-cjk midori cantata fcitx5-im fcitx5-configtool falkon \
                 lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc
             pacman -R --noconfirm lxqt-powermanagement
             sed -i 's/# autologin=.*/autologin='"$user"'/;s/# timeout=.*/timeout=0/' /etc/lxdm/lxdm.conf
