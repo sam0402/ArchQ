@@ -228,7 +228,8 @@ mkdir /mnt/home/$user/.vnc
 arch-chroot /mnt sh -c "echo $password | vncpasswd -f >/home/$user/.vnc/passwd"
 arch-chroot /mnt chmod 600 /home/$user/.vnc/passwd
 arch-chroot /mnt chown -R ${user}: /home/$user/.vnc
-arch-chroot /mnt systemctl enable lxdm vncserver@:1.service
+arch-chroot /mnt systemctl enable vncserver@:1.service
+[ $desktop = V ] || arch-chroot /mnt systemctl enable lxdm
 
 ### Other setting
 echo -e "\n${c_red_b}Setting service ...${c_gray}\n"
