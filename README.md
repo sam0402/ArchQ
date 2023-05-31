@@ -9,7 +9,7 @@ If the cpu is more than 2 cores, LMS and squeezelite will work at isolated cpu.
 
 
 Install step:
-1. Download the [ArchQ Linux install iso](https://drive.google.com/file/d/1eSdiw3MzZGdvhputsG9LJGnk1lhJvAst/view?usp=share_link), [mirror](https://miya.teracloud.jp/share/11d19e899ed2b3d5)
+1. Download the [ArchQ Linux install iso](https://drive.google.com/file/d/1eSdiw3MzZGdvhputsG9LJGnk1lhJvAst/view?usp=share_link), [mirror](https://miya.teracloud.jp/share/11d1f0429bbe26a2)
 
 2. Flash ISO image to USB drive by [Etcher](https://www.balena.io/etcher/?).
 
