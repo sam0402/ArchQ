@@ -31,8 +31,8 @@ SelVer()
       systemctl disable --now nqptp
       pacman -R --noconfirm nqptp-git
     fi
-    wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-${airver}-x86_64.pkg.tar.zst
-    pacman -U --noconfirm /tmp/shairport-sync-3.3.9-${airver}-x86_64.pkg.tar.zst
+    wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-4.4.1-${airver}-x86_64.pkg.tar.zst
+    pacman -U --noconfirm /tmp/shairport-sync-4.4.1-${airver}-x86_64.pkg.tar.zst
     isocpu=$(($(getconf _NPROCESSORS_ONLN)-1))
     sed -i '/Group=/iNice=-20\nAllowedCPUs='"$isocpu"'' /usr/lib/systemd/system/shairport-sync.service
     echo "Airplay $airver installed."
