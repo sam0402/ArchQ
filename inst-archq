@@ -268,8 +268,8 @@ arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 case $server in
     L)
         echo -e "\n${c_red_b}Install Logitech Media Server ...${c_gray}\n"
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
-        arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.2.0-2-x86_64.pkg.tar.xz
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
+        arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
         [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         [ $cpus -ge 6 ] && [[ $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/logitechmediaserver.service
@@ -287,14 +287,14 @@ case $server in
         ;;
     M)
         echo -e "\n${c_red_b}Install MPD ...${c_gray}\n"
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.11-4-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.12-12-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.5-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/blissify-0.3.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-ramdisk-0.5-1-any.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.11-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-2.00-1-any.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.5-1-x86_64.pkg.tar.zst /root/blissify-0.3.5-1-x86_64.pkg.tar.zst /root/mpd-ramdisk-0.5-1-any.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.12-12-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-2.00-1-any.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.6-1-x86_64.pkg.tar.zst /root/blissify-0.3.5-1-x86_64.pkg.tar.zst /root/mpd-ramdisk-0.5-1-any.pkg.tar.zst
 
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
@@ -334,8 +334,8 @@ if [[ $player =~ S ]]; then
 fi
 if [[ $player =~ A ]]; then
     echo -e "\n${c_red_b}Install Airplay ...${c_gray}\n"
-    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
-    arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
+    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-4.4.1-1-x86_64.pkg.tar.zst
+    arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-4.4.1-1-x86_64.pkg.tar.zst
     [[ -n "$scard" ]] && sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/' /mnt/etc/shairport-sync.conf
     sed -i '/Group=/iNice=-20\nAllowedCPUs='\"$iso_1st\"'' /mnt/usr/lib/systemd/system/shairport-sync.service
     arch-chroot /mnt systemctl enable shairport-sync
