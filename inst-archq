@@ -418,7 +418,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh 
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/bcache-cfg.sh >/mnt/usr/bin/bcache-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/datacache-cfg.sh >/mnt/usr/bin/datacache-cfg.sh
-curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/zerowipe.sh >/mnt/usr/bin/hddpower-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/hddpower-cfg.sh >/mnt/usr/bin/hddpower-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/zerowipe.sh >/mnt/usr/bin/zerowipe.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
