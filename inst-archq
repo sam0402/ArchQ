@@ -305,6 +305,7 @@ if systemctl is-active mpd >/dev/null; then
     chrt -p 95 \$(ps H -q \$(pidof -s mpd) -o tid,comm | grep ArchQ | awk '{print \$1}')
     chrt -fp 85 \$(pgrep mpd)
 fi
+#hdparm -S 24 /dev/sda
 exit 0
 EOF
 ### Setup RompR
