@@ -244,6 +244,7 @@ arch-chroot /mnt systemctl enable systemd-networkd
 echo -e "\n${c_red_b}Install ArchQ Kernel ...${c_gray}\n"
 ker=Q352
 [ $cpu = amd ] && ker=Q308AMD
+[ $cpu = amd ] && kver='6.0.1-1'
 [ $server = N ] && ker=${ker}w
 [ $fmt = U ] && ker=Q352WU
 [ $fmt = U ] && kver=6.1.29-12
