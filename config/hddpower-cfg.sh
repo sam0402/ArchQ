@@ -18,4 +18,5 @@ for i in $options
 do  
     echo '[ "$1" = "poweroff" ] && /usr/bin/hdparm -f -F -Y /dev/disk/by-id/'${arrDev[$i]} >>$file
 done
+echo 'exit 0' >>$file
 chmod +x $file
