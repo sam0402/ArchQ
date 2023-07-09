@@ -12,7 +12,7 @@ pacman -Q mpd-ffmpeg >/dev/null 2>&1 && MENU+='D MPD '
 pacman -Q squeezelite >/dev/null 2>&1 && MENU+='S Squeezelite '
 pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='A Airplay '
 if pacman -Q ffmpeg >/dev/null 2>&1; then
-    [[ $(pacman -Q ffmpeg) != 'ffmpeg 3:6.0-5' ]] || [[ -d '/opt/RoonServer' ]] && MENU+='F FFmpeg '
+    [[ $(pacman -Q ffmpeg) != 'ffmpeg 2:6.0-5' ]] || [[ -d '/opt/RoonServer' ]] && MENU+='F FFmpeg '
 fi
 
 uname -r | grep -q evl && MENU2='X Desktop C "CPU frequency" T Timezone ' \
