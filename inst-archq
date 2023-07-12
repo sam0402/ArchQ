@@ -12,6 +12,7 @@ c_red=$'\e[1;33m'
 c_white=$'\e[m'
 c_white_b=$'\e[1;37m'
 c_gray=$'\e[0;37m'
+
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog scrub
 desk=$(dialog --stdout --title "ArchQ" --menu "Install for" 7 0 0 M Music D Desktop) || exit 1; clear
 [ $desk = D ] && curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/inst-desktop | bash
@@ -287,13 +288,13 @@ case $server in
         ;;
     M)
         echo -e "\n${c_red_b}Install MPD ...${c_gray}\n"
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.12-12-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.13-4-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/blissify-0.3.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-ramdisk-0.5-1-any.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.12-12-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-2.00-1-any.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.13-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-2.00-1-any.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.6-1-x86_64.pkg.tar.zst /root/blissify-0.3.5-1-x86_64.pkg.tar.zst /root/mpd-ramdisk-0.5-1-any.pkg.tar.zst
 
 ### setup mpd
@@ -444,6 +445,7 @@ alias reboot='sudo systemctl reboot'
 alias config='sudo config.sh'
 alias qboot='sudo qboot'
 alias sw='sudo sw'
+alias status='systemctl status'
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
 
@@ -458,6 +460,7 @@ alias grep='grep --color=auto'
 alias ll='command ls -l --color=auto -v'
 alias ls='command ls --color=auto -v'
 alias config='config.sh'
+alias status='systemctl status'
 EOF
 # echo 'server-cfg.sh' >/mnt/root/.bash_profile
 # echo 'rm /root/.bash_profile' >>/mnt/root/.bash_profile
