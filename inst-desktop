@@ -138,7 +138,7 @@ lxd=''
 [ $desktop = Q ] && lxd="lxdm noto-fonts-cjk midori cantata fcitx5-im fcitx5-configtool falkon lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm iwd \
-        tigervnc upplay xf86-video-fbdev ${lxd}
+        tigervnc upplay xf86-video-fbdev audacious deadbeef-static ${lxd}
 [ $desktop = D ] && arch-chroot /mnt pacman -R --noconfirm lxmusic
 [ $desktop = Q ] && arch-chroot /mnt pacman -R --noconfirm lxqt-powermanagement
 
@@ -194,8 +194,7 @@ fi
     arch-chroot /mnt systemctl enable systemd-networkd
 
 ### Kernel
-echo .......................
-echo Install Kernel
+echo -e "\n${c_red_b}Install ArchQ Kernel ...${c_gray}\n"
 ker=evl; kver='6.1.29-12'
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
