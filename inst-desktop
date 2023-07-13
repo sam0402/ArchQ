@@ -166,6 +166,7 @@ echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
 arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime
 [ $lang = J ] && arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
+echo "root:$password" | chpasswd
 # echo "$user:$password" | chpasswd --root /mnt
 arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
 # echo "root:$password" | chpasswd --root /mnt
