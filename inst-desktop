@@ -138,7 +138,7 @@ lxd=''
 [ $desktop = Q ] && lxd="lxdm noto-fonts-cjk midori cantata fcitx5-im fcitx5-configtool falkon lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm iwd \
-        tigervnc upplay xf86-video-fbdev ${lxd}
+        tigervnc upplay xf86-video-fbdev audacious deadbeef-static ${lxd}
 [ $desktop = D ] && arch-chroot /mnt pacman -R --noconfirm lxmusic
 [ $desktop = Q ] && arch-chroot /mnt pacman -R --noconfirm lxqt-powermanagement
 
