@@ -1,7 +1,7 @@
 #!/bin/bash
 # WARNING: this script will destroy data on the selected disk.
 # This script can be run by executing the following:
-#   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/inst-archq | bash
+#   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/inst-compile | bash
 kver='6.0.1-12'
 set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
@@ -14,8 +14,6 @@ c_white_b=$'\e[1;37m'
 c_gray=$'\e[0;37m'
 
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog scrub
-desk=$(dialog --stdout --title "ArchQ" --menu "Install for" 7 0 0 M Music D Desktop) || exit 1; clear
-[ $desk = D ] && curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/inst-desktop | bash
 ### Get infomation from user ###
 password(){
     password=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password" 0 0) || exit 1; clear
@@ -29,56 +27,22 @@ password(){
         password
     fi
 }
-
-hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname" 0 0) || exit 1; clear
-if [ -z "$hostname" ];then
-    dialog --stdout --title "ArchQ" --pause "\n Hostname cannot be empty.\n\n Default will be 'ArchQ'." 12 0 3 || exit 1; clear
-hostname=ArchQ
-    hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname again" 0 0) || exit 1; clear
-fi
-
-user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1; clear
-if [ -z "$user" ];then
-    dialog --stdout --title "ArchQ" --pause "\n Username cannot be empty.\n\n Default will be 'archq'." 12 0 3 || exit 1; clear
-user=archq
-    user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username again" 0 0) || exit 1; clear
-fi
+hostname=Compile
+user=sam
 password
-lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1; clear
+lang=E
 devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
-fmt=$(dialog --stdout --title "ArchQ" --menu "Format device ${device}" 7 0 0 E Entire P Partition U "USB Storage") || exit 1; clear
-if [ $fmt = P ]; then
-    partlst='dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 '
-    while read line; do
-        partname=$(echo $line | awk '{print $1}')
-        partlable=$(echo $line | awk '{print substr($0,index($0,$2))}')
-        partlst+=$partname' '\"$partlable\"' '
-    done <<< $(lsblk -pln -o name,size,partlabel,fstype $device | sed -e '1d')
-    part_root=$(eval $partlst) || exit 1; clear
-    part_boot=$(lsblk -pln -o name,parttypename | grep EFI | grep $device | awk 'NR==1 {print $1}')
-fi
-
+fmt=P
 zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe disk times" 0 30 0) || exit 1; clear
-f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1; clear
+f2fs=F
 ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
 ifport=$(dialog --stdout --title "ArchQ" --menu "Select net device" 7 0 0 ${ethers}) || exit 1; clear
-ip=$(dialog --stdout --title "ArchQ" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1; clear
-if [ $ip = S ]; then
-ifmask=24; ifdns=8.8.8.8
-ifconfig=$(dialog --stdout --title "ArchQ" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
-            "Address" 1 1   ""          1 10 15 0 \
-            "Netmask" 2 1   "$ifmask"   2 10 15 0 \
-            "Gateway" 3 1   ""          3 10 15 0 \
-            "DNS"     4 1   "$ifdns"    4 10 15 0) || exit 1; clear
-ifaddr=$(echo $ifconfig | cut -d' ' -f1)
-ifmast=$(echo $ifconfig | cut -d' ' -f2)
-ifgw=$(echo $ifconfig | cut -d' ' -f3)
-ifdns=$(echo $ifconfig | cut -d' ' -f4)
-fi
-
+ip=S
+ifmask=24; ifdns=8.8.8.8; ifaddr=192.168.1.100; ifgw=192.168.1.1
 player=N
-server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon N None) || exit 1; clear
+server=X
+# server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon N None) || exit 1; clear
 case $server in
     L)
         player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
@@ -219,7 +183,7 @@ arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
 # echo "root:$password" | chpasswd --root /mnt
 arch-chroot /mnt sh -c "echo root:$password | chpasswd"
 arch-chroot /mnt mkinitcpio -p linux
-arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --removable --bootloader-id=$hostname
+# arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --removable --bootloader-id=$hostname
 arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
 
 echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
@@ -243,9 +207,8 @@ arch-chroot /mnt systemctl enable systemd-networkd
 
 ### Kernel
 echo -e "\n${c_red_b}Install ArchQ Kernel ...${c_gray}\n"
-ker=Q352
+ker=Qrip
 [ $cpu = amd ] && ker=Q308AMD
-[ $cpu = amd ] && kver='6.0.1-1'
 [ $server = N ] && ker=${ker}w
 [ $fmt = U ] && ker=Q352WU
 [ $fmt = U ] && kver=6.1.29-12
@@ -263,7 +226,7 @@ isocpu=''
 [ $cpus -ge 4 ] && [[ $server = L || $player =~ S ]] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
 [ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
 sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /mnt/etc/default/grub
-arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg_c
 
 ## server
 case $server in
@@ -306,8 +269,6 @@ if systemctl is-active mpd >/dev/null; then
     chrt -p 95 \$(ps H -q \$(pidof -s mpd) -o tid,comm | grep ArchQ | awk '{print \$1}')
     chrt -fp 85 \$(pgrep mpd)
 fi
-# Set the standby timeout for HDD, the values specify multiples of 5 seconds.
-#hdparm -S 24 /dev/sda
 exit 0
 EOF
 ### Setup RompR
@@ -446,6 +407,7 @@ alias config='sudo config.sh'
 alias qboot='sudo qboot'
 alias sw='sudo sw'
 alias status='systemctl status'
+alias mvol='function _f() { mpd-alsavol.py --set "\$1"; mpd-alsavol.py --set "$1"; } ; _f'
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
 
@@ -461,6 +423,7 @@ alias ll='command ls -l --color=auto -v'
 alias ls='command ls --color=auto -v'
 alias config='config.sh'
 alias status='systemctl status'
+alias mvol='function _f() { mpd-alsavol.py --set "\$1"; mpd-alsavol.py --set "$1"; } ; _f'
 EOF
 # echo 'server-cfg.sh' >/mnt/root/.bash_profile
 # echo 'rm /root/.bash_profile' >>/mnt/root/.bash_profile
