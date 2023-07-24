@@ -8,12 +8,12 @@ if [ $WK = A ]; then
     options=$(dialog --stdout \
         --title "Add SMB/CIFS mount point" \
         --ok-label "Ok" \
-        --form "Mount setting. Blank fills with <null>" 0 42 0 \
-        "Mount point /mnt/" 1 1 ""                  1 18 42 0 \
-        "Share name"        2 1 "//192.168.1.x/share"    2 18 42 0 \
-        "Username"          3 1 "<null>"                 3 18 42 0 \
-        "Password"          4 1 "<null>"                 4 18 42 0 \
-        "Options"           5 1 "ro,iocharset=utf8" 5 18 42 0) || exit 1; clear
+        --form "Mount setting. Blank fills with <null>" 0 45 0 \
+        "Mount point /mnt/" 1 1 ""                  1 18 45 0 \
+        "Share name"        2 1 "//192.168.1.x/share"    2 18 45 0 \
+        "Username"          3 1 "<null>"                 3 18 45 0 \
+        "Password"          4 1 "<null>"                 4 18 45 0 \
+        "Options"           5 1 "vers=3.0,ro,iocharset=utf8" 5 18 45 0) || exit 1; clear
 
     MP=$(echo $options | cut -d ' ' -f 1)
     SN=$(echo $options | cut -d ' ' -f 2)
@@ -23,6 +23,8 @@ if [ $WK = A ]; then
     [ $UN = '<null>' ] && UN=''
     [ $PW = '<null>' ] && PW=''
     echo "${SN} /mnt/$MP cifs username=$UN,password=$PW,_netdev,nofail,file_mode=0644,dir_mode=0755,$OP 0 0" >>$config
+    systemctl daemon-reload
+    mount -m /mnt/$MP && echo "Add $SN to /mnt/$MP mount point and mounting."
 elif [ $WK = D ]; then
     n=1; MENU=''
     while read line; do
@@ -56,12 +58,12 @@ else
             options=$(dialog --stdout \
                     --title "SMB/CIFS mount point" \
                     --ok-label "Ok" \
-                    --form "Mount setting. Blank fills with <null>" 0 42 0 \
-                "Mount Point /mnt/" 1 1   "$MPs"        1 18 42 0 \
-                "Share Name"        2 1   "$SNs"        2 18 42 0 \
-                "Username"          3 1   "$UNs"        3 18 42 0 \
-                "Password"          4 1   "$PWs"        4 18 42 0 \
-                "Options"           5 1   "$OPs"        5 18 42 0) || exit 1; clear
+                    --form "Mount setting. Blank fills with <null>" 0 45 0 \
+                "Mount Point /mnt/" 1 1   "$MPs"        1 18 45 0 \
+                "Share Name"        2 1   "$SNs"        2 18 45 0 \
+                "Username"          3 1   "$UNs"        3 18 45 0 \
+                "Password"          4 1   "$PWs"        4 18 45 0 \
+                "Options"           5 1   "$OPs"        5 18 45 0) || exit 1; clear
 
             MP=$(echo $options | cut -d ' ' -f 1)
             SN=$(echo $options | cut -d ' ' -f 2)
