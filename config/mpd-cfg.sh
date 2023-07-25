@@ -166,7 +166,7 @@ options=$(dialog --stdout \
 
 beffer=$(echo $options | awk '//{print $1 }')
 buftime=$(echo $options | awk '//{print $2 }')
-pertime=$(expr $buftime / 4)
+pertime=$(expr $buftime / 6)
 mdir=$(echo $echo $options | awk '//{print $4}' | sed 's"/"\\\/"g')
 ## Set ramdisk
 rd_GB=$(echo $options | awk '//{print $3 }')
