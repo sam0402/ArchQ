@@ -150,7 +150,7 @@ fi
 ### Buffer, RAMDISK & Music Directory 
 mdir=$(grep 'music_directory' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 buffer=$(grep 'audio_buffer_size' $config | cut -d'"' -f2 | cut -d'/' -f3-)
-buftime=$(grep 'buffer_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
+pertime=$(grep 'period_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 ## Ramdisk 
 ramdisk=$(grep 'rdsize=' /usr/bin/mpd-rdcheck.sh | awk -F'=' '{print $2}')
 [[ $(systemctl is-active mpd-ramdisk) == 'inactive' ]] && rd_GB=0 || rd_GB=$(python -c "print(round($ramdisk/1048576,1))")
@@ -160,13 +160,13 @@ options=$(dialog --stdout \
     --ok-label "Ok" \
     --form "Buffer, Ramdisk & Directory" 0 35 0 \
     "Audio Buffer"      1 1 $buffer  1 17 35 0 \
-    "ALSA Buffer(μs)"   2 1 $buftime 2 17 35 0 \
-    "Ramdisk(GB)"      3 1 $rd_GB   3 17 35 0 \
+    "Period Time(μs)"   2 1 $pertime 2 17 35 0 \
+    "Ramdisk(GB)"       3 1 $rd_GB   3 17 35 0 \
     "Music Dir  /mnt/"  4 1 $mdir    4 17 35 0 ) || exit 1; clear
 
 beffer=$(echo $options | awk '//{print $1 }')
-buftime=$(echo $options | awk '//{print $2 }')
-pertime=$(expr $buftime / 6)
+pertime=$(echo $options | awk '//{print $2 }')
+buftime=$(expr $pertime * 6)
 mdir=$(echo $echo $options | awk '//{print $4}' | sed 's"/"\\\/"g')
 ## Set ramdisk
 rd_GB=$(echo $options | awk '//{print $3 }')
