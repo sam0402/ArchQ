@@ -399,6 +399,9 @@ EOF
 # cat >/mnt/etc/udev/rules.d/69-hdparm.rules <<EOF
 # ACTION=="add|change", KERNEL=="sd[a-z]", ATTRS{queue/rotational}=="1", RUN+="/usr/bin/hdparm -a 0 -A 0 /dev/%k"
 # EOF
+curl -sL https://raw.githubusercontent.com/bb-qq/r8152/master/50-usb-realtek-net.rules >/mnt/etc/udev/rules.d/50-usb-realtek-net.rules
+# hot plug
+#curl -sL https://raw.githubusercontent.com/bb-qq/r8152/master/51-usb-r8152-net.rules >/mnt/etc/udev/rules.d/51-usb-r8152-net.rules
 sed -i 's/#Storage=auto/Storage=none/' /mnt/etc/systemd/journald.conf
 sed -i 's/wait-online/wait-online --any/' /mnt/usr/lib/systemd/system/systemd-networkd-wait-online.service
 ### install config file
