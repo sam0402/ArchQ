@@ -24,7 +24,7 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cd-discid-1.4-3-x86_64.pkg.tar.zst
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A5.1.2-12-x86_64.pkg.tar.zst
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/python-beautifulsoup4-4.10.0-1-any.pkg.tar.zst
-    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/python-soupsieve-2.4.1-1-any.pkg.tar.zst
+    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/python-soupsieve-2.4-1-any.pkg.tar.zst
     pacman -U --noconfirm /tmp/*.pkg.tar.zst
     echo -e "\nInstall kernel ${c_blue_b}Qrip${c_gray} ...\n"
     mkgrub
