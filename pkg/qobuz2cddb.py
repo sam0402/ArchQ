@@ -102,7 +102,7 @@ with open(dbfile, "r+") as file:
         if num.strip() == '1':
             discount = discount + 1
         if discount == args.W:
-            file.write(f"TTITLE{num.strip()}=")
+            file.write(f"TTITLE{int(num.strip())-1}=")
             ## Multi Artists
             # if len(t_artists) != 0:
             #     file.write(f"{t_artists[i].strip()} / ")
@@ -112,13 +112,13 @@ with open(dbfile, "r+") as file:
     ### Composer
     discount = 0
     tcount = 0
-    for info, num in zip(infos[::2], nums):
+    for info, num in zip(infos[::2], nums ):
         if num.strip() == '1':
             discount = discount + 1
         if discount == args.W:
             for infoitem in info.strip().split(' - '):
                 if len(infoitem.strip().split(', ')) == 2 and infoitem.strip().split(', ')[1] == 'Composer':
-                    file.write(f"TCOMPOSER{num}={infoitem.strip().split(', ')[0].title()}\n")
+                    file.write(f"TCOMPOSER{int(num.strip())-1}={infoitem.strip().split(', ')[0].title()}\n")
             tcount = tcount + 1
 
     ### EXTEND
