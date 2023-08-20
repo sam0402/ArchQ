@@ -31,6 +31,10 @@ def album_metas(soup):
     attrs = {'class': 'album-about__item album-about__item--link'}
     return [a.text.strip() for a in soup.find_all('a', attrs=attrs)]
 
+def track_nums(soup):
+    attrs = {'class': 'track__item track__item--number'}
+    return [div.text.strip() for div in soup.find_all('div', attrs=attrs)]
+
 # def track_durations(soup):
 #     attrs = {'class': 'track__item track__item--duration'}
 #     return [span.text.strip() for span in soup.find_all('td', attrs=attrs)]
@@ -53,13 +57,16 @@ def album_cover(soup):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--workpath", default='./abcde.*')
+    parser.add_argument("-W", type=int, default='1')
     args = parser.parse_args()
+
     url = input("Enter an Qobuz album url: ")
     webpage = requests.get(url, headers=HEADERS)
     soup = BeautifulSoup(webpage.content, "lxml")
 
     album = album_title(soup)
     titles = track_titles(soup)
+    nums = track_nums(soup)
     t_artists = track_artists(soup)
     infos = track_infos(soup)
     metas = album_metas(soup)
@@ -89,22 +96,35 @@ with open(dbfile, "r+") as file:
     file.write(f"DGENRE={metas[-1].strip()}\n")
     # print(f"DGENRE={metas[4].strip()}\n")
 
-    for i, title in zip(count(0), titles):
-        file.write(f"TTITLE{i}=")
-        ## Multi Artists
-        # if len(t_artists) != 0:
-        #     file.write(f"{t_artists[i].strip()} / ")
-        file.write(f"{title.strip()}\n")
-        # print(f"TTITLE{i}={t_artist.strip()}\n")
+    ### Track Name
+    discount = 0
+    for i, title, num  in zip(count(0), titles, nums):
+        if num.strip() == '1':
+            discount = discount + 1
+        if discount == args.W:
+            file.write(f"TTITLE{num.strip()}=")
+            ## Multi Artists
+            # if len(t_artists) != 0:
+            #     file.write(f"{t_artists[i].strip()} / ")
+            file.write(f"{title.strip()}\n")
+            # print(f"TTITLE{num}={t_artist.strip()}\n")
 
-    for i, info in zip(count(0), infos[::2]):
-        for infoitem in info.strip().split(' - '):
-            if len(infoitem.strip().split(', ')) == 2 and infoitem.strip().split(', ')[1] == 'Composer':
-                file.write(f"TCOMPOSER{i}={infoitem.strip().split(', ')[0].title()}\n")
+    ### Composer
+    discount = 0
+    tcount = 0
+    for info, num in zip(infos[::2], nums):
+        if num.strip() == '1':
+            discount = discount + 1
+        if discount == args.W:
+            for infoitem in info.strip().split(' - '):
+                if len(infoitem.strip().split(', ')) == 2 and infoitem.strip().split(', ')[1] == 'Composer':
+                    file.write(f"TCOMPOSER{num}={infoitem.strip().split(', ')[0].title()}\n")
+            tcount = tcount + 1
 
+    ### EXTEND
     file.write(f"EXTD=\n")
-    for i, title in zip(count(0), titles):
-        file.write(f"EXTT{i}=\n")
+    for j in range(tcount):
+        file.write(f"EXTT{j}=\n")
     file.write(f"PLAYORDER=\n")
     # file.write(f"COMMENT={metas[len(metas)-2].strip()}\n")
 
