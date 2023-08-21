@@ -6,6 +6,9 @@ import argparse
 from bs4 import BeautifulSoup
 from itertools import count
 
+MAXIMAGE = False
+MULTI_ARTIST = False
+
 HEADERS = ({'User-Agent':
         'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36',
         'Accept-Language': 'en-US, en;q=0.5'})
@@ -74,8 +77,6 @@ if __name__ == "__main__":
     artist = album_artist(soup)
     composer = metas[len(metas)-3].strip()
     year = re.findall("\d+", track_year(soup))[-1]
-    cover_url = album_cover(soup)['src']
-
     # description = album_description(soup)
 
 dbfile=glob.glob(rf"{args.workpath}/cddbread.0")[0]
@@ -104,8 +105,8 @@ with open(dbfile, "r+") as file:
         if discount == args.W:
             file.write(f"TTITLE{int(num.strip())-1}=")
             ## Multi Artists
-            # if len(t_artists) != 0:
-            #     file.write(f"{t_artists[i].strip()} / ")
+            if MULTI_ARTIST and len(t_artists) != 0:
+                file.write(f"{t_artists[i].strip()} / ")
             file.write(f"{title.strip()}\n")
             # print(f"TTITLE{num}={t_artist.strip()}\n")
 
@@ -131,10 +132,16 @@ with open(dbfile, "r+") as file:
 file.close()
 
 ## Cover image
+image_url = album_cover(soup)['src']
+maximg_url = image_url.split('_600.jpg')[0] + '_max.jpg'
 coverfile = dbfile.split('/cddbread.0')[0] + '/cover.jpg'
-image = requests.get(cover_url)
+cover = requests.get(maximg_url)
 
-if image.status_code:
-    fp = open(coverfile, 'wb')
-    fp.write(image.content)
-    fp.close()
+fp = open(coverfile, 'wb')
+if MAXIMAGE and cover.status_code:
+    fp.write(cover.content)
+else:
+    cover = requests.get(image_url)
+    if cover.status_code:
+        fp.write(cover.content)
+fp.close()
