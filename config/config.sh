@@ -12,7 +12,7 @@ pacman -Q mpd-ffmpeg >/dev/null 2>&1 && MENU+='D MPD '
 pacman -Q squeezelite >/dev/null 2>&1 && MENU+='S Squeezelite '
 pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='A Airplay '
 if pacman -Q ffmpeg >/dev/null 2>&1; then
-    [[ $(pacman -Q ffmpeg) != 'ffmpeg 2:6.0-5' ]] || [[ -d '/opt/RoonServer' ]] && MENU+='F FFmpeg '
+    [[ $(pacman -Q ffmpeg) != 'ffmpeg 2:5.1.2-12' ]] || [[ -d '/opt/RoonServer' ]] && MENU+='F FFmpeg '
 fi
 
 uname -r | grep -q evl && MENU2='X Desktop C "CPU frequency" T Timezone ' \
@@ -44,8 +44,8 @@ case $options in
             --checklist "Use ArchQ FFmpeg" 7 0 0 \
             E Enable $ff ) || exit 1; clear
         if [ $ffen == 'E' ]; then
-            wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-3%3A6.0-5-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /root/ffmpeg-3:6.0.-5-x86_64.pkg.tar.zst
+            wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A5.1.2-12-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /root/ffmpeg-2:5.1.12-12-x86_64.pkg.tar.zst
         else
             pacman -S --noconfirm ffmpeg
         fi
