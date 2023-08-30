@@ -54,6 +54,7 @@ else
 			chrt -p 95 $(ps H -q `pidof -s mpd` -o tid,comm | grep ArchQ | awk '{print $1}')
 			chrt -fp 85 `pgrep mpd`
 		fi
+		systemctl is-active owntone >/dev/null && mpc enable Multiroom >/dev/null || mpc disable Multiroom >/dev/null
 	fi
 fi
 
