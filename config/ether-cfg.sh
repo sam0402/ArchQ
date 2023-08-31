@@ -48,7 +48,8 @@ if [ -f "/etc/systemd/network/10-${ifport}.network" ]; then
     [[ -n $MTUBytes ]] && ifmtu=$(echo $MTUBytes | cut -d',' -f2)
 fi
 
-[ $DHCP == 'true' ] && v6=on || v6=off
+grep -q 'IPv6PrivacyExtensions=true' 10-${ifport}.network && v6_o='on' || v6_o='off'
+
 if echo $ifport | grep -q en; then
     ip='D'
     ip=$(dialog --stdout --title "ArchQ $1" --menu "Select IP setting" 7 0 0 S "Static IP" D "DHCP") || exit 1; clear
@@ -72,16 +73,18 @@ if [[ $ip == S ]]; then
     ifdns=$(echo $ifconfig | cut -d' ' -f4)
     ifmtu=$(echo $ifconfig | cut -d' ' -f5)
 else
-    v6=$(dialog --stdout --title "ArchQ $1" --checklist "DHCP ${ifport}" 7 0 0 6 IPv6 $v6 ) || exit 1; clear
-    if [[ $v6 == '6' ]];then
-        DHCP='true'
-        sed -i 's/ipv6.disable=1 //g' /etc/default/grub
-    else
-        DHCP='ipv4'
-        grep -q 'ipv6.disable=1' /etc/default/grub || sed -i 's/iomem=relaxed /iomem=relaxed ipv6.disable=1 /' /etc/default/grub
-    fi
-    mkgrub
+    DHCP='ipv4'
 fi
+
+v6=$(dialog --stdout --title "ArchQ $1" --checklist "Ethernet ${ifport}" 7 0 0 6 IPv6 $v6_o ) || exit 1; clear
+if [[ $v6 == '6' ]];then
+    v6='on'; DHCP='true'
+    sed -i 's/ipv6.disable=1 //g' /etc/default/grub
+else
+    v6='off'
+    grep -q 'ipv6.disable=1' /etc/default/grub || sed -i 's/iomem=relaxed /iomem=relaxed ipv6.disable=1 /' /etc/default/grub
+fi
+[[ $v6_o != $v6 ]] && mkgrub
 
 ifmac=$(ip link show $ifport | grep ether | awk '{print $2 }')
 
@@ -96,9 +99,10 @@ if [[ $ip == S ]]; then
     echo DNS=$ifgw $ifdns >>/etc/systemd/network/10-${ifport}.network
 else
     echo DHCP=$DHCP >>/etc/systemd/network/10-${ifport}.network
-    echo "# IPv6PrivacyExtensions=true" >>/etc/systemd/network/10-${ifport}.network
 fi
+[[ $v6 == 'on' ]] && echo "IPv6PrivacyExtensions=true" >>/etc/systemd/network/10-${ifport}.network
 echo  >>/etc/systemd/network/10-${ifport}.network
+
 echo [Link] >>/etc/systemd/network/10-${ifport}.network
 echo NamePolicy=kernel database onboard slot path >>/etc/systemd/network/10-${ifport}.network
 echo MTUBytes=$ifmtu >>/etc/systemd/network/10-${ifport}.network
