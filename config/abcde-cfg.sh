@@ -28,8 +28,8 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     pacman -U --noconfirm /tmp/*.pkg.tar.zst
     echo -e "\nInstall kernel ${c_blue_b}Qrip${c_gray} ...\n"
     mkgrub
-    curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde.conf >/etc/abcde.conf
-    curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qobuz2cddb.py >/usr/bin/qobuz2cddb.py
+    curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde.conf >/etc/abcde.conf
+    curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/qobuz2cddb.py >/usr/bin/qobuz2cddb.py
     chmod +x /usr/bin/qobuz2cddb.py
 
     sed -i '$d' /etc/rc.local
