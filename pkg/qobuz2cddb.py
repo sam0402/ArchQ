@@ -58,7 +58,7 @@ if __name__ == "__main__":
     parser.add_argument("-W", type=int, default='1')
     args = parser.parse_args()
 
-    url = input("Enter an Qobuz album url: ")
+    url = input("Enter an Qobuz album URL or html file: ")
     if url[0:4] == 'http':
         webpage = requests.get(url, headers=HEADERS).content
     else:
