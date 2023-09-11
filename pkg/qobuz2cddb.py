@@ -6,17 +6,12 @@ import argparse
 from bs4 import BeautifulSoup
 from itertools import count
 
-MAXIMAGE = False
+MAXIMAGE = True
 MULTI_ARTIST = False
 
 HEADERS = ({'User-Agent':
         'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36',
         'Accept-Language': 'en-US, en;q=0.5'})
-
-def get_soup(url):
-    r = requests.get(url)
-    r.raise_for_status()
-    return BeautifulSoup(r.text, 'lxml')
 
 def track_titles(soup):
     attrs = {'itemprop': 'name'}
@@ -64,8 +59,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     url = input("Enter an Qobuz album url: ")
-    webpage = requests.get(url, headers=HEADERS)
-    soup = BeautifulSoup(webpage.content, "lxml")
+    if url[0:4] == 'http':
+        webpage = requests.get(url, headers=HEADERS).content
+    else:
+        webpage = open(url,'r').read()
+    soup = BeautifulSoup(webpage, "lxml")
 
     album = album_title(soup)
     titles = track_titles(soup)
