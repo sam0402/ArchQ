@@ -17,16 +17,16 @@ case $1 in
 		;;
 	mpd)
 		serv=mpd
-		service="mpd mpd-ramdisk"
+		pacman -Q blissify >/dev/null 2>&1 && service="mpd mpd-ramdisk blissify" || service="mpd mpd-ramdisk"
 		;;
 	mtroom)
 		# user="--user"
 		serv="owntone"
-		service="avahi-daemon mpd mpd-ramdisk owntone"
+		pacman -Q blissify >/dev/null 2>&1 && service="avahi-daemon mpd mpd-ramdisk owntone blissify" || service="avahi-daemon mpd mpd-ramdisk owntone"
 		;;
 	rompr)
 		serv=mpd
-		service="avahi-daemon mpd nginx php-fpm"
+		pacman -Q blissify >/dev/null 2>&1 && service="avahi-daemon mpd nginx php-fpm blissify" || service="avahi-daemon mpd nginx php-fpm"
 		;;
 	lms)
 		serv=logitechmediaserver
