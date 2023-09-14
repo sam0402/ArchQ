@@ -6,6 +6,10 @@ if [ -z $1 ]; then
 fi
 serv=$1
 service=$serv
+MPD='mpd '
+pacman -Q blissify >/dev/null 2>&1 && MPD+='blissify '
+pacman -Q mpd-ramdisk >/dev/null 2>&1 && MPD+='mpd-ramdisk '
+
 case $1 in
 	airplay)
 		serv=shairport-sync
@@ -17,28 +21,28 @@ case $1 in
 		;;
 	mpd)
 		serv=mpd
-		pacman -Q blissify >/dev/null 2>&1 && service="mpd mpd-ramdisk blissify" || service="mpd mpd-ramdisk"
+		service=$MPD
 		;;
 	mtroom)
 		# user="--user"
 		serv="owntone"
-		pacman -Q blissify >/dev/null 2>&1 && service="avahi-daemon mpd mpd-ramdisk owntone blissify" || service="avahi-daemon mpd mpd-ramdisk owntone"
+		service=$MPD'avahi-daemon owntone'
 		;;
 	rompr)
 		serv=mpd
-		pacman -Q blissify >/dev/null 2>&1 && service="avahi-daemon mpd nginx php-fpm blissify" || service="avahi-daemon mpd nginx php-fpm"
+		service=$MPD'avahi-daemon nginx php-fpm'
 		;;
 	lms)
 		serv=logitechmediaserver
-		service="logitechmediaserver squeezelite"
+		service='logitechmediaserver squeezelite'
 		;;
 	hqe)
 		serv=hqplayerd
-		service="hqplayerd"
+		service='hqplayerd'
 		;;
 	nna)
 		serv=networkaudio
-		service="networkaudio"
+		service='networkaudio'
 		;;
 esac
 
