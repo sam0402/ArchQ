@@ -47,4 +47,4 @@ mkgrub
 echo -n "ArchQ will boot with '${c_red_b}${options[$input]}${c_write}', reboot now [Y/n]?"
 input=''; read input
 [[ -z $input || $input = y ]] && reboot
-[[ -z $input || $input = p ]] && poweroff
+[[ $input = p ]] && poweroff
