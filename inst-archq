@@ -302,9 +302,9 @@ case $server in
         sed -i '$d' /mnt/etc/rc.local
         cat >>/mnt/etc/rc.local <<EOF
 if systemctl is-active mpd >/dev/null; then
-    chrt -p 93 \$(ps H -q \$(pidof -s mpd) -o tid,cls | grep FF | awk '{print \$1}')
-    chrt -p 95 \$(ps H -q \$(pidof -s mpd) -o tid,comm | grep ArchQ | awk '{print \$1}')
-    chrt -fp 85 \$(pgrep mpd)
+    chrt -p 93 \$(ps H -q \`pidof -s mpd\` -o tid,cls | grep FF | awk '{print \$1}')
+    chrt -p 95 \$(ps H -q \`pidof -s mpd\` -o tid,comm | grep ArchQ | awk '{print \$1}')
+    chrt -fp 85 \`pgrep mpd\`
 fi
 # Set the standby timeout for HDD, the values specify multiples of 5 seconds.
 #hdparm -S 24 /dev/sda
