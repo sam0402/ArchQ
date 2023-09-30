@@ -17,8 +17,6 @@ mkgrub(){
 }
 if ! pacman -Q abcde >/dev/null 2>&1 ; then
     echo -e "\n${c_blue_b}Install abCDe ...${c_gray}\n"
-    kver=$(pacman -Q | grep linux-Q | grep -v headers | awk 'NR==1{print $2}')
-    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde-2.9.3-6-any.pkg.tar.zst
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cdparanoia-10.2-9-x86_64.pkg.tar.zst
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cd-discid-1.4-3-x86_64.pkg.tar.zst
@@ -26,8 +24,12 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/python-beautifulsoup4-4.10.0-1-any.pkg.tar.zst
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/python-soupsieve-2.4-1-any.pkg.tar.zst
     pacman -U --noconfirm /tmp/*.pkg.tar.zst
-    echo -e "\nInstall kernel ${c_blue_b}Qrip${c_gray} ...\n"
-    mkgrub
+    if ! pacman -Q linux-Qrip >/dev/null 2>&1 ; then
+        kver=$(pacman -Q | grep linux-Q | grep -v headers | awk 'NR==1{print $2}')
+        wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
+        echo -e "\nInstall kernel ${c_blue_b}Qrip${c_gray} ...\n"
+        mkgrub
+    fi
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde.conf >/etc/abcde.conf
     curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/qobuz2cddb.py >/usr/bin/qobuz2cddb.py
     chmod +x /usr/bin/qobuz2cddb.py
@@ -98,5 +100,5 @@ sed -i 's/^#\?EJECTCD=.*/EJECTCD='"$EJECTCD"'/' $config
 sed -i 's/^#\?CLOSETRAY=.*/CLOSETRAY='"$CLOSETRAY"'/' $config
 [ $TAGS == 'y' ] && sed -i 's/^KID3CLI=".*/KID3CLI="kid3-cli"/' $config || sed -i 's/^KID3CLI=".*/KID3CLI=""/' $config
 
-[ -n "$ans" ] && read -n 1 -p "Reboot to work for abcde,(Y/n)? " ans
-[ "$ans" = 'Y' ] && reboot
+[ -n "$ans" ] && ans=$(dialog --stdout --title "abCDe" --yesno "Reboot to work for abcde?" 0 0) || exit 1; clear
+[ "$ans" ] && reboot
