@@ -464,6 +464,7 @@ alias ll='command ls -l --color=auto -v'
 alias ls='command ls --color=auto -v'
 alias config='config.sh'
 alias status='systemctl status'
+alias wipedir='function _f() { for i in {1..5}; do find "\$1" -exec scrub -Sp fillzero {} \\;; done; rm -rf "\$1"; } ; _f'
 EOF
 # echo 'server-cfg.sh' >/mnt/root/.bash_profile
 # echo 'rm /root/.bash_profile' >>/mnt/root/.bash_profile
