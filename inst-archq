@@ -448,7 +448,9 @@ alias reboot='sudo systemctl reboot'
 alias config='sudo config.sh'
 alias qboot='sudo qboot'
 alias sw='sudo sw'
+alias df='df -h'
 alias status='systemctl status'
+alias wipedir='function _f() { for i in {1..5}; do find "\$1" -exec scrub -Sp fillzero {} \\;; done; rm -rf "\$1"; } ; _f'
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
 
@@ -463,8 +465,8 @@ alias grep='grep --color=auto'
 alias ll='command ls -l --color=auto -v'
 alias ls='command ls --color=auto -v'
 alias config='config.sh'
+alias df='df -h'
 alias status='systemctl status'
-alias wipedir='function _f() { for i in {1..5}; do find "\$1" -exec scrub -Sp fillzero {} \\;; done; rm -rf "\$1"; } ; _f'
 EOF
 # echo 'server-cfg.sh' >/mnt/root/.bash_profile
 # echo 'rm /root/.bash_profile' >>/mnt/root/.bash_profile
