@@ -32,6 +32,10 @@ case $1 in
 		serv=mpd
 		service=$MPD'avahi-daemon nginx php-fpm'
 		;;
+	mympd)
+		serv=mpd
+		service=$MPD'mympd'
+		;;
 	lms)
 		serv=logitechmediaserver
 		service='logitechmediaserver squeezelite'
