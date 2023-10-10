@@ -44,7 +44,7 @@ case $1 in
 		serv=hqplayerd
 		service='hqplayerd'
 		;;
-	nna)
+	naa)
 		serv=networkaudio
 		service='networkaudio'
 		;;
