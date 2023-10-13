@@ -1,5 +1,7 @@
 #!/bin/bash
 #serv=$(echo $0 | awk -F/ '{print $NF}')
+key="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJlMjQ3OWIyNDc0ODI0ZjYwODNlOTdiOGI0MDllN2ZiMiIsImlhdCI6MTY5MzQwMzcwNSwiZXhwIjoyMDA4NzYzNzA1fQ.VsKf7iZO-nv1MWSVCm8f-8Lsah9S0T9NaqoIQLyimHY"
+
 if [ -z $1 ]; then
 	echo "Using: sw mpd, roon, lms, rompr, airplay, mtroom, hqe, naa and other service."
 	exit 1
@@ -21,7 +23,7 @@ case $1 in
 		;;
 	mpd)
 		serv=mpd
-		service=$MPD
+		service=$MPD'mpd-alsavol'
 		;;
 	mtroom)
 		# user="--user"
@@ -54,16 +56,23 @@ if [[ -n $user ]]; then
 	[[ $(systemctl is-active --user $serv) == active ]] && systemctl stop --user $service || systemctl start --user $service
 else
 	if [[ $(systemctl is-active $serv) == active ]]; then 
+		STATUS='off'
 		sudo systemctl stop $service
 	else
+		STATUS='on'
 		sudo systemctl start $service
 		if systemctl is-active mpd >/dev/null; then
-			chrt -p 93 $(ps H -q `pidof -s mpd` -o tid,cls | grep FF | awk '{print $1}')
-			chrt -p 95 $(ps H -q `pidof -s mpd` -o tid,comm | grep ArchQ | awk '{print $1}')
-			chrt -fp 85 `pgrep mpd`
+			chrt -p 93 $(ps H -q $(pidof -s mpd) -o 'tid,cls' | grep FF | awk '{print $1}')
+			mpc enable ArchQ >/dev/null 2>&1
+			chrt -p 95 $(ps H -q $(pidof -s mpd) -o 'tid,comm' | grep ArchQ | awk '{print $1}')
+			chrt -fp 85 $(pgrep mpd)
+			chrt -fp 54 $(pgrep ksoftirqd/$(ps -eLo comm,cpuid| grep "output:"|awk '{print $2}'))
 		fi
 		systemctl is-active owntone >/dev/null && mpc enable Multiroom >/dev/null || mpc disable Multiroom >/dev/null
+
 	fi
+	curl -X POST -H "Authorization: Bearer $key" -H "Content-Type: application/json" -d '{"state": "'$STATUS'"}' \
+	http://192.168.1.37:8123/api/states/switch.$1 >/dev/null 2>&1
 fi
 
 echo Service $service is $(systemctl is-active $user $serv).

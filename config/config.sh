@@ -4,7 +4,7 @@ num=$(cat /root/.update)
 git=$(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/update)
 
 temp=$(sensors | grep 'Core 0' | awk '{print $3}')
-ipaddr=$(ip -o addr | grep en | awk 'NR == 1 {print $4}')
+ipaddr=$(ip -o addr | grep en | awk '{NR == 1 print $4}')
 MENU=''
 [ $git -gt $num ] && MENU+='U Update '
 pacman -Q mpd-light >/dev/null 2>&1 && MENU+='D MPD '
@@ -16,7 +16,7 @@ if pacman -Q ffmpeg >/dev/null 2>&1; then
 fi
 
 uname -r | grep -q evl && MENU2='X Desktop C "CPU frequency" T Timezone ' \
-    || MENU2='M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P Player O Server R "abCDe ripper" G "Data cache" C "CPU frequency" Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone '
+    || MENU2='M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P Player O Server I "Service mode" R "abCDe ripper" G "Data cache" C "CPU frequency" Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone '
 find /dev/disk/by-id/usb-* | grep -q 'usb' && MENU2+='W "HDD Poweroff" '
 exec='dialog --stdout --title "'$ipaddr'  '$temp'" --menu "'$HOSTNAME'.local  Config" 7 0 0 '$MENU'K Kernel E Network '$MENU2
 
@@ -58,6 +58,9 @@ case $options in
         # pacman -Scc --noconfirm
         # pacman -Syy --noconfirm
         # pacman -Syu --noconfirm
+        ;;
+    I)
+        /usr/bin/srvmenu-cfg.sh $Qver
         ;;
     K)
         /usr/bin/kernel-cfg.sh $Qver
