@@ -1,5 +1,5 @@
 #!/bin/bash
-config='/etc/srvmenu.conf'
+config='/etc/srvmode.conf'
 grub_cfg='/boot/grub/grub.cfg'
 [ ! -f "$config" ] && echo "Active=" >$config
 MENU=''; SRV='avahi-daemon mpd.socket '
@@ -35,8 +35,8 @@ kernel(){
 
 stopsrv(){
     for i in $SRV; do
-        :
-        # [ $(systemctl status $i 2>&1 | grep -c 'Started') = 1 ] && systemctl disable $i 
+        echo $i
+        [ $(systemctl status $i 2>&1 | grep -c 'active') = 1 ] && systemctl disable $i
     done
 }
 
@@ -52,7 +52,6 @@ else
             exec='dialog --stdout --title "'$m_name'" --checklist "Select service" 7 0 0 '$MENU
             options=$(eval $exec) || exit 1; clear
             kernel
-            # service=$(echo $options | sed -e 's/\(.*\)/\L\1/;s/lms/logitechmediaserver/;s/"hqplayer naa"/naa/;s/owntone/mtroom/;')
             echo "$m_name:$options:$kerboot" >>$config
             echo "Service mode $m_name add."
             ;;
