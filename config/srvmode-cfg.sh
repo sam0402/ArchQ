@@ -33,9 +33,15 @@ kernel(){
     fi
 }
 
-stopsrv(){
+disablesrv(){
     for i in $SRV; do
         [ $(systemctl status $i 2>&1 | grep -c 'active') = 1 ] && systemctl disable $i
+    done
+}
+
+stopsrv(){
+    for i in $SRV; do
+        [ $(systemctl status $i 2>&1 | grep -c 'enabled') = 1 ] && systemctl stop $i
     done
 }
 
@@ -89,7 +95,7 @@ else
             line=$((optine+1))
             m_name=$(sed "${line}q;d" $config | awk -F: '{print $1}')
             sed -i '1s/Active=.*/Active='"$m_name"'/' $config
-            stopsrv
+            disablesrv
             mboot $optine
             ;;
         D)
