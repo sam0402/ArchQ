@@ -58,9 +58,10 @@ else
             ;;
         M)
             while read line; do
-                e_menu+=$(echo $line | awk -F: '{print $1}')' 　 '
+                e_menu+=\"$(echo $line | awk -F: '{print $1}')\"' 　 '
             done <<< $(cat $config | sed '1d')
-            m_name=$(dialog --stdout --title "ArchQ $1" --menu "Modify service mode" 7 0 0 $e_menu) || exit 1; clear
+            exec='dialog --stdout --title "ArchQ $1" --menu "Modify service mode" 7 0 0 '$e_menu
+            m_name=$(eval $exec) || exit 1; clear
             for list in $(grep $m_name $config | awk -F: '{print $2}'); do
                 MENU=$(echo $MENU | sed -e 's/'"$list"' 　 0on /'"$list"' 　 off /')
             done
@@ -72,19 +73,26 @@ else
             ;;
         R)
             while read line; do
-                e_menu+=$(echo $line | awk -F: '{print $1}')' 　 '
+                e_menu+=\"$(echo $line | awk -F: '{print $1}')\"' 　 '
             done <<< $(cat $config | sed '1d')
-            m_name=$(dialog --stdout --title "ArchQ $1" --menu "Remove service mode" 7 0 0 $e_menu) || exit 1; clear
+            exec='dialog --stdout --title "ArchQ $1" --menu "Remove service mode" 7 0 0 '$e_menu
+            m_name=$(eval $exec) || exit 1; clear
             sed -i '/'"$m_name"':/d' $config
             echo "Service mode $m_name remove."
             ;;
         C)
+            i=1
             while read line; do
-                e_menu+=$(echo $line | awk -F: '{print $1}')' 　 '
+                e_menu+=$i' '\"$(echo $line | awk -F: '{print $1}')\"' '
+                $((i++))
             done <<< $(cat $config | sed '1d')
-            m_name=$(dialog --stdout --title "ArchQ $1" --menu "Active service mode" 7 0 0 $e_menu) || exit 1; clear
+            exec='dialog --stdout --title "ArchQ $1" --menu "Active service mode" 7 0 0 '$e_menu
+            optine=$(eval $exec) || exit 1; clear
+            line=$((optine+1))
+            m_name=$(sed "${line}q;d" $config | awk -F: '{print $1}')
             sed -i '1s/Active=.*/Active='"$m_name"'/' $config
             stopsrv
+            ./mboot $optine
             ;;
     esac
 fi

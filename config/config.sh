@@ -60,7 +60,7 @@ case $options in
         # pacman -Syu --noconfirm
         ;;
     I)
-        /usr/bin/srvmenu-cfg.sh $Qver
+        /usr/bin/srvmode-cfg.sh $Qver
         ;;
     K)
         /usr/bin/kernel-cfg.sh $Qver
