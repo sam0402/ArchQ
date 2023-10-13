@@ -241,6 +241,25 @@ else
 fi
 arch-chroot /mnt systemctl enable systemd-networkd
 
+## Add Ethernet dectect to rc.local
+sed -i '$d' /mnt/etc/rc.local
+cat >>/mnt/etc/rc.local <<EOF
+# ethernet auto detect
+while read ether; do
+    npath='/etc/systemd/network/'
+    if [ ! -f "\$npath""10-\${ether}.network" ]; then
+        cd \$npath
+        source=\$(ls 10-en*.network | head -n 1)
+        cp \$source 10-\${ether}.network
+        sed -i 's/Name=.*/Name='"\$ether"'/' 10-\${ether}.network
+        systemctl restart systemd-networkd
+        cd -
+    fi
+done <<< \$(ip -o link show | awk '{print \$2,\$9}' | grep '^en' | sed 's/://' | awk '{print \$1}')
+sleep 1
+
+EOF
+
 ### Kernel
 echo -e "\n${c_red_b}Install ArchQ Kernel ...${c_gray}\n"
 ker=Q352
@@ -299,16 +318,15 @@ case $server in
 
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
-        sed -i '$d' /mnt/etc/rc.local
+
+#### add priority for MPD
         cat >>/mnt/etc/rc.local <<EOF
 if systemctl is-active mpd >/dev/null; then
     chrt -p 93 \$(ps H -q \`pidof -s mpd\` -o tid,cls | grep FF | awk '{print \$1}')
     chrt -p 95 \$(ps H -q \`pidof -s mpd\` -o tid,comm | grep ArchQ | awk '{print \$1}')
     chrt -fp 85 \`pgrep mpd\`
 fi
-# Set the standby timeout for HDD, the values specify multiples of 5 seconds.
-#hdparm -S 24 /dev/sda
-exit 0
+
 EOF
 ### Setup RompR
         mkdir -p /mnt/etc/nginx/sites-available /mnt/etc/nginx/sites-enabled
@@ -359,28 +377,36 @@ arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x8
 arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /root/qt5-base-5.15.9+kde+r151-1-x86_64.pkg.tar.zst /root/kid3-common-3.9.3-2-x86_64.pkg.tar.zst /root/double-conversion-3.2.1-1-x86_64.pkg.tar.zst
 
 pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
-sed -i '$i sleep 3' /mnt/etc/rc.local
-sed -i '$d' /mnt/etc/rc.local
 cat >>/mnt/etc/rc.local <<EOF
-# ethernet auto detect
-while read ether; do
-    npath='/etc/systemd/network/'
-    if [ ! -f "\$npath""10-\${ether}.network" ]; then
-        cd \$npath
-        source=\$(ls 10-en*.network | head -n 1)
-        cp \$source 10-\${ether}.network
-        sed -i 's/Name=.*/Name='"\$ether"'/' 10-\${ether}.network
-        systemctl restart systemd-networkd
-        cd -
-    fi
-done <<< \$(ip -o link show | awk '{print \$2,\$9}' | grep '^en' | sed 's/://' | awk '{print \$1}')
-
 # systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
 # systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-udevd 
 # systemctl stop dbus.socket dbus 
 # systemctl stop systemd-networkd
+
+#** Set readahead for HDD
 # hdparm -a0 /dev/sda >/dev/null 2>&1
+
+#** Set the standby timeout for HDD, the values specify multiples of 5 seconds.
+# hdparm -S 24 /dev/sda
+
+#** Reorganizer for XFS
 # xfs_fsr /mnt/music
+
+# Qrip stop all service
+kernel=\$(uname -r | awk -F - '{print \$3}')
+[ \$kernel = 'Qrip' ] && srvmode-cfg.sh stopsrv
+
+# Mode active
+active=\$(head -n 1 /etc/srvmode.conf | awk -F= '{print \$2}')
+if [ ! \$active == '' ]; then
+    service=\$(grep \$active /etc/srvmode.conf | awk -F: '{print \$2}' | \\
+        sed -e 's/\(.*\)/\L\1/;s/lms/logitechmediaserver/;s/"hqplayer naa"/naa/;s/owntone/mtroom/;')
+    for i in \$service; do
+        sw \$i >/dev/null 2>&1
+        sleep 0.2
+    done
+fi
+
 exit 0
 EOF
 arch-chroot /mnt systemctl enable sshd ntpdate rc-local cpupower
@@ -422,13 +448,14 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cfg.sh >/mnt/usr/bin/shairport-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
-curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/srvmenu-cfg.sh >/mnt/usr/bin/srvmenu-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/srvmode-cfg.sh >/mnt/usr/bin/srvmode-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/bcache-cfg.sh >/mnt/usr/bin/bcache-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/datacache-cfg.sh >/mnt/usr/bin/datacache-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/hddpower-cfg.sh >/mnt/usr/bin/hddpower-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/zerowipe.sh >/mnt/usr/bin/zerowipe.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mboot >/mnt/usr/bin/mboot
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sw >/mnt/usr/bin/sw
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/mnt/usr/bin/pagecache-management.sh
 arch-chroot /mnt wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
