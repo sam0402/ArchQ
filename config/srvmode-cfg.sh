@@ -35,7 +35,6 @@ kernel(){
 
 stopsrv(){
     for i in $SRV; do
-        echo $i
         [ $(systemctl status $i 2>&1 | grep -c 'active') = 1 ] && systemctl disable $i
     done
 }
@@ -43,7 +42,7 @@ stopsrv(){
 if [ "$1" == 'stopsrv' ]; then
     stopsrv
 else
-    WK=$(dialog --stdout --title "ArchQ $1" --menu "Service mode" 7 0 0 A Add M Modify R Remove C Active) || exit 1; clear
+    WK=$(dialog --stdout --title "ArchQ $1" --menu "Service mode" 7 0 0 A Add M Modify R Remove C Active D Disable) || exit 1; clear
 
     case $WK in
         A)
@@ -91,7 +90,11 @@ else
             m_name=$(sed "${line}q;d" $config | awk -F: '{print $1}')
             sed -i '1s/Active=.*/Active='"$m_name"'/' $config
             stopsrv
-            ./mboot $optine
+            mboot $optine
+            ;;
+        D)
+            sed -i '1s/Active=.*/Active=/' $config
+            echo "ArchQ service mode is disabled."
             ;;
     esac
 fi
