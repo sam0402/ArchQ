@@ -459,7 +459,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mboot >/mnt
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sw >/mnt/usr/bin/sw
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/mnt/usr/bin/pagecache-management.sh
 arch-chroot /mnt wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
-chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/qboot /mnt/usr/bin/sw
+chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/mboot /mnt/usr/bin/sw
 
 cat >>/mnt/home/${user}/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
