@@ -3,17 +3,17 @@ config='/etc/srvmode.conf'
 grub_cfg='/boot/grub/grub.cfg'
 [ ! -f "$config" ] && echo "Active=" >$config
 MENU=''; SRV='avahi-daemon mpd.socket '
-pacman -Q mpd >/dev/null 2>&1 && MENU='MPD 　 on ' && SRV+='mpd '
-pacman -Q rompr >/dev/null 2>&1 && MENU='Rompr 　 on '&& SRV+='mpd rompr nginx php-fpm '
-pacman -Q mympd >/dev/null 2>&1 && MENU='MyMPD 　 on ' && SRV+='mpd mympd '
-pacman -Q logitechmediaserver >/dev/null 2>&1 && MENU+='LMS 　 on ' && SRV+='logitechmediaserver '
-pacman -Q squeezelite >/dev/null 2>&1 && MENU+='Squeezelite 　 on ' && SRV+='squeezelite '
-[ -f /usr/lib/systemd/system/roonserver.service ] && MENU+='Roon 　 on ' && SRV+='roonserver '
-[ -f /usr/lib/systemd/system/hqplayerd.service ] && MENU+='HQPlayerd 　 on ' && SRV+='hqplayerd '
-pacman -Q roonbridge >/dev/null 2>&1 && MENU+='Roonbridge 　 on ' && SRV+='roonbridge '
-pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='Airplay 　 on ' && SRV+='shairport-sync '
-pacman -Q hqplayer-network-audio-daemon >/dev/null 2>&1 && MENU+='"HQPlayer NAA" 　 on ' && SRV+='networkaudio '
-pacman -Q owntone >/dev/null 2>&1 && MENU+='Owntone 　 on ' && SRV+='owntone '
+pacman -Q mpd >/dev/null 2>&1 && MENU='MPD 　 off ' && SRV+='mpd '
+pacman -Q rompr >/dev/null 2>&1 && MENU='Rompr 　 off '&& SRV+='mpd rompr nginx php-fpm '
+pacman -Q mympd >/dev/null 2>&1 && MENU='MyMPD 　 off ' && SRV+='mpd mympd '
+pacman -Q logitechmediaserver >/dev/null 2>&1 && MENU+='LMS 　 off ' && SRV+='logitechmediaserver '
+pacman -Q squeezelite >/dev/null 2>&1 && MENU+='Squeezelite 　 off ' && SRV+='squeezelite '
+[ -f /usr/lib/systemd/system/roonserver.service ] && MENU+='Roon 　 off ' && SRV+='roonserver '
+[ -f /usr/lib/systemd/system/hqplayerd.service ] && MENU+='HQPlayerd 　 off ' && SRV+='hqplayerd '
+pacman -Q roonbridge >/dev/null 2>&1 && MENU+='Roonbridge 　 off ' && SRV+='roonbridge '
+pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='Airplay 　 off ' && SRV+='shairport-sync '
+pacman -Q hqplayer-network-audio-daemon >/dev/null 2>&1 && MENU+='"HQPlayer NAA" 　 off ' && SRV+='networkaudio '
+pacman -Q owntone >/dev/null 2>&1 && MENU+='Owntone 　 off ' && SRV+='owntone '
 
 kernel(){
     n=1; kernel=()
@@ -65,12 +65,12 @@ else
             exec='dialog --stdout --title "ArchQ $1" --menu "Modify service mode" 7 0 0 '$e_menu
             m_name=$(eval $exec) || exit 1; clear
             for list in $(grep $m_name $config | awk -F: '{print $2}'); do
-                MENU=$(echo $MENU | sed -e 's/'"$list"' 　 0on /'"$list"' 　 off /')
+                MENU=$(echo $MENU | sed -e 's/'"$list"' 　 off /'"$list"' 　 on /')
             done
             exec='dialog --stdout --title "'$m_name'" --checklist "Select service" 7 0 0 '$MENU
             options=$(eval $exec) || exit 1; clear
             kernel
-            sed -e '2,$s/'"$m_name"':.*/'"$m_name"':'"$options"':'"$kerboot"'/' $config
+            sed -i '2,$s/'"$m_name"':.*/'"$m_name"':'"$options"':'"$kerboot"'/' $config
             echo "Service mode $m_name modify."
             ;;
         R)
