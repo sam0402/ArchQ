@@ -262,7 +262,7 @@ EOF
 
 ### Kernel
 echo -e "\n${c_red_b}Install ArchQ Kernel ...${c_gray}\n"
-ker=Q352
+ker=Q396
 [ $cpu = amd ] && ker=Q308AMD
 [ $cpu = amd ] && kver='6.1.54-1'
 [ $server = N ] && ker=${ker}w
