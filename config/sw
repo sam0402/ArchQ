@@ -28,7 +28,7 @@ case $1 in
 	mtroom)
 		# user="--user"
 		serv="owntone"
-		service=$MPD'avahi-daemon owntone'
+		service='mpd avahi-daemon owntone mpd-otvol'
 		;;
 	rompr)
 		serv=mpd
