@@ -1,0 +1,13 @@
+[Unit]
+Description=Owntone volume control from MPD
+After=mpd.service
+
+[Service]
+User=mpd
+Group=mpd
+Type=simple
+Restart=always
+ExecStart=/usr/bin/python3 /usr/bin/mpd-otvol.py --listen
+
+[Install]
+WantedBy=multi-user.target
