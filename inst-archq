@@ -396,7 +396,7 @@ cat >>/mnt/etc/rc.local <<EOF
 
 # Qrip stop all service
 kernel=\$(uname -r | awk -F - '{print \$3}')
-[[ \$kernel = 'Qrip' ]] && srvmode-cfg.sh stopsrv
+[[ "\$kernel" = "Qrip" ]] && srvmode-cfg.sh stopsrv
 
 # Mode active
 active=\$(head -n 1 /etc/srvmode.conf | awk -F= '{print \$2}')
