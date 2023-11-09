@@ -13,6 +13,7 @@ c_white=$'\e[m'
 c_white_b=$'\e[1;37m'
 c_gray=$'\e[0;37m'
 
+echo root:archq | chpasswd
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog scrub
 desk=$(dialog --stdout --title "ArchQ" --menu "Install for" 7 0 0 M Music D Desktop) || exit 1; clear
 [ $desk = D ] && curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/inst-desktop | bash
