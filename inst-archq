@@ -310,11 +310,12 @@ case $server in
         echo -e "\n${c_red_b}Install MPD ...${c_gray}\n"
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.13-4-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
+        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-13.0.1-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
         arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/blissify-0.3.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-ramdisk-0.5-1-any.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.13-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-2.00-1-any.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.13-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/rompr-2.00-1-any.pkg.tar.zst mympd-13.0.1-1-x86_64.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.5-1-x86_64.pkg.tar.zst /root/blissify-0.3.5-1-x86_64.pkg.tar.zst /root/mpd-ramdisk-0.5-1-any.pkg.tar.zst
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-otvol.py >/mnt/usr/bin/mpd-otvol.py
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-otvol.service >/mnt/usr/lib/systemd/system/mpd-otvol.service
@@ -396,8 +397,7 @@ cat >>/mnt/etc/rc.local <<EOF
 # xfs_fsr /mnt/music
 
 # Qrip stop all service
-kernel=\$(uname -r | awk -F - '{print \$3}')
-[[ "\$kernel" = "Qrip" ]] && srvmode-cfg.sh stopsrv
+[[ "$(uname -r | cut -d- -f3)" = "Qrip" ]] && srvmode-cfg.sh stopsrv
 
 # Mode active
 active=\$(head -n 1 /etc/srvmode.conf | awk -F= '{print \$2}')
