@@ -56,7 +56,7 @@ case $server in
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/blissify-0.3.5-1-x86_64.pkg.tar.zst
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-ramdisk-0.5-1-any.pkg.tar.zst
-            pacman -U --noconfirm /tmp/mpd-light-0.23.13-4-x86_64.pkg.tar.zst /tmp/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /tmp/rompr-2.00-1-any.pkg.tar.zst mympd-13.0.1-1-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /tmp/mpd-light-0.23.13-4-x86_64.pkg.tar.zst /tmp/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /tmp/rompr-2.00-1-any.pkg.tar.zst /tmp/mympd-13.0.1-1-x86_64.pkg.tar.zst
             pacman -U --noconfirm /tmp/owntone-28.6-1-x86_64.pkg.tar.zst /tmp/blissify-0.3.5-1-x86_64.pkg.tar.zst /tmp/mpd-ramdisk-0.5-1-any.pkg.tar.zst
 
     ### setup mpd
