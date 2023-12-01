@@ -68,7 +68,7 @@ else
 			chrt -fp 85 $(pgrep mpd)
 			chrt -fp 54 $(pgrep ksoftirqd/$(ps -eLo comm,cpuid| grep "output:"|awk '{print $2}'))
 		fi
-		systemctl is-active owntone >/dev/null && mpc enable Multiroom >/dev/null || mpc disable Multiroom >/dev/null
+		systemctl is-active owntone >/dev/null && mpc enable Multiroom >/dev/null || mpc disable Multiroom Stream >/dev/null
 
 	fi
 	curl -X POST -H "Authorization: Bearer $key" -H "Content-Type: application/json" -d '{"state": "'$STATUS'"}' \
