@@ -90,6 +90,7 @@ EOF
         [[ -d '/opt/hqplayerd' ]] && systemctl disable --now hqplayerd
         /usr/bin/mpd-cfg.sh
         systemctl enable --now mpd
+        usermod -aG optical mpd
         ;;
     4|5)
         if ! pacman -Q gupnp-dlna >/dev/null 2>&1; then
