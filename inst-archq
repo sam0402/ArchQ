@@ -384,8 +384,10 @@ arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar
 pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
 cat >>/mnt/etc/rc.local <<EOF
 # systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
-# systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-udevd 
-# systemctl stop dbus.socket dbus 
+# systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket
+# systemctl stop dbus.socket dbus
+# Play CD on MPD don't uncomment
+# systemctl stop systemd-udevd
 # systemctl stop systemd-networkd
 
 #** Set readahead for HDD
