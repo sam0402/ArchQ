@@ -159,7 +159,7 @@ options=$(dialog --stdout \
     --title "ArchQ MPD" \
     --ok-label "Ok" \
     --form "Buffer, Ramdisk & Directory" 0 35 0 \
-    "Audio Buffer"      1 1 $buffer  1 17 35 0 \
+    "Audio Buffer >=128" 1 1 $buffer  1 17 35 0 \
     "Period Time(μs)"   2 1 $pertime 2 17 35 0 \
     "Ramdisk(GB)"       3 1 $rd_GB   3 17 35 0 \
     "Music Dir  /mnt/"  4 1 $mdir    4 17 35 0 ) || exit 1; clear
