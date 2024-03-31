@@ -454,6 +454,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-c
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/mnt/usr/bin/abcde-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/srvmode-cfg.sh >/mnt/usr/bin/srvmode-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sync_backup-cfg.sh >/mnt/usr/bin/sync_backup-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/bcache-cfg.sh >/mnt/usr/bin/bcache-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/datacache-cfg.sh >/mnt/usr/bin/datacache-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/hddpower-cfg.sh >/mnt/usr/bin/hddpower-cfg.sh
