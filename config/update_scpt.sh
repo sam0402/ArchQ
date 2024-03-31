@@ -13,6 +13,7 @@ curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/shairport-cf
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sqzlite-cfg.sh >/usr/bin/sqzlite-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/abcde-cfg.sh >/usr/bin/abcde-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/srvmode-cfg.sh >/usr/bin/srvmode-cfg.sh
+curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sync_backup-cfg.sh >/usr/bin/sync_backup-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/bcache-cfg.sh >/usr/bin/bcache-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/datacache-cfg.sh >/usr/bin/datacache-cfg.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/hddpower-cfg.sh >/usr/bin/hddpower-cfg.sh

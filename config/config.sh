@@ -16,7 +16,7 @@ if pacman -Q ffmpeg >/dev/null 2>&1; then
 fi
 
 uname -r | grep -q evl && MENU2='X Desktop C "CPU frequency" T Timezone ' \
-    || MENU2='M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P Player O Server I "Service mode" R "abCDe ripper" G "Data cache" C "CPU frequency" Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone '
+    || MENU2='M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P Player O Server I "Service mode" J "Sync backup" R "abCDe ripper" G "Data cache" C "CPU frequency" Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone '
 find /dev/disk/by-id/usb-* | grep -q 'usb' && MENU2+='W "HDD Poweroff" '
 exec='dialog --stdout --title "'$ipaddr'  '$temp'" --menu "'$HOSTNAME'.local  Config" 7 0 0 '$MENU'K Kernel E Network '$MENU2
 
@@ -61,6 +61,9 @@ case $options in
         ;;
     I)
         /usr/bin/srvmode-cfg.sh $Qver
+        ;;
+    I)
+        /usr/bin/sync_backup-cfg.sh $Qver
         ;;
     K)
         /usr/bin/kernel-cfg.sh $Qver
