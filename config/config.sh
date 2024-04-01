@@ -62,7 +62,7 @@ case $options in
     I)
         /usr/bin/srvmode-cfg.sh $Qver
         ;;
-    I)
+    J)
         /usr/bin/sync_backup-cfg.sh $Qver
         ;;
     K)
