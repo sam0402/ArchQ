@@ -1,6 +1,4 @@
 #!/bin/bash
-config='/etc/fstab'
-
 while read line; do
     list+=${line}' 　 '
 done <<< $(ls /mnt)
