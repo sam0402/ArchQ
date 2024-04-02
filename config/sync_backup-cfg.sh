@@ -34,9 +34,9 @@ fi
 [ $FS = f2fs ] && OP+=',background_gc=on,no_heap,inline_xattr,inline_data,inline_dentry,flush_merge,extent_cache,mode=adaptive,active_logs=6,alloc_mode=reuse,checkpoint_merge,fsync_mode=posix,discard_unit=block,memory=normal'
 
 yes=$(dialog --stdout --title "Synchronization Backup $1" \
-        --yesno "This will backup files from\n/mnt/$SOURCE to $partition." 0 0) || exit 1; clear
+        --yesno "This will backup files from\n/mnt/$SOURCE to $partition (/mnt/music_bk)." 0 0) || exit 1; clear
  
 echo -e "Synchronization backup /mnt/$SOURCE to ${partition}${delmsg}."
-mount -t $FS -m -o $OP $partition /mnt/sync_backup
-rsync -avh $DEL --progress /mnt/$SOURCE/* /mnt/sync_backup/.
-[[ $options =~ D ]] && umount /mnt/sync_backup
+mount -t $FS -m -o $OP $partition /mnt/music_bk
+rsync -avh $DEL --progress /mnt/$SOURCE/* /mnt/music_bk/.
+[[ $options =~ D ]] && umount /mnt/music_bk
