@@ -159,10 +159,10 @@ options=$(dialog --stdout \
     --title "ArchQ MPD" \
     --ok-label "Ok" \
     --form "Buffer, Ramdisk & Directory" 0 35 0 \
-    "Audio Buffer >=128" 1 1 $buffer  1 20 35 0 \
-    "Period Time(μs)"   2 1 $pertime 2 20 35 0 \
-    "Ramdisk(GB)"       3 1 $rd_GB   3 20 35 0 \
-    "Music Dir  /mnt/"  4 1 $mdir    4 20 35 0 ) || exit 1; clear
+    "Audio Buffer >=128"  1 1 $buffer  1 20 35 0 \
+    "Period Time(μs)"     2 1 $pertime 2 20 35 0 \
+    "Ramdisk(GB)"         3 1 $rd_GB   3 20 35 0 \
+    "Music Dir     /mnt/" 4 1 $mdir    4 20 35 0 ) || exit 1; clear
 
 beffer=$(echo $options | awk '//{print $1 }')
 pertime=$(echo $options | awk '//{print $2 }')
