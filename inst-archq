@@ -417,6 +417,7 @@ EOF
 arch-chroot /mnt systemctl enable sshd ntpdate rc-local cpupower
 arch-chroot /mnt systemctl disable ntpd
 arch-chroot /mnt ln -s /usr/bin/vim /usr/bin/vi
+arch-chroot /mnt touch /etc/srvmode.conf
 ###
 echo 'ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"' >/mnt/etc/udev/rules.d/pci_pm.rules
 cat >/mnt/etc/udev/rules.d/60-ioschedulers.rules <<EOF
