@@ -1,0 +1,4 @@
+KERNEL!="sd[a-z][0-9]",GOTO="automount_exit"
+ACTION=="add", SUBSYSTEMS=="usb", SUBSYSTEM=="block", ENV{ID_FS_USAGE}=="filesystem" RUN{program}+="/usr/bin/usb-storage-mount.sh $env{ID_FS_UUID}"
+ACTION=="remove", RUN{program}+="/usr/bin/systemd-umount UUID=$env{ID_FS_UUID}
+LABEL="automount_exit"
