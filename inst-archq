@@ -488,6 +488,7 @@ alias sw='sudo sw'
 alias df='df -h'
 alias status='systemctl status'
 alias wipedir='function _f() { for i in {1..5}; do find "\$1" -exec scrub -Sp fillzero {} \\;; done; rm -rf "\$1"; } ; _f'
+alias hcp='function _f() { echo "\$1 >> \$2"; for i in {1..5}; do cp -a "\$1" "\$2";echo -n .$((\$i*2));cp -a "\$2"/"\$1" .;done; }; _f'
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
 
