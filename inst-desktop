@@ -12,6 +12,7 @@ c_white=$'\e[m'
 c_white_b=$'\e[1;37m'
 c_gray=$'\e[0;37m'
 
+echo root:archq | chpasswd
 ### Get infomation from user ###
 password(){
     password=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter admin password" 0 0) || exit 1; clear
@@ -237,6 +238,11 @@ echo -e "\n${c_red_b}Setting service ...${c_gray}\n"
 cp /archq/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst /archq/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /mnt/root
 arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst
+
+# Other package
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nocache-1.2-1-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/nocache-1.2-1-x86_64.pkg.tar.zst
+
 sed -i '$i sleep 3' /mnt/etc/rc.local
 sed -i '$d' /mnt/etc/rc.local
 cat >>/mnt/etc/rc.local <<EOF
