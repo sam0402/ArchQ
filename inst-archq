@@ -380,6 +380,10 @@ cp /archq/qt5-base-5.15.9+kde+r151-1-x86_64.pkg.tar.zst /archq/kid3-common-3.9.3
 arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /root/qt5-base-5.15.9+kde+r151-1-x86_64.pkg.tar.zst /root/kid3-common-3.9.3-2-x86_64.pkg.tar.zst /root/double-conversion-3.2.1-1-x86_64.pkg.tar.zst
 
+# Other package
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nocache-1.2-1-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/nocache-1.2-1-x86_64.pkg.tar.zst
+
 pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
 cat >>/mnt/etc/rc.local <<EOF
 # systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
@@ -488,7 +492,7 @@ alias sw='sudo sw'
 alias df='df -h'
 alias status='systemctl status'
 alias wipedir='function _f() { for i in {1..5}; do find "\$1" -exec scrub -Sp fillzero {} \\;; done; rm -rf "\$1"; } ; _f'
-alias hcp='function _f() { echo "\$1 >> \$2"; for i in {1..50}; do [ -z \$2 ] && break; cp -a "\$1" "\$2";echo -n .\$((\$i*2));cp -a "\$2"/"\$1" .;done; }; _f'
+alias hcp='function _f() { echo "\$1 >> \$2"; for i in {1..50}; do [ -z \$2 ] && break; nocache cp -a "\$1" "\$2";echo -n .\$((\$i*2));nocache cp -a "\$2"/"\$1" .;done; }; _f'
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
 
