@@ -15,15 +15,14 @@ case $WK in
         FS=$(echo $partdata | cut -d ' ' -f 2)
         ID=$(echo $partdata | cut -d ' ' -f 3)
 
-        OP='rw' 
-        [ $FS = ext4 ] && OP='defaults,noatime'
-        [ $FS = hfsplus ] && OP='rw,force,noatime'
-        [ $FS = apfs ] && OP='readwrite'
-        [ $FS = f2fs ] && OP='rw,noatime'
-        [ $FS = xfs ] && OP='rw,noatime'
+        OP='rw,noatime' 
+        [ $FS = ext4 ] && OP+=',defaults'
+        [ $FS = hfsplus ] && OP+=',force'
         if [ $FS = ntfs ]; then
-            FS=ntfs3; OP='iocharset=utf8'
+            FS=ntfs3; OP+=',iocharset=utf8'
         fi
+        [ $FS = exfat ] && OP+=',iocharset=utf8'
+        [ $FS = apfs ] && OP='readwrite,noatime'
 
         options=$(dialog --stdout \
             --title "Partition $partition ($FS)" \
