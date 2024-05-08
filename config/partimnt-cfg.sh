@@ -36,6 +36,8 @@ case $WK in
         [ $FS = xfs ] && OP+=',attr2,inode64,logbufs=8,logbsize=32k,noquota'
         [ $FS = f2fs ] && OP+=',background_gc=on,no_heap,inline_xattr,inline_data,inline_dentry,flush_merge,extent_cache,mode=adaptive,active_logs=6,alloc_mode=reuse,checkpoint_merge,fsync_mode=posix,discard_unit=block,memory=normal'
         [ -z $OP ] && echo "Fail! Mount point is null." && exit 1
+
+    # mount for root || user
         mntuser=$(dialog --stdout --title "Mount point /mnt/$MP" \
             --radiolist "Set permission to" 7 0 0 \
              root '　' on \
@@ -44,12 +46,21 @@ case $WK in
         [[ $mntuser != root && $FS =~ fat ]] && OP+=',uid=1000,gid=1000'
         [[ $mntuser != root && $FS =~ ntfs ]] && OP+=',uid=1000,gid=1000'
 
-        echo "UUID=$ID /mnt/$MP $FS $OP 0 0" >>$config
+    # for USB storage
+        usb=$(dialog --stdout --title "Mount point /mnt/$MP" \
+            --radiolist "USB storage auto mount" 7 0 0 \
+            No '　' on \
+            Yes '　' off) || exit 1; clear
+
+        [ $usb = Yes ] && tag='#' || tag=''
+        [ $usb = Yes ] && OP="noauto,$OP"
+
+        echo "${tag}UUID=$ID /mnt/$MP $FS $OP 0 0" >>$config
         systemctl daemon-reload
 
         echo "Add $partition ($FS) to /mnt/$MP mount point."
         
-        if [ $mntuser != root ]; then
+        if [ $mntuser != root ] && [ $usb == No ]; then
             mount -m /mnt/$MP
             [[ $FS =~ fat ]] || chown $user: /mnt/$MP && echo "Set /mnt/$MP permission to $user."
         fi
