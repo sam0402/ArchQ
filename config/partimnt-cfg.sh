@@ -42,8 +42,8 @@ case $WK in
              root '　' on \
             $user '　' off) || exit 1; clear
 
-        [[ $mntuser != root && $FS =~ fat ]] && OP='rw,uid=1000,gid=1000'
-        [[ $mntuser != root && $FS =~ ntfs ]] && OP='iocharset=utf8,uid=1000,gid=1000'
+        [[ $mntuser != root && $FS =~ fat ]] && OP+=',uid=1000,gid=1000'
+        [[ $mntuser != root && $FS =~ ntfs ]] && OP+=',uid=1000,gid=1000'
 
         echo "UUID=$ID /mnt/$MP $FS $OP 0 0" >>$config
         systemctl daemon-reload
