@@ -1,7 +1,5 @@
 #!/bin/bash
 #serv=$(echo $0 | awk -F/ '{print $NF}')
-key="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJlMjQ3OWIyNDc0ODI0ZjYwODNlOTdiOGI0MDllN2ZiMiIsImlhdCI6MTY5MzQwMzcwNSwiZXhwIjoyMDA4NzYzNzA1fQ.VsKf7iZO-nv1MWSVCm8f-8Lsah9S0T9NaqoIQLyimHY"
-
 if [ -z $1 ]; then
 	echo "Using: sw mpd, roon, lms, rompr, airplay, mtroom, hqe, naa and other service."
 	exit 1
