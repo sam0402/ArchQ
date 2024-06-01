@@ -70,8 +70,6 @@ else
 		systemctl is-active owntone >/dev/null && mpc enable Multiroom >/dev/null || mpc disable Multiroom Stream >/dev/null
 
 	fi
-	curl -X POST -H "Authorization: Bearer $key" -H "Content-Type: application/json" -d '{"state": "'$STATUS'"}' \
-	http://192.168.1.37:8123/api/states/switch.$1 >/dev/null 2>&1
 fi
 
 echo Service $service is $'\e[1;38;5;196m'$(systemctl is-active $user $serv)$'\e[m'.
