@@ -61,7 +61,7 @@ else
         M)
             while read line; do
                 e_menu+=\"$(echo $line | awk -F: '{print $1}')\"' 　 '
-            done <<< $(cat $config | sed '1d')
+            done <<< $(cat $config)
             exec='dialog --stdout --title "ArchQ $1" --menu "Modify service mode" 7 0 0 '$e_menu
             m_name=$(eval $exec) || exit 1; clear
             for list in $(grep $m_name $config | awk -F: '{print $2}'); do
@@ -76,7 +76,7 @@ else
         R)
             while read line; do
                 e_menu+=\"$(echo $line | awk -F: '{print $1}')\"' 　 '
-            done <<< $(cat $config | sed '1d')
+            done <<< $(cat $config)
             exec='dialog --stdout --title "ArchQ $1" --menu "Remove service mode" 7 0 0 '$e_menu
             m_name=$(eval $exec) || exit 1; clear
             sed -i '/'"$m_name"':/d' $config
@@ -87,14 +87,14 @@ else
             while read line; do
                 e_menu+=$i' '\"$(echo $line | awk -F: '{print $1}')\"' '
                 $((i++))
-            done <<< $(cat $config | sed '1d')
+            done <<< $(cat $config)
             exec='dialog --stdout --title "ArchQ $1" --menu "Active service mode" 7 0 0 '$e_menu
-            optine=$(eval $exec) || exit 1; clear
-            line=$((optine+1))
+            option=$(eval $exec) || exit 1; clear
+            line=$((option+1))
             m_name=$(sed "${line}q;d" $config | awk -F: '{print $1}')
             sed -i '1s/Active=.*/Active='"$m_name"'/' $config
             disablesrv
-            mboot $optine
+            mboot $option
             ;;
         D)
             sed -i '1s/Active=.*/Active=/' $config
