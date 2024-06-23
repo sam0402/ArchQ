@@ -153,7 +153,7 @@ buffer=$(grep 'audio_buffer_size' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 pertime=$(grep 'period_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 ## Ramdisk 
 ramdisk=$(grep 'rdsize=' /usr/bin/mpd-rdcheck.sh | awk -F'=' '{print $2}')
-[[ $(systemctl is-active mpd-ramdisk) == 'inactive' ]] && rd_GB=0 || rd_GB=$(python -c "print(round($ramdisk/1048576,1))")
+[[ $(systemctl is-active mpd-plugin) == 'inactive' ]] && rd_GB=0 || rd_GB=$(python -c "print(round($ramdisk/1048576,1))")
 ###
 options=$(dialog --stdout \
     --title "ArchQ MPD" \
@@ -172,13 +172,13 @@ mdir=$(echo $echo $options | awk '//{print $4}' | sed 's"/"\\\/"g')
 rd_GB=$(echo $options | awk '//{print $3 }')
 if [ $rd_GB = '0' ]; then
     rm -f /var/lib/mpd/playlists/RAMDISK.m3u
-    systemctl disable --now mpd-ramdisk
+    systemctl disable --now mpd-plugin
 else
     ramdisk=$(python -c "print(int($rd_GB*1048576))")
     sed -i 's/rdsize=.*/rdsize='"$ramdisk"'/' /usr/bin/mpd-rdcheck.sh
     touch /tmp/RAMDISK.m3u
     install -Dm 644 -o mpd -g mpd /tmp/RAMDISK.m3u -t /var/lib/mpd/playlists/
-    systemctl enable --now mpd-ramdisk
+    systemctl enable --now mpd-plugin
 fi
 
 sed -i 's/^#\?audio_buffer_size.*"/audio_buffer_size\t"'"$beffer"'"/' $config
