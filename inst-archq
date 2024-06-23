@@ -342,6 +342,7 @@ EOF
         arch-chroot /mnt chmod 644 /etc/nginx/sites-enabled/rompr
 ### Start mpd.. etc. service
         arch-chroot /mnt systemctl enable mpd nginx php-fpm avahi-daemon
+        arch-chroot /mnt systemctl disable mpd.socket
         arch-chroot /mnt usermod -aG optical mpd
         ;;
 esac
