@@ -89,6 +89,7 @@ EOF
         [[ -d '/opt/hqplayerd' ]] && systemctl disable --now hqplayerd
         /usr/bin/mpd-cfg.sh
         systemctl enable --now mpd
+        systemctl disable --now mpd.socket
         usermod -aG optical mpd
         ;;
     4|5)
