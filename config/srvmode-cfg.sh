@@ -21,7 +21,7 @@ kernel(){
         kernel[$n]=${line}
         ((n += 1 ))
     done <<< $(grep 'menuentry ' $grub_cfg | cut -d "'" -f2 | sed '$d;s/Arch Linux, with Linux //;s/ initramfs//'|cut -d' ' -f1-2)
-    input=$1
+
     if [ ! $1 ]; then
         for i in ${!kernel[@]}; do
             $(echo ${kernel[i]} | grep -qv 'fallback') && KMENU+=$i' '${kernel[i]}' '
