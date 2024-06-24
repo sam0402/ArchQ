@@ -2,7 +2,7 @@
 config='/etc/srvmode.conf'
 grub_cfg='/boot/grub/grub.cfg'
 [ ! -s "$config" ] && echo "Active=" >$config
-MENU=''; SRV='avahi-daemon mpd.socket'
+MENU=''; SRV='avahi-daemon mpd.socket '
 pacman -Q mpd >/dev/null 2>&1 && MENU='MPD 　 off ' && SRV+='mpd '
 pacman -Q rompr >/dev/null 2>&1 && MENU='Rompr 　 off '&& SRV+='mpd rompr nginx php-fpm '
 pacman -Q mympd >/dev/null 2>&1 && MENU='MyMPD 　 off ' && SRV+='mpd mympd '
