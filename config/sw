@@ -7,7 +7,7 @@ fi
 serv=$1
 service=$serv
 MPD='mpd '
-pacman -Q mpd-plunin >/dev/null 2>&1 && MPD+='mpd-plugin '
+pacman -Q mpd-plugin >/dev/null 2>&1 && MPD+='mpd-plugin '
 
 case $1 in
 	airplay)
