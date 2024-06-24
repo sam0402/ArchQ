@@ -1,7 +1,7 @@
 #!/bin/bash
 config='/etc/srvmode.conf'
 grub_cfg='/boot/grub/grub.cfg'
-[ ! -f "$config" ] && echo "Active=" >$config
+[ ! -s "$config" ] && echo "Active=" >$config
 MENU=''; SRV='avahi-daemon '
 pacman -Q mpd >/dev/null 2>&1 && MENU='MPD 　 off ' && SRV+='mpd '
 pacman -Q rompr >/dev/null 2>&1 && MENU='Rompr 　 off '&& SRV+='mpd rompr nginx php-fpm '
@@ -61,7 +61,7 @@ else
         M)
             while read line; do
                 e_menu+=\"$(echo $line | awk -F: '{print $1}')\"' 　 '
-            done <<< $(cat $config)
+            done <<< $(cat $config | sed '1d')
             exec='dialog --stdout --title "ArchQ $1" --menu "Modify service mode" 7 0 0 '$e_menu
             m_name=$(eval $exec) || exit 1; clear
             for list in $(grep $m_name $config | awk -F: '{print $2}'); do
@@ -76,7 +76,7 @@ else
         R)
             while read line; do
                 e_menu+=\"$(echo $line | awk -F: '{print $1}')\"' 　 '
-            done <<< $(cat $config)
+            done <<< $(cat $config | sed '1d')
             exec='dialog --stdout --title "ArchQ $1" --menu "Remove service mode" 7 0 0 '$e_menu
             m_name=$(eval $exec) || exit 1; clear
             sed -i '/'"$m_name"':/d' $config
@@ -87,7 +87,7 @@ else
             while read line; do
                 e_menu+=$i' '\"$(echo $line | awk -F: '{print $1}')\"' '
                 $((i++))
-            done <<< $(cat $config)
+            done <<< $(cat $config | sed '1d')
             exec='dialog --stdout --title "ArchQ $1" --menu "Active service mode" 7 0 0 '$e_menu
             options=$(eval $exec) || exit 1; clear
             line=$((options+1))
