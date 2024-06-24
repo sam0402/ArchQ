@@ -89,12 +89,12 @@ else
                 $((i++))
             done <<< $(cat $config)
             exec='dialog --stdout --title "ArchQ $1" --menu "Active service mode" 7 0 0 '$e_menu
-            option=$(eval $exec) || exit 1; clear
-            line=$((option+1))
+            options=$(eval $exec) || exit 1; clear
+            line=$((options+1))
             m_name=$(sed "${line}q;d" $config | awk -F: '{print $1}')
             sed -i '1s/Active=.*/Active='"$m_name"'/' $config
             disablesrv
-            mboot $option
+            mboot $options
             ;;
         D)
             sed -i '1s/Active=.*/Active=/' $config
