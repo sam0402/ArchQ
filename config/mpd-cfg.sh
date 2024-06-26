@@ -27,7 +27,11 @@ vol_ctrl(){
     sed -i 's/mixer_type.*"/mixer_type\t"'"$volume"'"/' $2
 }
 ### MPD client select
-client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 R "RompR :6660" M "myMPD :80" C "Cantata :8080" N "Ncmpcpp ncurses" U "Multi user") || exit 1
+MENU=''
+pacman -Q mympd >/dev/null 2>&1 && MENU+='M "myMPD :80" '
+pacman -Q rompr >/dev/null 2>&1 && MENU+='R "RompR :6660" '
+exec='dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 '$MENU'C "Cantata :8080" N "Ncmpcpp ncurses" U "Multi user"'
+client=$(eval $exec)|| exit 1
 clear
 case $client in
     R)
@@ -153,7 +157,7 @@ buffer=$(grep 'audio_buffer_size' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 pertime=$(grep 'period_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 ## Ramdisk 
 ramdisk=$(grep 'rdsize=' /usr/bin/mpd-rdcheck.sh | awk -F'=' '{print $2}')
-[[ $(systemctl is-active mpd-plugin) == 'inactive' ]] && rd_GB=0 || rd_GB=$(python -c "print(round($ramdisk/1048576,1))")
+rd_GB=$(python -c "print(round($ramdisk/1048576,1))")
 ###
 options=$(dialog --stdout \
     --title "ArchQ MPD" \
@@ -172,15 +176,12 @@ mdir=$(echo $echo $options | awk '//{print $4}' | sed 's"/"\\\/"g')
 rd_GB=$(echo $options | awk '//{print $3 }')
 if [ $rd_GB = '0' ]; then
     rm -f /var/lib/mpd/playlists/RAMDISK.m3u
-    systemctl disable --now mpd-plugin
 else
-    ramdisk=$(python -c "print(int($rd_GB*1048576))")
-    sed -i 's/rdsize=.*/rdsize='"$ramdisk"'/' /usr/bin/mpd-rdcheck.sh
     touch /tmp/RAMDISK.m3u
     install -Dm 644 -o mpd -g mpd /tmp/RAMDISK.m3u -t /var/lib/mpd/playlists/
-    systemctl enable --now mpd-plugin
 fi
-
+ramdisk=$(python -c "print(int($rd_GB*1048576))")
+sed -i 's/rdsize=.*/rdsize='"$ramdisk"'/' /usr/bin/mpd-rdcheck.sh
 sed -i 's/^#\?audio_buffer_size.*"/audio_buffer_size\t"'"$beffer"'"/' $config
 sed -i 's/^#\?.* \?\tbuffer_time.*"/\tbuffer_time\t"'"$buftime"'"/;s/^#\?.* \?\tperiod_time.*"/\tperiod_time\t"'"$pertime"'"/' $config
 sed -i 's/^#\?music_directory.*"/music_directory\t"\/mnt\/'"$mdir"'"/' $config

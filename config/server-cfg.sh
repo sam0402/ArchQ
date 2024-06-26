@@ -1,7 +1,7 @@
 #!/bin/bash
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
-server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon \
+server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 L LMS M MyMPD N "MPD & RompR" R Roon \
         5 "HQPlayer Embedded 5" 4 "HQPlayer Embedded 4" P Player) || exit 1; clear
 yes | pacman -Scc
 case $server in
@@ -46,18 +46,36 @@ case $server in
         [[ -d '/opt/hqplayerd' ]] && systemctl disable --now hqplayerd
         systemctl enable --now roonserver
         ;;
-    M)
+    M|N)
         if ! pacman -Q mpd-light >/dev/null 2>&1; then
             echo -e "\n${c_blue_b}Install MPD ...${c_gray}\n"
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.13-4-x86_64.pkg.tar.zst
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /tmp/mpd-light-0.23.13-4-x86_64.pkg.tar.zst /tmp/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /tmp/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /tmp/owntone-28.6-1-x86_64.pkg.tar.zst /tmp/mympd-12.1.1-1-x86_64.pkg.tar.zst /tmp/rompr-2.00-1-any.pkg.tar.zst 
-
+            pacman -U --noconfirm /tmp/mpd-*.pkg.tar.zst
+            if [[ $server == M ]]; then
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
+                pacman -U --noconfirm /tmp/mympd-*.pkg.tar.zst
+            fi
+            if [[ $server == N ]]; then
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
+                pacman -U --noconfirm /tmp/rompr-*.pkg.tar.zst
+                ### Setup RompR
+                mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+                sed -i '$i include /etc/nginx/sites-enabled/*;' /etc/nginx/nginx.conf
+                curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/etc/nginx/sites-available/rompr
+                curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cantata_nginx >/etc/nginx/sites-available/cantata
+                sed -i 's/hostname/'"${HOSTNAME,,}"'/' /etc/nginx/sites-available/rompr
+                sed -i 's/hostname/'"${HOSTNAME,,}"'/' /etc/nginx/sites-available/cantata
+                sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /etc/php/php.ini
+                sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /etc/php/php.ini
+                sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /usr/lib/systemd/system/nginx.service
+                ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
+                ln -s /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
+                chmod 644 /etc/nginx/sites-enabled/rompr
+            fi
+            
     ### setup mpd
             sed -i '$d' /etc/rc.local
             cat >>/etc/rc.local <<EOF
@@ -67,19 +85,7 @@ if systemctl is-active mpd >/dev/null; then
 fi
 exit 0
 EOF
-            ### Setup RompR
-            mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
-            sed -i '$i include /etc/nginx/sites-enabled/*;' /etc/nginx/nginx.conf
-            curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/etc/nginx/sites-available/rompr
-            curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cantata_nginx >/etc/nginx/sites-available/cantata
-            sed -i 's/hostname/'"${HOSTNAME,,}"'/' /etc/nginx/sites-available/rompr
-            sed -i 's/hostname/'"${HOSTNAME,,}"'/' /etc/nginx/sites-available/cantata
-            sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /etc/php/php.ini
-            sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /etc/php/php.ini
-            sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /usr/lib/systemd/system/nginx.service
-            ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
-            ln -s /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
-            chmod 644 /etc/nginx/sites-enabled/rompr
+
             chmod 644 /etc/nginx/sites-enabled/cantata
         fi
         ### Start mpd.. etc. service
