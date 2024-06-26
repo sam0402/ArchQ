@@ -78,7 +78,7 @@ ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
 player=N
-server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS M "MPD & RompR" R Roon N None) || exit 1; clear
+server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS M "& myMPD" N "MPD & RompR" R Roon N None) || exit 1; clear
 case $server in
     L)
         player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
@@ -305,20 +305,39 @@ case $server in
         sed -i 's/exec "$HARDLINK" "$SCRIPT.dll" "$@"/exec nice -n -20 "$HARDLINK" "$SCRIPT.dll" "$@"/g' /mnt/opt/RoonServer/Appliance/RAATServer
         arch-chroot /mnt systemctl enable roonserver
         ;;
-    M)
+    M|N)
         echo -e "\n${c_red_b}Install MPD ...${c_gray}\n"
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.13-4-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
-        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
-        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
         arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.13-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.6-1-x86_64.pkg.tar.zst /root/mympd-12.1.1-1-x86_64.pkg.tar.zst /root/rompr-2.00-1-any.pkg.tar.zst
-
+        arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.6-1-x86_64.pkg.tar.zst
+        ### Install myMPD
+        if [[ $server == M ]]; then
+            arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm /root/mympd-12.1.1-1-x86_64.pkg.tar.zst
+            arch-chroot /mnt systemctl enable mpd mympd
+        fi
+        ### Setup RompR
+        if [[ $server == N ]]; then
+            arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm /root/rompr-2.00-1-any.pkg.tar.zst
+            mkdir -p /mnt/etc/nginx/sites-available /mnt/etc/nginx/sites-enabled
+            sed -i '$i include /etc/nginx/sites-enabled/*;' /mnt/etc/nginx/nginx.conf
+            curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/mnt/etc/nginx/sites-available/rompr
+            curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cantata_nginx >/mnt/etc/nginx/sites-available/cantata
+            sed -i 's/hostname/'"${hostname,,}"'/' /mnt/etc/nginx/sites-available/rompr
+            sed -i 's/hostname/'"${hostname,,}"'/' /mnt/etc/nginx/sites-available/cantata
+            sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /mnt/etc/php/php.ini
+            sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /mnt/etc/php/php.ini
+            sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /mnt/usr/lib/systemd/system/nginx.service
+            arch-chroot /mnt ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
+            arch-chroot /mnt chmod 644 /etc/nginx/sites-enabled/rompr
+            arch-chroot /mnt systemctl enable mpd nginx php-fpm avahi-daemon
+        fi
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
-
 #### add priority for MPD
         cat >>/mnt/etc/rc.local <<EOF
 if systemctl is-active mpd >/dev/null; then
@@ -328,20 +347,7 @@ if systemctl is-active mpd >/dev/null; then
 fi
 
 EOF
-### Setup RompR
-        mkdir -p /mnt/etc/nginx/sites-available /mnt/etc/nginx/sites-enabled
-        sed -i '$i include /etc/nginx/sites-enabled/*;' /mnt/etc/nginx/nginx.conf
-        curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/mnt/etc/nginx/sites-available/rompr
-        curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cantata_nginx >/mnt/etc/nginx/sites-available/cantata
-        sed -i 's/hostname/'"${hostname,,}"'/' /mnt/etc/nginx/sites-available/rompr
-        sed -i 's/hostname/'"${hostname,,}"'/' /mnt/etc/nginx/sites-available/cantata
-        sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /mnt/etc/php/php.ini
-        sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /mnt/etc/php/php.ini
-        sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /mnt/usr/lib/systemd/system/nginx.service
-        arch-chroot /mnt ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
-        arch-chroot /mnt chmod 644 /etc/nginx/sites-enabled/rompr
 ### Start mpd.. etc. service
-        arch-chroot /mnt systemctl enable mpd nginx php-fpm avahi-daemon
         arch-chroot /mnt systemctl disable mpd.socket
         arch-chroot /mnt usermod -aG optical mpd
         ;;
