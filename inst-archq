@@ -179,14 +179,14 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 
 echo -e "\n${c_red_b}Install Arch Linux package ...${c_gray}\n"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
-        vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop iwd \
+        vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop iwd nocache \
         which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
         fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms \
         confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
         nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl libconfig faad2 libmad \
-        openmpi fftw boost openpmix ncmpcpp hwloc taglib lua \
+        openmpi fftw boost openpmix hwloc taglib lua \
         perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious \
-        alsa-lib ffmpeg mympd ncmpcpp mpc rc-local \
+        alsa-lib ffmpeg ncmpcpp mpc rc-local \
         atomicparsley glyr imagemagick libao libdiscid libxslt opusfile schedtool srt vorbis-tools \
         python-chardet python-idna python-lxml python-requests python-urllib3
 
@@ -383,10 +383,6 @@ cp /archq/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst /archq/alsa-utils-1.2.8-1-x86_64.p
 cp /archq/qt5-base-5.15.9+kde+r151-1-x86_64.pkg.tar.zst /archq/kid3-common-3.9.3-2-x86_64.pkg.tar.zst /archq/double-conversion-3.2.1-1-x86_64.pkg.tar.zst /mnt/root
 arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /root/qt5-base-5.15.9+kde+r151-1-x86_64.pkg.tar.zst /root/kid3-common-3.9.3-2-x86_64.pkg.tar.zst /root/double-conversion-3.2.1-1-x86_64.pkg.tar.zst
-
-# Other package
-arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nocache-1.2-1-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm /root/nocache-1.2-1-x86_64.pkg.tar.zst
 
 pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
 cat >>/mnt/etc/rc.local <<EOF
