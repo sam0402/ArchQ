@@ -186,7 +186,7 @@ pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-
         nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl libconfig faad2 libmad \
         openmpi fftw boost openpmix hwloc taglib lua \
         perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious \
-        alsa-lib ffmpeg ncmpcpp mpc rc-local \
+        alsa-lib ffmpeg mympd ncmpcpp mpc rc-local \
         atomicparsley glyr imagemagick libao libdiscid libxslt opusfile schedtool srt vorbis-tools \
         python-chardet python-idna python-lxml python-requests python-urllib3
 
