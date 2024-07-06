@@ -78,7 +78,7 @@ ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
 player=N
-server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS M "& myMPD" N "MPD & RompR" R Roon N None) || exit 1; clear
+server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS M "MPD &myMPD" N "MPD &RompR" R Roon N None) || exit 1; clear
 case $server in
     L)
         player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
