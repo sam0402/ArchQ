@@ -23,6 +23,7 @@ curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sw >/usr/bin
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd_inst.sh >/usr/bin/mpd_inst.sh
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/usr/bin/qboot
 curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mboot >/usr/bin/mboot
+curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/qobuz2cddb.py >/usr/bin/qobuz2cddb.py
 # [ -f /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst ] || wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
 #  pacman -R --noconfirm alsa-utils; pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
 #  pacman -Sd --noconfirm alsa-utils
