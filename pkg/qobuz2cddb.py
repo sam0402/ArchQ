@@ -41,7 +41,7 @@ def album_title(soup):
     return soup.find('h1', attrs={'class':'album-meta__title'}).text
 
 def album_artist(soup):
-    return soup.find('h2', attrs={'class':'album-meta__artist'}).text
+    return soup.find('span', attrs={'class':'album-meta__artist'}).text
 
 def track_year(soup):
     return soup.find('li', attrs={'class':'album-meta__item'}).text
