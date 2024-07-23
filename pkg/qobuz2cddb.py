@@ -65,7 +65,7 @@ if __name__ == "__main__":
         webpage = open(url,'r').read()
     soup = BeautifulSoup(webpage, "lxml")
 
-    album = album_title(soup)
+    album = album_title(soup).strip().split("\n")[0]
     titles = track_titles(soup)
     nums = track_nums(soup)
     t_artists = track_artists(soup)
