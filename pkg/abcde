@@ -678,7 +678,7 @@ splitvarious ()
 		TRACKARTIST="Various"
 	else
 		TRACKARTIST="$DARTIST"
-		TRACKCOMPOSER="$COMPOSER"
+		TRACKCOMPOSER="$DCOMPOSER"
 	fi
 }
 
@@ -2854,6 +2854,8 @@ do_cddb_read ()
 			$CDDBTOOL read "$CDDBURL" "$CDDBPROTO" "$CDDBUSER" "$CDDBHOST" \
 					  $(cut -f2,3 -d' ' "${SOURCE_WORKDIR}/cddbquery") \
 					  > "${SOURCE_WORKDIR}/cddbread.${NUM_CDDB_MATCHES}"
+			sed -i '/DTITLE=/a DCOMPOSER=' "${SOURCE_WORKDIR}/cddbread.${NUM_CDDB_MATCHES}"
+			sed -i '/DGENRE=/a DCATALOGNO=' "${SOURCE_WORKDIR}/cddbread.${NUM_CDDB_MATCHES}"
 			cat "${SOURCE_WORKDIR}/cddbquery" | cut -f2- -d' ' > "${SOURCE_WORKDIR}/cddbquery.${NUM_CDDB_MATCHES}"
 			echo "cddb" > "${SOURCE_WORKDIR}/datasource.${NUM_CDDB_MATCHES}"
 			echo "cddb-read-${NUM_CDDB_MATCHES}-complete" >> "${ABCDETEMPDIR}/status"
@@ -2877,6 +2879,8 @@ do_cddb_read ()
 						$CDDBTOOL read "$CDDBURL" "$CDDBPROTO" "$CDDBUSER" "$CDDBHOST" \
 								  $(echo "$DISCINFO" | cut -f1,2 -d' ') \
 								  > "${SOURCE_WORKDIR}/cddbread.${NUM_CDDB_MATCHES}"
+						sed -i '/DTITLE=/a DCOMPOSER=' "${SOURCE_WORKDIR}/cddbread.${NUM_CDDB_MATCHES}"
+						sed -i '/DGENRE=/a DCATALOGNO=' "${SOURCE_WORKDIR}/cddbread.${NUM_CDDB_MATCHES}"
 						echo "$DISCINFO" > "${SOURCE_WORKDIR}/cddbquery.${NUM_CDDB_MATCHES}"
 						echo "cddb" > "${SOURCE_WORKDIR}/datasource.${NUM_CDDB_MATCHES}"
 						echo "cddb-read-${NUM_CDDB_MATCHES}-complete" >> "${ABCDETEMPDIR}/status"

@@ -104,11 +104,11 @@ with open(dbfile, "r+") as file:
 
     file.write(f"DTITLE={artist.strip()} / {album.strip()}\n")
     # file.write(f"COMPOSER={album.strip().split(':')[0]}\n")
-    file.write(f"COMPOSER={composer}\n")
+    file.write(f"DCOMPOSER={composer}\n")
     file.write(f"DYEAR={year}\n")
     file.write(f"DGENRE={metas[-1].strip()}\n")
     # print(f"DGENRE={metas[4].strip()}\n")
-    file.write(f"CATALOGNO={catalog_no}\n")
+    file.write(f"DCATALOGNO={catalog_no}\n")
 
     ### Track Name
     discount = 0
