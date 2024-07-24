@@ -3,6 +3,7 @@ import requests
 import glob
 import re
 import argparse
+import urllib.parse
 from bs4 import BeautifulSoup
 from itertools import count
 
@@ -49,6 +50,9 @@ def track_year(soup):
 def album_cover(soup):
     return soup.find('img', attrs={'class':'album-cover__image'})
 
+def album_no(soup):
+    return soup.find('div', attrs={'class':'c-product-block__metadata'}).text if soup.find('div', attrs={'class':'c-product-block__metadata'}) else ''
+
 # def album_description(soup):
 #     return soup.find('p', attrs={'class':'album-info__text'}).text
 
@@ -74,8 +78,17 @@ if __name__ == "__main__":
     # durations = track_durations(soup)
     artist = album_artist(soup)
     composer = metas[len(metas)-3].strip()
+    label = metas[len(metas)-2].strip().split()[0]
     year = re.findall("\d+", track_year(soup))[-1]
     # description = album_description(soup)
+
+    # Query Catalog No from Prestomusic
+    query = album + ' ' + artist + ' ' + label + ' FLAC'
+    catalogurl = "https://www.prestomusic.com/classical/search?search_query=" + urllib.parse.quote(query)
+    catalog = requests.get(catalogurl, headers=HEADERS).content
+    catalog_soup = BeautifulSoup(catalog, "lxml")
+    if album_no(catalog_soup):
+        catalog_no = album_no(catalog_soup).strip().split("\n")[3].split(": ")[1]
 
 dbfile=glob.glob(rf"{args.workpath}/cddbread.0")[0]
 
@@ -94,6 +107,7 @@ with open(dbfile, "r+") as file:
     file.write(f"DYEAR={year}\n")
     file.write(f"DGENRE={metas[-1].strip()}\n")
     # print(f"DGENRE={metas[4].strip()}\n")
+    file.write(f"CATALOGNO={catalog_no}\n")
 
     ### Track Name
     discount = 0
