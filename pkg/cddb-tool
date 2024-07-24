@@ -137,6 +137,7 @@ parse)	# takes 1 argument, a filename, and dumps out a sh parseable version
 	DARTISTALBUM="$(grep -a ^DTITLE= "$CDDBFILE" | cut -f2- -d= | tr -d \\n | sed 's- / -~-g' | tr -d \[:cntrl:\])"
 	DARTIST="$(echo "$DARTISTALBUM" | cut -f1 -d~ | sed 's,\\,\\\\,g;s,\([\"\$\`]\),\\\1,g' | tr -d \[:cntrl:\])"
 	DALBUM="$(echo "$DARTISTALBUM" | cut -f2 -d~ | sed 's,\\,\\\\,g;s,\([\"\$\`]\),\\\1,g' | tr -d \[:cntrl:\])"
+	DCOMPOSER=$(grep -a '^DCOMPOSER=' "$CDDBFILE" | cut -f2- -d= | tr -d \[:cntrl:\])
 	CDDBGENRE="$(grep -a '^#CATEGORY=' "$CDDBFILE" | cut -f2- -d= | tr -d \[:cntrl:\])"
 	if grep -a "^DYEAR" "$CDDBFILE" 2>&1 > /dev/null ; then
 		CDYEAR=$(grep -a "^DYEAR" "$CDDBFILE" | cut -f2- -d= | tr -d \[:cntrl:\])
@@ -146,9 +147,8 @@ parse)	# takes 1 argument, a filename, and dumps out a sh parseable version
 		CDYEAR=""
 	fi
 	CDGENRE=$(grep -a '^DGENRE=' "$CDDBFILE" | cut -f2- -d= | tr -d \[:cntrl:\])
-	DCOMPOSER=$(grep -a '^DCOMPOSER=' "$CDDBFILE" | cut -f2- -d= | tr -d \[:cntrl:\])
-	DCATALOGNO=$(grep -a '^DCATALOGNO=' "$CDDBFILE" | cut -f2- -d= | tr -d \[:cntrl:\])
-	
+	DCATALOGNO=$(grep -a "^DCATALOGNO=" "$CDDBFILE" | cut -f2- -d= | tr -d \[:cntrl:\])
+
 	set +e
 	echo DISCID="\"$DISCID\""
 	echo DALBUM="\"$DALBUM\""

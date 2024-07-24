@@ -2472,7 +2472,6 @@ do_cddbparse ()
 			echo "$TRACK": "$(grep -a ^TTITLE$(($TRACK - 1))= "${CDDBPARSEFILE}" | cut -f2- -d= | tr -d \\r\\n)"
 		done
 	fi
-	CATALOGNO="."$(grep -a DCATALOGNO "${CDDBPARSEFILE}" | cut '-d=' -f2-)
 }
 
 # do_localcddb_read
