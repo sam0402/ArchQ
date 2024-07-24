@@ -87,6 +87,7 @@ if __name__ == "__main__":
     catalogurl = "https://www.prestomusic.com/classical/search?search_query=" + urllib.parse.quote(query)
     catalog = requests.get(catalogurl, headers=HEADERS).content
     catalog_soup = BeautifulSoup(catalog, "lxml")
+    catalog_no = ''
     if album_no(catalog_soup):
         catalog_no = album_no(catalog_soup).strip().split("\n")[3].split(": ")[1]
 
