@@ -68,8 +68,8 @@ else
 		fi
 		if systemctl is-active owntone >/dev/null; then
 			chrt -p 95 $(ps H -q $(pidof -s mpd) -o 'tid,comm' | grep Multi | awk '{print $1}')
-			chrt -p 45 $(ps H -q `pidof -s owntone` -o tid,comm | grep player | awk '{print $1}')
-			chrt -p 40 $(ps H -q `pidof -s owntone` -o tid,comm | grep input | awk '{print $1}')
+			chrt -p 94 $(ps H -q `pidof -s owntone` -o tid,comm | grep player | awk '{print $1}')
+			chrt -p 92 $(ps H -q `pidof -s owntone` -o tid,comm | grep input | awk '{print $1}')
 			mpc enable Multiroom >/dev/null
 		fi
 		systemctl is-active owntone >/dev/null && mpc enable Multiroom >/dev/null || mpc disable Multiroom Stream >/dev/null
