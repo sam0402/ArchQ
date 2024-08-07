@@ -64,10 +64,12 @@ else
 			chrt -p 95 $(ps H -q $(pidof -s mpd) -o 'tid,comm' | grep ArchQ | awk '{print $1}')
 			chrt -fp 85 $(pgrep mpd)
 			chrt -fp 54 $(pgrep ksoftirqd/$(ps -eLo comm,cpuid| grep "output:"|awk '{print $2}'))
+			mpc disable Multiroom Stream >/dev/null
 		fi
 		if systemctl is-active owntone >/dev/null; then
 			chrt -p 35 $(ps H -q `pidof -s owntone` -o tid,comm | grep player | awk '{print $1}')
 			chrt -p 30 $(ps H -q `pidof -s owntone` -o tid,comm | grep input | awk '{print $1}')
+			mpc enable Multiroom >/dev/null
 		fi
 		systemctl is-active owntone >/dev/null && mpc enable Multiroom >/dev/null || mpc disable Multiroom Stream >/dev/null
 
