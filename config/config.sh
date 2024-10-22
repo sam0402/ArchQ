@@ -1,27 +1,37 @@
 #!/bin/bash
 [ -f /root/.update ] || echo 0 >/root/.update
 num=$(cat /root/.update)
-git=$(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/update)
+gitupd=$(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/update)
 
 temp=$(sensors | grep 'Core 0' | awk '{print $3}')
 ipaddr=$(ip -o addr | grep en | awk 'NR == 1 {print $4}')
 MENU=''
-[ $git -gt $num ] && MENU+='U Update '
+[ $gitupd -gt $num ] && MENU+='U Update '
 pacman -Q mpd-light >/dev/null 2>&1 && MENU+='D MPD '
 pacman -Q mpd-ffmpeg >/dev/null 2>&1 && MENU+='D MPD ' 
 pacman -Q squeezelite >/dev/null 2>&1 && MENU+='S Squeezelite '
 pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='A Airplay '
-if pacman -Q ffmpeg >/dev/null 2>&1; then
-    [[ $(pacman -Q ffmpeg) != 'ffmpeg 2:5.1.2-12' ]] || [[ -d '/opt/RoonServer' ]] && MENU+='F FFmpeg '
-fi
 
-uname -r | grep -q evl && MENU2='X Desktop C "CPU frequency" T Timezone ' \
-    || MENU2='M "Partition mount" N "NFS mount" B "SMB/CIFS mount" P Player O Server I "Service mode" J "Sync backup" R "abCDe ripper" G "Data cache" C "CPU frequency" Z "Zero Wipe" V "NFS Server" Y Bcache T Timezone '
-find /dev/disk/by-id/usb-* | grep -q 'usb' && MENU2+='W "HDD Poweroff" '
-exec='dialog --stdout --title "'$ipaddr'  '$temp'" --menu "'$HOSTNAME'.local  Config" 7 0 0 '$MENU'K Kernel E Network '$MENU2
+if [ -f /root/.advence ]; then
+   MENU2='R "abCDe ripper" P Player O Server I "Service mode" J "Sync backup" G "Data cache" C "CPU frequency" Z "Zero Wipe" N "NFS mount" B "SMB/CIFS mount" V "NFS Server" E Network Y Bcache T Timezone '
+	find /dev/disk/by-id/usb-* | grep -q 'usb' && MENU2+='W "HDD Poweroff" '
+	if pacman -Q ffmpeg >/dev/null 2>&1; then
+    [[ $(pacman -Q ffmpeg) != 'ffmpeg 2:5.1.2-12' ]] || [[ -d '/opt/RoonServer' ]] && MENU2+='F FFmpeg '
+	fi
+fi
+[ -f /root/.advence ] && MENU2+='0 "Basic config" ' || MENU2+='1 "Advence config" '
+uname -r | grep -q evl && MENU2='X Desktop C "CPU frequency" T Timezone '
+
+exec='dialog --stdout --title "'$ipaddr'  '$temp'" --menu "'$HOSTNAME'.local  Config" 7 0 0 '$MENU'K Kernel M "Partition mount" '$MENU2
 
 options=$(eval $exec) || exit 1; clear
 case $options in
+	0)
+        rm /root/.advence; /usr/bin/config.sh
+        ;;
+	1)
+        touch /root/.advence; /usr/bin/config.sh
+        ;;
     A)
         /usr/bin/shairport-cfg.sh $Qver
         ;;
