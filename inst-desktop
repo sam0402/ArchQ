@@ -255,9 +255,18 @@ arch-chroot /mnt chown -R ${user}: /home/$user/.vnc
 arch-chroot /mnt systemctl enable vncserver@:1.service
 [ $desktop = V ] || arch-chroot /mnt systemctl enable lxdm
 
-## server
 mkdir /mnt/home/$user/Desktop
 arch-chroot /mnt chown -R ${user}: /home/$user/Desktop
+cat >>/mnt/home/$user/Desktop/Config.desktop <<EOF
+[Desktop Entry]
+Encoding=UTF-8
+Name=Config
+Type=Application
+Terminal=true
+Exec=/usr/bin/config.sh
+EOF
+
+## server
 case $server in
     L)
         echo -e "\n${c_red_b}Install Logitech Media Server ...${c_gray}\n"
@@ -265,7 +274,7 @@ case $server in
         arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
         sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         arch-chroot /mnt systemctl enable logitechmediaserver
-        cat >>/mnt/home/$user/Desktop/lms <<EOF
+        cat >>/mnt/home/$user/Desktop/lms.desktop <<EOF
 [Desktop Entry]
 Encoding=UTF-8
 Name=Logitech Media Server
@@ -288,7 +297,7 @@ EOF
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
 #### add priority for MPD
-        cat >>/mnt/home/$user/Desktop/myMPD <<EOF
+        cat >>/mnt/home/$user/Desktop/myMPD.desktop <<EOF
 [Desktop Entry]
 Encoding=UTF-8
 Name=myMPD
@@ -361,8 +370,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/usb-storage-mount.sh >/mnt/usr/bin/usb-storage-mount.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/90-usb-storage-automount.rules >/mnt/etc/udev/rules.d/90-usb-storage-automount.rules
-chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot
-arch-chroot /mnt ln -sf /usr/bin/config.sh /home/$user/Desktop/.
+chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/home/$user/Desktop/*.desktop
 
 cat >>/mnt/home/${user}/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
