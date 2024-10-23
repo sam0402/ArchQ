@@ -78,7 +78,7 @@ ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
 player=N
-server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS M "MPD &myMPD" N "MPD &RompR" R Roon N None) || exit 1; clear
+server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS M "MPD &myMPD" O "MPD &RompR" R Roon N None) || exit 1; clear
 case $server in
     L)
         player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
@@ -186,7 +186,7 @@ pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-
         nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl libconfig faad2 libmad \
         openmpi fftw boost openpmix hwloc taglib lua \
         perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious \
-        alsa-lib ffmpeg mympd ncmpcpp mpc rc-local \
+        alsa-lib ffmpeg ncmpcpp mpc rc-local \
         atomicparsley glyr imagemagick libao libdiscid libxslt opusfile schedtool srt vorbis-tools \
         python-chardet python-idna python-lxml python-requests python-urllib3
 
@@ -305,7 +305,7 @@ case $server in
         sed -i 's/exec "$HARDLINK" "$SCRIPT.dll" "$@"/exec nice -n -20 "$HARDLINK" "$SCRIPT.dll" "$@"/g' /mnt/opt/RoonServer/Appliance/RAATServer
         arch-chroot /mnt systemctl enable roonserver
         ;;
-    M|N)
+    M|O)
         echo -e "\n${c_red_b}Install MPD ...${c_gray}\n"
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.13-4-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
@@ -469,9 +469,9 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mboot >/mnt/usr/bin/mboot
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sw >/mnt/usr/bin/sw
-curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/mnt/usr/bin/pagecache-management.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/usb-storage-mount.sh >/mnt/usr/bin/usb-storage-mount.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/90-usb-storage-automount.rules >/mnt/etc/udev/rules.d/90-usb-storage-automount.rules
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/mnt/usr/bin/pagecache-management.sh
 arch-chroot /mnt wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/mboot /mnt/usr/bin/sw
 

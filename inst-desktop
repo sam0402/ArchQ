@@ -73,7 +73,10 @@ ifgw=$(echo $ifconfig | cut -d' ' -f3)
 ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
-desktop=$(dialog --stdout --title "ArchQ Desktop" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt V "VNC only") || exit 1
+desktop=$(dialog --stdout --title "ArchQ Desktop" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt V "VNC only") || exit 1; clear
+server=$(dialog --stdout --title "ArchQ Desktop" --menu "Select music server" 7 0 0 L LMS M "MPD" N None) || exit 1; clear
+### select sound card
+scard="hw:0,0"
 
 ### Set up logging ###
 exec 1> >(tee "stdout.log")
@@ -91,8 +94,8 @@ if [ $fmt = P ]; then
     # Rebuild partition if EFI < 200MB
     if [ $(lsblk $part_boot -pln -o size | tr -d [:alpha:]) -lt 200 ]; then
         boot_start=$(parted $device 'unit s' print | grep "^ ${part_root:0-1}" | tail -1 | awk -F '[[:space:]]*' '{ print $3 }')
-        boot_end=$(expr ${boot_start::-1} + 524287)s
-        root_start=$(expr ${boot_start::-1} + 524288)s
+        boot_end=$(expr ${boot_start::-1} + 786431)s
+        root_start=$(expr ${boot_start::-1} + 786432)s
         parted --script "${device}" -- \
             rm "${part_root:0-1}" \
             mkpart EFI fat32 $boot_start $boot_end \
@@ -109,9 +112,9 @@ else
     root_size=5800
     root_end=$(( $root_size + 257 + 1 ))MiB
   parted --script "${device}" -- mklabel gpt \
-        mkpart EFI fat32 1Mib 257MiB \
+        mkpart EFI fat32 1Mib 385MiB \
     set 1 boot on \
-        mkpart ArchQ ext4 257MiB ${root_end}
+        mkpart ArchQ ext4 385MiB ${root_end}
         # mkpart Database ext4 ${root_end} 100%
 
 # Simple globbing was not enough as on one device I needed to match /dev/mmcblk0p1 
@@ -137,8 +140,12 @@ echo -e "\n${c_red_b}Download Arch Linux package and install ...${c_gray}\n"
 lxd=''
 [ $desktop = D ] && lxd="lxdm noto-fonts-cjk midori cantata fcitx5-im fcitx5-configtool falkon lxde lxpanel"
 [ $desktop = Q ] && lxd="lxdm noto-fonts-cjk midori cantata fcitx5-im fcitx5-configtool falkon lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
-pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient alsa-lib \
-        vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm iwd \
+pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
+        vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop iwd nocache \
+        which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
+        fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms \
+        perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious \
+        alsa-lib rc-local\
         tigervnc upplay xf86-video-fbdev audacious deadbeef-static ${lxd}
 [ $desktop = D ] && arch-chroot /mnt pacman -R --noconfirm lxmusic
 [ $desktop = Q ] && arch-chroot /mnt pacman -R --noconfirm lxqt-powermanagement
@@ -146,7 +153,7 @@ pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
 cat >>/mnt/etc/fstab <<EOF
-none /tmp tmpfs nodev,nosuid,noexec,mode=1777 0 0
+none /tmp tmpfs nodev,nosuid,mode=1777 0 0
 none /var/log tmpfs nodev,nosuid,noexec,size=10M 0 0
 none /var/tmp tmpfs nodev,nosuid,noexec,size=20M 0 0
 EOF
@@ -167,7 +174,6 @@ echo "LANG=en_US.UTF-8" > /mnt/etc/locale.conf
 arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime
 [ $lang = J ] && arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 
-echo "root:$password" | chpasswd
 # echo "$user:$password" | chpasswd --root /mnt
 arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
 # echo "root:$password" | chpasswd --root /mnt
@@ -195,18 +201,33 @@ else
 fi
     arch-chroot /mnt systemctl enable systemd-networkd
 
+## Add Ethernet dectect to rc.local
+sed -i '$d' /mnt/etc/rc.local
+cat >>/mnt/etc/rc.local <<EOF
+# ethernet auto detect
+while read ether; do
+    npath='/etc/systemd/network/'
+    if [ ! -f "\$npath""10-\${ether}.network" ]; then
+        cd \$npath
+        source=\$(ls 10-en*.network | head -n 1)
+        cp \$source 10-\${ether}.network
+        sed -i 's/Name=.*/Name='"\$ether"'/' 10-\${ether}.network
+        systemctl restart systemd-networkd
+        cd -
+    fi
+done <<< \$(ip -o link show | awk '{print \$2,\$9}' | grep '^en' | sed 's/://' | awk '{print \$1}')
+sleep 1
+
+EOF
+
 ### Kernel
 echo -e "\n${c_red_b}Install ArchQ Kernel ...${c_gray}\n"
-ker=evl; kver='6.1.54-12'
+ker=D88; kver='6.6.17-12'
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll acpi_pm_good nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
 /mnt/etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
-
-# Add /etc/rc.local
-arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rc-local-4-1-any.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm /root/rc-local-4-1-any.pkg.tar.zst
 
 ### Setup Desktop (LXDE || LDQT)
 echo "LANG=en_US.UTF-8" >/mnt/home/$user/.xinitrc
@@ -232,33 +253,73 @@ arch-chroot /mnt chmod 600 /home/$user/.vnc/passwd
 arch-chroot /mnt chown -R ${user}: /home/$user/.vnc
 arch-chroot /mnt systemctl enable vncserver@:1.service
 [ $desktop = V ] || arch-chroot /mnt systemctl enable lxdm
+
+## server
+case $server in
+    L)
+        echo -e "\n${c_red_b}Install Logitech Media Server ...${c_gray}\n"
+        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
+        arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
+        sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/logitechmediaserver.service
+        arch-chroot /mnt systemctl enable logitechmediaserver
+        cat >>/mnt/home/${user}/Desktop/lms <<EOF
+[Desktop Entry]
+Encoding=UTF-8
+Name=Logitech Media Server
+Type=Link
+URL=http://localhost:9000/
+Icon=text-html
+EOF
+        ;;
+    M)
+        echo -e "\n${c_red_b}Install MPD ...${c_gray}\n"
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.13-4-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.13-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
+        ### Install myMPD
+        if [[ $server == M ]]; then
+            arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm /root/mympd-12.1.1-1-x86_64.pkg.tar.zst
+            arch-chroot /mnt systemctl enable mpd mympd
+        fi
+### setup mpd
+        [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
+#### add priority for MPD
+        cat >>/mnt/home/${user}/Desktop/myMPD <<EOF
+[Desktop Entry]
+Encoding=UTF-8
+Name=myMPD
+Type=Link
+URL=https://localhost/
+Icon=text-html
+EOF
+
+        cat >>/mnt/etc/rc.local <<EOF
+if systemctl is-active mpd >/dev/null; then
+    chrt -p 93 \$(ps H -q \`pidof -s mpd\` -o tid,cls | grep FF | awk '{print \$1}')
+    chrt -p 95 \$(ps H -q \`pidof -s mpd\` -o tid,comm | grep ArchQ | awk '{print \$1}')
+    chrt -fp 85 \`pgrep mpd\`
+fi
+
+EOF
+### Start mpd.. etc. service
+        arch-chroot /mnt systemctl disable mpd.socket
+        arch-chroot /mnt usermod -aG optical mpd
+        ;;
+esac
+
 ### Other setting
 echo -e "\n${c_red_b}Setting service ...${c_gray}\n"
+
+arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A6.0-5-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/ffmpeg-2:6.0-5-x86_64.pkg.tar.zst
 ## Instal alsa-lib-1.1.9
 cp /archq/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst /archq/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /mnt/root
 arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst
 
-# Other package
-arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nocache-1.2-1-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm /root/nocache-1.2-1-x86_64.pkg.tar.zst
-
-sed -i '$i sleep 3' /mnt/etc/rc.local
-sed -i '$d' /mnt/etc/rc.local
 cat >>/mnt/etc/rc.local <<EOF
-# ethernet auto detect
-while read ether; do
-    npath='/etc/systemd/network/'
-    if [ ! -f "\$npath""10-\${ether}.network" ]; then
-        cd \$npath
-        source=\$(ls 10-en*.network | head -n 1)
-        cp \$source 10-\${ether}.network
-        sed -i 's/Name=.*/Name='"\$ether"'/' 10-\${ether}.network
-        systemctl restart systemd-networkd
-        cd -
-    fi
-done <<< \$(ip -o link show | awk '{print \$2,\$9}' | grep '^en' | sed 's/://' | awk '{print \$1}')
-
 # systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
 # systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-udevd 
 # systemctl stop dbus.socket dbus 
@@ -285,18 +346,24 @@ sed -i 's/wait-online/wait-online --any/' /mnt/usr/lib/systemd/system/systemd-ne
 # Desktop auto login
 [ $desktop = V ] || sed -i 's/# autologin=.*/autologin='"$user"'/;s/# timeout=.*/timeout=0/' /mnt/etc/lxdm/lxdm.conf
 ### install config file
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/update >/mnt/root/.update
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/timezone.sh >/mnt/usr/bin/timezone.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/ether-cfg.sh >/mnt/usr/bin/ether-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/kernel-cfg.sh >/mnt/usr/bin/kernel-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/cpu-cfg.sh >/mnt/usr/bin/cpu-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/partimnt-cfg.sh >/mnt/usr/bin/partimnt-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/mnt/usr/bin/update_scpt.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg.sh >/mnt/usr/bin/desktop-cfg.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
-chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot 
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/usb-storage-mount.sh >/mnt/usr/bin/usb-storage-mount.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/90-usb-storage-automount.rules >/mnt/etc/udev/rules.d/90-usb-storage-automount.rules
+chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot
 mkdir /mnt/home/$user/Desktop
 arch-chroot /mnt ln -sf /usr/bin/config.sh /home/$user/Desktop/.
 arch-chroot /mnt chown -R ${user}: /home/$user/Desktop
+
 cat >>/mnt/home/${user}/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
 export KVER=\$(uname -r | cut -d- -f3)
@@ -310,6 +377,7 @@ alias poweroff='sudo systemctl poweroff'
 alias reboot='sudo systemctl reboot'
 alias config='sudo config.sh'
 alias qboot='sudo qboot'
+alias status='systemctl status'
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
 
@@ -323,9 +391,15 @@ alias egrep='egrep --color=auto'
 alias grep='grep --color=auto'
 alias ll='command ls -l --color=auto -v'
 alias ls='command ls --color=auto -v'
+alias df='df -h'
 alias config='config.sh'
+alias status='systemctl status'
 EOF
 arch-chroot /mnt sh -c 'yes | pacman -Scc'
+rm -rf /mnt/etc/pacman.d/gnupg
+arch-chroot /mnt pacman-key --init
+arch-chroot /mnt pacman-key --populate archlinux
+arch-chroot /mnt pacman -Sy
 rm -f /mnt/root/*.tar.zst /mnt/root/*.tar.xz
 # Detect other OS
 if [ -n "$old_efi" ]; then
@@ -335,5 +409,5 @@ if [ -n "$old_efi" ]; then
     arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 fi
 
-dialog --stdout --title "ArchQ Desktop" --pause "\n  ArchQ is installed, unplug the USB driver.\n\n  System will reboot after 10 seconds." 12 50 10; clear
+dialog --stdout --title "ArchQ" --pause "\n  ArchQ is installed, unplug the USB driver.\n\n  System will reboot after 10 seconds." 12 50 10; clear
 reboot
