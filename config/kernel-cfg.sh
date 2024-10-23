@@ -40,7 +40,7 @@ case $WK in
     M)
         while read line; do
             menu+=${line}' '
-        done <<< $(pacman -Q | grep linux-Q | grep -v headers)
+        done <<< $(pacman -Q | grep linux-[DQ] | grep -v headers)
         options=$(dialog --stdout \
                 --title "ArchQ $1" \
                 --menu "Select to remove" 7 0 0 $menu) || exit 1; clear
