@@ -20,7 +20,7 @@ if [ -f /root/.advence ]; then
 	fi
 fi
 [ -f /root/.advence ] && MENU2+='0 "Basic config" ' || MENU2+='1 "Advence config" '
-uname -r | grep -q evl && MENU2='X Desktop C "CPU frequency" T Timezone '
+uname -r | grep -q D && MENU2='X Desktop C "CPU frequency" T Timezone '
 
 exec='dialog --stdout --title "'$ipaddr'  '$temp'" --menu "'$HOSTNAME'.local  Config" 7 0 0 '$MENU'K Kernel M "Partition mount" '$MENU2
 
