@@ -155,9 +155,13 @@ fi
 mdir=$(grep 'music_directory' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 buffer=$(grep 'audio_buffer_size' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 pertime=$(grep 'period_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
-## Ramdisk 
-ramdisk=$(grep 'rdsize=' /usr/bin/mpd-rdcheck.sh | awk -F'=' '{print $2}')
-rd_GB=$(python -c "print(round($ramdisk/1048576,1))")
+
+## Ramdisk
+rd_GB=0
+if [ -f /usr/bin/mpd-rdcheck.sh ]; then
+    ramdisk=$(grep 'rdsize=' /usr/bin/mpd-rdcheck.sh | awk -F'=' '{print $2}')
+    rd_GB=$(python -c "print(round($ramdisk/1048576,1))")
+fi
 ###
 options=$(dialog --stdout \
     --title "ArchQ MPD" \
@@ -180,8 +184,10 @@ else
     touch /tmp/RAMDISK.m3u
     install -Dm 644 -o mpd -g mpd /tmp/RAMDISK.m3u -t /var/lib/mpd/playlists/
 fi
-ramdisk=$(python -c "print(int($rd_GB*1048576))")
-sed -i 's/rdsize=.*/rdsize='"$ramdisk"'/' /usr/bin/mpd-rdcheck.sh
+if [ -f /usr/bin/mpd-rdcheck.sh ]; then
+    ramdisk=$(python -c "print(int($rd_GB*1048576))")
+    sed -i 's/rdsize=.*/rdsize='"$ramdisk"'/' /usr/bin/mpd-rdcheck.sh
+fi
 sed -i 's/^#\?audio_buffer_size.*"/audio_buffer_size\t"'"$beffer"'"/' $config
 sed -i 's/^#\?.* \?\tbuffer_time.*"/\tbuffer_time\t"'"$buftime"'"/;s/^#\?.* \?\tperiod_time.*"/\tperiod_time\t"'"$pertime"'"/' $config
 sed -i 's/^#\?music_directory.*"/music_directory\t"\/mnt\/'"$mdir"'"/' $config
