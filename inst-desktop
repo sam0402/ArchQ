@@ -4,6 +4,9 @@
 #   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/inst-desktop | bash
 set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
+
+ker=D44; kver='6.6.17-12'
+
 c_blue_b=$'\e[1;38;5;27m'
 c_green_b=$'\e[1;38;5;46m'
 c_red_b=$'\e[1;38;5;196m'
@@ -136,7 +139,7 @@ mount "${part_boot}" /mnt/boot
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 [ -f /mnt/boot/${cpu}-ucode.img ] || pacstrap /mnt ${cpu}-ucode
 
-echo -e "\n${c_red_b}Download Arch Linux package and install ...${c_gray}\n"
+echo -e "\n${c_blue_b}Download Arch Linux package and install ...${c_gray}\n"
 lxd=''
 [ $desktop = D ] && lxd="lxdm noto-fonts-cjk midori cantata fcitx5-im fcitx5-configtool falkon lxde lxpanel"
 [ $desktop = Q ] && lxd="lxdm noto-fonts-cjk midori cantata fcitx5-im fcitx5-configtool falkon lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
@@ -144,9 +147,8 @@ pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-
         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop iwd nocache \
         which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
         fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms \
-        libid3tag taglib lua \
         perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious \
-        alsa-lib mpc rc-local\
+        alsa-lib mpc rc-local libid3tag taglib lua \
         tigervnc upplay xf86-video-fbdev audacious deadbeef-static ${lxd}
 [ $desktop = D ] && arch-chroot /mnt pacman -R --noconfirm lxmusic
 [ $desktop = Q ] && arch-chroot /mnt pacman -R --noconfirm lxqt-powermanagement
@@ -222,8 +224,7 @@ sleep 1
 EOF
 
 ### Kernel
-echo -e "\n${c_red_b}Install ArchQ Kernel ...${c_gray}\n"
-ker=D88; kver='6.6.17-12'
+echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll acpi_pm_good nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime hpet=disable intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
@@ -269,7 +270,7 @@ EOF
 ## server
 case $server in
     L)
-        echo -e "\n${c_red_b}Install Logitech Media Server ...${c_gray}\n"
+        echo -e "\n${c_blue_b}Install Logitech Media Server ...${c_gray}\n"
         arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
         arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
         sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/logitechmediaserver.service
@@ -284,7 +285,7 @@ Icon=text-html
 EOF
         ;;
     M)
-        echo -e "\n${c_red_b}Install MPD ...${c_gray}\n"
+        echo -e "\n${c_blue_b}Install MPD ...${c_gray}\n"
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-light-0.23.13-4-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-light-0.23.13-4-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
@@ -321,7 +322,7 @@ EOF
 esac
 
 ### Other setting
-echo -e "\n${c_red_b}Setting service ...${c_gray}\n"
+echo -e "\n${c_blue_b}Setting service ...${c_gray}\n"
 
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A6.0-5-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/ffmpeg-2:6.0-5-x86_64.pkg.tar.zst
