@@ -238,8 +238,8 @@ echo "LANG=en_US.UTF-8" >/mnt/home/$user/.xinitrc
 echo "GTK_IM_MODULE=fcitx" >>/mnt/etc/environment
 echo "QT_IM_MODULE=fcitx" >>/mnt/etc/environment
 echo "XMODIFIERS=@im=fcitx" >>/mnt/etc/environment
-arch-chroot /mnt ln -s /usr/bin/qterminal /usr/bin/xterm
-
+[ $desktop = D ] && arch-chroot /mnt ln -s /usr/bin/lxterminal /usr/bin/xterm
+[ $desktop = Q ] && arch-chroot /mnt ln -s /usr/bin/qterminal /usr/bin/xterm
 [ $desktop = D ] && sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
 [ $desktop = Q ] && sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxqt;g' /mnt/etc/lxdm/lxdm.conf
 
