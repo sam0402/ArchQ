@@ -327,8 +327,8 @@ echo -e "\n${c_blue_b}Setting service ...${c_gray}\n"
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A6.0-5-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/ffmpeg-2:6.0-5-x86_64.pkg.tar.zst
 ## Instal alsa-lib-1.1.9
-cp /archq/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst /archq/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /mnt/root
-arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
+arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst
 
 cat >>/mnt/etc/rc.local <<EOF
