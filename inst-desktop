@@ -148,7 +148,7 @@ pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-
         which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
         fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms \
         perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious \
-        alsa-lib mpc rc-local libid3tag taglib lua \
+        alsa-lib mpc mympd rc-local libid3tag taglib lua \
         tigervnc upplay xf86-video-fbdev audacious deadbeef-static ${lxd}
 [ $desktop = D ] && arch-chroot /mnt pacman -R --noconfirm lxmusic
 [ $desktop = Q ] && arch-chroot /mnt pacman -R --noconfirm lxqt-powermanagement
@@ -327,6 +327,7 @@ echo -e "\n${c_blue_b}Setting service ...${c_gray}\n"
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A6.0-5-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/ffmpeg-2:6.0-5-x86_64.pkg.tar.zst
 ## Instal alsa-lib-1.1.9
+cp /archq/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /mnt/root
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst
