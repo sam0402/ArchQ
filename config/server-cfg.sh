@@ -55,8 +55,9 @@ case $server in
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
             pacman -U --noconfirm /tmp/mpd-*.pkg.tar.zst
             if [[ $server == M ]]; then
-                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
-                pacman -U --noconfirm /tmp/mympd-*.pkg.tar.zst
+                wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-18.1.2-1-x86_64.pkg.tar.zst
+                get -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
+                pacman -U --noconfirm /tmp/mympd-*.pkg.tar.zst libnewt-0.52.24-2-x86_64.pkg.tar.zst
             fi
             if [[ $server == N ]]; then
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
