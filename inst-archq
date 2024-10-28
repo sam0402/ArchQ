@@ -317,8 +317,8 @@ case $server in
         arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.6-1-x86_64.pkg.tar.zst
         ### Install myMPD
         if [[ $server == M ]]; then
-            arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
-            arch-chroot /mnt pacman -U --noconfirm /root/mympd-12.1.1-1-x86_64.pkg.tar.zst
+            arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-18.1.2-1-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm /root/mympd-18.1.2-1-x86_64.pkg.tar.zst
             arch-chroot /mnt systemctl enable mpd mympd
         fi
         ### Setup RompR
