@@ -256,8 +256,8 @@ arch-chroot /mnt chown -R ${user}: /home/$user/.vnc
 arch-chroot /mnt systemctl enable vncserver@:1.service
 [ $desktop = V ] || arch-chroot /mnt systemctl enable lxdm
 
-mkdir /mnt/home/$user/Desktop
-arch-chroot /mnt chown -R ${user}: /home/$user/Desktop
+mkdir /mnt/home/$user/Desktop /mnt/mnt/music
+arch-chroot /mnt chown -R ${user}: /home/$user/Desktop /mnt/mnt/music
 cat >>/mnt/home/$user/Desktop/Config.desktop <<EOF
 [Desktop Entry]
 Encoding=UTF-8
