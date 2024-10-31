@@ -40,8 +40,8 @@ case $WK in
     # mount for root || user
         mntuser=$(dialog --stdout --title "Mount point /mnt/$MP" \
             --radiolist "Set permission to" 7 0 0 \
-             root '　' on \
-            $user '　' off) || exit 1; clear
+            $user '　' off \
+             root '　' on ) || exit 1; clear
 
         [[ $mntuser != root && $FS =~ fat ]] && OP+=',uid=1000,gid=1000'
         [[ $mntuser != root && $FS =~ ntfs ]] && OP+=',uid=1000,gid=1000'
@@ -49,8 +49,8 @@ case $WK in
     # for USB storage
         usb=$(dialog --stdout --title "Mount point /mnt/$MP" \
             --radiolist "USB storage auto mount" 7 0 0 \
-            No '　' on \
-            Yes '　' off) || exit 1; clear
+            Yes '　' off \
+            No '　' on ) || exit 1; clear
 
         [ $usb = Yes ] && tag='#' || tag=''
         [ $usb = Yes ] && OP="noauto,$OP"
