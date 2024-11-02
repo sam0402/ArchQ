@@ -319,7 +319,7 @@ case $server in
         if [[ $server == M ]]; then
             arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-18.1.2-1-x86_64.pkg.tar.zst
             arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
-            arch-chroot /mnt pacman -U --noconfirm /root/mympd-18.1.2-1-x86_64.pkg.tar.zst libnewt-0.52.24-2-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm /root/mympd-18.1.2-1-x86_64.pkg.tar.zst /root/libnewt-0.52.24-2-x86_64.pkg.tar.zst
             arch-chroot /mnt systemctl enable mpd mympd
         fi
         ### Setup RompR
