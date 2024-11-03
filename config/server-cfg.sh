@@ -1,7 +1,7 @@
 #!/bin/bash
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
-server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 L LMS M MyMPD O "MPD & RompR" R Roon \
+server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 L LMS M "MPD &MyMPD" O "MPD &RompR" R Roon \
         5 "HQPlayer Embedded 5" 4 "HQPlayer Embedded 4" P Player) || exit 1; clear
 yes | pacman -Scc
 case $server in
