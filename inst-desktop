@@ -264,7 +264,7 @@ Encoding=UTF-8
 Name=Config
 Type=Application
 Terminal=true
-Exec=bash /usr/bin/config.sh
+Exec=sudo /usr/bin/config.sh
 EOF
 
 ## server
