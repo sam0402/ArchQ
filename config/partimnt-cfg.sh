@@ -49,8 +49,8 @@ case $WK in
     # for USB storage
         usb=$(dialog --stdout --title "Mount point /mnt/$MP" \
             --radiolist "USB storage auto mount" 7 0 0 \
-            Yes '　' on \
-            No '　' off ) || exit 1; clear
+            No '　' on \
+            Yes '　' off ) || exit 1; clear
 
         [ $usb = Yes ] && tag='#' || tag=''
         [ $usb = Yes ] && OP="noauto,$OP"
