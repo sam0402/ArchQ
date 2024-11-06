@@ -77,7 +77,7 @@ ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
 desktop=$(dialog --stdout --title "ArchQ Desktop" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt V "VNC only") || exit 1; clear
-server=$(dialog --stdout --title "ArchQ Desktop" --menu "Select music server" 7 0 0 L LMS M "MPD" N None) || exit 1; clear
+server=$(dialog --stdout --title "ArchQ Desktop" --menu "Select music server" 7 0 0 M MPD L LMS N None) || exit 1; clear
 ### select sound card
 scard="hw:0,0"
 
