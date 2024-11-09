@@ -212,11 +212,11 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 echo -e "\n${c_blue_b}Install Arch Linux package ...${c_gray}\n"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop iwd nocache \
-        which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
+        which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils schedtool srt vorbis-tools \
         alsa-lib ffmpeg rc-local
         # openmpi fftw boost openpmix hwloc taglib \
         # libwmf libjxl \
-        # atomicparsley glyr imagemagick libao libdiscid libxslt opusfile schedtool srt vorbis-tools \
+        # atomicparsley glyr libao libdiscid libxslt opusfile vorbis-tools \
         # python-chardet python-idna python-lxml python-requests python-urllib3
 
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
@@ -339,7 +339,7 @@ case $server in
         [[ $server =~ .S ]] && MPD=stream
         [[ $server =~ .M ]] && MPD=ffmpeg
         echo -e "\n${c_blue_b}Install MPD-${MPD}...${c_gray}\n"
-        pacstrap /mnt fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms ncmpcpp mpc python-mpd2
+        pacstrap /mnt fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms libid3tag ncmpcpp mpc python-mpd2 lua
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-0.23.14-12-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
@@ -352,7 +352,6 @@ case $server in
         if [[ $server =~ y. ]]; then
             arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
             # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
-            pacstrap /mnt lua libid3tag
             arch-chroot /mnt pacman -U --noconfirm /root/mympd-12.1.1-1-x86_64.pkg.tar.zst
             arch-chroot /mnt systemctl enable mpd mympd
         fi
