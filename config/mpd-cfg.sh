@@ -30,7 +30,7 @@ vol_ctrl(){
 MENU=''
 pacman -Q mympd >/dev/null 2>&1 && MENU+='M "myMPD :80" '
 pacman -Q rompr >/dev/null 2>&1 && MENU+='R "RompR :6660" '
-exec='dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 '$MENU'C "Cantata :8080" N "Ncmpcpp ncurses" U "Multi user"'
+exec='dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 '$MENU'C "Cantata :8080" N "Ncmpcpp | Rigelian(iOS)" U "Multi user"'
 client=$(eval $exec)|| exit 1
 clear
 case $client in
