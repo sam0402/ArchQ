@@ -81,31 +81,46 @@ ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
 player=N
-server=$(dialog --stdout --title "ArchQ" --menu "Select music server" 7 0 0 L LMS M "MPD &myMPD" O "MPD &RompR" R Roon N None) || exit 1; clear
+server=$(dialog --stdout --title "ArchQ" \
+            --menu "Select music server or player" 7 0 0 \
+            LMS "Logitech Media Server" \
+            MPD "MPD, Rigelain(iOS) | text-based client" \
+            myMPD "MPD & myMPD web-based client" \
+            RompЯ "MPD & RompЯ web-based client" \
+            Roon "Roon Server" \
+            Player "Squeezelite | Airplay | Roonbridge" ) || exit 1; clear
+
 case $server in
-    L)
+    LMS)
         player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
         ;;
-    N)
+    MPD)
+       server=$(dialog --stdout --title "ArchQ" \
+                --radiolist "Select MPD version" 7 0 0 \
+                mL "Light: pcm, flac" off \
+                mS "Stream: +Light, dsd, radio" on \
+                mM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+        ;;
+    myMPD)
+        server=$(dialog --stdout --title "ArchQ" \
+                --radiolist "Select MPD version" 7 0 0 \
+                yL "Light: pcm, flac" off \
+                yS "Stream: +Light, dsd, radio" on \
+                yM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+        ;;
+    RompЯ)
+       server=$(dialog --stdout --title "ArchQ" \
+                --radiolist "Select MPD version" 7 0 0 \
+                oL "Light: pcm, flac" off \
+                oS "Stream: +Light, dsd, radio" on \
+                oM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+        ;;
+    Player)
         player=$(dialog --stdout --title "ArchQ" \
                 --checklist "Select music player" 7 0 0 \
                 S Squeezelite on \
                 A Airplay off \
                 R Roonbridge off ) || exit 1
-        ;;
-    M)
-        server=$(dialog --stdout --title "ArchQ" \
-                --radiolist "Select MPD version" 7 0 0 \
-                ML "Light: pcm, flac" off \
-                MS "Stream: +Light, dsd, radio" on \
-                MM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
-        ;;
-    O)
-       server=$(dialog --stdout --title "ArchQ" \
-                --radiolist "Select MPD version" 7 0 0 \
-                OL "Light: pcm, flac" off \
-                OS "Stream: +Light, dsd, radio" on \
-                OM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
         ;;
 esac
 clear
@@ -181,7 +196,7 @@ mkdir /mnt/boot
 mount "${part_boot}" /mnt/boot
 
 ## Roon server data partition
-if [ $server = R ]; then
+if [ $server = Roon ]; then
     parted --script "${device}" -- \
         mkpart Database ext4 ${root_end} 100%
     part_data="$(ls ${device}* | grep -E "^${device}p?3$")"
@@ -198,14 +213,11 @@ echo -e "\n${c_blue_b}Install Arch Linux package ...${c_gray}\n"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop iwd nocache \
         which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
-        fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms \
-        confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
-        nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl libconfig faad2 libmad \
-        openmpi fftw boost openpmix hwloc taglib lua \
-        perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious \
-        alsa-lib ffmpeg mympd ncmpcpp mpc rc-local \
-        atomicparsley glyr imagemagick libao libdiscid libxslt opusfile schedtool srt vorbis-tools \
-        python-chardet python-idna python-lxml python-requests python-urllib3
+        alsa-lib ffmpeg rc-local
+        # openmpi fftw boost openpmix hwloc taglib \
+        # libwmf libjxl \
+        # atomicparsley glyr imagemagick libao libdiscid libxslt opusfile schedtool srt vorbis-tools \
+        # python-chardet python-idna python-lxml python-requests python-urllib3
 
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
@@ -295,15 +307,16 @@ cpus=$(lscpu | grep 'Core(s) per socket:' | cut -d ':' -f2)
 iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
 #cpus=$(getconf _NPROCESSORS_ONLN)
 isocpu=''
-[ $cpus -ge 4 ] && [[ $server = L || $player =~ S ]] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
-[ $cpus -ge 6 ] && [ $server = L ] && [[ $player =~ S ]] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
+[ $cpus -ge 4 ] && [[ $server = LMS || $player =~ S ]] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
+[ $cpus -ge 6 ] && [ $server = LMS ] && [[ $player =~ S ]] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
 sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /mnt/etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 ## server
 case $server in
-    L)
+    LMS)
         echo -e "\n${c_blue_b}Install Logitech Media Server ...${c_gray}\n"
+        pacstrap /mnt perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious
         arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
         arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
         [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
@@ -311,7 +324,7 @@ case $server in
         sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         arch-chroot /mnt systemctl enable logitechmediaserver
         ;;
-    R)
+    Roon)
         echo -e "\n${c_blue_b}Install Roon Server ...${c_gray}\n"
         mkdir -p /mnt/opt/RoonServer /mnt/usr/share/licenses/roonserver
         arch-chroot /mnt wget -O - http://download.roonlabs.com/builds/RoonServer_linuxx64.tar.bz2 | bsdtar xf - -C /mnt/opt
@@ -321,26 +334,31 @@ case $server in
         sed -i 's/exec "$HARDLINK" "$SCRIPT.dll" "$@"/exec nice -n -20 "$HARDLINK" "$SCRIPT.dll" "$@"/g' /mnt/opt/RoonServer/Appliance/RAATServer
         arch-chroot /mnt systemctl enable roonserver
         ;;
-    M*|O*)
+    m?|y?|o?)
         [[ $server =~ .L ]] && MPD=light
         [[ $server =~ .S ]] && MPD=stream
         [[ $server =~ .M ]] && MPD=ffmpeg
-        echo -e "\n${c_blue_b}Install MPD-${MPD} ...${c_gray}\n"
+        echo -e "\n${c_blue_b}Install MPD-${MPD}...${c_gray}\n"
+        pacstrap /mnt fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms ncmpcpp mpc python-mpd2
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-0.23.14-12-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst /root/mpd-${MPD}-0.23.14-12-x86_64.pkg.tar.zst
+        # dependencies for owntone
+        pacstrap /mnt confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c
         arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.6-1-x86_64.pkg.tar.zst
         ### Install myMPD
-        if [[ $server =~ M ]]; then
+        if [[ $server =~ y. ]]; then
             arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
             # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
+            pacstrap /mnt lua libid3tag
             arch-chroot /mnt pacman -U --noconfirm /root/mympd-12.1.1-1-x86_64.pkg.tar.zst
             arch-chroot /mnt systemctl enable mpd mympd
         fi
         ### Setup RompR
-        if [[ $server =~ O ]]; then
+        if [[ $server =~ o. ]]; then
+            pacstrap /mnt nginx php-sqlite php-gd php-fpm php-intl imagemagick
             arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
             arch-chroot /mnt pacman -U --noconfirm /root/rompr-2.00-1-any.pkg.tar.zst
             mkdir -p /mnt/etc/nginx/sites-available /mnt/etc/nginx/sites-enabled
@@ -375,6 +393,7 @@ esac
 
 if [[ $player =~ S ]]; then
     echo -e "\n${c_blue_b}Install Squeezelite ...${c_gray}\n"
+    pacstrap /mnt faad2 libmad
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-pcm-x86_64.pkg.tar.zst
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
@@ -383,6 +402,7 @@ if [[ $player =~ S ]]; then
 fi
 if [[ $player =~ A ]]; then
     echo -e "\n${c_blue_b}Install Airplay ...${c_gray}\n"
+    pacstrap /mnt libconfig
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     [[ -n "$scard" ]] && sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/' /mnt/etc/shairport-sync.conf
