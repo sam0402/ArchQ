@@ -404,18 +404,17 @@ EOF
         arch-chroot /mnt install -Dm644 "/usr/share/doc/hqplayerd/copyright" "/usr/share/licenses/hqplayer/COPYING"
         arch-chroot /mnt rm "/usr/share/doc/hqplayerd/copyright"
         arch-chroot /mnt mkdir -p /var/lib/hqplayer/home /etc/pki/tls/certs
-        arch-chroot /mnt chown -R root:root /var/lib/hqplayer
-        arch-chroot /mnt chown -R root:root /etc/hqplayer
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayerd.service >/mnt/usr/lib/systemd/system/hqplayerd.service
 
         ## lib link
-        arch-chroot /mnt ln -s /usr/liblibgupnp-1.2.so.1 /usr/liblibgupnp-1.2.so.0
-        arch-chroot /mnt ln -s /usr/liblibgupnp-av-1.0.so.3 /usr/liblibgupnp-av-1.0.so.2
-        arch-chroot /mnt ln -s /usr/liblibomp.so /usr/liblibomp.so.5
-        arch-chroot /mnt ln -s /usr/liblibFLAC.so.12 /usr/liblibFLAC.so.8
-        arch-chroot /mnt ln -s /opt/hqplayerd/lib/libsgllnx64-2.29.02.so /usr/liblibsgllnx64-2.29.02.so
-        arch-chroot /mnt ln -s /opt/hqplayerd/lib/libsglarm64-2.31.0.0.so /usr/liblibsglarm64-2.31.0.0.so
+        arch-chroot /mnt ln -s /usr/liblibgupnp-1.2.so.1 /usr/lib/libgupnp-1.2.so.0
+        arch-chroot /mnt ln -s /usr/liblibgupnp-av-1.0.so.3 /usr/lib/libgupnp-av-1.0.so.2
+        arch-chroot /mnt ln -s /usr/liblibomp.so /usr/lib/libomp.so.5
+        arch-chroot /mnt ln -s /usr/liblibFLAC.so.12 /usr/lib/libFLAC.so.8
+        arch-chroot /mnt ln -s /opt/hqplayerd/lib/libsgllnx64-2.29.02.so /usr/lib/libsgllnx64-2.29.02.so
+        arch-chroot /mnt ln -s /opt/hqplayerd/lib/libsglarm64-2.31.0.0.so /usr/lib/libsglarm64-2.31.0.0.so
         arch-chroot /mnt ln -s /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt
+        arch-chroot /mnt systemctl enable hqplayerd
         ;;
 esac
 
