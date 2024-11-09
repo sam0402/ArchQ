@@ -391,6 +391,8 @@ EOF
         ;;
     HQPE4|HQPE5)
         echo -e "\n${c_blue_b}Install HQPlayer Embedded${server:4:1}...${c_gray}\n"
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/gtk3-1%3A3.24.37-1-x86_64.pkg.tar.zst
+        pacman -U --noconfirm /root/gtk3-1%3A3.24.37-1-x86_64.pkg.tar.zst
         hqe_deb=$(curl -sL https://www.signalyst.eu/bins/hqplayerd/jammy/ | grep "hqplayerd_${server:4:1}" | grep _amd64.deb | tail -n1 | awk -F'"' '{print $2}')
         curl -L "https://www.signalyst.eu/bins/hqplayerd/jammy/$hqe_deb" | bsdtar xf - -C /tmp
         mkdir -p /tmp/hqpd
