@@ -90,7 +90,7 @@ server=$(dialog --stdout --title "ArchQ" \
             Roon "Roon Server" \
             HQPE5 "HQPlayer Embedded 5" \
             HQPE4 "HQPlayer Embedded 4" \
-            Player "Squeezelite | Airplay | Roonbridge | HQP NAA" ) || exit 1; clear
+            Player "Airplay | Squeezelite | Roonbridge | HQP NAA" ) || exit 1; clear
 
 case $server in
     LMS)
