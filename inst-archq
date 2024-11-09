@@ -571,8 +571,14 @@ alias qboot='sudo qboot'
 alias sw='sudo sw'
 alias df='df -h'
 alias status='systemctl status'
+alias album='kid3-cli -c "set album '\''\$ALBUM'\''"'
+alias artist='kid3-cli -c "set artist '\''\$ARTIST'\''"'
+alias track='kid3-cli -c "set title '\''\$TRACK'\''"'
+alias genre='kid3-cli -c "set genre '\''\$GENRE'\''"'
+alias composer='kid3-cli -c "set composer '\''\$COMPOSER'\''"'
 alias wipedir='function _f() { for i in {1..5}; do find "\$1" -exec scrub -Sp fillzero {} \\;; done; rm -rf "\$1"; } ; _f'
 alias hcp='function _f() { echo "\$1 >> \$2"; for i in {1..50}; do [ -z \$2 ] && break; nocache cp -a "\$1" "\$2";echo -n .\$((\$i*2));nocache cp -a "\$2"/"\$1" .;done; }; _f'
+alias fflac='function _f() { mkdir -p "\$2"/"\$1"; cp "\$1"/*.{pdf,jp*g} "\$2"/"\$1"; for i in "\$1"/*.flac; do ffmpeg -i "\$i" -vn -c:a flac -compression_level 1 -fflags +bitexact "\$2"/"\$i"; done; } ; _f'
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
 
