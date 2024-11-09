@@ -84,7 +84,7 @@ player=N
 server=$(dialog --stdout --title "ArchQ" \
             --menu "Select music server or player" 7 0 0 \
             LMS "Logitech Media Server" \
-            MPD "MPD, Rigelain(iOS) | text-based client" \
+            MPD "MPD, Rigelian(iOS) | text-based client" \
             myMPD "MPD & myMPD web-based client" \
             RompR "MPD & RompR web-based client" \
             Roon "Roon Server" \
@@ -290,6 +290,12 @@ sleep 1
 
 EOF
 
+arch-chroot /mnt sh -c 'yes | pacman -Scc'
+rm -rf /mnt/etc/pacman.d/gnupg
+arch-chroot /mnt pacman-key --init
+arch-chroot /mnt pacman-key --populate archlinux
+arch-chroot /mnt pacman -Sy
+
 ### Kernel
 echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
 [ $cpu = amd ] && ker=Q308AMD
@@ -393,7 +399,6 @@ EOF
         echo -e "\n${c_blue_b}Install HQPlayer Embedded${server:4:1}...${c_gray}\n"
         curl https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayerd-lib.tar.gz | tar zxf - -C /mnt/root
         arch-chroot /mnt wget -P /root/hqplayerd-lib https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/gtk3-1%3A3.24.37-1-x86_64.pkg.tar.zst
-        arch-chroot /mnt pacman -Sy --noconfirm archlinux-keyring
         pacman -U --noconfirm -r /mnt /mnt/root/hqplayerd-lib/*.pkg.tar.zst
         hqe_deb=$(curl -sL https://www.signalyst.eu/bins/hqplayerd/jammy/ | grep "hqplayerd_${server:4:1}" | grep _amd64.deb | tail -n1 | awk -F'"' '{print $2}')
         curl -L "https://www.signalyst.eu/bins/hqplayerd/jammy/$hqe_deb" | bsdtar xf - -C /tmp
@@ -586,11 +591,6 @@ alias status='systemctl status'
 EOF
 # echo 'server-cfg.sh' >/mnt/root/.bash_profile
 # echo 'rm /root/.bash_profile' >>/mnt/root/.bash_profile
-arch-chroot /mnt sh -c 'yes | pacman -Scc'
-rm -rf /mnt/etc/pacman.d/gnupg
-arch-chroot /mnt pacman-key --init
-arch-chroot /mnt pacman-key --populate archlinux
-arch-chroot /mnt pacman -Sy
 rm -f /mnt/root/*.tar.zst /mnt/root/*.tar.xz
 # Detect other OS
 if [ -n "$old_efi" ]; then
