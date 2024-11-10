@@ -61,7 +61,6 @@ if [ $fmt = P ]; then
     part_root=$(eval $partlst) || exit 1; clear
     part_boot=$(lsblk -pln -o name,parttypename | grep EFI | grep $device | awk 'NR==1 {print $1}')
 fi
-
 zerofill=0
 # zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe disk times" 0 30 0) || exit 1; clear
 f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1; clear
@@ -238,7 +237,7 @@ echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" >> /mnt/etc/resolv.conf
 arch-chroot /mnt useradd -mU "$user"
 sed -i '0,/# %wheel/s/# %wheel/%wheel/' /mnt/etc/sudoers
 arch-chroot /mnt usermod -aG wheel $user
-echo "$user $hostname =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot,/usr/bin/qboot,/usr/bin/sw" >>/mnt/etc/sudoers
+echo "$user $hostname =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot,/usr/bin/qboot,/usr/bin/sw,/usr/bin/config" >>/mnt/etc/sudoers
 
 ### Set locale language
 echo -e "en_US.UTF-8 UTF-8\nja_JP.UTF-8 UTF-8\nzh_TW.UTF-8 UTF-8" >/mnt/etc/locale.gen
@@ -359,16 +358,18 @@ case $server in
         # dependencies for owntone
         pacstrap /mnt confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c
         arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.6-1-x86_64.pkg.tar.zst
-        arch-chroot /mnt systemctl enable mpd 
+        arch-chroot /mnt systemctl enable mpd
         ### Install myMPD
         if [[ $server =~ y. ]]; then
+            echo -e "\n${c_blue_b}Install myMPD ...${c_gray}\n"
             arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
             # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
             arch-chroot /mnt pacman -U --noconfirm /root/mympd-12.1.1-1-x86_64.pkg.tar.zst
             arch-chroot /mnt systemctl enable mympd
         fi
-        ### Setup RompR
+        ### Install RompR
         if [[ $server =~ o. ]]; then
+            echo -e "\n${c_blue_b}Install RompR ...${c_gray}\n"
             pacstrap /mnt nginx php-sqlite php-gd php-fpm php-intl imagemagick
             arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
             arch-chroot /mnt pacman -U --noconfirm /root/rompr-2.00-1-any.pkg.tar.zst
@@ -549,7 +550,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/bcache-cfg.
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/datacache-cfg.sh >/mnt/usr/bin/datacache-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/hddpower-cfg.sh >/mnt/usr/bin/hddpower-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/zerowipe.sh >/mnt/usr/bin/zerowipe.sh
-curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mboot >/mnt/usr/bin/mboot
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/sw >/mnt/usr/bin/sw
@@ -571,7 +572,6 @@ alias ls='command ls --color=auto -v'
 alias abcde='eject -t; abcde'
 alias poweroff='sudo systemctl poweroff'
 alias reboot='sudo systemctl reboot'
-alias config='sudo config.sh'
 alias qboot='sudo qboot'
 alias sw='sudo sw'
 alias df='df -h'
@@ -598,7 +598,6 @@ alias grep='grep --color=auto'
 alias ll='command ls -l --color=auto -v'
 alias ls='command ls --color=auto -v'
 alias df='df -h'
-alias config='config.sh'
 alias status='systemctl status'
 EOF
 # echo 'server-cfg.sh' >/mnt/root/.bash_profile

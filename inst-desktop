@@ -76,8 +76,16 @@ ifgw=$(echo $ifconfig | cut -d' ' -f3)
 ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
 
-desktop=$(dialog --stdout --title "ArchQ Desktop" --menu "Desktop & VNC :5901" 7 0 0 D LXDE Q LXQt V "VNC only") || exit 1; clear
-server=$(dialog --stdout --title "ArchQ Desktop" --menu "Select music server" 7 0 0 M MPD L LMS N None) || exit 1; clear
+desktop=$(dialog --stdout --title "ArchQ Desktop" \
+    --menu "Desktop & VNC :5901" 7 0 0 \
+    LXDE "Lightweight X11 Desktop" \
+    LXQt "Lightweight Qt Desktop" \
+    VNC "TigerVNC only" ) || exit 1; clear
+server=$(dialog --stdout --title "ArchQ Desktop" \
+    --menu "Select music server" 7 0 0 \
+    MPD "MPD & myMPD web-based client" \
+    LMS "Logitech Media Server" \
+    None "Desktop only" ) || exit 1; clear
 ### select sound card
 scard="hw:0,0"
 
@@ -139,10 +147,10 @@ mount "${part_boot}" /mnt/boot
 cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 [ -f /mnt/boot/${cpu}-ucode.img ] || pacstrap /mnt ${cpu}-ucode
 
-echo -e "\n${c_blue_b}Download Arch Linux package and install ...${c_gray}\n"
+echo -e "\n${c_blue_b}Install Arch Linux package ...${c_gray}\n"
 lxd=''
-[ $desktop = D ] && lxd="lxdm noto-fonts-cjk midori cantata fcitx5-im fcitx5-configtool falkon lxde lxpanel"
-[ $desktop = Q ] && lxd="lxdm noto-fonts-cjk midori cantata fcitx5-im fcitx5-configtool falkon lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
+[ $desktop = LXDE ] && lxd="lxdm noto-fonts-cjk midori cantata fcitx5-im fcitx5-configtool falkon lxde lxpanel"
+[ $desktop = LXQt ] && lxd="lxdm noto-fonts-cjk midori cantata fcitx5-im fcitx5-configtool falkon lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop iwd nocache \
         which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
@@ -150,8 +158,8 @@ pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-
         perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious \
         alsa-lib mpc mympd rc-local libid3tag taglib lua \
         tigervnc upplay xf86-video-fbdev audacious deadbeef-static ${lxd}
-[ $desktop = D ] && arch-chroot /mnt pacman -R --noconfirm lxmusic
-[ $desktop = Q ] && arch-chroot /mnt pacman -R --noconfirm lxqt-powermanagement
+[ $desktop = LXDE ] && arch-chroot /mnt pacman -R --noconfirm lxmusic
+[ $desktop = LXQt ] && arch-chroot /mnt pacman -R --noconfirm lxqt-powermanagement
 
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
@@ -166,7 +174,7 @@ echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" >> /mnt/etc/resolv.conf
 arch-chroot /mnt useradd -mU "$user"
 sed -i '0,/# %wheel/s/# %wheel/%wheel/' /mnt/etc/sudoers
 arch-chroot /mnt usermod -aG wheel $user
-echo "$user $hostname =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot,/usr/bin/qboot,/usr/bin/config.sh" >>/mnt/etc/sudoers
+echo "$user $hostname =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot,/usr/bin/qboot,/usr/bin/config" >>/mnt/etc/sudoers
 
 ### Set locale language
 echo -e "en_US.UTF-8 UTF-8\nja_JP.UTF-8 UTF-8\nzh_TW.UTF-8 UTF-8" >/mnt/etc/locale.gen
@@ -223,6 +231,12 @@ sleep 1
 
 EOF
 
+arch-chroot /mnt sh -c 'yes | pacman -Scc'
+rm -rf /mnt/etc/pacman.d/gnupg
+arch-chroot /mnt pacman-key --init
+arch-chroot /mnt pacman-key --populate archlinux
+arch-chroot /mnt pacman -Sy
+
 ### Kernel
 echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
@@ -231,7 +245,7 @@ sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll acpi_pm_good no
 /mnt/etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
-### Setup Desktop (LXDE || LDQT)
+### Setup Desktop (LXDE || LXQt)
 echo "LANG=en_US.UTF-8" >/mnt/home/$user/.xinitrc
 [ $lang = J ] && echo "LANG=ja_JP.UTF-8" > /mnt/home/$user/.xinitrc
 [ $lang = T ] && echo "LANG=zh_TW.UTF-8" > /mnt/home/$user/.xinitrc
@@ -239,22 +253,22 @@ echo "LANG=en_US.UTF-8" >/mnt/home/$user/.xinitrc
 echo "GTK_IM_MODULE=fcitx" >>/mnt/etc/environment
 echo "QT_IM_MODULE=fcitx" >>/mnt/etc/environment
 echo "XMODIFIERS=@im=fcitx" >>/mnt/etc/environment
-[ $desktop = D ] && arch-chroot /mnt ln -s /usr/bin/lxterminal /usr/bin/xterm
-[ $desktop = Q ] && arch-chroot /mnt ln -s /usr/bin/qterminal /usr/bin/xterm
-[ $desktop = D ] && sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
-[ $desktop = Q ] && sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxqt;g' /mnt/etc/lxdm/lxdm.conf
+[ $desktop = LXDE ] && arch-chroot /mnt ln -s /usr/bin/lxterminal /usr/bin/xterm
+[ $desktop = LXQt ] && arch-chroot /mnt ln -s /usr/bin/qterminal /usr/bin/xterm
+[ $desktop = LXDE ] && sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxde;g' /mnt/etc/lxdm/lxdm.conf
+[ $desktop = LXQt ] && sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxqt;g' /mnt/etc/lxdm/lxdm.conf
 
 # Setup TigerVNC
 chroot /mnt ln /usr/lib/systemd/system/vncserver\@.service /etc/systemd/system/vncserver\@:1.service
 echo ":1=$user" >>/mnt/etc/tigervnc/vncserver.users
 mkdir /mnt/home/$user/.vnc
-[ $desktop = D ] && echo "session=LXDE" >/mnt/home/$user/.vnc/config
-[ $desktop = Q ] && echo "session=lxqt" >/mnt/home/$user/.vnc/config
+[ $desktop = LXDE ] && echo "session=LXDE" >/mnt/home/$user/.vnc/config
+[ $desktop = LXQt ] && echo "session=lxqt" >/mnt/home/$user/.vnc/config
 arch-chroot /mnt sh -c "echo $password | vncpasswd -f >/home/$user/.vnc/passwd"
 arch-chroot /mnt chmod 600 /home/$user/.vnc/passwd
 arch-chroot /mnt chown -R ${user}: /home/$user/.vnc
 arch-chroot /mnt systemctl enable vncserver@:1.service
-[ $desktop = V ] || arch-chroot /mnt systemctl enable lxdm
+[ $desktop = VNC ] || arch-chroot /mnt systemctl enable lxdm
 
 mkdir /mnt/home/$user/Desktop /mnt/mnt/music
 arch-chroot /mnt chown -R ${user}: /home/$user/Desktop /mnt/music
@@ -264,12 +278,12 @@ Encoding=UTF-8
 Name=Config
 Type=Application
 Terminal=true
-Exec=sudo /usr/bin/config.sh
+Exec=sudo /usr/bin/config
 EOF
 
 ## server
 case $server in
-    L)
+    LMS)
         echo -e "\n${c_blue_b}Install Logitech Media Server ...${c_gray}\n"
         arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
         arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
@@ -284,18 +298,16 @@ URL=http://localhost:9000/
 Icon=text-html
 EOF
         ;;
-    M)
+    MPD)
         echo -e "\n${c_blue_b}Install MPD ...${c_gray}\n"
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-stream-0.23.14-12-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-stream-0.23.14-12-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         ### Install myMPD
-        if [[ $server == M ]]; then
-            # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
-            arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
-            arch-chroot /mnt pacman -U --noconfirm /root/mympd-12.1.1-1-x86_64.pkg.tar.zst 
-            arch-chroot /mnt systemctl enable mpd mympd
-        fi
+        # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mympd-12.1.1-1-x86_64.pkg.tar.zst 
+        arch-chroot /mnt systemctl enable mpd mympd
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
         sed -i 's/^include_optional/#include_optional/g' /mnt/etc/mpd.conf
@@ -325,7 +337,6 @@ esac
 
 ### Other setting
 echo -e "\n${c_blue_b}Setting service ...${c_gray}\n"
-
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A6.0-5-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/ffmpeg-2:6.0-5-x86_64.pkg.tar.zst
 ## Instal alsa-lib-1.1.9
@@ -370,7 +381,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/partimnt-cf
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/mnt/usr/bin/update_scpt.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/desktop-cfg.sh >/mnt/usr/bin/desktop-cfg.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpd-cfg.sh >/mnt/usr/bin/mpd-cfg.sh
-curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config.sh
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/config.sh >/mnt/usr/bin/config
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt/usr/bin/qboot
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/usb-storage-mount.sh >/mnt/usr/bin/usb-storage-mount.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/90-usb-storage-automount.rules >/mnt/etc/udev/rules.d/90-usb-storage-automount.rules
@@ -387,7 +398,6 @@ alias ll='command ls -l --color=auto -v'
 alias ls='command ls --color=auto -v'
 alias poweroff='sudo systemctl poweroff'
 alias reboot='sudo systemctl reboot'
-alias config='sudo config.sh'
 alias qboot='sudo qboot'
 alias status='systemctl status'
 EOF
@@ -404,14 +414,8 @@ alias grep='grep --color=auto'
 alias ll='command ls -l --color=auto -v'
 alias ls='command ls --color=auto -v'
 alias df='df -h'
-alias config='config.sh'
 alias status='systemctl status'
 EOF
-arch-chroot /mnt sh -c 'yes | pacman -Scc'
-rm -rf /mnt/etc/pacman.d/gnupg
-arch-chroot /mnt pacman-key --init
-arch-chroot /mnt pacman-key --populate archlinux
-arch-chroot /mnt pacman -Sy
 rm -f /mnt/root/*.tar.zst /mnt/root/*.tar.xz
 # Detect other OS
 if [ -n "$old_efi" ]; then
