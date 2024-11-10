@@ -30,7 +30,7 @@ vol_ctrl(){
 MENU=''
 pacman -Q mympd >/dev/null 2>&1 && MENU+='M "myMPD :80" '
 pacman -Q rompr >/dev/null 2>&1 && MENU+='R "RompR :6660" '
-exec='dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 '$MENU'C "Cantata :8080" N "Ncmpcpp | Rigelian(iOS)" U "Multi user"'
+exec='dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 '$MENU'C "Cantata :8080" N "Ncmpcpp | Rigelian(iOS)"'
 client=$(eval $exec)|| exit 1
 clear
 case $client in
@@ -116,7 +116,9 @@ cat $config | grep httpd | grep -q '#' || h0=on
 cat $config | grep -q "#[[:space:]]dop" || d0=on
 output=$(dialog --stdout --title "ArchQ MPD" \
         --checklist "Output" 7 0 0 \
-        M Multiroom $m0 H Httpd $h0 D DoP $d0) || exit 1; clear
+        M "Multiroom Airplay" $m0 \
+        H "Http Stream" $h0 \
+        D "DSD over PCM" $d0 ) || exit 1; clear
 [[ $output =~ M ]] && m1=on
 [[ $output =~ H ]] && h1=on
 [[ $output =~ D ]] && d1=on
@@ -140,7 +142,7 @@ if [[ $h1 == on ]]; then
     [[ $(cat $ht_conf | grep 'encoder' $2 | cut -d'"' -f2) == 'flac' ]] && http_flac=on || http_wave=on
     encoder=$(dialog --stdout \
         --title "ArchQ MPD" \
-        --radiolist "Httpd stream encoder" 7 0 0 \
+        --radiolist "Http stream encoder" 7 0 0 \
         flac '　' $http_flac \
         wave '　' $http_wave) || exit 1
     clear
@@ -157,37 +159,33 @@ buffer=$(grep 'audio_buffer_size' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 pertime=$(grep 'period_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 
 ## Ramdisk
-rd_GB=0
-if [ -f /usr/bin/mpd-rdcheck.sh ]; then
-    ramdisk=$(grep 'rdsize=' /usr/bin/mpd-rdcheck.sh | awk -F'=' '{print $2}')
-    rd_GB=$(python -c "print(round($ramdisk/1048576,1))")
-fi
+# rd_GB=0
+# if [ -f /usr/bin/mpd-rdcheck.sh ]; then
+#     ramdisk=$(grep 'rdsize=' /usr/bin/mpd-rdcheck.sh | awk -F'=' '{print $2}')
+#     rd_GB=$(python -c "print(round($ramdisk/1048576,1))")
+# fi
 ###
-options=$(dialog --stdout \
-    --title "ArchQ MPD" \
-    --ok-label "Ok" \
-    --form "Buffer, Ramdisk & Directory" 0 35 0 \
+options=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Buffer & Music directory" 0 35 0 \
     "Audio Buffer >=128"  1 1 $buffer  1 20 35 0 \
     "Period Time(μs)"     2 1 $pertime 2 20 35 0 \
-    "Ramdisk(GB)"         3 1 $rd_GB   3 20 35 0 \
-    "Music Dir     /mnt/" 4 1 $mdir    4 20 35 0 ) || exit 1; clear
-
+    "Music Dir     /mnt/" 3 1 $mdir    3 20 35 0 ) || exit 1; clear
+    # "Ramdisk(GB)"         4 1 $rd_GB   4 20 35 0
 beffer=$(echo $options | awk '//{print $1 }')
 pertime=$(echo $options | awk '//{print $2 }')
 buftime=$(($pertime * 6))
-mdir=$(echo $echo $options | awk '//{print $4}' | sed 's"/"\\\/"g')
+mdir=$(echo $echo $options | awk '//{print $3}' | sed 's"/"\\\/"g')
 ## Set ramdisk
-rd_GB=$(echo $options | awk '//{print $3 }')
-if [ $rd_GB = '0' ]; then
-    rm -f /var/lib/mpd/playlists/RAMDISK.m3u
-else
-    touch /tmp/RAMDISK.m3u
-    install -Dm 644 -o mpd -g mpd /tmp/RAMDISK.m3u -t /var/lib/mpd/playlists/
-fi
-if [ -f /usr/bin/mpd-rdcheck.sh ]; then
-    ramdisk=$(python -c "print(int($rd_GB*1048576))")
-    sed -i 's/rdsize=.*/rdsize='"$ramdisk"'/' /usr/bin/mpd-rdcheck.sh
-fi
+# rd_GB=$(echo $options | awk '//{print $3 }')
+# if [ $rd_GB = '0' ]; then
+#     rm -f /var/lib/mpd/playlists/RAMDISK.m3u
+# else
+#     touch /tmp/RAMDISK.m3u
+#     install -Dm 644 -o mpd -g mpd /tmp/RAMDISK.m3u -t /var/lib/mpd/playlists/
+# fi
+# if [ -f /usr/bin/mpd-rdcheck.sh ]; then
+#     ramdisk=$(python -c "print(int($rd_GB*1048576))")
+#     sed -i 's/rdsize=.*/rdsize='"$ramdisk"'/' /usr/bin/mpd-rdcheck.sh
+# fi
 sed -i 's/^#\?audio_buffer_size.*"/audio_buffer_size\t"'"$beffer"'"/' $config
 sed -i 's/^#\?.* \?\tbuffer_time.*"/\tbuffer_time\t"'"$buftime"'"/;s/^#\?.* \?\tperiod_time.*"/\tperiod_time\t"'"$pertime"'"/' $config
 sed -i 's/^#\?music_directory.*"/music_directory\t"\/mnt\/'"$mdir"'"/' $config
