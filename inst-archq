@@ -355,12 +355,13 @@ case $server in
         # dependencies for owntone
         pacstrap /mnt confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c
         arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.6-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt systemctl enable mpd 
         ### Install myMPD
         if [[ $server =~ y. ]]; then
             arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
             # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
             arch-chroot /mnt pacman -U --noconfirm /root/mympd-12.1.1-1-x86_64.pkg.tar.zst
-            arch-chroot /mnt systemctl enable mpd mympd
+            arch-chroot /mnt systemctl enable mympd
         fi
         ### Setup RompR
         if [[ $server =~ o. ]]; then
@@ -378,7 +379,7 @@ case $server in
             sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /mnt/usr/lib/systemd/system/nginx.service
             arch-chroot /mnt ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
             arch-chroot /mnt chmod 644 /etc/nginx/sites-enabled/rompr
-            arch-chroot /mnt systemctl enable mpd nginx php-fpm avahi-daemon
+            arch-chroot /mnt systemctl enable nginx php-fpm avahi-daemon
         fi
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
