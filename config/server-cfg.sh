@@ -1,36 +1,51 @@
 #!/bin/bash
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
-server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 L LMS M "MPD &MyMPD" O "MPD &RompR" R Roon \
-        5 "HQPlayer Embedded 5" 4 "HQPlayer Embedded 4" P Player) || exit 1; clear
+server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
+        LMS "Logitech Media Server" \
+        MPD "MPD, Rigelian(iOS) | text-based client" \
+        myMPD "MPD & myMPD web-based client" \
+        RompR "MPD & RompR web-based client" \
+        Roon "Roon Server" \
+        HQPE5 "HQPlayer Embedded 5" \
+        HQPE4 "HQPlayer Embedded 4" \
+        Player "Airplay | Squeezelite | Roonbridge | HQP NAA" ) || exit 1; clear
 yes | pacman -Scc
 case $server in
-    M)
-        server=$(dialog --stdout --title "ArchQ" \
-                --radiolist "Select MPD version" 7 0 0 \
-                ML "Light: pcm, flac" off \
-                MS "Stream: +Light, dsd, radio" on \
-                MM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
-        ;;
-    O)
+    MPD)
        server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                OL "Light: pcm, flac" off \
-                OS "Stream: +Light, dsd, radio" on \
-                OM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+                mL "Light: pcm, flac" off \
+                mS "Stream: +Light, dsd, radio" on \
+                mM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+        ;;
+    myMPD)
+        server=$(dialog --stdout --title "ArchQ" \
+                --radiolist "Select MPD version" 7 0 0 \
+                yL "Light: pcm, flac" off \
+                yS "Stream: +Light, dsd, radio" on \
+                yM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+        ;;
+    RompR)
+       server=$(dialog --stdout --title "ArchQ" \
+                --radiolist "Select MPD version" 7 0 0 \
+                oL "Light: pcm, flac" off \
+                oS "Stream: +Light, dsd, radio" on \
+                oM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
         ;;
 esac
 case $server in
-    P)  
+    Player)  
         sed -i 's/'"$isocpu"'//' /etc/default/grub
         /usr/bin/player-cfg.sh
         ;;
-    L)
+    LMS)
         if ! pacman -Q logitechmediaserver >/dev/null 2>&1; then
             cpus=$(getconf _NPROCESSORS_ONLN)
             iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
             isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
             echo -e "\n${c_blue_b}Install Logitech Media Server ...${c_gray}\n"
+            pacman -S perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
             pacman -U --noconfirm /tmp/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
             [ $cpus -ge 4 ] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /usr/lib/systemd/system/logitechmediaserver.service
@@ -41,7 +56,7 @@ case $server in
         systemctl disable --now mpd nginx php-fpm mympd roonserver hqplayerd
         systemctl enable --now logitechmediaserver
         ;;
-    R)
+    Roon)
         if [[ ! -d '/opt/RoonServer' ]]; then
             echo -e "\n${c_blue_b}Install Roon Server ...${c_gray}\n"
             mkdir -p /opt/RoonServer /usr/share/licenses/roonserver
@@ -55,7 +70,7 @@ case $server in
         systemctl disable --now mpd nginx php-fpm mympd logitechmediaserver hqplayerd
         systemctl enable --now roonserver
         ;;
-    M*|O*)
+    m?|y?|o?)
         [[ $server =~ .L ]] && MPD=light
         [[ $server =~ .S ]] && MPD=stream
         [[ $server =~ .M ]] && MPD=ffmpeg
@@ -66,12 +81,13 @@ case $server in
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
             pacman -U --noconfirm /tmp/mpd-*.pkg.tar.zst
-            if [[ $server =~ M ]]; then
+            if [[ $server =~ y. ]]; then
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
                 # wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
-                pacman -U --noconfirm /tmp/mympd-*.pkg.tar.zst libnewt-0.52.24-2-x86_64.pkg.tar.zst
+                pacman -U --noconfirm /tmp/mympd-*.pkg.tar.zst
+                systemctl enable mympd
             fi
-            if [[ $server =~ O ]]; then
+            if [[ $server =~ o. ]]; then
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
                 pacman -U --noconfirm /tmp/rompr-*.pkg.tar.zst
                 ### Setup RompR
@@ -87,8 +103,8 @@ case $server in
                 ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
                 ln -s /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
                 chmod 644 /etc/nginx/sites-enabled/rompr
+                systemctl enable nginx php-fpm avahi-daemon
             fi
-            
     ### setup mpd
             sed -i '$d' /etc/rc.local
             cat >>/etc/rc.local <<EOF
@@ -108,7 +124,8 @@ EOF
         usermod -aG optical mpd
         systemctl enable --now mpd
         ;;
-    4|5)
+    HQPE4|HQPE5)
+        echo -e "\n${c_blue_b}Install HQPlayer Embedded${server:4:1}...${c_gray}\n"
         if ! pacman -Q gupnp-dlna >/dev/null 2>&1; then
             wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayerd-lib.tar.gz | tar zxf - -C /tmp
             wget -P /tmp/hqplayerd-lib https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/gtk3-1%3A3.24.37-1-x86_64.pkg.tar.zst
@@ -116,7 +133,7 @@ EOF
         fi
         ## install hqplayerd
         systemctl disable --now hqplayerd
-        hqe_deb=$(wget -O - https://www.signalyst.eu/bins/hqplayerd/jammy/ | grep "hqplayerd_$server" | grep avx2_amd64.deb | tail -n1 | awk -F'"' '{print $2}')
+        hqe_deb=$(wget -O - https://www.signalyst.eu/bins/hqplayerd/jammy/ | grep "hqplayerd_${server:4:1}" | grep _amd64.deb | tail -n1 | awk -F'"' '{print $2}')
         wget -O - "https://www.signalyst.eu/bins/hqplayerd/jammy/$hqe_deb" | bsdtar xf - -C /tmp
         mkdir -p /tmp/hqpd
         bsdtar xf /tmp/data.tar.zst -C /tmp/hqpd
