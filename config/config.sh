@@ -28,10 +28,10 @@ exec='dialog --stdout --title "'$ipaddr'  '$temp'" --menu "'$HOSTNAME'.local  Co
 options=$(eval $exec) || exit 1; clear
 case $options in
 	0)
-        rm /root/.advence; /usr/bin/config.sh
+        rm /root/.advence; /usr/bin/config
         ;;
 	1)
-        touch /root/.advence; /usr/bin/config.sh
+        touch /root/.advence; /usr/bin/config
         ;;
     A)
         /usr/bin/shairport-cfg.sh $Qver
