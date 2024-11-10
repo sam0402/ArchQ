@@ -217,7 +217,7 @@ pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-
         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop iwd nocache \
         which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils schedtool srt \
         alsa-lib ffmpeg libdiscid rc-local \
-        libao opusfile vorbis-tools \
+        glyr libao opusfile vorbis-tools \
         python-chardet python-idna python-lxml python-requests python-urllib3 \
         perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious
 
