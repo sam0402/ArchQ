@@ -356,14 +356,14 @@ case $server in
         [[ $server =~ .S ]] && MPD=stream
         [[ $server =~ .M ]] && MPD=ffmpeg
         echo -e "\n${c_blue_b}Install MPD-${MPD}...${c_gray}\n"
-        pacstrap /mnt fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms libid3tag ncmpcpp mpc python-mpd2 lua
+        # pacstrap /mnt fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms libid3tag ncmpcpp mpc python-mpd2 lua
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-0.23.14-12-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst /root/mpd-${MPD}-0.23.14-12-x86_64.pkg.tar.zst
         # dependencies for owntone
-        pacstrap /mnt confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c
+        # pacstrap /mnt confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c
         arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.6-1-x86_64.pkg.tar.zst
         arch-chroot /mnt systemctl enable mpd
         ### Install myMPD
@@ -377,7 +377,7 @@ case $server in
         ### Install RompR
         if [[ $server =~ o. ]]; then
             echo -e "\n${c_blue_b}Install RompR ...${c_gray}\n"
-            pacstrap /mnt nginx php-sqlite php-gd php-fpm php-intl imagemagick
+            # pacstrap /mnt nginx php-sqlite php-gd php-fpm php-intl imagemagick
             arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
             arch-chroot /mnt pacman -U --noconfirm /root/rompr-2.00-1-any.pkg.tar.zst
             mkdir -p /mnt/etc/nginx/sites-available /mnt/etc/nginx/sites-enabled
@@ -439,7 +439,7 @@ esac
 
 if [[ $player =~ S ]]; then
     echo -e "\n${c_blue_b}Install Squeezelite ...${c_gray}\n"
-    pacstrap /mnt faad2 libmad
+    # pacstrap /mnt faad2 libmad
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-pcm-x86_64.pkg.tar.zst
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
@@ -448,7 +448,7 @@ if [[ $player =~ S ]]; then
 fi
 if [[ $player =~ A ]]; then
     echo -e "\n${c_blue_b}Install Airplay ...${c_gray}\n"
-    pacstrap /mnt libconfig
+    # pacstrap /mnt libconfig
     arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
     [[ -n "$scard" ]] && sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/' /mnt/etc/shairport-sync.conf
