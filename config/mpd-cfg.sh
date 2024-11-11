@@ -208,6 +208,7 @@ echo '}'                            >>$ot_conf
         options=$(dialog --stdout --title "ArchQ MPD" --menu "Remove player(partition)" 7 0 0 $MENU ) || exit 1; clear
         sed -i '/mtp_'"$options"'/d' $config
         rm -f /etc/mpd.d/mtp_${options}.out /etc/owntone.d/${options}
+	brow_mtp
         ;;
     esac
 
