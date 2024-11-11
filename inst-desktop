@@ -386,7 +386,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/usb-storage-mount.sh >/mnt/usr/bin/usb-storage-mount.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/90-usb-storage-automount.rules >/mnt/etc/udev/rules.d/90-usb-storage-automount.rules
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/home/$user/Desktop/*.desktop
-arch-chroot ln /usr/bin/config.sh /usr/bin/config
+arch-chroot ln -s /usr/bin/config.sh /usr/bin/config
 
 cat >>/mnt/home/${user}/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
