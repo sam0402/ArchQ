@@ -62,7 +62,7 @@ if [ $fmt = P ]; then
     part_boot=$(lsblk -pln -o name,parttypename | grep EFI | grep $device | awk 'NR==1 {print $1}')
 fi
 zerofill=0
-# zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe disk times" 0 30 0) || exit 1; clear
+zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe disk times" 0 30 0) || exit 1; clear
 f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1; clear
 ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
 ifport=$(dialog --stdout --title "ArchQ" --menu "Select net device" 7 0 0 ${ethers}) || exit 1; clear
@@ -559,7 +559,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/90-usb-storage
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/mnt/usr/bin/pagecache-management.sh
 arch-chroot /mnt wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/mboot /mnt/usr/bin/sw
-arch-chroot ln /usr/bin/config.sh /usr/bin/config
+arch-chroot ln -s /usr/bin/config.sh /usr/bin/config
 
 cat >>/mnt/home/${user}/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
