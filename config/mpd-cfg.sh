@@ -126,7 +126,7 @@ MENU=''
 if [ $client = M ]; then
     cat $config | grep 'mtp_' | grep -q '^i' && p0=on || p0=off
     p1=off
-    MENU="P Multi-player $p0 "
+    # MENU="P Multi-player $p0 "
 fi
 cat $config | grep owntone | grep -q '#' || m0=on 
 cat $config | grep httpd | grep -q '#' || h0=on
