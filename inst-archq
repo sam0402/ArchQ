@@ -559,7 +559,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/90-usb-storage
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/mnt/usr/bin/pagecache-management.sh
 arch-chroot /mnt wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/usr/bin/mboot /mnt/usr/bin/sw
-arch-chroot ln -s /usr/bin/config.sh /usr/bin/config
+arch-chroot /mnt ln /usr/bin/config.sh /usr/bin/config
 
 cat >>/mnt/home/${user}/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
