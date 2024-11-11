@@ -215,14 +215,21 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 echo -e "\n${c_blue_b}Install Arch Linux package ...${c_gray}\n"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
         vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop iwd nocache \
-        which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils schedtool srt \
-        alsa-lib ffmpeg rc-local \
-        imagemagick glyr libao opusfile vorbis-tools libdiscid libxslt libdiscid \
-        python-chardet python-idna python-lxml python-requests python-urllib3 \
-        perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious
-### abcde: atomicparsley
-### LMS: 
-### mpd-plugin:
+        which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
+        fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms \
+        confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
+        nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl libconfig faad2 libmad \
+        openmpi fftw boost openpmix hwloc taglib lua \
+        perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious \
+        alsa-lib ffmpeg mympd ncmpcpp mpc rc-local \
+        atomicparsley glyr imagemagick libao libdiscid libxslt opusfile schedtool srt vorbis-tools \
+        python-chardet python-idna python-lxml python-requests python-urllib3
+# mpd:         fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms \
+# confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \        
+# shairport-sync: libplist libsodium libsndfile
+# abcde: atomicparsley imagemagick glyr libao opusfile vorbis-tools libdiscid libxslt libdiscid \
+# LMS: python-chardet python-idna python-lxml python-requests python-urllib3 \
+# mpd-plugin: perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious
 
 genfstab -Up /mnt | sed '/^$/d' >>/mnt/etc/fstab
 sed -i 's/barrier,//g;s/relatime,lazytime/noatime/g;s/nodiscard,//g' /mnt/etc/fstab
