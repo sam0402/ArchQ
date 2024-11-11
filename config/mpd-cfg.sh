@@ -176,6 +176,7 @@ echo '}'                                >>$mtp_file
     [[ -d /var/lib/mpd/${mtp_name@L} ]] || mkdir /var/lib/mpd/${mtp_name@L}
     ot_conf=/etc/owntone.d/${mtp_name@L}
     ports=$(cat /etc/owntone.d/* | grep port | cut -d ' ' -f 3)
+    max=3689
     for n in ${ports[@]}; do
         [[ $n > $max ]] && max=$n
     done
