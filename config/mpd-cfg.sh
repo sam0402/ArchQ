@@ -26,6 +26,16 @@ vol_ctrl(){
     clear
     sed -i 's/mixer_type.*"/mixer_type\t"'"$volume"'"/' $2
 }
+
+brow_mtp(){
+    MENU=''
+    for file in /etc/owntone.d/*; do
+        port=$(cat $file | grep port | cut -d ' ' -f 3)
+        MENU=$MENU"${file##*/} "$'\t\t:'"$port"'\n'
+    done
+    dialog --stdout --title "ArchQ MPD" --msgbox "$MENU" 10 30 || exit 1; clear
+}
+
 ### MPD client select
 MENU=''
 pacman -Q mympd >/dev/null 2>&1 && MENU+='M "myMPD :80" '
@@ -111,33 +121,100 @@ vol_ctrl ALSA $config
 ### Include audio output & Dop
 m0=off; h0=off; d0=off
 m1=off; h1=off; d1=off
+MENU=''
+if [ $client = M ]; then
+    cat $config | grep 'mtp_' | grep -q '^i' && p0=on || p0=off
+    p1=off
+    MENU="P Multi-player $p0 "
+fi
 cat $config | grep owntone | grep -q '#' || m0=on 
 cat $config | grep httpd | grep -q '#' || h0=on
 cat $config | grep -q "#[[:space:]]dop" || d0=on
 output=$(dialog --stdout --title "ArchQ MPD" \
-        --checklist "Output" 7 0 0 \
-        M "Multiroom Airplay" $m0 \
+        --checklist "Output method" 7 0 0 \
+        M "Multi-room Play" $m0 $MENU \
         H "Http Stream" $h0 \
         D "DSD over PCM" $d0 ) || exit 1; clear
 [[ $output =~ M ]] && m1=on
+[[ $output =~ P ]] && p1=on
 [[ $output =~ H ]] && h1=on
 [[ $output =~ D ]] && d1=on
-
 ## Airplay multi room on/off
 if [[ $m1 == on ]]; then
     [[ -d /var/lib/mpd/fifo ]] || install -o mpd -g mpd -m 755 -d /var/lib/mpd/fifo
-    sed -i 's/^#.\?include_optional "mpd.d\/owntone.out"/include_optional\t"mpd.d\/owntone.out"/' $config
+    sed -i 's/^#.\?include_optional "mpd.d\/owntone.out"/include_optional "mpd.d\/owntone.out"/' $config
     systemctl start --now avahi-daemon.socket owntone
     # systemctl --user --now -M $user@ enable pipewire pipewire-pulse sinkdef
 else
-    sed -i 's/^include_optional "mpd.d\/owntone.out"/#include_optional\t"mpd.d\/owntone.out"/' $config
+    sed -i 's/^include_optional "mpd.d\/owntone.out"/#include_optional "mpd.d\/owntone.out"/' $config
     systemctl --now disable owntone avahi-daemon.socket
 fi
 
+if [[ $p1 == on ]]; then
+    sed -i 's/^#.\?include_optional "mpd.d\/mtp_/include_optional "mpd.d\/mtp_/' $config
+    options=$(dialog --stdout --title "ArchQ MPD" --menu "Player(Partition)" 7 0 0 \
+        B Browse A Add R Remove ) || exit 1; clear
+    case $options in
+    B)
+        brow_mtp
+        ;;
+    A)
+        mtp_name=$(dialog --stdout --title "ArchQ" --inputbox "Add player(partition)" 0 0) || exit 1; clear
+        mtp_file="/etc/mpd.d/mtp_${mtp_name@L}.out"
+echo "include_optional \"mpd.d/mtp_${mtp_name@L}.out\"" >>$config
+echo 'partition {'                      >$mtp_file
+echo '	name	"'${mtp_name@u}'"'    >>$mtp_file
+echo '}'                                >>$mtp_file
+echo 'audio_output {'                   >>$mtp_file
+echo '	type	"fifo"'                 >>$mtp_file
+echo '	name	"'${mtp_name@u}'"'      >>$mtp_file
+echo '	path	"/var/lib/mpd/'${mtp_name@L}'/air"' >>$mtp_file
+echo '	format	"44100:16:2"'           >>$mtp_file
+echo '}'                                >>$mtp_file
+
+    [[ -d /etc/owntone.d ]] || mkdir /etc/owntone.d
+    [[ -d /var/lib/mpd/${mtp_name@L} ]] || mkdir /var/lib/mpd/${mtp_name@L}
+    ot_conf=/etc/owntone.d/${mtp_name@L}
+    ports=$(cat /etc/owntone.d/* | grep port | cut -d ' ' -f 3)
+    for n in ${ports[@]}; do
+        [[ $n > $max ]] && max=$n
+    done
+    cat >$ot_conf <<EOF
+general {
+	uid = "owntone"
+	logfile = "/var/log/owntone.log"
+	loglevel = fatal
+	ipv6 = no
+	cache_daap_threshold = 1000
+	speaker_autoselect = no
+	high_resolution_clock = yes
+}
+
+library {
+EOF
+echo '	port = '$((max+1))          >>$ot_conf
+echo '	directories = { "/var/lib/mpd/'${mtp_name@L}'" }' >>$ot_conf
+echo '	follow_symlinks = false'    >>$ot_conf
+echo '}'                            >>$ot_conf
+
+    brow_mtp
+        ;;
+    R)
+        MENU=''
+        while read line; do
+            MENU=${MENU}${line}' 　 '
+        done <<< $(cat $config | grep mtp_ | cut -d '_' -f 3 | cut -d '.' -f1)
+        options=$(dialog --stdout --title "ArchQ MPD" --menu "Remove player(partition)" 7 0 0 $MENU ) || exit 1; clear
+        sed -i '/mtp_'"$options"'/d' $config
+        rm -f /etc/mpd.d/mtp_${options}.out /etc/owntone.d/${options}
+        ;;
+    esac
+
+fi
 ## Httpd stream output on/off
 if [[ $h1 == on ]]; then
     ht_conf='/etc/mpd.d/httpd.out'
-    sed -i 's/^#.\?include_optional "mpd.d\/httpd.out"/include_optional\t"mpd.d\/httpd.out"/' $config
+    sed -i 's/^#.\?include_optional "mpd.d\/httpd.out"/include_optional "mpd.d\/httpd.out"/' $config
     http_flac=off; http_wave=off
     [[ $(cat $ht_conf | grep 'encoder' $2 | cut -d'"' -f2) == 'flac' ]] && http_flac=on || http_wave=on
     encoder=$(dialog --stdout \
