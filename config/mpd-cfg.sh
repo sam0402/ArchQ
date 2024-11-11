@@ -31,7 +31,8 @@ brow_mtp(){
     MENU=''
     for file in /etc/owntone.d/*; do
         port=$(cat $file | grep port | cut -d ' ' -f 3)
-        MENU=$MENU"${file##*/} "$'\t\t:'"$port"'\n'
+        filename=${file##*/}
+        MENU=$MENU"${filename@u} "$'\t\t:'"$port"'\n'
     done
     dialog --stdout --title "ArchQ MPD" --msgbox "$MENU" 10 30 || exit 1; clear
 }
@@ -208,7 +209,7 @@ echo '}'                            >>$ot_conf
         options=$(dialog --stdout --title "ArchQ MPD" --menu "Remove player(partition)" 7 0 0 $MENU ) || exit 1; clear
         sed -i '/mtp_'"$options"'/d' $config
         rm -f /etc/mpd.d/mtp_${options}.out /etc/owntone.d/${options}
-	brow_mtp
+        brow_mtp
         ;;
     esac
 
