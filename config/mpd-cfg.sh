@@ -168,7 +168,7 @@ pertime=$(grep 'period_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 options=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Buffer & Music directory" 0 35 0 \
     "Audio Buffer >=128"  1 1 $buffer  1 20 35 0 \
     "Period Time(μs)"     2 1 $pertime 2 20 35 0 \
-    "Music Dir     /mnt/" 3 1 $mdir    3 20 35 0 ) || exit 1; clear
+    "Music Dir     /mnt/" 3 1 "$mdir"  3 20 35 0 ) || exit 1; clear
     # "Ramdisk(GB)"         4 1 $rd_GB   4 20 35 0
 beffer=$(echo $options | awk '//{print $1 }')
 pertime=$(echo $options | awk '//{print $2 }')
