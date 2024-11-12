@@ -184,7 +184,6 @@ echo '}'                                >>$mtp_file
     cat >$ot_conf <<EOF
 general {
 	uid = "owntone"
-	logfile = "/var/log/owntone.log"
 	loglevel = fatal
 	ipv6 = no
 	cache_daap_threshold = 1000
