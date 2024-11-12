@@ -82,6 +82,7 @@ case $server in
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
             pacman -U --noconfirm /tmp/mpd-*.pkg.tar.zst
             sed -i '58,92d' /usr/bin/mpd-plugin.py
+            sed -i 's/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone\@.service
             if [[ $server =~ y. ]]; then
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
                 # wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst

@@ -28,11 +28,11 @@ vol_ctrl(){
 }
 
 brow_mtp(){
-    MENU=''
-    for file in /etc/owntone.d/*; do
+    MENU="Name"$'\t\t:'"Ctrl-port\n"
+    for file in /etc/owntone-*.conf; do
         port=$(cat $file | grep port | cut -d ' ' -f 3)
-        filename=${file##*/}
-        MENU=$MENU"${filename@u} "$'\t\t:'"$port"'\n'
+        filename=${file##*/}; filename=${filename:8:-5}
+        MENU=$MENU"${filename@u}"$'\t:'"$port"'\n'
     done
     dialog --stdout --title "ArchQ MPD" --msgbox "$MENU" 10 30 || exit 1; clear
 }
@@ -53,7 +53,7 @@ case $client in
         ;;
     M)
         pacman -Q mympd >/dev/null 2>&1 || (pacman -Sy --noconfirm archlinux-keyring mympd; yes | pacman -Scc >/dev/null 2>&1)
-        systemctl disable --now nginx php-fpm avahi-daemon
+        systemctl disable --now nginx php-fpm
         systemctl enable --now mpd mympd
         ;;
     N)
@@ -67,37 +67,37 @@ case $client in
         pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd php-fpm
         systemctl enable --now mpd nginx
         ;;
-    U)
-        if [[ ! -d /usr/share/mpd ]]; then
-            curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_config.tar.gz | tar -xz -C /usr/share
-            curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpdconf >/usr/bin/mpdconf
-            chmod +x /usr/bin/mpdconf
-        fi
-        users=$(dialog --stdout --title "ArchQ MPD multi" --inputbox "Add users" 0 25 0) || exit 1; clear
-        num=$(grep 'mpd' /etc/passwd | wc -l)
-        users=$(( $users + $num - 1 ))
+    # U)
+        # if [[ ! -d /usr/share/mpd ]]; then
+        #     curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_config.tar.gz | tar -xz -C /usr/share
+        #     curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpdconf >/usr/bin/mpdconf
+        #     chmod +x /usr/bin/mpdconf
+        # fi
+        # users=$(dialog --stdout --title "ArchQ MPD multi" --inputbox "Add users" 0 25 0) || exit 1; clear
+        # num=$(grep 'mpd' /etc/passwd | wc -l)
+        # users=$(( $users + $num - 1 ))
         # Httpd stream multi user
-        for ((i=$num; i <= $users; i++))
-        do
-            useradd -mU "mpd$i"
-            sh -c "echo mpd$i:mpd | chpasswd"
-            mkdir -p /home/mpd$i/.config
-            cp -a /usr/share/mpd /home/mpd$i/.config
-            chown -R mpd$i: /home/mpd$i/.config
-            port=$(( $(id -u mpd$i) + 5600 ))
-            sed -i 's/port.*"/port\t"'"$port"'"/' /home/mpd$i/.config/mpd/mpd.conf
-            sport=$(( $(id -u mpd$i) + 7000 ))
-            sed -i 's/port.*"/port\t"'"$sport"'"/' /home/mpd$i/.config/mpd/httpd.out
-            ln -s /usr/lib/systemd/user/mpd.service /usr/lib/systemd/user/mpd$i.service
-            cp /usr/lib/systemd/user/mpd.socket /usr/lib/systemd/user/mpd$i.socket
-            sed -i 's/ListenStream=6600/ListenStream='"$port"'/' /usr/lib/systemd/user/mpd$i.socket
-            systemctl enable --now avahi-daemon
-            systemctl --user -M mpd$i@ enable mpd$i.socket
-            echo "User mpd$i's control port: $port, stream port: $sport"
-        done
-        echo "Use command 'mpdcfg mpd[$num-$users]' to configure."
-        exit 1
-        ;;
+        # for ((i=$num; i <= $users; i++))
+        # do
+        #     useradd -mU "mpd$i"
+        #     sh -c "echo mpd$i:mpd | chpasswd"
+        #     mkdir -p /home/mpd$i/.config
+        #     cp -a /usr/share/mpd /home/mpd$i/.config
+        #     chown -R mpd$i: /home/mpd$i/.config
+        #     port=$(( $(id -u mpd$i) + 5600 ))
+        #     sed -i 's/port.*"/port\t"'"$port"'"/' /home/mpd$i/.config/mpd/mpd.conf
+        #     sport=$(( $(id -u mpd$i) + 7000 ))
+        #     sed -i 's/port.*"/port\t"'"$sport"'"/' /home/mpd$i/.config/mpd/httpd.out
+        #     ln -s /usr/lib/systemd/user/mpd.service /usr/lib/systemd/user/mpd$i.service
+        #     cp /usr/lib/systemd/user/mpd.socket /usr/lib/systemd/user/mpd$i.socket
+        #     sed -i 's/ListenStream=6600/ListenStream='"$port"'/' /usr/lib/systemd/user/mpd$i.socket
+        #     systemctl enable --now avahi-daemon
+            # systemctl --user -M mpd$i@ enable mpd$i.socket
+            # echo "User mpd$i's control port: $port, stream port: $sport"
+        # done
+        # echo "Use command 'mpdcfg mpd[$num-$users]' to configure."
+        # exit 1
+        # ;;
 esac
 
 # ### Select sound device
@@ -126,7 +126,7 @@ MENU=''
 if [ $client = M ]; then
     cat $config | grep 'mtp_' | grep -q '^i' && p0=on || p0=off
     p1=off
-    # MENU="P Multi-player $p0 "
+    MENU="P Multi-player $p0 "
 fi
 cat $config | grep owntone | grep -q '#' || m0=on 
 cat $config | grep httpd | grep -q '#' || h0=on
@@ -144,11 +144,11 @@ output=$(dialog --stdout --title "ArchQ MPD" \
 if [[ $m1 == on ]]; then
     [[ -d /var/lib/mpd/fifo ]] || install -o mpd -g mpd -m 755 -d /var/lib/mpd/fifo
     sed -i 's/^#.\?include_optional "mpd.d\/owntone.out"/include_optional "mpd.d\/owntone.out"/' $config
-    systemctl start --now avahi-daemon.socket owntone
+    systemctl enable --now avahi-daemon.socket owntone
     # systemctl --user --now -M $user@ enable pipewire pipewire-pulse sinkdef
 else
     sed -i 's/^include_optional "mpd.d\/owntone.out"/#include_optional "mpd.d\/owntone.out"/' $config
-    systemctl --now disable owntone avahi-daemon.socket
+    systemctl  disable --now owntone avahi-daemon.socket
 fi
 
 if [[ $p1 == on ]]; then
@@ -161,22 +161,22 @@ if [[ $p1 == on ]]; then
         ;;
     A)
         mtp_name=$(dialog --stdout --title "ArchQ" --inputbox "Add player(partition)" 0 0) || exit 1; clear
-        mtp_file="/etc/mpd.d/mtp_${mtp_name@L}.out"
-echo "include_optional \"mpd.d/mtp_${mtp_name@L}.out\"" >>$config
-echo 'partition {'                      >$mtp_file
-echo '	name	"'${mtp_name@u}'"'    >>$mtp_file
-echo '}'                                >>$mtp_file
-echo 'audio_output {'                   >>$mtp_file
+        mtp_file="/etc/mpd.d/mtp_${mtp_name@u}.out"
+echo "include_optional \"mpd.d/mtp_${mtp_name@u}.out\"" >>$config
+# echo 'partition {'                      >$mtp_file
+# echo '	name	"'${mtp_name@u}'"'    >>$mtp_file
+# echo '}'                                >>$mtp_file
+echo 'audio_output {'                   >$mtp_file
 echo '	type	"fifo"'                 >>$mtp_file
 echo '	name	"'${mtp_name@u}'"'      >>$mtp_file
-echo '	path	"/var/lib/mpd/'${mtp_name@L}'/air"' >>$mtp_file
+echo '	path	"/var/lib/mpd/'${mtp_name@u}'/air"' >>$mtp_file
 echo '	format	"44100:16:2"'           >>$mtp_file
 echo '}'                                >>$mtp_file
 
-    [[ -d /etc/owntone.d ]] || mkdir /etc/owntone.d
-    [[ -d /var/lib/mpd/${mtp_name@L} ]] || mkdir /var/lib/mpd/${mtp_name@L}
-    ot_conf=/etc/owntone.d/${mtp_name@L}
-    ports=$(cat /etc/owntone.d/* | grep port | cut -d ' ' -f 3)
+    [[ -d /var/lib/mpd/${mtp_name@u} ]] || install -o mpd -g mpd -m 755 -d //var/lib/mpd/${mtp_name@u}
+    ln -s "/etc/systemd/system/owntone@.service" "/etc/systemd/system/owntone@${mtp_name@u}"
+    ot_conf=/etc/owntone-${mtp_name@u}.conf
+    ports=$(cat /etc/owntone-*.conf | grep port | cut -d ' ' -f 3)
     max=3689
     for n in ${ports[@]}; do
         [[ $n > $max ]] && max=$n
@@ -195,11 +195,12 @@ general {
 library {
 EOF
 echo '	port = '$((max+1))          >>$ot_conf
-echo '	directories = { "/var/lib/mpd/'${mtp_name@L}'" }' >>$ot_conf
+echo '	directories = { "/var/lib/mpd/'${mtp_name@u}'" }' >>$ot_conf
 echo '	follow_symlinks = false'    >>$ot_conf
 echo '}'                            >>$ot_conf
 
     brow_mtp
+    systemctl enable --now avahi-daemon.socket owntone@${mtp_name@u}
         ;;
     R)
         MENU=''
@@ -207,8 +208,9 @@ echo '}'                            >>$ot_conf
             MENU=${MENU}${line}' 　 '
         done <<< $(cat $config | grep mtp_ | cut -d '_' -f 3 | cut -d '.' -f1)
         options=$(dialog --stdout --title "ArchQ MPD" --menu "Remove player(partition)" 7 0 0 $MENU ) || exit 1; clear
+        systemctl disable --now owntone@${options}
         sed -i '/mtp_'"$options"'/d' $config
-        rm -f /etc/mpd.d/mtp_${options}.out /etc/owntone.d/${options}
+        rm -f /etc/mpd.d/mtp_${options}.out /etc/owntone-${options}.conf /etc/systemd/system/owntone@Bedroom
         brow_mtp
         ;;
     esac
