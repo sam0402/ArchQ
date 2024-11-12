@@ -366,6 +366,7 @@ case $server in
         # pacstrap /mnt confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c
         arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.6-1-x86_64.pkg.tar.zst
         arch-chroot /mnt systemctl enable mpd
+        sed -i '58,92d' /mnt/usr/bin/mpd-plugin.py
         ### Install myMPD
         if [[ $server =~ y. ]]; then
             echo -e "\n${c_blue_b}Install myMPD ...${c_gray}\n"
