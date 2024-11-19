@@ -29,13 +29,12 @@ password(){
         password
     fi
 }
-
-hostname=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter hostname" 0 0) || exit 1; clear
-if [ -z "$hostname" ];then
-    dialog --stdout --title "ArchQ Desktop" --pause "\n Hostname cannot be empty.\n\n Default will be 'ArchQ'." 12 0 3 || exit 1; clear
-    hostname=Desktop
-    hostname=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter hostname again" 0 0) || exit 1; clear
-fi
+hostname=ArchQ
+# hostname=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter hostname" 0 0) || exit 1; clear
+# if [ -z "$hostname" ];then
+#     dialog --stdout --title "ArchQ Desktop" --pause "\n Hostname cannot be empty.\n\n Default will be 'ArchQ'." 12 0 3 || exit 1; clear
+#     hostname=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter hostname again" 0 0) || exit 1; clear
+# fi
 
 user=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter admin username" 0 0) || exit 1; clear
 if [ -z "$user" ];then
@@ -59,17 +58,16 @@ if [ $fmt = P ]; then
     part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
 fi
 
-f2fs=$(dialog --stdout --title "ArchQ Desktop" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1; clear
-ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en' | sed 's/://')
-ifport=$(dialog --stdout --title "ArchQ Desktop" --menu "Select net device" 7 0 0 ${ethers}) || exit 1; clear
+echo ${device} | grep -q 'nvme' && f2fs=F || f2fs=X
+ifport=$(ip -o link show | awk '{print $2,$9}' | grep -m1 '^en.*UP' | sed 's/:.*//')
 ip=$(dialog --stdout --title "ArchQ Desktop" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1; clear
 if [ $ip = S ]; then
 ifmask=24; ifdns=8.8.8.8
 ifconfig=$(dialog --stdout --title "ArchQ Desktop" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
-            "Address" 1 1   ""          1 10 15 0 \
-            "Netmask" 2 1   "$ifmask"   2 10 15 0 \
-            "Gateway" 3 1   ""          3 10 15 0 \
-            "DNS"     4 1   "$ifdns"    4 10 15 0) || exit 1; clear
+            "Address" 1 1   "192.168.1."    1 10 15 0 \
+            "Netmask" 2 1   "$ifmask"       2 10 15 0 \
+            "Gateway" 3 1   "192.168.1.254" 3 10 15 0 \
+            "DNS"     4 1   "$ifdns"        4 10 15 0) || exit 1; clear
 ifaddr=$(echo $ifconfig | cut -d' ' -f1)
 ifmast=$(echo $ifconfig | cut -d' ' -f2)
 ifgw=$(echo $ifconfig | cut -d' ' -f3)
