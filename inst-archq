@@ -17,7 +17,7 @@ c_gray=$'\e[0;37m'
 
 echo root:archq | chpasswd
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog scrub
-desk=$(dialog --stdout --title "ArchQ" --menu "Install for" 7 0 0 M Music D Desktop) || exit 1; clear
+desk=$(dialog --stdout --title "ArchQ" --menu "Install" 7 0 0 M "Music Server|Player without GUI" D "Desktop with LMS|MPD Server") || exit 1; clear
 [ $desk = D ] && curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/inst-desktop | bash
 ### Get infomation from user ###
 password(){
@@ -369,6 +369,7 @@ case $server in
         arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.6-1-x86_64.pkg.tar.zst
         arch-chroot /mnt systemctl enable mpd
         sed -i '58,92d' /mnt/usr/bin/mpd-plugin.py
+        sed -i 's/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /mnt/usr/lib/systemd/system/owntone.service
         sed -i 's/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /mnt/etc/systemd/system/owntone\@.service
         ### Install myMPD
         if [[ $server =~ y. ]]; then
