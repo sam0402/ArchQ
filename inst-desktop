@@ -73,12 +73,12 @@ ifmast=$(echo $ifconfig | cut -d' ' -f2)
 ifgw=$(echo $ifconfig | cut -d' ' -f3)
 ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
-
-desktop=$(dialog --stdout --title "ArchQ Desktop" \
-    --menu "Desktop & VNC :5901" 7 0 0 \
-    LXDE "Lightweight X11 Desktop" \
-    LXQt "Lightweight Qt Desktop" \
-    VNC "TigerVNC only" ) || exit 1; clear
+desktop=LXDE
+# desktop=$(dialog --stdout --title "ArchQ Desktop" \
+#     --menu "Desktop & VNC :5901" 7 0 0 \
+#     LXDE "Lightweight X11 Desktop" \
+#     LXQt "Lightweight Qt Desktop" \
+#     VNC "TigerVNC only" ) || exit 1; clear
 server=$(dialog --stdout --title "ArchQ Desktop" \
     --menu "Select music server" 7 0 0 \
     MPD "MPD & myMPD web-based client" \
@@ -257,16 +257,16 @@ echo "XMODIFIERS=@im=fcitx" >>/mnt/etc/environment
 [ $desktop = LXQt ] && sed -i 's;^# session=/usr/bin/startlxde;session=/usr/bin/startlxqt;g' /mnt/etc/lxdm/lxdm.conf
 
 # Setup TigerVNC
-chroot /mnt ln /usr/lib/systemd/system/vncserver\@.service /etc/systemd/system/vncserver\@:1.service
-echo ":1=$user" >>/mnt/etc/tigervnc/vncserver.users
-mkdir /mnt/home/$user/.vnc
-[ $desktop = LXDE ] && echo "session=LXDE" >/mnt/home/$user/.vnc/config
-[ $desktop = LXQt ] && echo "session=lxqt" >/mnt/home/$user/.vnc/config
-arch-chroot /mnt sh -c "echo $password | vncpasswd -f >/home/$user/.vnc/passwd"
-arch-chroot /mnt chmod 600 /home/$user/.vnc/passwd
-arch-chroot /mnt chown -R ${user}: /home/$user/.vnc
-arch-chroot /mnt systemctl enable vncserver@:1.service
-[ $desktop = VNC ] || arch-chroot /mnt systemctl enable lxdm
+# chroot /mnt ln /usr/lib/systemd/system/vncserver\@.service /etc/systemd/system/vncserver\@:1.service
+# echo ":1=$user" >>/mnt/etc/tigervnc/vncserver.users
+# mkdir /mnt/home/$user/.vnc
+# [ $desktop = LXDE ] && echo "session=LXDE" >/mnt/home/$user/.vnc/config
+# [ $desktop = LXQt ] && echo "session=lxqt" >/mnt/home/$user/.vnc/config
+# arch-chroot /mnt sh -c "echo $password | vncpasswd -f >/home/$user/.vnc/passwd"
+# arch-chroot /mnt chmod 600 /home/$user/.vnc/passwd
+# arch-chroot /mnt chown -R ${user}: /home/$user/.vnc
+# arch-chroot /mnt systemctl enable vncserver@:1.service
+# [ $desktop = VNC ] || arch-chroot /mnt systemctl enable lxdm
 
 mkdir /mnt/home/$user/Desktop /mnt/mnt/music
 arch-chroot /mnt chown -R ${user}: /home/$user/Desktop /mnt/music
