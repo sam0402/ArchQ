@@ -6,8 +6,6 @@ After=network.target sound.target
 [Service]
 ExecStart=/usr/bin/shairport-sync
 User=shairport-sync
-Nice=-20
-AllowedCPUs=3
 Group=shairport-sync
 
 Restart=on-failure
