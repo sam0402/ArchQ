@@ -454,11 +454,13 @@ fi
 if [[ $player =~ A ]]; then
     echo -e "\n${c_blue_b}Install Airplay ...${c_gray}\n"
     # pacstrap /mnt libconfig
-    arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
-    arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-3.3.9-1-x86_64.pkg.tar.zst
+    arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-4.3.3-2-x86_64.pkg.tar.zst
+    arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nqptp-git-1.1-1-x86_64.pkg.tar.zst
+    arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-4.3.3-2-x86_64.pkg.tar.zst /root/nqptp-git-1.1-1-x86_64.pkg.tar.zst
+    curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync.service >/mnt/usr/lib/systemd/system/shairport-sync.service
     [[ -n "$scard" ]] && sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/' /mnt/etc/shairport-sync.conf
     sed -i '/Group=/iNice=-20\nAllowedCPUs='\"$iso_1st\"'' /mnt/usr/lib/systemd/system/shairport-sync.service
-    arch-chroot /mnt systemctl enable shairport-sync
+    arch-chroot /mnt systemctl enable shairport-sync nqptp
 fi
 if  [[ $player =~ R ]]; then
     echo echo -e "\n${c_blue_b}Install Roonbridge ...${c_gray}\n"
@@ -598,6 +600,7 @@ alias composer='kid3-cli -c "set composer '\''\$COMPOSER'\''"'
 alias wipedir='function _f() { for i in {1..5}; do find "\$1" -exec scrub -Sp fillzero {} \\;; done; rm -rf "\$1"; } ; _f'
 alias hcp='function _f() { echo "\$1 >> \$2"; for i in {1..50}; do [ -z \$2 ] && break; nocache cp -a "\$1" "\$2";echo -n .\$((\$i*2));nocache cp -a "\$2"/"\$1" .;done; }; _f'
 alias fflac='function _f() { mkdir -p "\$2"/"\$1"; cp "\$1"/*.{pdf,jp*g} "\$2"/"\$1"; for i in "\$1"/*.flac; do ffmpeg -i "\$i" -vn -c:a flac -compression_level 1 -fflags +bitexact "\$2"/"\$i"; done; } ; _f'
+alias dflac='function _f() { for d in "\$1"/*;do fflac "\$d" "\$2";done; }; _f'
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
 
