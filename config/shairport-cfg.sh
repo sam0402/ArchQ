@@ -1,5 +1,5 @@
 #!/bin/bash
-version='3.3.9'
+version='4.3.3'
 config='/etc/shairport-sync.conf'
 name=$(grep -m1 'name = ' $config | awk -F\" '{print $2}')
 [ $name = '%H' ] && name=$(uname -n)
@@ -33,7 +33,7 @@ SelVer()
       pacman -U --noconfirm /tmp/nqptp-git-1.1-1-x86_64.pkg.tar.zst
     else
       systemctl disable --now nqptp
-      pacman -R --noconfirm nqptp-git
+      pacman -R --noconfirm nqptp
     fi
     isocpu=$(($(getconf _NPROCESSORS_ONLN)-1))
     sed -i '/Install/iNice=-20\nAllowedCPUs='"$isocpu"'' /usr/lib/systemd/system/shairport-sync.service
