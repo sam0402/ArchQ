@@ -29,7 +29,6 @@ player=$(dialog --stdout --title "ArchQ $1" --checklist "Active player" 7 0 0 \
 [[ $player =~ H ]] && h1=on
 
 cpus=$(getconf _NPROCESSORS_ONLN)
-isocpu=$((cpus-1))
 if [[ $player =~ S ]] && ! pacman -Q squeezelite >/dev/null 2>&1; then
     /usr/bin/sqzlite-cfg.sh
 fi
@@ -38,7 +37,7 @@ if [[ $player =~ A ]] && ! pacman -Q shairport-sync >/dev/null 2>&1; then
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nqptp-1.2.5-1-x86_64.pkg.tar.zst
     pacman -U --noconfirm /tmp/shairport-sync-4.3.3-2-x86_64.pkg.tar.zst /tmp/nqptp-1.2.5-1-x86_64.pkg.tar.zst
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync.service >/usr/lib/systemd/system/shairport-sync.service
-    sed -i '/Install/iNice=-20\nAllowedCPUs='"$isocpu"'\n'  /usr/lib/systemd/system/shairport-sync.service
+    sed -i '/Install/iNice=-20\n' /usr/lib/systemd/system/shairport-sync.service
     systemctl daemon-reload
 fi
 if [[ $player =~ R ]] && ! pacman -Q roonbridge >/dev/null 2>&1; then
