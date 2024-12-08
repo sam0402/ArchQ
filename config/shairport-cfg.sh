@@ -29,14 +29,14 @@ SelVer()
     pacman -U --noconfirm /tmp/shairport-sync-${version}-${airver}-x86_64.pkg.tar.zst
     if [[ $airver == '2' ]]; then
       curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync.service >/usr/lib/systemd/system/shairport-sync.service
-      wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nqptp-git-1.1-1-x86_64.pkg.tar.zst
-      pacman -U --noconfirm /tmp/nqptp-git-1.1-1-x86_64.pkg.tar.zst
+      wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nqptp-1.2.5-1-x86_64.pkg.tar.zst
+      pacman -U --noconfirm /tmp/nqptp-1.2.5-1-x86_64.pkg.tar.zst
     else
       systemctl disable --now nqptp
       pacman -R --noconfirm nqptp
     fi
     isocpu=$(($(getconf _NPROCESSORS_ONLN)-1))
-    sed -i '/Install/iNice=-20\nAllowedCPUs='"$isocpu"'' /usr/lib/systemd/system/shairport-sync.service
+    sed -i '/Install/iNice=-20\nAllowedCPUs='"$isocpu"'\n' /usr/lib/systemd/system/shairport-sync.service
     echo "Airplay $airver installed."
 }
 
