@@ -266,7 +266,7 @@ echo "XMODIFIERS=@im=fcitx" >>/mnt/etc/environment
 # arch-chroot /mnt chmod 600 /home/$user/.vnc/passwd
 # arch-chroot /mnt chown -R ${user}: /home/$user/.vnc
 # arch-chroot /mnt systemctl enable vncserver@:1.service
-# [ $desktop = VNC ] || arch-chroot /mnt systemctl enable lxdm
+[ $desktop = VNC ] || arch-chroot /mnt systemctl enable lxdm
 
 mkdir /mnt/home/$user/Desktop /mnt/mnt/music
 arch-chroot /mnt chown -R ${user}: /home/$user/Desktop /mnt/music
