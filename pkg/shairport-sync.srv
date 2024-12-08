@@ -1,0 +1,19 @@
+[Unit]
+Description=Shairport Sync - AirPlay Audio Receiver
+Requires=avahi-daemon.service nqptp.service
+After=network.target sound.target
+
+[Service]
+ExecStart=/usr/bin/shairport-sync
+User=shairport-sync
+Nice=-20
+AllowedCPUs=3
+Group=shairport-sync
+
+Restart=on-failure
+RestartSec=5
+StartLimitBurst=10
+StartLimitInterval=600
+
+[Install]
+WantedBy=multi-user.target
