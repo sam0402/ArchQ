@@ -25,7 +25,7 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/python-soupsieve-2.4-1-any.pkg.tar.zst
     pacman -U --noconfirm /tmp/*.pkg.tar.zst
     if ! pacman -Q linux-Qrip >/dev/null 2>&1 ; then
-        kver=$(pacman -Q | grep linux-Q | grep -v headers | awk 'NR==1{print $2}')
+        kver=$(pacman -Q | grep linux-Q | awk 'NR==1{print $2}')
         wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
         echo -e "\nInstall kernel ${c_blue_b}Qrip${c_gray} ...\n"
         mkgrub
