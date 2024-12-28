@@ -221,8 +221,7 @@ if [[ $h1 == on ]]; then
     sed -i 's/^#.\?include_optional "mpd.d\/httpd.out"/include_optional "mpd.d\/httpd.out"/' $config
     http_flac=off; http_wave=off
     [[ $(cat $ht_conf | grep 'encoder' $2 | cut -d'"' -f2) == 'flac' ]] && http_flac=on || http_wave=on
-    encoder=$(dialog --stdout \
-        --title "ArchQ MPD" --radiolist "Http stream encoder" 7 0 0 \
+    encoder=$(dialog --stdout --title "ArchQ MPD" --radiolist "Http:8000 codec" 7 0 0 \
         flac '　' $http_flac \
         wave '　' $http_wave) || exit 1
     clear
