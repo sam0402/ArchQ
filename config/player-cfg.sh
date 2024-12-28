@@ -37,6 +37,7 @@ if [[ $player =~ A ]] && ! pacman -Q shairport-sync >/dev/null 2>&1; then
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nqptp-1.2.5-1-x86_64.pkg.tar.zst
     pacman -U --noconfirm /tmp/shairport-sync-4.3.3-2-x86_64.pkg.tar.zst /tmp/nqptp-1.2.5-1-x86_64.pkg.tar.zst
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync.service >/usr/lib/systemd/system/shairport-sync.service
+    sed -i 's/^\/\?\/\?\tresync_threshold_in_seconds = 0.050;/\tresync_threshold_in_seconds = 0.010;/' /etc/shairport-sync.conf
     sed -i '/Install/iNice=-20\n' /usr/lib/systemd/system/shairport-sync.service
     systemctl daemon-reload
 fi
