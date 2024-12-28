@@ -134,7 +134,7 @@ cat $config | grep -q "#[[:space:]]dop" || d0=on
 output=$(dialog --stdout --title "ArchQ MPD" \
         --checklist "Output method" 7 0 0 \
         M "Multi-room Play" $m0 $MENU \
-        H "Http Stream" $h0 \
+        H "Http Stream:8000" $h0 \
         D "DSD over PCM" $d0 ) || exit 1; clear
 [[ $output =~ M ]] && m1=on
 [[ $output =~ P ]] && p1=on
@@ -222,8 +222,7 @@ if [[ $h1 == on ]]; then
     http_flac=off; http_wave=off
     [[ $(cat $ht_conf | grep 'encoder' $2 | cut -d'"' -f2) == 'flac' ]] && http_flac=on || http_wave=on
     encoder=$(dialog --stdout \
-        --title "ArchQ MPD" \
-        --radiolist "Http stream encoder" 7 0 0 \
+        --title "ArchQ MPD" --radiolist "Http stream encoder" 7 0 0 \
         flac '　' $http_flac \
         wave '　' $http_wave) || exit 1
     clear
