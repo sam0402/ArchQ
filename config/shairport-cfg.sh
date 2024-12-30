@@ -91,7 +91,9 @@ WK=$(dialog --stdout --title "ArchQ $1" --menu "Airplay configure" 7 0 0 \
 case $WK in
   S)
       SelDevice
-      persize=78
+      persize=$(cat $config | grep 'period_size' | cut -d '=' -f2| cut -d';' -f 1)
+      persize=${persize// /}
+      [[ ${persize} == '<number>' ]] && persize=78
       persize=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Airplay ALSA" 0 26 0 \
       "Period size" 1 1 $persize 1 14 26 0 ) || exit 1; clear
       bufsize=$(($persize * 6))
