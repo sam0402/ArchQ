@@ -91,6 +91,12 @@ WK=$(dialog --stdout --title "ArchQ $1" --menu "Airplay configure" 7 0 0 \
 case $WK in
   S)
       SelDevice
+      persize=78
+      persize=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Airplay ALSA" 0 26 0 \
+      "Period size" 1 1 $persize 1 14 26 0 ) || exit 1; clear
+      bufsize=$(($persize * 6))
+      sed -i 's/^\/\?\/\?\tperiod_size = .*;/\tperiod_size = '"$persize"';/' $config
+      sed -i 's/^\/\?\/\?\tbuffer_size = .*;/\tbuffer_size = '"$bufsize"';/' $config
       systemctl enable $NQPTP shairport-sync
       systemctl restart $NQPTP shairport-sync
       echo shAirport is started.
