@@ -152,6 +152,10 @@ else
 fi
 
 if [[ $p1 == on ]]; then
+    if ! pacman -Q mpd-stream >/dev/null 2>&1; then
+        wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-stream-0.23.14-12-x86_64.pkg.tar.zst
+        pacman -U --noconfirm /tmp/*.pkg.tar.zst
+    fi
     sed -i 's/^#.\?include_optional "mpd.d\/mtp_/include_optional "mpd.d\/mtp_/' $config
     options=$(dialog --stdout --title "ArchQ MPD" --menu "Player(Partition)" 7 0 0 \
         B Browse A Add R Remove ) || exit 1; clear
