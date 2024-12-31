@@ -371,6 +371,7 @@ case $server in
         sed -i '58,92d' /mnt/usr/bin/mpd-plugin.py
         sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/' /mnt/etc/systemd/system/owntone.service
         sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/' /mnt/etc/systemd/system/owntone\@.service
+        curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone.out >/mnt/etc/mpd.d/owntone.out
         ### Install myMPD
         if [[ $server =~ y. ]]; then
             echo -e "\n${c_blue_b}Install myMPD ...${c_gray}\n"
@@ -483,6 +484,7 @@ cp /archq/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /mnt/root
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /root/qt5-base-5.15.9+kde+r151-1-x86_64.pkg.tar.zst /root/kid3-common-3.9.3-2-x86_64.pkg.tar.zst /root/double-conversion-3.2.1-1-x86_64.pkg.tar.zst
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/asound.conf >/mnt/etc/asound.conf
 
 pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
 arch-chroot /mnt systemctl disable avahi-daemon.socket
