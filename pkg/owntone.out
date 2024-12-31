@@ -1,0 +1,9 @@
+audio_output {
+	type	"alsa"
+	name	"Multiroom"
+	enabled	"yes"
+	device	"writeFile"
+	format	"44100:16:2"
+	server	"127.0.0.1"
+	replay_gain_handler "none"
+}
