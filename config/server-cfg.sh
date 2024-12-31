@@ -83,6 +83,7 @@ case $server in
             pacman -U --noconfirm /tmp/mpd-*.pkg.tar.zst
             sed -i '58,92d' /usr/bin/mpd-plugin.py
             sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/' /etc/systemd/system/owntone\@.service
+            curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone.out >/etc/mpd.d/owntone.out
             if [[ $server =~ y. ]]; then
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
                 # wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
