@@ -341,6 +341,7 @@ case $server in
         [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         [ $cpus -ge 6 ] && [[ $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/logitechmediaserver.service
+        sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         arch-chroot /mnt systemctl enable logitechmediaserver
         ;;
     Roon)
@@ -364,6 +365,7 @@ case $server in
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst /root/mpd-${MPD}-0.23.14-12-x86_64.pkg.tar.zst
+        sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/mpd.service
         # dependencies for owntone
         # pacstrap /mnt confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c
         arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.6-1-x86_64.pkg.tar.zst
@@ -462,6 +464,7 @@ if [[ $player =~ A ]]; then
     [[ -n "$scard" ]] && sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/' /mnt/etc/shairport-sync.conf
     sed -i 's/^\/\?\/\?\tresync_threshold_in_seconds = 0.050;/\tresync_threshold_in_seconds = 0.025;/' /mnt/etc/shairport-sync.conf
     sed -i '/Install\n/iNice=-20\nAllowedCPUs='\"$iso_1st\"'\n' /mnt/usr/lib/systemd/system/shairport-sync.service
+    sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/shairport-sync.service
     arch-chroot /mnt systemctl enable shairport-sync nqptp
 fi
 if  [[ $player =~ R ]]; then

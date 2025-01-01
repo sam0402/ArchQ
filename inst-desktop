@@ -286,6 +286,7 @@ case $server in
         arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
         arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
         sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/logitechmediaserver.service
+        sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         arch-chroot /mnt systemctl enable logitechmediaserver
         cat >>/mnt/home/$user/Desktop/lms.desktop <<EOF
 [Desktop Entry]
@@ -304,7 +305,8 @@ EOF
         ### Install myMPD
         # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/mympd-12.1.1-1-x86_64.pkg.tar.zst 
+        arch-chroot /mnt pacman -U --noconfirm /root/mympd-12.1.1-1-x86_64.pkg.tar.zst
+        sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/mpd.service
         arch-chroot /mnt systemctl enable mpd mympd
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
@@ -345,7 +347,7 @@ arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar
 
 cat >>/mnt/etc/rc.local <<EOF
 # systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
-# systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-udevd
+# systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-udevd 
 # systemctl stop systemd-networkd
 # hdparm -a0 /dev/sda >/dev/null 2>&1
 exit 0
