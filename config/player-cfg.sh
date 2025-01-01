@@ -40,6 +40,7 @@ if [[ $player =~ A ]] && ! pacman -Q shairport-sync >/dev/null 2>&1; then
     sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = \"hw:0,0\";/' /etc/shairport-sync.conf
     sed -i 's/^\/\?\/\?\tresync_threshold_in_seconds = 0.050;/\tresync_threshold_in_seconds = 0.025;/' /etc/shairport-sync.conf
     sed -i '/Install/iNice=-20\n' /usr/lib/systemd/system/shairport-sync.service
+    sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/shairport-sync.service
     systemctl daemon-reload
     systemctl enable --now nqptp shairport-sync
     /usr/bin/shairport-cfg.sh ; exit 0
