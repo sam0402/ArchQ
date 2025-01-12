@@ -385,6 +385,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/usb-storage-mount.sh >/mnt/usr/bin/usb-storage-mount.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/90-usb-storage-automount.rules >/mnt/etc/udev/rules.d/90-usb-storage-automount.rules
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/mnt/usr/bin/pagecache-management.sh
+arch-chroot /mnt wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/home/$user/Desktop/*.desktop
 arch-chroot /mnt ln -s /usr/bin/config.sh /usr/bin/config
 
