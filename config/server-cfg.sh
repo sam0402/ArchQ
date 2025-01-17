@@ -84,7 +84,8 @@ case $server in
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
             pacman -U --noconfirm /tmp/mpd-*.pkg.tar.zst /tmp/owntone-*.tar.zst /tmp/ffmpeg-*.pkg.tar.zst
             sed -i '58,92d' /usr/bin/mpd-plugin.py
-            sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/' /etc/systemd/system/owntone\@.service
+            sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone.service
+            sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone\@.service
             curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone.out >/etc/mpd.d/owntone.out
             sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
             if [[ $server =~ y. ]]; then
