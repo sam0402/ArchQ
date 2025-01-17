@@ -362,13 +362,14 @@ case $server in
         # pacstrap /mnt fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms libid3tag ncmpcpp mpc python-mpd2 lua
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-0.23.14-12-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.10-2-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst /root/mpd-${MPD}-0.23.14-12-x86_64.pkg.tar.zst
         sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/mpd.service
         # dependencies for owntone
         # pacstrap /mnt confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c
-        arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.6-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.10-2-x86_64.pkg.tar.zst /root/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
         arch-chroot /mnt systemctl enable mpd
         sed -i '58,92d' /mnt/usr/bin/mpd-plugin.py
         sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/' /mnt/etc/systemd/system/owntone.service
