@@ -89,9 +89,11 @@ case $server in
             curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone.out >/etc/mpd.d/owntone.out
             sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
             if [[ $server =~ y. ]]; then
-                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-12.1.1-1-x86_64.pkg.tar.zst
-                # wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
-                pacman -U --noconfirm /tmp/mympd-*.pkg.tar.zst
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-19.0.3-1-x86_64.pkg.tar.zst
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
+                mkdir -p /var/lib/private/mympd/config/
+                echo 'Unknown' >/var/lib/private/mympd/config/album_group_tag
+                pacman -U --noconfirm /tmp/*.pkg.tar.zst
                 systemctl enable mympd
             fi
             if [[ $server =~ o. ]]; then
