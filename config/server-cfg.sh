@@ -78,9 +78,9 @@ case $server in
         if ! pacman -Q mpd-${MPD} >/dev/null 2>&1; then
             echo -e "\n${c_blue_b}Install MPD-${MPD} ...${c_gray}\n"
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-0.23.17-12-x86_64.pkg.tar.zst
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
+            pacman -Q mpd_cdrom >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
+            pacman -Q mpd-plugin >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
+            pacman -Q owntone >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
             pacman -U --noconfirm /tmp/mpd-*.pkg.tar.zst /tmp/owntone-*.tar.zst /tmp/ffmpeg-*.pkg.tar.zst
             sed -i '58,92d' /usr/bin/mpd-plugin.py
@@ -89,8 +89,8 @@ case $server in
             curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone.out >/etc/mpd.d/owntone.out
             sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
             if [[ $server =~ y. ]]; then
-                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-19.0.3-1-x86_64.pkg.tar.zst
-                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
+                pacman -Q mympd >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-19.0.3-1-x86_64.pkg.tar.zst
+                pacman -Q libnewt >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
                 mkdir -p /var/lib/private/mympd/config/
                 echo 'Unknown' >/var/lib/private/mympd/config/album_group_tag
                 pacman -U --noconfirm /tmp/*.pkg.tar.zst
