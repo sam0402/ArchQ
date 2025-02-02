@@ -223,12 +223,14 @@ fi
 if [[ $h1 == on ]]; then
     ht_conf='/etc/mpd.d/httpd.out'
     sed -i 's/^#.\?include_optional "mpd.d\/httpd.out"/include_optional "mpd.d\/httpd.out"/' $config
-    http_flac=off; http_wave=off
-    [[ $(cat $ht_conf | grep 'encoder' $2 | cut -d'"' -f2) == 'flac' ]] && http_flac=on || http_wave=on
-    encoder=$(dialog --stdout --title "ArchQ MPD" --radiolist "Http:8000 codec" 7 0 0 \
-        flac '　' $http_flac \
-        wave '　' $http_wave) || exit 1
+    http_flac=off; http_wave=off; http_lame=off
+    declare http_$(cat $ht_conf | grep 'encoder' $2 | cut -d'"' -f2)=on
+    MENU='flac 　 '$http_flac' wave 　 '$http_wave
+    pacman -Q mpd-ffmpeg >/dev/null 2>&1 && MENU=${MENU}' mp3 　 '$http_lame
+    encoder=$(dialog --stdout --title "ArchQ MPD" --radiolist "Http:8000 codec" 7 0 0 $MENU) || exit 1
     clear
+    sed -i 's/name.*"/name\t"'"Stream.$encoder"'"/' $ht_conf
+    [[ $encoder == 'mp3' ]] && encoder=lame
     sed -i 's/encoder.*"/encoder\t"'"$encoder"'"/' $ht_conf
 else   
     sed -i 's/^include_optional "mpd.d\/httpd.out"/#include_optional "mpd.d\/httpd.out"/' $config
