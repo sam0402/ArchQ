@@ -16,22 +16,22 @@ case $server in
        server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 mL "Light: pcm, flac" off \
-                mS "Stream: +Light, dsd, radio" on \
-                mM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+                mS "Stream: +Light, dsd" on \
+                mM "MPEG: +Stream, radio, mp3, alac" off ) || exit 1
         ;;
     myMPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 yL "Light: pcm, flac" off \
-                yS "Stream: +Light, dsd, radio" on \
-                yM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+                yS "Stream: +Light, dsd" on \
+                yM "MPEG: +Stream, radio, mp3, alac" off ) || exit 1
         ;;
     RompR)
        server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 oL "Light: pcm, flac" off \
-                oS "Stream: +Light, dsd, radio" on \
-                oM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+                oS "Stream: +Light, dsd" on \
+                oM "MPEG: +Stream, mp3, alac" off ) || exit 1
         ;;
 esac
 case $server in
@@ -77,7 +77,7 @@ case $server in
         [[ $server =~ .M ]] && MPD=ffmpeg
         if ! pacman -Q mpd-${MPD} >/dev/null 2>&1; then
             echo -e "\n${c_blue_b}Install MPD-${MPD} ...${c_gray}\n"
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-0.23.14-12-x86_64.pkg.tar.zst
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-0.23.17-12-x86_64.pkg.tar.zst
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
