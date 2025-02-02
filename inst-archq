@@ -88,11 +88,11 @@ server=$(dialog --stdout --title "ArchQ" \
         LMS "Logitech Media Server" \
         MPD "MPD, Rigelian(iOS) | text-based client" \
         myMPD "MPD & myMPD web-based client" \
-        RompR "MPD & RompR web-based client" \
         Roon "Roon Server" \
         HQPE5 "HQPlayer Embedded 5" \
         HQPE4 "HQPlayer Embedded 4" \
         Player "Airplay | Squeezelite | Roonbridge | HQP NAA" ) || exit 1; clear
+#        RompR "MPD & RompR web-based client" \
 
 case $server in
     LMS)
@@ -102,15 +102,13 @@ case $server in
        server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 mL "Light: pcm, flac" off \
-                mS "Stream: +Light, dsd, radio" on \
-                mM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+                mM "MPEG: +Light, radio, mp3, alac" off ) || exit 1
         ;;
     myMPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 yL "Light: pcm, flac" off \
-                yS "Stream: +Light, dsd, radio" on \
-                yM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+                yM "MPEG: +Light, radio, mp3, alac" off ) || exit 1
         ;;
     RompR)
        server=$(dialog --stdout --title "ArchQ" \
@@ -360,12 +358,12 @@ case $server in
         [[ $server =~ .M ]] && MPD=ffmpeg
         echo -e "\n${c_blue_b}Install MPD-${MPD}...${c_gray}\n"
         # pacstrap /mnt fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms libid3tag ncmpcpp mpc python-mpd2 lua
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-0.23.14-12-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-0.23.17-12-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.10-2-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/mpd-${MPD}-0.23.14-12-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mpd-${MPD}-0.23.17-12-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
         sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/mpd.service
         # dependencies for owntone
         # pacstrap /mnt confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c
