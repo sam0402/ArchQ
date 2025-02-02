@@ -328,6 +328,7 @@ if systemctl is-active mpd >/dev/null; then
     chrt -p 93 \$(ps H -q \$(pgrep mpd) -o tid,cls | grep FF | awk '{print \$1}')
     chrt -p 95 \$(ps H -q \$(pgrep mpd) -o tid,comm | grep ArchQ | awk '{print \$1}')
     chrt -fp 85 \$(pgrep mpd)
+    chrt -fp 54 \$(pgrep ksoftirqd/\$(ps -eLo comm,cpuid| grep "output:A"|awk '{print \$2}'))
 fi
 
 EOF
