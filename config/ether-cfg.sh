@@ -97,10 +97,10 @@ if [[ $ip == S ]]; then
     echo Address=$ifaddr/$ifmask >>$config
     echo Gateway=$ifgw >>$config
     echo DNS=$ifgw $ifdns >>$config
+    [[ $v6 == 'on' ]] && echo "IPv6PrivacyExtensions=true" >>$config
 else
     echo DHCP=$DHCP >>$config
 fi
-[[ $v6 == 'on' ]] && echo "IPv6PrivacyExtensions=true" >>$config
 echo  >>$config
 
 echo [Link] >>$config
