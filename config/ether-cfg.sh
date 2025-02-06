@@ -48,7 +48,7 @@ if [ -f "/etc/systemd/network/10-${ifport}.network" ]; then
     [[ -n $MTUBytes ]] && ifmtu=$(echo $MTUBytes | cut -d',' -f2)
 fi
 
-grep -q 'IPv6PrivacyExtensions=true' 10-${ifport}.network && v6_o='on' || v6_o='off'
+grep -q "IPv6PrivacyExtensions=true\|DHCP=true" $config && v6_o='on' || v6_o='off'
 
 if echo $ifport | grep -q en; then
     ip='D'
@@ -88,21 +88,21 @@ fi
 
 ifmac=$(ip link show $ifport | grep ether | awk '{print $2 }')
 
-echo [Match] >/etc/systemd/network/10-${ifport}.network
-echo Name=${ifport} >>/etc/systemd/network/10-${ifport}.network
-echo MACAddress=${ifmac} >>/etc/systemd/network/10-${ifport}.network
-echo  >>/etc/systemd/network/10-${ifport}.network
-echo [Network] >>/etc/systemd/network/10-${ifport}.network
+echo [Match] >$config
+echo Name=${ifport} >>$config
+echo MACAddress=${ifmac} >>$config
+echo  >>$config
+echo [Network] >>$config
 if [[ $ip == S ]]; then
-    echo Address=$ifaddr/$ifmask >>/etc/systemd/network/10-${ifport}.network
-    echo Gateway=$ifgw >>/etc/systemd/network/10-${ifport}.network
-    echo DNS=$ifgw $ifdns >>/etc/systemd/network/10-${ifport}.network
+    echo Address=$ifaddr/$ifmask >>$config
+    echo Gateway=$ifgw >>$config
+    echo DNS=$ifgw $ifdns >>$config
 else
-    echo DHCP=$DHCP >>/etc/systemd/network/10-${ifport}.network
+    echo DHCP=$DHCP >>$config
 fi
-[[ $v6 == 'on' ]] && echo "IPv6PrivacyExtensions=true" >>/etc/systemd/network/10-${ifport}.network
-echo  >>/etc/systemd/network/10-${ifport}.network
+[[ $v6 == 'on' ]] && echo "IPv6PrivacyExtensions=true" >>$config
+echo  >>$config
 
-echo [Link] >>/etc/systemd/network/10-${ifport}.network
-echo NamePolicy=kernel database onboard slot path >>/etc/systemd/network/10-${ifport}.network
-echo MTUBytes=$ifmtu >>/etc/systemd/network/10-${ifport}.network
+echo [Link] >>$config
+echo NamePolicy=kernel database onboard slot path >>$config
+echo MTUBytes=$ifmtu >>$config
