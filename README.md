@@ -17,9 +17,9 @@ Install step:
 
 4. After reboot, the monitor will not show any message only 'linux-Q352 ...'
 
-5. Enter URL `http://name@hostname.local:9000` or `http://ip.address:9000` in browser to configure LMS.
+5. Enter URL `http://name@archq.local:9000` or `http://ip.address:9000` in browser to configure LMS.
 
-   Enter URL `http://name@hostname.local:6660` or `http://ip.address:6660` in browser to configure RompЯ.
+   Enter URL `http://name@archq.local:6660` or `http://ip.address:6660` in browser to configure RompЯ.
 
 6. Use `ssh name@hostname.local` or `ssh name@ip.address` to login ArchQ system and configure. (Use [PuTTY](https://www.putty.org) for Windows)
    
