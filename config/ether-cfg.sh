@@ -90,7 +90,6 @@ ifmac=$(ip link show $ifport | grep ether | awk '{print $2 }')
 
 echo [Match] >$config
 echo Name=${ifport} >>$config
-echo MACAddress=${ifmac} >>$config
 echo  >>$config
 echo [Network] >>$config
 if [[ $ip == S ]]; then
