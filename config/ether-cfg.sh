@@ -82,7 +82,7 @@ subnet 10.10.10.0 netmask 255.255.255.224 {
 #  option domain-name "archq.local";
 }
 EOF
-    echo "Set $ifport as DHCP server."
+    echo "Configure the ifport as a DHCP server."
     systemctl enable --now dhcpd4
     exit 0
 fi
@@ -137,3 +137,4 @@ echo  >>$config
 echo [Link] >>$config
 echo NamePolicy=kernel database onboard slot path >>$config
 echo MTUBytes=$ifmtu >>$config
+echo "The $ifport is set up."
