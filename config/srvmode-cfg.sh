@@ -11,7 +11,7 @@ pacman -Q squeezelite >/dev/null 2>&1 && MENU+='Squeezelite 　 off ' && SRV+='s
 [ -f /usr/lib/systemd/system/roonserver.service ] && MENU+='Roon 　 off ' && SRV+='roonserver '
 [ -f /usr/lib/systemd/system/hqplayerd.service ] && MENU+='HQPlayerd 　 off ' && SRV+='hqplayerd '
 pacman -Q roonbridge >/dev/null 2>&1 && MENU+='Roonbridge 　 off ' && SRV+='roonbridge '
-pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='Airplay 　 off ' && SRV+='shairport-sync '
+pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='Airplay 　 off ' && SRV+='nqptp shairport-sync '
 pacman -Q hqplayer-network-audio-daemon >/dev/null 2>&1 && MENU+='"HQPlayer NAA" 　 off ' && SRV+='networkaudio '
 pacman -Q owntone >/dev/null 2>&1 && MENU+='Owntone 　 off ' && SRV+='owntone '
 
