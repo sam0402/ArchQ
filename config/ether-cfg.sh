@@ -11,7 +11,9 @@ mkgrub(){
 ifmask=24; ifdns=8.8.8.8; ifmtu=1500
 ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en\|^wlan' | sed 's/://')
 ifport=$(echo $ethers | cut -d ' ' -f1)
+MENU='I "Static IP" D "DHCP"'
 if [ $(echo $ethers | wc -w) -gt 2 ]; then
+    MENU+=' S "DHCP Server" '
     ifport=$(dialog --stdout --title "ArchQ $1" \
             --menu "Select network device" 7 0 0 ${ethers}) || exit 1; clear
 fi
@@ -52,10 +54,40 @@ grep -q "IPv6PrivacyExtensions=true\|DHCP=true" $config && v6_o='on' || v6_o='of
 
 if echo $ifport | grep -q en; then
     ip='D'
-    ip=$(dialog --stdout --title "ArchQ $1" --menu "Select IP setting" 7 0 0 S "Static IP" D "DHCP") || exit 1; clear
+    exec='dialog --stdout --title "ArchQ $1" --menu "Select IP setting" 7 0 0 '$MENU
+    ip=$(eval $exec) || exit 1; clear
+fi
+if [[ $ip == S ]]; then
+    if ! pacman -Q dhcp >/dev/null 2>&1 ; then
+        wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/dhcp-4.4.2.P1-4-x86_64.pkg.tar.zst
+        pacman -U --noconfirm /tmp/*.pkg.tar.zst
+    fi
+
+    echo [Match] >$config
+    echo Name=${ifport} >>$config
+    echo  >>$config
+    echo [Network] >>$config
+    echo Address=10.10.10.0/27 >>$config
+    echo Gateway=10.10.10.1 >>$config
+
+    cat >/etc/dhcpd.conf <<EOF
+default-lease-time 600;
+max-lease-time 7200;
+authoritative;
+subnet 10.10.10.0 netmask 255.255.255.224 {
+  range 10.10.10.10 10.10.10.20;
+  option routers 10.10.10.1;
+  option broadcast-address 10.10.10.31;
+  option domain-name-servers 10.10.10.1, 8.8.8.8;
+#  option domain-name "archq.local";
+}
+EOF
+    echo "Set $ifport as DHCP server."
+    systemctl enable --now dhcpd4
+    exit 0
 fi
 
-if [[ $ip == S ]]; then
+if [[ $ip == I ]]; then
     ifconfig=$(dialog --stdout \
                 --title "ArchQ $1" \
                 --ok-label "Ok" \
@@ -92,7 +124,7 @@ echo [Match] >$config
 echo Name=${ifport} >>$config
 echo  >>$config
 echo [Network] >>$config
-if [[ $ip == S ]]; then
+if [[ $ip == I ]]; then
     echo Address=$ifaddr/$ifmask >>$config
     echo Gateway=$ifgw >>$config
     echo DNS=$ifgw $ifdns >>$config
