@@ -1,6 +1,9 @@
 #!/bin/bash
+mympdver=20.0.0-1
+
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
+
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
         LMS "Logitech Media Server" \
         MPD "MPD, Rigelian(iOS) | text-based client" \
@@ -89,7 +92,7 @@ case $server in
             curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone.out >/etc/mpd.d/owntone.out
             sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
             if [[ $server =~ y. ]]; then
-                pacman -Q mympd >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-19.0.3-1-x86_64.pkg.tar.zst
+                pacman -Q mympd >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
                 pacman -Q libnewt >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
                 mkdir -p /var/lib/private/mympd/config/
                 echo 'Unknown' >/var/lib/private/mympd/config/album_group_tag
