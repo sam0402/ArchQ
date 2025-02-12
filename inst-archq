@@ -501,6 +501,7 @@ cat >>/mnt/etc/rc.local <<EOF
 # Play CD on MPD don't uncomment
 # systemctl stop systemd-udevd
 # systemctl stop systemd-networkd
+systemctl --user exit
 
 # -a0 set readahead for HDD; -S60 Set the standby timeout 5 mins for HDD, the values specify multiples of 5 seconds.
 [ -b /dev/sda ] && hdparm -a0 -S60 /dev/sda >/dev/null 2>&1
