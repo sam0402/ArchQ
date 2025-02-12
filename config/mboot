@@ -26,4 +26,4 @@ echo "ArchQ change to mode '${c_red_b}${options[$input]}'${c_write}."
 sudo qboot $qboot
 echo -n "Reboot now [Y/n]? "
 input=''; read input
-[[ -z $input || $input = y ]] && reboot
+[[ -z $input || $input = y ]] && sudo reboot
