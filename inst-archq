@@ -7,6 +7,7 @@ trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 ker=Q352WU; kver='6.6.17-12'
 mympdver=20.0.0-1
+lmsver=8.5.0-1
 
 c_blue_b=$'\e[1;38;5;27m'
 c_green_b=$'\e[1;38;5;46m'
@@ -86,7 +87,7 @@ fi
 player=N
 server=$(dialog --stdout --title "ArchQ" \
         --menu "Select music server or player" 7 0 0 \
-        LMS "Logitech Media Server" \
+        LMS "Lyrion Media Server" \
         MPD "MPD, Rigelian(iOS) | text-based client" \
         myMPD "MPD & myMPD web-based client" \
         Roon "Roon Server" \
@@ -334,9 +335,9 @@ arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 ## server
 case $server in
     LMS)
-        echo -e "\n${c_blue_b}Install Logitech Media Server ...${c_gray}\n"
-        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
-        arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
+        echo -e "\n${c_blue_b}Install Lyrion Media Server ...${c_gray}\n"
+        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-${lmsver}-x86_64.pkg.tar.xz
+        arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-${lmsver}-x86_64.pkg.tar.xz
         [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         [ $cpus -ge 6 ] && [[ $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
         sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/logitechmediaserver.service
