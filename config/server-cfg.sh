@@ -1,5 +1,6 @@
 #!/bin/bash
 mympdver=20.0.0-1
+lmsver=8.5.0-1
 
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
@@ -49,8 +50,8 @@ case $server in
             isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
             echo -e "\n${c_blue_b}Install Logitech Media Server ...${c_gray}\n"
             pacman -S perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
-            pacman -U --noconfirm /tmp/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-${lmsver}-x86_64.pkg.tar.xz
+            pacman -U --noconfirm /tmp/logitechmediaserver-${lmsver}-x86_64.pkg.tar.xz
             [ $cpus -ge 4 ] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /usr/lib/systemd/system/logitechmediaserver.service
             [ $cpus -ge 6 ] && pacman -Q squeezelite >/dev/null 2>&1 && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /usr/lib/systemd/system/logitechmediaserver.service
             sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
