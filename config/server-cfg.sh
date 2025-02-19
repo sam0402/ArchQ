@@ -86,7 +86,7 @@ case $server in
             pacman -Q mpd-plugin >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
             pacman -Q owntone >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /tmp/mpd-*.pkg.tar.zst /tmp/owntone-*.tar.zst /tmp/ffmpeg-*.pkg.tar.zst
+            pacman -U --noconfirm /tmp/*.pkg.tar.zst
             sed -i '58,92d' /usr/bin/mpd-plugin.py
             sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone.service
             sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone\@.service
