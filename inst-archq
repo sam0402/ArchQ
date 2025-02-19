@@ -467,6 +467,7 @@ if [[ $player =~ A ]]; then
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync.service >/mnt/usr/lib/systemd/system/shairport-sync.service
     [[ -n "$scard" ]] && sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/' /mnt/etc/shairport-sync.conf
     sed -i 's/^\/\?\/\?\tresync_threshold_in_seconds = 0.050;/\tresync_threshold_in_seconds = 0.025;/' /mnt/etc/shairport-sync.conf
+    sed -i 's/Requires=/Requires=nqptp.service /' /mnt/usr/lib/systemd/system/shairport-sync.service 
     sed -i '/Install\n/iNice=-20\nAllowedCPUs='\"$iso_1st\"'\n' /mnt/usr/lib/systemd/system/shairport-sync.service
     sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/shairport-sync.service
     arch-chroot /mnt systemctl enable shairport-sync nqptp
