@@ -254,7 +254,7 @@ sampling=$(grep 'upsampling_two_multiple' $config | cut -d'"' -f2)
 options=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Buffer & Music directory" 0 40 0 \
     "Audio Buffer >=128"        1 1 $buffer   1 25 40 0 \
     "Period Time(μs)"           2 1 $pertime  2 25 40 0 \
-    "Bit Depth"                 3 1 $bitdepth 3 25 40 0 \
+    "Bit Depth (16/24/32)"      3 1 $bitdepth 3 25 40 0 \
     "Upsampling Two Multiple"   4 1 $sampling 4 25 40 0 \
     "Music Dir          /mnt/"  5 1 "$mdir"   5 25 40    0 ) || exit 1; clear
     # "Ramdisk(GB)"         4 1 $rd_GB   4 20 35 0
