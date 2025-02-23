@@ -1,4 +1,5 @@
 #!/bin/bash
+mpdver=0.23.16-24
 mympdver=20.0.0-1
 lmsver=8.5.0-1
 
@@ -6,7 +7,7 @@ c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
 
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
-        LMS "Logitech Media Server" \
+        LMS "Lyrion Media Server" \
         MPD "MPD, Rigelian(iOS) | text-based client" \
         myMPD "MPD & myMPD web-based client" \
         RompR "MPD & RompR web-based client" \
@@ -20,22 +21,22 @@ case $server in
        server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 mL "Light: pcm, flac" off \
-                mS "Stream: +Light, dsd" on \
-                mM "MPEG: +Stream, radio, mp3, alac" off ) || exit 1
+                mS "Stream: +Light, dsd, radio" on \
+                mM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
         ;;
     myMPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 yL "Light: pcm, flac" off \
-                yS "Stream: +Light, dsd" on \
-                yM "MPEG: +Stream, radio, mp3, alac" off ) || exit 1
+                yS "Stream: +Light, dsd, radio" on \
+                yM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
         ;;
     RompR)
        server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 oL "Light: pcm, flac" off \
-                oS "Stream: +Light, dsd" on \
-                oM "MPEG: +Stream, mp3, alac" off ) || exit 1
+                oS "Stream: +Light, dsd, radio" on \
+                oM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
         ;;
 esac
 case $server in
@@ -48,7 +49,7 @@ case $server in
             cpus=$(getconf _NPROCESSORS_ONLN)
             iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
             isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
-            echo -e "\n${c_blue_b}Install Logitech Media Server ...${c_gray}\n"
+            echo -e "\n${c_blue_b}Install Lyrion Media Server ...${c_gray}\n"
             pacman -S perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-${lmsver}-x86_64.pkg.tar.xz
             pacman -U --noconfirm /tmp/logitechmediaserver-${lmsver}-x86_64.pkg.tar.xz
@@ -81,7 +82,7 @@ case $server in
         [[ $server =~ .M ]] && MPD=ffmpeg
         if ! pacman -Q mpd-${MPD} >/dev/null 2>&1; then
             echo -e "\n${c_blue_b}Install MPD-${MPD} ...${c_gray}\n"
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-0.23.17-12-x86_64.pkg.tar.zst
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
             pacman -Q mpd_cdrom >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
             pacman -Q mpd-plugin >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
             pacman -Q owntone >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
