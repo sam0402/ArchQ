@@ -135,7 +135,7 @@ EOF
         fi
         if [[ $(pacman -Q mpd-${MPD} | awk '{print $2}') != ${mpdver} ]]; then
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
-            pacman -R --noconfirm $(pacman -Q | grep 0.23 | awk '{print $1}')
+            pacman -R --noconfirm $(pacman -Q mpd | awk '{print $1}')
             pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
             sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
         fi
