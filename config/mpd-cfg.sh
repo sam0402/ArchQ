@@ -236,38 +236,29 @@ else
     sed -i 's/^include_optional "mpd.d\/httpd.out"/#include_optional "mpd.d\/httpd.out"/' $config
 fi
 ## Dop on/off
-[[ $d1 == on ]] && sed -i 's/^#.\?dop.*/\tdop\t"yes"/' $config || sed -i 's/^[[:space:]]dop.*/#\tdop\t"yes"/' $config
+[[ $d1 == on ]] && sed -i 's/^#.\?dop.*/\tdop\t"yes"/;s/dsd64:\*/dsd64:*=dop/;s/dsd128:\*/dsd128:*=dop/' $config \
+                || sed -i 's/^[[:space:]]dop.*/#\tdop\t"yes"/;s/=dop//g' $config
 
-### Buffer, RAMDISK & Music Directory 
+### Buffer, bitDepth, Upsampling, & Music Directory 
 mdir=$(grep 'music_directory' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 buffer=$(grep 'audio_buffer_size' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 pertime=$(grep 'period_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
-bitdepth=$(grep -P '\tformat' $config | cut -d'"' -f2 | cut -d':' -f2)
-if [[ -z $bitdepth ]]; then 
-    sed -i '/auto_format/i\\tformat\t\t"*:32:*"' $config
-    bitdepth=32
-fi
-
+bitdepth=$(grep -P '\tallowed_formats' $config | awk '{print $2}' | cut -d':' -f2)
 sampling=$(grep 'upsampling_two_multiple' $config | cut -d'"' -f2)
-## Ramdisk
-# rd_GB=0
-# if [ -f /usr/bin/mpd-rdcheck.sh ]; then
-#     ramdisk=$(grep 'rdsize=' /usr/bin/mpd-rdcheck.sh | awk -F'=' '{print $2}')
-#     rd_GB=$(python -c "print(round($ramdisk/1048576,1))")
-# fi
-###
+
 options=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Buffer & Music directory" 0 40 0 \
     "Audio Buffer >=128"        1 1 $buffer   1 25 40 0 \
     "Period Time(μs)"           2 1 $pertime  2 25 40 0 \
     "Bit Depth(16/24/32)"       3 1 $bitdepth 3 25 40 0 \
-    "Music Dir          /mnt/"  4 1 "$mdir"   4 25 40    0 ) || exit 1; clear
-    # "Upsampling Two Multiple"   4 1 $sampling 4 25 40 0 \
+    "Upsampling Two Multiple"   4 1 $sampling 4 25 40 0 \
+    "Music Dir          /mnt/"  5 1 "$mdir"   5 25 40 0 ) || exit 1; clear
+    
 beffer=$(echo $options | awk '//{print $1 }')
 pertime=$(echo $options | awk '//{print $2 }')
 buftime=$(($pertime * 6))
 bitdepth=$(echo $options | awk '//{print $3 }')
-mdir=$(echo $echo $options | awk '//{print $4}' | sed 's"/"\\\/"g')
-# sampling=$(echo $options | awk '//{print $4 }')
+sampling=$(echo $options | awk '//{print $4 }')
+mdir=$(echo $echo $options | awk '//{print $5}' | sed 's"/"\\\/"g')
 
 ## Set ramdisk
 # rd_GB=$(echo $options | awk '//{print $3 }')
@@ -283,8 +274,8 @@ mdir=$(echo $echo $options | awk '//{print $4}' | sed 's"/"\\\/"g')
 # fi
 sed -i 's/^#\?audio_buffer_size.*"/audio_buffer_size\t"'"$beffer"'"/' $config
 sed -i 's/^#\?.* \?\tbuffer_time.*"/\tbuffer_time\t"'"$buftime"'"/;s/^#\?.* \?\tperiod_time.*"/\tperiod_time\t"'"$pertime"'"/' $config
-sed -i 's/^#\?.format.*"/\tformat\t\t"*:'"$bitdepth"':*"/' $config
-# sed -i 's/^#\?.upsampling_two_multiple.*"/\tupsampling_two_multiple\t"'"$sampling"'"/' $config
+sed -i 's/^#\?.allowed_formats .*"*:..:/\tallowed_formats "*:'"$bitdepth"':/' $config
+sed -i 's/^#\?.upsampling_two_multiple.*"/\tupsampling_two_multiple\t"'"$sampling"'"/' $config
 sed -i 's/^#\?music_directory.*"/music_directory\t"\/mnt\/'"$mdir"'"/' $config
 
 ### Blissify scan music directory as mpd
