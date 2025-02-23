@@ -243,6 +243,11 @@ mdir=$(grep 'music_directory' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 buffer=$(grep 'audio_buffer_size' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 pertime=$(grep 'period_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 bitdepth=$(grep -P '\tformat' $config | cut -d'"' -f2 | cut -d':' -f2)
+if [[ -z $bitdepth ]]; then 
+    sed -i '/auto_format/i\\tformat\t\t"*:32:*"' $config
+    bitdepth=32
+fi
+
 sampling=$(grep 'upsampling_two_multiple' $config | cut -d'"' -f2)
 ## Ramdisk
 # rd_GB=0
@@ -255,15 +260,15 @@ options=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Buffer & M
     "Audio Buffer >=128"        1 1 $buffer   1 25 40 0 \
     "Period Time(μs)"           2 1 $pertime  2 25 40 0 \
     "Bit Depth(16/24/32)"       3 1 $bitdepth 3 25 40 0 \
-    "Upsampling Two Multiple"   4 1 $sampling 4 25 40 0 \
-    "Music Dir          /mnt/"  5 1 "$mdir"   5 25 40    0 ) || exit 1; clear
-    # "Ramdisk(GB)"         4 1 $rd_GB   4 20 35 0
+    "Music Dir          /mnt/"  4 1 "$mdir"   4 25 40    0 ) || exit 1; clear
+    # "Upsampling Two Multiple"   4 1 $sampling 4 25 40 0 \
 beffer=$(echo $options | awk '//{print $1 }')
 pertime=$(echo $options | awk '//{print $2 }')
 buftime=$(($pertime * 6))
 bitdepth=$(echo $options | awk '//{print $3 }')
-sampling=$(echo $options | awk '//{print $4 }')
-mdir=$(echo $echo $options | awk '//{print $5}' | sed 's"/"\\\/"g')
+mdir=$(echo $echo $options | awk '//{print $4}' | sed 's"/"\\\/"g')
+# sampling=$(echo $options | awk '//{print $4 }')
+
 ## Set ramdisk
 # rd_GB=$(echo $options | awk '//{print $3 }')
 # if [ $rd_GB = '0' ]; then
@@ -279,7 +284,7 @@ mdir=$(echo $echo $options | awk '//{print $5}' | sed 's"/"\\\/"g')
 sed -i 's/^#\?audio_buffer_size.*"/audio_buffer_size\t"'"$beffer"'"/' $config
 sed -i 's/^#\?.* \?\tbuffer_time.*"/\tbuffer_time\t"'"$buftime"'"/;s/^#\?.* \?\tperiod_time.*"/\tperiod_time\t"'"$pertime"'"/' $config
 sed -i 's/^#\?.format.*"/\tformat\t\t"*:'"$bitdepth"':*"/' $config
-sed -i 's/^#\?.upsampling_two_multiple.*"/\tupsampling_two_multiple\t"'"$sampling"'"/' $config
+# sed -i 's/^#\?.upsampling_two_multiple.*"/\tupsampling_two_multiple\t"'"$sampling"'"/' $config
 sed -i 's/^#\?music_directory.*"/music_directory\t"\/mnt\/'"$mdir"'"/' $config
 
 ### Blissify scan music directory as mpd
