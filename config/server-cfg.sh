@@ -80,19 +80,32 @@ case $server in
         [[ $server =~ .L ]] && MPD=light
         [[ $server =~ .S ]] && MPD=stream
         [[ $server =~ .M ]] && MPD=ffmpeg
+
         if ! pacman -Q mpd-${MPD} >/dev/null 2>&1; then
             echo -e "\n${c_blue_b}Install MPD-${MPD} ...${c_gray}\n"
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
-            pacman -Q mpd_cdrom >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
-            pacman -Q mpd-plugin >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
-            pacman -Q owntone >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /tmp/*.pkg.tar.zst
-            sed -i '58,92d' /usr/bin/mpd-plugin.py
-            sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone.service
-            sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone\@.service
-            curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone.out >/etc/mpd.d/owntone.out
-            sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
+            if ! pacman -Q mpd_cdrom >/dev/null 2>&1 ; then
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
+                pacman -U --noconfirm /tmp/*.pkg.tar.zst
+                sed -i '58,92d' /usr/bin/mpd-plugin.py
+                sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone.service
+                sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone\@.service
+                curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone.out >/etc/mpd.d/owntone.out
+                sed -i '$d' /etc/rc.local
+                cat >>/etc/rc.local <<EOF
+if systemctl is-active mpd >/dev/null; then
+    chrt -p 93 \$(ps H -q \$(pgrep mpd) -o tid,cls | grep FF | awk '{print \$1}')
+    mpc enable ArchQ >/dev/null 2>&1
+    chrt -p 95 \$(ps H -q \$(pgrep mpd) -o tid,comm | grep ArchQ | awk '{print \$1}')
+    chrt -fp 85 \$(pgrep mpd)
+    chrt -fp 54 \$(pgrep ksoftirqd/\$(ps -eLo comm,cpuid| grep "output:A"|awk '{print \$2}'))
+fi
+
+exit 0
+EOF
+            fi
             if [[ $server =~ y. ]]; then
                 pacman -Q mympd >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
                 pacman -Q libnewt >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
@@ -116,20 +129,15 @@ case $server in
                 sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /usr/lib/systemd/system/nginx.service
                 ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
                 ln -s /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
-                chmod 644 /etc/nginx/sites-enabled/rompr
+                chmod 644 /etc/nginx/sites-enabled/*
                 systemctl enable nginx php-fpm avahi-daemon
             fi
-    ### setup mpd
-            sed -i '$d' /etc/rc.local
-            cat >>/etc/rc.local <<EOF
-if systemctl is-active mpd >/dev/null; then
-    ps H -q `pidof -s mpd` -o 'tid,cls' | grep FF | awk '{print \$1}' | while read PROC; do chrt -p 95 \$PROC; done
-    chrt -fp 85 `pgrep mpd`
-fi
-exit 0
-EOF
-
-            chmod 644 /etc/nginx/sites-enabled/cantata
+        fi
+        if [[ $(pacman -Q mpd-${MPD} | awk '{print $2}') != ${mpdver} ]]; then
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
+            pacman -R --noconfirm $(pacman -Q | grep 0.23 | awk '{print $1}')
+            pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
+            sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
         fi
         ### Start mpd.. etc. service
         sed -i 's/'"$isocpu"'//' /etc/default/grub
