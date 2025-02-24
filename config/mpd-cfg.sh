@@ -236,7 +236,7 @@ else
     sed -i 's/^include_optional "mpd.d\/httpd.out"/#include_optional "mpd.d\/httpd.out"/' $config
 fi
 ## Dop on/off
-[[ $d1 == on ]] && sed -i 's/^#.\?dop.*/\tdop\t"yes"/;s/dsd64:\*/dsd64:*=dop/;s/dsd128:\*/dsd128:*=dop/' $config \
+[[ $d1 == on ]] && sed -i 's/^#.\?dop.*/\tdop\t"yes"/;s/dsd64:.* /dsd64:*=dop /;s/dsd128:.*"/dsd128:*=dop"/' $config \
                 || sed -i 's/^[[:space:]]dop.*/#\tdop\t"yes"/;s/=dop//g' $config
 
 ### Buffer, bitDepth, Upsampling, & Music Directory 
