@@ -6,7 +6,7 @@ gitupd=$(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/update)
 temp=$(sensors | grep 'Core 0' | awk '{print $3}')
 ipaddr=$(ip -o addr | grep en | awk 'NR == 1 {print $4}')
 MENU=''
-[ $gitupd -gt $num ] && MENU+='U Update '
+[[ "$gitupd" -gt "$num" || -z $num ]] && MENU+='U Update '
 pacman -Q mpd-light >/dev/null 2>&1 && MENU+='D MPD '
 pacman -Q mpd-stream >/dev/null 2>&1 && MENU+='D MPD ' 
 pacman -Q mpd-ffmpeg >/dev/null 2>&1 && MENU+='D MPD ' 
