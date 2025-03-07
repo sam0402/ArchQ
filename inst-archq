@@ -310,7 +310,7 @@ arch-chroot /mnt sh -c 'yes | pacman -Scc'
 rm -rf /mnt/etc/pacman.d/gnupg
 arch-chroot /mnt pacman-key --init
 arch-chroot /mnt pacman-key --populate archlinux
-sed -i '85,86 s/^/#/' /mnt/etc/pacman.conf
+sed -i '84,86 s/^/#/' /mnt/etc/pacman.conf
 arch-chroot /mnt pacman -Sy
 
 ### Kernel
