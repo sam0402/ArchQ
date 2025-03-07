@@ -6,7 +6,7 @@ set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 ker=D44; kver='6.6.17-12'
-mpdver=0.23.17-24
+mpdver=0.23.16-24
 mympdver=20.0.0-1
 
 c_blue_b=$'\e[1;38;5;27m'
@@ -235,7 +235,7 @@ arch-chroot /mnt sh -c 'yes | pacman -Scc'
 rm -rf /mnt/etc/pacman.d/gnupg
 arch-chroot /mnt pacman-key --init
 arch-chroot /mnt pacman-key --populate archlinux
-sed -i '84,86 s/^/#/' /mnt/etc/pacman.conf
+sed -i '84,85 s/^/#/' /mnt/etc/pacman.conf
 arch-chroot /mnt pacman -Sy
 
 ### Kernel
