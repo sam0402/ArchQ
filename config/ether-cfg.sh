@@ -82,7 +82,7 @@ subnet 10.10.10.0 netmask 255.255.255.224 {
 #  option domain-name "archq.local";
 }
 EOF
-    echo "Configure the ifport as a DHCP server."
+    echo "Configure the ${ifport} as a DHCP server."
     systemctl enable --now dhcpd4
     exit 0
 fi
