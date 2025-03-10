@@ -377,7 +377,6 @@ case $server in
         arch-chroot /mnt systemctl enable mpd
         sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /mnt/etc/systemd/system/owntone.service
         sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /mnt/etc/systemd/system/owntone\@.service
-        curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone.out >/mnt/etc/mpd.d/owntone.out
         ### Install myMPD
         if [[ $server =~ y. ]]; then
             echo -e "\n${c_blue_b}Install myMPD ...${c_gray}\n"
