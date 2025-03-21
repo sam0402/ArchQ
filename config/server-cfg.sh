@@ -1,10 +1,18 @@
 #!/bin/bash
-mpdver=0.23.17-24
+mpdver=0.23.14-12
 mympdver=20.0.0-1
 lmsver=8.5.0-1
 
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
+
+servs=''
+pacman -Q logitechmediaserver >/dev/null 2>&1 && servs+='logitechmediaserver '
+pacman -Q mpd >/dev/null 2>&1 && servs+='mpd '
+pacman -Q mympd >/dev/null 2>&1 && servs+='mympd '
+pacman -Q roonserver >/dev/null 2>&1 && servs+='roonserver '
+pacman -Q hqplayerd >/dev/null 2>&1 && servs+='hqplayerd '
+pacman -Q nginx >/dev/null 2>&1 && servs+='nginx php-fpm '
 
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
         LMS "Lyrion Media Server" \
@@ -18,7 +26,7 @@ server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
 yes | pacman -Scc
 case $server in
     MPD)
-       server=$(dialog --stdout --title "ArchQ" \
+        server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 mL "Light: pcm, flac" off \
                 mS "Stream: +Light, dsd, radio" on \
@@ -32,7 +40,7 @@ case $server in
                 yM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
         ;;
     RompR)
-       server=$(dialog --stdout --title "ArchQ" \
+        server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 oL "Light: pcm, flac" off \
                 oS "Stream: +Light, dsd, radio" on \
@@ -59,7 +67,9 @@ case $server in
             sed -i 's/novideo/novideo --charset=utf8/' /usr/lib/systemd/system/logitechmediaserver.service
             sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/logitechmediaserver.service
         fi
-        systemctl disable --now mpd nginx php-fpm mympd roonserver hqplayerd
+
+        servs=${servs/logitechmediaserver/}
+        systemctl disable --now $servs
         systemctl enable --now logitechmediaserver
         ;;
     Roon)
@@ -73,10 +83,23 @@ case $server in
             sed -i 's/exec "$HARDLINK" "$SCRIPT.dll" "$@"/exec nice -n -20 "$HARDLINK" "$SCRIPT.dll" "$@"/g' /opt/RoonServer/Appliance/RAATServer
         fi
         sed -i 's/'"$isocpu"'//' /etc/default/grub
-        systemctl disable --now mpd nginx php-fpm mympd logitechmediaserver hqplayerd
+
+        servs=${servs/roonserver/}
+        systemctl disable --now $servs
         systemctl enable --now roonserver
         ;;
     m?|y?|o?)
+        if ! pacman -Q mpd >/dev/null 2>&1; then
+        sed -i '$d' /etc/rc.local
+        cat >>/etc/rc.local <<EOF
+if systemctl is-active mpd >/dev/null; then
+    mpc enable ArchQ >/dev/null 2>&1
+    chrt -fp 54 \$(pgrep ksoftirqd/\$(ps -eLo comm,cpuid| grep "output:A"|awk '{print \$2}'))
+fi
+exit 0
+EOF
+        fi
+
         [[ $server =~ .L ]] && MPD=light
         [[ $server =~ .S ]] && MPD=stream
         [[ $server =~ .M ]] && MPD=ffmpeg
@@ -92,19 +115,7 @@ case $server in
                 sed -i '58,92d' /usr/bin/mpd-plugin.py
                 sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone.service
                 sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone\@.service
-                curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone.out >/etc/mpd.d/owntone.out
                 sed -i '$d' /etc/rc.local
-                cat >>/etc/rc.local <<EOF
-if systemctl is-active mpd >/dev/null; then
-    chrt -p 93 \$(ps H -q \$(pgrep mpd) -o tid,cls | grep FF | awk '{print \$1}')
-    mpc enable ArchQ >/dev/null 2>&1
-    chrt -p 95 \$(ps H -q \$(pgrep mpd) -o tid,comm | grep ArchQ | awk '{print \$1}')
-    chrt -fp 85 \$(pgrep mpd)
-    chrt -fp 54 \$(pgrep ksoftirqd/\$(ps -eLo comm,cpuid| grep "output:A"|awk '{print \$2}'))
-fi
-
-exit 0
-EOF
             fi
             if [[ $server =~ y. ]]; then
                 pacman -Q mympd >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
@@ -141,7 +152,9 @@ EOF
         fi
         ### Start mpd.. etc. service
         sed -i 's/'"$isocpu"'//' /etc/default/grub
-        systemctl disable --now logitechmediaserver roonserver hqplayerd mpd.socket
+
+        servs=${servs/mpd/}
+        systemctl disable --now $servs mpd.socket
         /usr/bin/mpd-cfg.sh
         usermod -aG optical mpd
         systemctl enable --now mpd
@@ -180,7 +193,9 @@ EOF
             mkdir -p /etc/pki/tls/certs
             ln -s /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt
         fi
-        systemctl disable --now mpd nginx php-fpm mympd logitechmediaserver roonserver
+
+        servs=${servs/hqplayerd/}
+        systemctl disable --now $servs
         systemctl enable --now hqplayerd
         ;;
 esac
