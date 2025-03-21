@@ -58,16 +58,12 @@ else
 		STATUS='on'
 		sudo systemctl start $service
 		if systemctl is-active mpd >/dev/null; then
-			chrt -p 93 $(ps H -q `pidof -s mpd` -o 'tid,cls' | grep FF | awk '{print $1}')
 			mpc enable ArchQ >/dev/null 2>&1
-			chrt -p 95 $(ps H -q `pidof -s mpd` -o 'tid,comm' | grep ArchQ | awk '{print $1}')
-			chrt -fp 85 `pidof -s mpd`
 			chrt -fp 54 $(pgrep ksoftirqd/$(ps -eLo comm,cpuid| grep "output:"|awk '{print $2}'))
 			mpc disable Multiroom Stream >/dev/null
 		fi
 		if systemctl is-active owntone >/dev/null; then
 			mpc enable Multiroom >/dev/null; mpc disable ArchQ >/dev/null
-			chrt -p 95 $(ps H -q `pidof -s mpd` -o 'tid,comm' | grep Multi | awk '{print $1}')
 			chrt -p 81 `pidof -s owntone`
 			chrt -p 94 $(ps H -q `pidof -s owntone` -o tid,comm | grep player | awk '{print $1}')
 			chrt -p 92 $(ps H -q `pidof -s owntone` -o tid,comm | grep input | awk '{print $1}')
