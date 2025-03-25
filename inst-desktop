@@ -8,6 +8,7 @@ trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 ker=D44; kver='6.12.12-12'
 mpdver=0.23.17-24
 mympdver=20.0.0-1
+lmsver=9.1-1
 
 c_blue_b=$'\e[1;38;5;27m'
 c_green_b=$'\e[1;38;5;46m'
@@ -31,6 +32,7 @@ password(){
         password
     fi
 }
+
 hostname=ArchQ
 # hostname=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter hostname" 0 0) || exit 1; clear
 # if [ -z "$hostname" ];then
@@ -120,7 +122,7 @@ if [ $fmt = P ]; then
     fi
 else
     # Install in entire disk
-    root_size=5800
+    [ $server = LMS ] && root_size=6800 || root_size=5800
     root_end=$(( $root_size + 257 + 1 ))MiB
   parted --script "${device}" -- mklabel gpt \
         mkpart EFI fat32 1Mib 385MiB \
@@ -307,8 +309,8 @@ EOF
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-stream-${mpdver}-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/mpd.service
         ### Install myMPD
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mympd-${mympdver}-x86_64.pkg.tar.zst
         mkdir -p /mnt/var/lib/private/mympd/config/
         echo 'Unknown' >/mnt/var/lib/private/mympd/config/album_group_tag
@@ -317,6 +319,13 @@ EOF
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
         sed -i 's/^include_optional/#include_optional/g' /mnt/etc/mpd.conf
 #### add priority for MPD
+        cat >>/mnt/etc/rc.local <<EOF
+if systemctl is-active mpd >/dev/null; then
+    mpc enable ArchQ >/dev/null 2>&1
+    chrt -fp 54 \$(pgrep ksoftirqd/\$(ps -eLo comm,cpuid| grep "output:A"|awk '{print \$2}'))
+fi
+
+EOF
         cat >>/mnt/home/$user/Desktop/myMPD.desktop <<EOF
 [Desktop Entry]
 Encoding=UTF-8
@@ -343,7 +352,7 @@ arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-3-x8
 arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst
 
 cat >>/mnt/etc/rc.local <<EOF
-# systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
+systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
 # systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket systemd-udevd 
 # systemctl stop systemd-networkd
 
@@ -388,6 +397,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/qboot >/mnt
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/usb-storage-mount.sh >/mnt/usr/bin/usb-storage-mount.sh
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/90-usb-storage-automount.rules >/mnt/etc/udev/rules.d/90-usb-storage-automount.rules
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.sh >/mnt/usr/bin/pagecache-management.sh
+arch-chroot /mnt wget -qP /usr/bin https://raw.githubusercontent.com/sam0402/ArchQ/main/config/pagecache-management.so
 chmod +x /mnt/usr/bin/*.sh /mnt/usr/bin/qboot /mnt/home/$user/Desktop/*.desktop
 arch-chroot /mnt ln -s /usr/bin/config.sh /usr/bin/config
 
@@ -404,6 +414,7 @@ alias poweroff='sudo systemctl poweroff'
 alias reboot='sudo systemctl reboot'
 alias qboot='sudo qboot'
 alias config='sudo config.sh'
+alias df='df -h'
 alias status='systemctl status'
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
