@@ -1,13 +1,13 @@
 #!/bin/bash
-mpdver=0.23.14-12
+mpdver=0.23.17-24
 mympdver=20.0.0-1
-lmsver=8.5.0-1
+lmsver=9.1-1
 
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
 
 servs=''
-pacman -Q logitechmediaserver >/dev/null 2>&1 && servs+='logitechmediaserver '
+pacman -Q lyrionmediaserver >/dev/null 2>&1 && servs+='lyrionmediaserver '
 pacman -Q mpd >/dev/null 2>&1 && servs+='mpd '
 pacman -Q mympd >/dev/null 2>&1 && servs+='mympd '
 pacman -Q roonserver >/dev/null 2>&1 && servs+='roonserver '
@@ -28,23 +28,23 @@ case $server in
     MPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                mL "Light: pcm, flac" off \
-                mS "Stream: +Light, dsd, radio" on \
-                mM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+                mL "Light: pcm, flac, dsd only" off \
+                mS "Stream: +Light, mp3 radio" on \
+                mM "MPEG: +Stream, aac, alac" off ) || exit 1
         ;;
     myMPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                yL "Light: pcm, flac" off \
-                yS "Stream: +Light, dsd, radio" on \
-                yM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+                yL "Light: pcm, flac, dsd only" off \
+                yS "Stream: +Light, mp3 radio" on \
+                yM "MPEG: +Stream, aac, alac" off ) || exit 1
         ;;
     RompR)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                oL "Light: pcm, flac" off \
-                oS "Stream: +Light, dsd, radio" on \
-                oM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+                oL "Light: pcm, flac, dsd only" off \
+                oS "Stream: +Light, mp3 radio" on \
+                oM "MPEG: +Stream, aac, alac" off ) || exit 1
         ;;
 esac
 case $server in
@@ -53,24 +53,24 @@ case $server in
         /usr/bin/player-cfg.sh
         ;;
     LMS)
-        if ! pacman -Q logitechmediaserver >/dev/null 2>&1; then
+        if ! pacman -Q lyrionmediaserver >/dev/null 2>&1; then
             cpus=$(getconf _NPROCESSORS_ONLN)
             iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
             isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
             echo -e "\n${c_blue_b}Install Lyrion Media Server ...${c_gray}\n"
             pacman -S perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-${lmsver}-x86_64.pkg.tar.xz
-            pacman -U --noconfirm /tmp/logitechmediaserver-${lmsver}-x86_64.pkg.tar.xz
-            [ $cpus -ge 4 ] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /usr/lib/systemd/system/logitechmediaserver.service
-            [ $cpus -ge 6 ] && pacman -Q squeezelite >/dev/null 2>&1 && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /usr/lib/systemd/system/logitechmediaserver.service
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmediaserver-${lmsver}-x86_64.pkg.tar.xz
+            pacman -U --noconfirm /tmp/lyrionmediaserver-${lmsver}-x86_64.pkg.tar.xz
+            [ $cpus -ge 4 ] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /usr/lib/systemd/system/lyrionmediaserver.service
+            [ $cpus -ge 6 ] && pacman -Q squeezelite >/dev/null 2>&1 && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /usr/lib/systemd/system/lyrionmediaserver.service
             sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
-            sed -i 's/novideo/novideo --charset=utf8/' /usr/lib/systemd/system/logitechmediaserver.service
-            sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/logitechmediaserver.service
+            sed -i 's/novideo/novideo --charset=utf8/' /usr/lib/systemd/system/lyrionmediaserver.service
+            sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/lyrionmediaserver.service
         fi
 
-        servs=${servs/logitechmediaserver/}
+        servs=${servs/lyrionmediaserver/}
         systemctl disable --now $servs
-        systemctl enable --now logitechmediaserver
+        systemctl enable --now lyrionmediaserver
         ;;
     Roon)
         if [[ ! -d '/opt/RoonServer' ]]; then
