@@ -364,6 +364,7 @@ case $server in
         [[ $server =~ .M ]] && MPD=ffmpeg
         echo -e "\n${c_blue_b}Install MPD-${MPD}...${c_gray}\n"
         # pacstrap /mnt fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms libid3tag ncmpcpp mpc python-mpd2 lua
+        [[ $server =~ .L ]] || pacstrap /mnt/upmpdcli
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
@@ -499,7 +500,7 @@ pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
 arch-chroot /mnt systemctl disable avahi-daemon.socket
 
 cat >>/mnt/etc/rc.local <<EOF
-# systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
+systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
 # systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket
 # Play CD on MPD don't uncomment
 # systemctl stop systemd-udevd
