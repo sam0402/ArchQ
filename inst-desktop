@@ -84,7 +84,7 @@ desktop=LXDE
 server=$(dialog --stdout --title "ArchQ Desktop" \
     --menu "Select music server" 7 0 0 \
     MPD "MPD & myMPD web-based client" \
-    LMS "Logitech Media Server" \
+    LMS "Lyrion Media Server" \
     None "Desktop only" ) || exit 1; clear
 ### select sound card
 scard="hw:0,0"
@@ -285,16 +285,16 @@ EOF
 ## server
 case $server in
     LMS)
-        echo -e "\n${c_blue_b}Install Logitech Media Server ...${c_gray}\n"
-        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
-        arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-8.4.0-1-x86_64.pkg.tar.xz
-        sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/logitechmediaserver.service
-        sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/logitechmediaserver.service
-        arch-chroot /mnt systemctl enable logitechmediaserver
+        echo -e "\n${c_blue_b}Install Lyrion Media Server ...${c_gray}\n"
+        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmediaserver-8.4.0-1-x86_64.pkg.tar.xz
+        arch-chroot /mnt pacman -U --noconfirm /root/lyrionmediaserver-8.4.0-1-x86_64.pkg.tar.xz
+        sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/lyrionmediaserver.service
+        sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/lyrionmediaserver.service
+        arch-chroot /mnt systemctl enable lyrionmediaserver
         cat >>/mnt/home/$user/Desktop/lms.desktop <<EOF
 [Desktop Entry]
 Encoding=UTF-8
-Name=Logitech Media Server
+Name=Lyrion Media Server
 Type=Link
 URL=http://localhost:9000/
 Icon=text-html
@@ -336,7 +336,7 @@ esac
 echo -e "\n${c_blue_b}Setting service ...${c_gray}\n"
 arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A6.0-5-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/ffmpeg-2:6.0-5-x86_64.pkg.tar.zst
-## Instal -1.1.9
+## Instal alsa-lib-1.1.9
 cp /archq/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /mnt/root
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
