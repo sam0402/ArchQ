@@ -128,14 +128,13 @@ if [ $client = M ]; then
     p1=off
     MENU="P Multi-player $p0 "
 fi
+pacman -Q mpd-light >/dev/null 2>&1 || MENU+='M Multi-room '$m0' H "Http Stream:8000" '$h0' '
 cat $config | grep owntone | grep -q '#' || m0=on 
 cat $config | grep httpd | grep -q '#' || h0=on
 cat $config | grep -q "#[[:space:]]dop" || d0=on
-output=$(dialog --stdout --title "ArchQ MPD" \
-        --checklist "Output method" 7 0 0 \
-        M "Multi-room Play" $m0 $MENU \
-        H "Http Stream:8000" $h0 \
-        D "DSD over PCM" $d0 ) || exit 1; clear
+exec='dialog --stdout --title "ArchQ MPD" --checklist "Output method" 7 0 0 '$MENU'D "DSD over PCM" '$d0
+output=$(eval $exec) || exit 1; clear
+
 [[ $output =~ M ]] && m1=on
 [[ $output =~ P ]] && p1=on
 [[ $output =~ H ]] && h1=on
