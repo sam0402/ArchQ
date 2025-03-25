@@ -364,7 +364,7 @@ case $server in
         [[ $server =~ .M ]] && MPD=ffmpeg
         echo -e "\n${c_blue_b}Install MPD-${MPD}...${c_gray}\n"
         # pacstrap /mnt fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms libid3tag ncmpcpp mpc python-mpd2 lua
-        [[ $server =~ .L ]] || pacstrap /mnt upmpdcli
+        # [[ $server =~ .L ]] || pacstrap /mnt upmpdcli
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
