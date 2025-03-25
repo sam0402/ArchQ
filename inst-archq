@@ -51,7 +51,7 @@ user=archq
 fi
 password
 lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1; clear
-devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
+devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop")
 device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
 fmt=$(dialog --stdout --title "ArchQ" --menu "Format device ${device}" 7 0 0 E Entire P Partition U "USB Storage") || exit 1; clear
 if [ $fmt = P ]; then
