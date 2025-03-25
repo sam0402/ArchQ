@@ -5,10 +5,10 @@
 set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
-ker=Q352WU; kver='6.6.17-12'
+ker=Q352WU; kver='6.12.12-12'
 mpdver=0.23.17-24
 mympdver=20.0.0-1
-lmsver=8.5.0-1
+lmsver=9.1-1
 
 c_blue_b=$'\e[1;38;5;27m'
 c_green_b=$'\e[1;38;5;46m'
@@ -102,25 +102,25 @@ case $server in
         player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
         ;;
     MPD)
-       server=$(dialog --stdout --title "ArchQ" \
+        server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                mL "Light: pcm, flac" off \
-                mS "Stream: +Light, dsd, radio" on \
-                mM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+                mL "Light: pcm, flac, dsd only" off \
+                mS "Stream: +Light, mp3 radio" on \
+                mM "MPEG: +Stream, aac, alac" off ) || exit 1
         ;;
     myMPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                yL "Light: pcm, flac" off \
-                yS "Stream: +Light, dsd, radio" on \
-                yM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+                yL "Light: pcm, flac, dsd only" off \
+                yS "Stream: +Light, mp3 radio" on \
+                yM "MPEG: +Stream, aac, alac" off ) || exit 1
         ;;
     RompR)
-       server=$(dialog --stdout --title "ArchQ" \
+        server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                oL "Light: pcm, flac" off \
-                oS "Stream: +Light, dsd, radio" on \
-                oM "MPEG: +Stream, mp3, aac, alac" off ) || exit 1
+                oL "Light: pcm, flac, dsd only" off \
+                oS "Stream: +Light, mp3 radio" on \
+                oM "MPEG: +Stream, aac, alac" off ) || exit 1
         ;;
     Player)
         player=$(dialog --stdout --title "ArchQ" \
@@ -340,13 +340,13 @@ arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 case $server in
     LMS)
         echo -e "\n${c_blue_b}Install Lyrion Media Server ...${c_gray}\n"
-        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/logitechmediaserver-${lmsver}-x86_64.pkg.tar.xz
-        arch-chroot /mnt pacman -U --noconfirm /root/logitechmediaserver-${lmsver}-x86_64.pkg.tar.xz
-        [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
-        [ $cpus -ge 6 ] && [[ $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /mnt/usr/lib/systemd/system/logitechmediaserver.service
-        sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/logitechmediaserver.service
-        sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/logitechmediaserver.service
-        arch-chroot /mnt systemctl enable logitechmediaserver
+        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmediaserver-${lmsver}-x86_64.pkg.tar.xz
+        arch-chroot /mnt pacman -U --noconfirm /root/lyrionmediaserver-${lmsver}-x86_64.pkg.tar.xz
+        [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /mnt/usr/lib/systemd/system/lyrionmediaserver.service
+        [ $cpus -ge 6 ] && [[ $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /mnt/usr/lib/systemd/system/lyrionmediaserver.service
+        sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/lyrionmediaserver.service
+        sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/lyrionmediaserver.service
+        arch-chroot /mnt systemctl enable lyrionmediaserver
         ;;
     Roon)
         echo -e "\n${c_blue_b}Install Roon Server ...${c_gray}\n"
@@ -505,9 +505,6 @@ cat >>/mnt/etc/rc.local <<EOF
 # systemctl stop systemd-udevd
 # systemctl stop systemd-networkd
 
-# -a0 set readahead for HDD; -S60 Set the standby timeout 5 mins for HDD, the values specify multiples of 5 seconds.
-[ -b /dev/sda ] && hdparm -a0 -S60 /dev/sda >/dev/null 2>&1
-
 #** Reorganizer for XFS
 # xfs_fsr /mnt/music
 
@@ -518,7 +515,7 @@ cat >>/mnt/etc/rc.local <<EOF
 active=\$(head -n 1 /etc/srvmode.conf | awk -F= '{print \$2}')
 if [ ! \$active == '' ]; then
     service=\$(grep \$active /etc/srvmode.conf | awk -F: '{print \$2}' | \\
-        sed -e 's/\(.*\)/\L\1/;s/lms/logitechmediaserver/;s/"hqplayer naa"/naa/;s/owntone/mtroom/;')
+        sed -e 's/\(.*\)/\L\1/;s/lms/lyrionmediaserver/;s/"hqplayer naa"/naa/;s/owntone/mtroom/;')
     for i in \$service; do
         sw \$i >/dev/null 2>&1
         sleep 0.2
@@ -541,9 +538,9 @@ ACTION=="add|change", KERNEL=="sd[a-z]|mmcblk[0-9]*", ATTR{queue/rotational}=="0
 # set scheduler for rotating disks
 ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
 EOF
-# cat >/mnt/etc/udev/rules.d/69-hdparm.rules <<EOF
-# ACTION=="add|change", KERNEL=="sd[a-z]", ATTRS{queue/rotational}=="1", RUN+="/usr/bin/hdparm -a 0 -A 0 /dev/%k"
-# EOF
+cat >/mnt/etc/udev/rules.d/69-hdparm.rules <<EOF
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTRS{queue/rotational}=="1", RUN+="/usr/bin/hdparm -a 0 -A 0 -S 60 /dev/%k"
+EOF
 curl -sL https://raw.githubusercontent.com/bb-qq/r8152/master/50-usb-realtek-net.rules >/mnt/etc/udev/rules.d/50-usb-realtek-net.rules
 # hot plug
 #curl -sL https://raw.githubusercontent.com/bb-qq/r8152/master/51-usb-r8152-net.rules >/mnt/etc/udev/rules.d/51-usb-r8152-net.rules
