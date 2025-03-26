@@ -347,8 +347,8 @@ arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/
 arch-chroot /mnt pacman -U --noconfirm /root/ffmpeg-2:6.0-5-x86_64.pkg.tar.zst
 ## Instal alsa-lib-1.1.9
 cp /archq/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /mnt/root
-arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-2-x86_64.pkg.tar.zst
+arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst
 
 cat >>/mnt/etc/rc.local <<EOF
@@ -372,7 +372,7 @@ ACTION=="add|change", KERNEL=="sd[a-z]|mmcblk[0-9]*", ATTR{queue/rotational}=="0
 ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
 EOF
 cat >/mnt/etc/udev/rules.d/69-hdparm.rules <<EOF
-ACTION=="add|change", KERNEL=="sd[a-z]", ATTRS{queue/rotational}=="1", RUN+="/usr/bin/hdparm -a 0 -A 0 -S 60 /dev/%k"
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTRS{queue/rotational}=="1", RUN+="/usr/bin/hdparm -a0 -S60 /dev/%k"
 EOF
 curl -sL https://raw.githubusercontent.com/bb-qq/r8152/master/50-usb-realtek-net.rules >/mnt/etc/udev/rules.d/50-usb-realtek-net.rules
 ## Patch
