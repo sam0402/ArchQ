@@ -94,7 +94,7 @@ case $server in
         cat >>/etc/rc.local <<EOF
 if systemctl is-active mpd >/dev/null; then
     mpc enable ArchQ >/dev/null 2>&1
-    chrt -fp 85 $(pgrep mpd)
+    chrt -fp 85 \$(pgrep mpd)
     chrt -fp 54 \$(pgrep ksoftirqd/\$(ps -eLo comm,cpuid| grep "output:A"|awk '{print \$2}'))
 fi
 exit 0
