@@ -322,6 +322,7 @@ EOF
         cat >>/mnt/etc/rc.local <<EOF
 if systemctl is-active mpd >/dev/null; then
     mpc enable ArchQ >/dev/null 2>&1
+    chrt -fp 85 $(pgrep mpd)
     chrt -fp 54 \$(pgrep ksoftirqd/\$(ps -eLo comm,cpuid| grep "output:A"|awk '{print \$2}'))
 fi
 
@@ -372,7 +373,7 @@ ACTION=="add|change", KERNEL=="sd[a-z]|mmcblk[0-9]*", ATTR{queue/rotational}=="0
 ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
 EOF
 cat >/mnt/etc/udev/rules.d/69-hdparm.rules <<EOF
-ACTION=="add|change", KERNEL=="sd[a-z]", ATTRS{queue/rotational}=="1", RUN+="/usr/bin/hdparm -a0 -S60 /dev/%k"
+ACTION=="add|change", KERNEL=="sd[a-z]", ATTRS{queue/rotational}=="1", RUN+="/usr/bin/hdparm -a0 /dev/%k"
 EOF
 curl -sL https://raw.githubusercontent.com/bb-qq/r8152/master/50-usb-realtek-net.rules >/mnt/etc/udev/rules.d/50-usb-realtek-net.rules
 ## Patch
