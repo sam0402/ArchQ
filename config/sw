@@ -57,12 +57,13 @@ else
 	else
 		STATUS='on'
 		sudo systemctl start $service
-		if systemctl is-active mpd >/dev/null && [[ $1 == mpd ]] ; then
+		if systemctl is-active mpd >/dev/null && [[ $1 == mpd ]]; then
 			mpc enable ArchQ >/dev/null 2>&1
+			chrt -fp 85 $(pgrep mpd)
 			chrt -fp 54 $(pgrep ksoftirqd/$(ps -eLo comm,cpuid| grep "output:"|awk '{print $2}'))
 			mpc disable Multiroom Stream >/dev/null
 		fi
-		if systemctl is-active owntone >/dev/null && [[ $1 == mtroom ]] ; then
+		if systemctl is-active owntone >/dev/null && [[ $1 == mtroom ]]; then
 			mpc enable Multiroom >/dev/null; mpc disable ArchQ >/dev/null
 			chrt -p 81 `pidof -s owntone`
 			chrt -p 93 $(ps H -q `pidof -s owntone` -o tid,comm | grep player | awk '{print $1}')
