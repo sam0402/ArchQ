@@ -6,7 +6,7 @@ ver=$(pacman -Q squeezelite | awk -F ' ' '{print $2}')
 inst=(1.9.8.1317-pcm 1.9.8.1317-dsd 2.0.0.1518-pcm 2.0.0.1518-dsd)
 option=$(dialog --stdout --title "ArchQ Squeezelite $1" \
         --menu "Select: ${inst}" 7 0 0 \
-        0 "1.9-PCM" 1 "1.9-DSD" 2 "2.0-PCM" 3 "2.0-DSD" \
+        0 "1.9 PCM" 1 "1.9 DSD" 2 "2.0 PCM" 3 "2.0 DSD" \
         ) || exit 1; clear
 
 ver=${ver/-[15]/-pcm}; ver=${ver/-[26]/-dsd}
