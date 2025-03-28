@@ -28,22 +28,22 @@ case $server in
     MPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                mL "Light: pcm, flac, dsd only" off \
-                mS "Stream: +Light, mp3 radio" on \
+                mL "Light: pcm, flac, dsd, cd" off \
+                mS "Stream: pcm, flac, mp3 radio" on \
                 mM "MPEG: +Stream, aac, alac" off ) || exit 1
         ;;
     myMPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                yL "Light: pcm, flac, dsd only" off \
-                yS "Stream: +Light, mp3 radio" on \
+                yL "Light: pcm, flac, dsd, cd" off \
+                yS "Stream: pcm, flac, mp3 radio" on \
                 yM "MPEG: +Stream, aac, alac" off ) || exit 1
         ;;
     RompR)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                oL "Light: pcm, flac, dsd only" off \
-                oS "Stream: +Light, mp3 radio" on \
+                oL "Light: pcm, flac, dsd, cd" off \
+                oS "Stream: pcm, flac, mp3 radio" on \
                 oM "MPEG: +Stream, aac, alac" off ) || exit 1
         ;;
 esac
@@ -149,7 +149,7 @@ EOF
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
             pacman -R --noconfirm $(pacman -Q mpd | awk '{print $1}')
             pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
-            sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |;/LimitRTPRIO/iNice=-20' /usr/lib/systemd/system/mpd.service
+            sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
         fi
         ### Start mpd.. etc. service
         sed -i 's/'"$isocpu"'//' /etc/default/grub
