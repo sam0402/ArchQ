@@ -483,7 +483,7 @@ if  [[ $player =~ R ]]; then
 fi
 if  [[ $player =~ H ]]; then
     echo echo -e "\n${c_blue_b}Install HQPlayer NAA ...${c_gray}\n"
-    arch-chroot /mnt wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayer-network-audio-daemon-4.4.0-1-x86_64.pkg.tar.zst
+    arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayer-network-audio-daemon-4.4.0-1-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/hqplayer-network-audio-daemon-4.4.0-1-x86_64.pkg.tar.zst
     arch-chroot /mnt systemctl enable networkaudio
 fi
@@ -543,6 +543,9 @@ EOF
 cat >/mnt/etc/udev/rules.d/69-hdparm.rules <<EOF
 ACTION=="add|change", KERNEL=="sd[a-z]", ATTRS{queue/rotational}=="1", RUN+="/usr/bin/hdparm -a0 /dev/%k"
 EOF
+# cat >/mnt/etc/udev/rules.d/80-usbsound.rules <<EOF
+# ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="8888", ATTR{idProduct}=="1717", RUN+="/bin/systemctl start shairport-sync.service"
+# EOF
 curl -sL https://raw.githubusercontent.com/bb-qq/r8152/master/50-usb-realtek-net.rules >/mnt/etc/udev/rules.d/50-usb-realtek-net.rules
 # hot plug
 #curl -sL https://raw.githubusercontent.com/bb-qq/r8152/master/51-usb-r8152-net.rules >/mnt/etc/udev/rules.d/51-usb-r8152-net.rules
