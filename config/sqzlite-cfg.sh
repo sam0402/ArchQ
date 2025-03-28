@@ -2,17 +2,20 @@
 config='/etc/squeezelite.conf'
 
 ### Select squeezelite version
-ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
-inst=(0 1 2 3 4 pcm dsd)
+ver=$(pacman -Q squeezelite | awk -F ' ' '{print $2}')
+inst=(1.9.8.1317-pcm 1.9.8.1317-dsd 2.0.0.1518-pcm 2.0.0.1518-dsd)
 option=$(dialog --stdout --title "ArchQ Squeezelite $1" \
-        --menu "Select: ${inst[$ver]^^}" 7 0 0 \
-        5 "PCM" 6 "DSD" ) || exit 1; clear
+        --menu "Select: ${inst}" 7 0 0 \
+        0 "1.9-PCM" 1 "1.9-DSD" 2 "2.0-PCM" 3 "2.0-DSD" \
+        ) || exit 1; clear
 
-if [ "$ver" != ${inst[$option]} ]; then
+ver=${ver/-[15]/-pcm}; ver=${ver/-[26]/-dsd}
+if [ "${ver}" != ${inst[$option]} ]; then
     cpus=$(getconf _NPROCESSORS_ONLN)
-    [ -f /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst ] || wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
-    pacman -U --noconfirm /root/squeezelite-1.9.8.1317-${inst[$option]}-x86_64.pkg.tar.zst
-    ver=$(pacman -Q squeezelite | awk -F - '{print $2}')
+    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-${inst[$option]}-x86_64.pkg.tar.zst
+    pacman -U --noconfirm /tmp/squeezelite-${inst[$option]}-x86_64.pkg.tar.zst
+    ver=$(pacman -Q squeezelite | awk -F ' ' '{print $2}')
+    ver=${ver/-[15]/-pcm}; ver=${ver/-[26]/-dsd}
 fi
 
 ## Select sound device
@@ -25,7 +28,7 @@ else
     done <<< $(aplay -L | grep ':')
 
     device=$(dialog --stdout \
-            --title "ArchQ Squeezelite ${inst[$ver]^^}" \
+            --title "ArchQ Squeezelite ${ver}" \
             --menu "Ouput device" 7 0 0 ${devs}) || exit 1; clear
     sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$device"'"/' $config
 fi
@@ -39,7 +42,7 @@ eval $(grep -v '#' | sed 's/-. //')
 #echo $(grep -v '#' | sed 's/-. //')
 done < $config
 
-if [[ ${inst[$ver]^^} =~ DSD ]]; then
+if [[ ${inst} =~ DSD ]]; then
     DOP='0:u32be'
     echo $CODEC | grep -q dsd || CODEC=$CODEC',dsd'
     INFO="\nDSD format: dop, u8, u16le, u16be, u32le, u32be"
@@ -49,8 +52,7 @@ else
 fi
 
 options=$(dialog --stdout \
-    --title "ArchQ Squeezelite ${inst[$ver]^^}" \
-    --ok-label "Ok" \
+    --title "ArchQ Squeezelite ${ver}" --ok-label "Ok" \
     --form "Modify settings. Blank fills with <null>$INFO" 0 60 0 \
     "Name of Player"        1 1   "$NAME"          1 25 60 0 \
     "ALSA setting"          2 1   "$ALSA_PARAMS"   2 25 60 0 \
