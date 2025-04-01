@@ -101,7 +101,7 @@ exit 0
 EOF
         fi
 
-        [[ $server =~ .L ]] && MPD=light
+        [[ $server =~ .L ]] && MPD=light || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
         [[ $server =~ .S ]] && MPD=stream
         [[ $server =~ .M ]] && MPD=ffmpeg
 
