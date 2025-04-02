@@ -5,7 +5,7 @@
 set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
-ker=D44; kver='6.12.12-12'
+ker=D44S; kver='6.12.12-12'
 mpdver=0.23.17-24
 mympdver=20.0.0-1
 lmsver=9.1-1
