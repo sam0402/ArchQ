@@ -220,6 +220,7 @@ cat >>/mnt/etc/rc.local <<EOF
 # ethernet auto detect
 while read ether; do
     npath='/etc/systemd/network/'
+    touch \${npath}\${ether}-\$(uname -r | cut -d- -f3)
     if [ ! -f "\$npath""10-\${ether}.network" ]; then
         cd \$npath
         source=\$(ls 10-en*.network | head -n 1)
@@ -228,7 +229,7 @@ while read ether; do
         systemctl restart systemd-networkd
         cd -
     fi
-done <<< \$(ip -o link show | awk '{print \$2,\$9}' | grep '^en' | sed 's/://' | awk '{print \$1}')
+done <<< \$(ip -o link show | awk '{print \$2,\$9}' | grep '^en' | cut -d':' -f1)
 sleep 1
 
 EOF
