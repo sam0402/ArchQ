@@ -220,7 +220,7 @@ cat >>/mnt/etc/rc.local <<EOF
 # ethernet auto detect
 while read ether; do
     npath='/etc/systemd/network/'
-    touch \${npath}\${ether}-\$(uname -r | cut -d- -f3)
+    touch \${npath}\${ether}_\$(uname -r | cut -d- -f3)
     if [ ! -f "\$npath""10-\${ether}.network" ]; then
         cd \$npath
         source=\$(ls 10-en*.network | head -n 1)
