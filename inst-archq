@@ -484,8 +484,14 @@ if  [[ $player =~ R ]]; then
 fi
 if  [[ $player =~ H ]]; then
     echo echo -e "\n${c_blue_b}Install HQPlayer NAA ...${c_gray}\n"
-    arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayer-network-audio-daemon-4.4.0-1-x86_64.pkg.tar.zst
-    arch-chroot /mnt pacman -U --noconfirm /root/hqplayer-network-audio-daemon-4.4.0-1-x86_64.pkg.tar.zst
+    naa_deb=$(curl -sL https://www.signalyst.com/bins/naa/linux/bookworm/ | grep "networkaudiod_5" | grep _amd64.deb | tail -n1 | awk -F'"' '{print $8}')
+    curl -L "https://www.signalyst.com/bins/naa/linux/bookworm/$naa_deb" | bsdtar xf - -C /tmp
+    mkdir -p /tmp/naa
+    bsdtar Jxf /tmp/data.tar.xz -C /tmp/naa
+    cp -af /tmp/naa/* /mnt/.
+    arch-chroot /mnt mv "/lib/systemd/system/networkaudiod.service" "/usr/lib/systemd/system/networkaudio.service"
+    arch-chroot /mnt mv "/usr/sbin/networkaudiod" "/usr/bin/networkaudiod"
+    arch-chroot /mnt install -Dm644 "/usr/share/doc/networkaudiod/copyright" "/usr/share/licenses/networkaudiod/COPYING"
     arch-chroot /mnt systemctl enable networkaudio
 fi
 ### Other setting
