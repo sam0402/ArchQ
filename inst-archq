@@ -490,7 +490,7 @@ if  [[ $player =~ H ]]; then
     bsdtar Jxf /tmp/data.tar.xz -C /tmp/naa
     cp -af /tmp/naa/* /mnt/.
     arch-chroot /mnt mv "/lib/systemd/system/networkaudiod.service" "/usr/lib/systemd/system/networkaudio.service"
-    arch-chroot /mnt mv "/usr/sbin/networkaudiod" "/usr/bin/networkaudiod"
+    arch-chroot /mnt install -Dm755 "/usr/sbin/networkaudiod" "/usr/bin/networkaudiod"
     arch-chroot /mnt install -Dm644 "/usr/share/doc/networkaudiod/copyright" "/usr/share/licenses/networkaudiod/COPYING"
     arch-chroot /mnt systemctl enable networkaudio
 fi
