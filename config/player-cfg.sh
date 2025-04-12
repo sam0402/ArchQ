@@ -38,6 +38,7 @@ if [[ $player =~ A ]] && ! pacman -Q shairport-sync >/dev/null 2>&1; then
     pacman -U --noconfirm /tmp/shairport-sync-4.3.3-2-x86_64.pkg.tar.zst /tmp/nqptp-1.2.5-1-x86_64.pkg.tar.zst
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync.service >/usr/lib/systemd/system/shairport-sync.service
     sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = \"hw:0,0\";/' /etc/shairport-sync.conf
+    # sed -i 's/^\/\?\/\?\toutput_format = ".*";/\toutput_format = "S32_LE";/' /etc/shairport-sync.conf
     sed -i 's/^\/\?\/\?\tperiod_size = <.*>;/\tperiod_size = 78;/;s/^\/\?\/\?\tbuffer_size = <.*>;/\tbuffer_size = 468;/' /etc/shairport-sync.conf
     sed -i 's/^\/\?\/\?\tresync_threshold_in_seconds = 0.050;/\tresync_threshold_in_seconds = 0.025;/' /etc/shairport-sync.conf
     sed -i '/Install/iNice=-20\n' /usr/lib/systemd/system/shairport-sync.service
@@ -51,10 +52,16 @@ if [[ $player =~ R ]] && ! pacman -Q roonbridge >/dev/null 2>&1; then
     pacman -U --noconfirm /tmp/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
     systemctl daemon-reload
 fi
-if [[ $player =~ H ]] && ! pacman -Q hqplayer-network-audio-daemon >/dev/null 2>&1; then
-    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayer-network-audio-daemon-4.4.0-1-x86_64.pkg.tar.zst
-    pacman -U --noconfirm /tmp/hqplayer-network-audio-daemon-4.4.0-1-x86_64.pkg.tar.zst
-    systemctl daemon-reload
+if [[ $player =~ H ]]; then
+    naa_deb=$(curl -sL https://www.signalyst.com/bins/naa/linux/bookworm/ | grep "networkaudiod_5" | grep _amd64.deb | tail -n1 | awk -F'"' '{print $8}')
+    curl -L "https://www.signalyst.com/bins/naa/linux/bookworm/$naa_deb" | bsdtar xf - -C /tmp
+    mkdir -p /tmp/naa
+    bsdtar Jxf /tmp/data.tar.xz -C /tmp/naa
+    install -Dm644 "/tmp/naa/etc/default/networkaudiod" "/etc/default/networkaudiod"
+    install -Dm644 "/tmp/naa/etc/networkaudiod/networkaudiod.xml" "/etc/networkaudiod/networkaudiod.xml"
+    install -Dm644 "/tmp/naa/lib/systemd/system/networkaudiod.service" "/usr/lib/systemd/system/networkaudio.service"
+    install -Dm644 "/tmp/naa/usr/share/doc/networkaudiod/copyright" "/usr/share/licenses/networkaudiod/COPYING"
+    install -Dm755 "/tmp/naa/usr/sbin/networkaudiod" "/usr/bin/networkaudiod"
 fi
 
 if [[ $s0 != $s1 ]]; then
