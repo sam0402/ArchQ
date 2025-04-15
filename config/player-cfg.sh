@@ -1,5 +1,8 @@
  #!/bin/bash
 grub_cfg='/boot/grub/grub.cfg'
+naa_deb=$(curl -sL https://www.signalyst.com/bins/naa/linux/bookworm/ | grep "networkaudiod_5" | grep _amd64.deb | tail -n1 | awk -F'"' '{print $8}')
+naa_ver=${naa_deb#*_}; naa_ver=${naa_ver%-*}
+
 mkgrub(){
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
         part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
@@ -21,7 +24,7 @@ player=$(dialog --stdout --title "ArchQ $1" --checklist "Active player" 7 0 0 \
         S Squeezelite   $s0 \
         A Airplay       $a0 \
         R Roonbridge    $r0 \
-        H "HQPlayer NAA" $h0 ) || exit 1; clear
+        H "HQPlayer NAA $naa_ver" $h0 ) || exit 1; clear
 
 [[ $player =~ S ]] && s1=on
 [[ $player =~ A ]] && a1=on
@@ -53,7 +56,6 @@ if [[ $player =~ R ]] && ! pacman -Q roonbridge >/dev/null 2>&1; then
     systemctl daemon-reload
 fi
 if [[ $player =~ H ]]; then
-    naa_deb=$(curl -sL https://www.signalyst.com/bins/naa/linux/bookworm/ | grep "networkaudiod_5" | grep _amd64.deb | tail -n1 | awk -F'"' '{print $8}')
     curl -L "https://www.signalyst.com/bins/naa/linux/bookworm/$naa_deb" | bsdtar xf - -C /tmp
     mkdir -p /tmp/naa
     bsdtar Jxf /tmp/data.tar.xz -C /tmp/naa
