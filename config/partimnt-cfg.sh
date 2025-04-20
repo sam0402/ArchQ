@@ -9,6 +9,7 @@ case $WK in
         devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
         device=$(dialog --stdout --title "Mount partition" --menu "Select device" 7 0 0 $devicelist) || exit 1; clear
         partitionlist=$(lsblk -pln -o name,size,fstype $device | sed -e '1d;s/\s\+/ /g;s/\s/,/2')
+        [ "$partitionlist" = "" ] && (echo "No partitions are found on the $device"; exit 0)
         partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1; clear
         partdata=$(lsblk -pln -o name,fstype,uuid $partition)
         PT=$(echo $partdata | cut -d ' ' -f 1)
