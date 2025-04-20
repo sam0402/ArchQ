@@ -30,9 +30,14 @@ case $WK in
         devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | grep sd | tac)
         device=$(dialog --stdout --title "Format disk" --menu "Select HDD device" 7 0 0 $devicelist) || exit 1
         partitionlist=$(lsblk -pln -o name,size $device | sed -e '1d;s/\s\+/ /g')
+        if [[ "$partitionlist" == "" ]]; then
+            yes=$(dialog --stdout --title "Format XFS" --yesno "No partitions are found on the $device ! \nA partition will be created to occupy the whole disk.\n   Create a partition on the ${device}?" 0 0) || exit 1; clear
+            [[ $yes ]] && parted --script "${device}" -- mklabel gpt mkpart Music xfs 1Mib 100% || exit 0
+            partitionlist=$(lsblk -pln -o name,size $device | sed -e '1d;s/\s\+/ /g')
+        fi
         partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1; clear
         yes1=$(dialog --stdout --title "Format" --yesno "Partition $(echo $partition|cut -d/ -f3) to XFS" 0 0) || exit 1; clear
-        yes2=$(dialog --stdout --title "Format XFS" --yesno "   Will clean all data!!\n   Conform to format $(echo $partition|cut -d/ -f3)!!" 0 0) || exit 1; clear
+        yes2=$(dialog --stdout --title "Format XFS" --yesno "   All data will be erased!!!\n  Confirm to format the $(echo $partition|cut -d/ -f3)!!" 0 0) || exit 1; clear
         [[ $yes1] && [$yes2 ]] && mkfs.xfs -f $partition
         ;;
 esac
