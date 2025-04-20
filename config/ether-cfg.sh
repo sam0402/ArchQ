@@ -8,17 +8,42 @@ mkgrub(){
     grub-mkconfig -o $grub_cfg
     pacman -Q ramroot >/dev/null 2>&1 && sed -i 's/fallback/ramroot/g' $grub_cfg
 }
+
 ifmask=24; ifdns=8.8.8.8; ifmtu=1500
 ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en\|^wlan' | sed 's/://')
 ifport=$(echo $ethers | cut -d ' ' -f1)
+
+systemctl is-active tailscaled >/dev/null 2>&1 && vpn=$(ip -o addr | grep tailscale0 | awk '{print $4}' | cut -d'/' -f1) || vpn="DOWN"
+
 MENU='I "Static IP" D "DHCP"'
 if [ $(echo $ethers | wc -w) -gt 2 ]; then
     MENU+=' S "DHCP Server" '
     ifport=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select network device" 7 0 0 ${ethers}) || exit 1; clear
+            --menu "Select network device" 7 0 0 ${ethers} Tailscale ${vpn}) || exit 1; clear
 fi
 
-if echo $ifport | grep -q wlan; then
+### Tailscale setup
+if [[ ${ifport} == "Tailscale" ]]; then
+    if ! systemctl is-active tailscaled >/dev/null 2>&1; then
+        if ! pacman -Q tailscale >/dev/null 2>&1; then
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/tailscale-1.80.3-1-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /tmp/tailscale-1.80.3-1-x86_64.pkg.tar.zst
+            systemctl enable --now tailscaled
+            tailscale up
+            exit 0
+        fi
+        systemctl enable --now tailscaled
+    else
+        systemctl disable --now tailscaled
+    fi
+    sleep 3
+    vpn=$(ip -o addr | grep tailscale0 | awk '{print $4}' | cut -d'/' -f1)
+    [[ $vpn == "" ]] && echo "Tailscale is DOWN." || echo "Tailscale IP: $vpn"
+    exit 0
+fi
+
+### Wireless SSID setup
+if [[ ${ifport:0:4} == "wlan" ]] ; then
     iw_conf(){
         # ssid_list=$(iwctl station wlan0 get-networks | awk '{print $1}')
         iw_conf=$(dialog --stdout --title "ArchQ $1" \
@@ -52,11 +77,13 @@ fi
 
 grep -q "IPv6PrivacyExtensions=true\|DHCP=true" $config && v6_o='on' || v6_o='off'
 
-if echo $ifport | grep -q en; then
+if [[ ${ifport:0:2} == "en" ]]; then
     ip='D'
     exec='dialog --stdout --title "ArchQ $1" --menu "Select IP setting" 7 0 0 '$MENU
     ip=$(eval $exec) || exit 1; clear
 fi
+
+### DHCP Server
 if [[ $ip == S ]]; then
     if ! pacman -Q dhcp >/dev/null 2>&1 ; then
         wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/dhcp-4.4.2.P1-4-x86_64.pkg.tar.zst
@@ -87,6 +114,7 @@ EOF
     exit 0
 fi
 
+### Static IP setup
 if [[ $ip == I ]]; then
     ifconfig=$(dialog --stdout \
                 --title "ArchQ $1" \
