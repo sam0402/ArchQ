@@ -179,7 +179,7 @@ else
     parted --script "${device}" -- mklabel gpt \
         mkpart EFI fat32 1Mib 257MiB \
         set 1 boot on \
-        mkpart ArchQ ext4 257MiB ${root_end}
+        mkpart ArchQ ext4 257MiB ${root_end} \
         mkpart Data ext4 ${root_end} 100%
 
     # Simple globbing was not enough as on one device I needed to match /dev/mmcblk0p1
