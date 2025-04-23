@@ -423,8 +423,8 @@ EOF
     while read PID; do 
         taskset -cp 0-$((iso_1st-1)) \$PID
     done <<< \$(ps ax -o command,tid,psr | grep -v '^\[' | grep '$iso_1st\$' | awk '{print \$(NF-1)}')
-    taskset -cp $iso_1st \$(ps H -q \`pidof -s mpd\` -o tid,comm | grep "output:ArchQ" | awk '{print \$1}')
 EOF
+        sed -i '/dop/i\\tcpu_affinity\t"'"$iso_1st"'"' /mnt/etc/mpd.conf
         fi
         cat >>/mnt/etc/rc.local <<EOF
 fi
