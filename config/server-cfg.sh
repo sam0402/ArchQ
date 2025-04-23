@@ -6,6 +6,9 @@ lmsver=9.1-1
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
 
+cpus=$(getconf _NPROCESSORS_ONLN)
+iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
+
 servs=''
 pacman -Q lyrionmediaserver >/dev/null 2>&1 && servs+='lyrionmediaserver '
 pacman -Q mpd >/dev/null 2>&1 && servs+='mpd '
@@ -54,8 +57,6 @@ case $server in
         ;;
     LMS)
         if ! pacman -Q lyrionmediaserver >/dev/null 2>&1; then
-            cpus=$(getconf _NPROCESSORS_ONLN)
-            iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
             isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
             echo -e "\n${c_blue_b}Install Lyrion Media Server ...${c_gray}\n"
             pacman -S perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious
@@ -71,6 +72,9 @@ case $server in
         servs=${servs/lyrionmediaserver/}
         systemctl disable --now $servs
         systemctl enable --now lyrionmediaserver
+        
+        sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
+        grub-mkconfig -o /boot/grub/grub.cfg
         ;;
     Roon)
         if [[ ! -d '/opt/RoonServer' ]]; then
@@ -89,15 +93,26 @@ case $server in
         systemctl enable --now roonserver
         ;;
     m?|y?|o?)
+        [ $cpus -ge 6 ] && isocpu="rcu_nocbs=$iso_1st "
         if ! pacman -Q mpd >/dev/null 2>&1; then
         sed -i '$d' /etc/rc.local
         cat >>/etc/rc.local <<EOF
 if systemctl is-active mpd >/dev/null; then
     mpc enable ArchQ >/dev/null 2>&1
     chrt -fp 85 \$(pgrep mpd)
-    chrt -fp 54 \$(pgrep ksoftirqd/\$(ps -eLo comm,cpuid| grep "output:A"|awk '{print \$2}'))
+    chrt -fp 54 \$(pgrep ksoftirqd/\$(ps -eLo comm,cpuid | grep "output:ArchQ" | awk '{print \$2}'))
+EOF
+        if [ $cpus -ge 6 ]; then
+        cat >>/etc/rc.local <<EOF
+    while read PID; do 
+        taskset -cp 0-$((iso_1st-1)) \$PID
+    done <<< \$(ps ax -o command,tid,psr | grep -v '^\[' | grep '$iso_1st\$' | awk '{print \$(NF-1)}')
+EOF
+        sed -i '/dop/i\\tcpu_affinity\t"'"$iso_1st"'"' /etc/mpd.conf
+        fi
+        cat >>/etc/rc.local <<EOF
 fi
-exit 0
+
 EOF
         fi
 
@@ -159,6 +174,9 @@ EOF
         /usr/bin/mpd-cfg.sh
         usermod -aG optical mpd
         systemctl enable --now mpd
+
+        sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
+        grub-mkconfig -o /boot/grub/grub.cfg
         ;;
     HQPE4|HQPE5)
         echo -e "\n${c_blue_b}Install HQPlayer Embedded${server:4:1}...${c_gray}\n"
