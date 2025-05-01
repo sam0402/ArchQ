@@ -33,26 +33,27 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 mL "Light: pcm, flac, dsd, cd" off \
                 mS "Stream: pcm, flac, mp3 radio" on \
-                mM "MPEG: +Stream, aac, alac" off ) || exit 1
+                mM "MPEG: +Stream, aac, alac" off ) || exit 1; clear
         ;;
     myMPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 yL "Light: pcm, flac, dsd, cd" off \
                 yS "Stream: pcm, flac, mp3 radio" on \
-                yM "MPEG: +Stream, aac, alac" off ) || exit 1
+                yM "MPEG: +Stream, aac, alac" off ) || exit 1; clear
         ;;
     RompR)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 oL "Light: pcm, flac, dsd, cd" off \
                 oS "Stream: pcm, flac, mp3 radio" on \
-                oM "MPEG: +Stream, aac, alac" off ) || exit 1
+                oM "MPEG: +Stream, aac, alac" off ) || exit 1; clear
         ;;
 esac
+clear
 case $server in
     Player)  
-        sed -i 's/'"$isocpu"'//' /etc/default/grub
+        # sed -i 's/'"$isocpu"'//' /etc/default/grub
         /usr/bin/player-cfg.sh
         ;;
     LMS)
@@ -86,7 +87,6 @@ case $server in
             curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roon_copyright >/usr/share/licenses/roonserver/COPYING
             sed -i 's/exec "$HARDLINK" "$SCRIPT.dll" "$@"/exec nice -n -20 "$HARDLINK" "$SCRIPT.dll" "$@"/g' /opt/RoonServer/Appliance/RAATServer
         fi
-        sed -i 's/'"$isocpu"'//' /etc/default/grub
 
         servs=${servs/roonserver/}
         systemctl disable --now $servs
@@ -94,7 +94,7 @@ case $server in
         ;;
     m?|y?|o?)
         [ $cpus -ge 6 ] && isocpu="rcu_nocbs=$iso_1st "
-        if ! pacman -Q mpd >/dev/null 2>&1; then
+    if ! grep -q 'eLo' /etc/rc.local; then
         sed -i '$d' /etc/rc.local
         cat >>/etc/rc.local <<EOF
 if systemctl is-active mpd >/dev/null; then
@@ -108,13 +108,12 @@ EOF
         taskset -cp 0-$((iso_1st-1)) \$PID
     done <<< \$(ps ax -o command,tid,psr | grep -v '^\[' | grep '$iso_1st\$' | awk '{print \$(NF-1)}')
 EOF
-        sed -i '/dop/i\\tcpu_affinity\t"'"$iso_1st"'"' /etc/mpd.conf
         fi
         cat >>/etc/rc.local <<EOF
 fi
 
 EOF
-        fi
+    fi
 
         [[ $server =~ .L ]] && MPD=light || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
         [[ $server =~ .S ]] && MPD=stream
@@ -166,17 +165,19 @@ EOF
             pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
             sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
         fi
+# cpu isolation
+        if [ $cpus -ge 6 ]; then
+            echo cpu isolation ...
+            sed -i '/dop/i\\tcpu_affinity\t"'"$iso_1st"'"' /etc/mpd.conf
+            sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
+            grub-mkconfig -o /boot/grub/grub.cfg
+        fi
         ### Start mpd.. etc. service
-        sed -i 's/'"$isocpu"'//' /etc/default/grub
-
         servs=${servs/mpd/}
-        systemctl disable --now $servs mpd.socket
+        echo systemctl disable --now $servs mpd.socket
         /usr/bin/mpd-cfg.sh
         usermod -aG optical mpd
         systemctl enable --now mpd
-
-        sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
-        grub-mkconfig -o /boot/grub/grub.cfg
         ;;
     HQPE4|HQPE5)
         echo -e "\n${c_blue_b}Install HQPlayer Embedded${server:4:1}...${c_gray}\n"
