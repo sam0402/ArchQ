@@ -106,21 +106,24 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 mL "Light: pcm, flac, dsd, cd" off \
                 mS "Stream: pcm, flac, mp3 radio" on \
-                mM "MPEG: +Stream, aac, alac" off ) || exit 1
+                mD "DStream: DSD +Stream" off \
+                mM "MPEG: +DStream, aac, alac" off ) || exit 1
         ;;
     myMPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 yL "Light: pcm, flac, dsd, cd" off \
                 yS "Stream: pcm, flac, mp3 radio" on \
-                yM "MPEG: +Stream, aac, alac" off ) || exit 1
+                yD "DStream: DSD +Stream" off \
+                yM "MPEG: +DStream, aac, alac" off ) || exit 1
         ;;
     RompR)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 oL "Light: pcm, flac, dsd, cd" off \
                 oS "Stream: pcm, flac, mp3 radio" on \
-                oM "MPEG: +Stream, aac, alac" off ) || exit 1
+                oD "DStream: DSD +Stream" off \
+                oM "MPEG: +DStream, aac, alac" off ) || exit 1
         ;;
     Player)
         player=$(dialog --stdout --title "ArchQ" \
@@ -362,6 +365,7 @@ case $server in
         [ $cpus -ge 6 ] && isocpu="rcu_nocbs=$iso_1st "
         [[ $server =~ .L ]] && MPD=light
         [[ $server =~ .S ]] && MPD=stream
+        [[ $server =~ .D ]] && MPD=dstream
         [[ $server =~ .M ]] && MPD=ffmpeg
         echo -e "\n${c_blue_b}Install MPD-${MPD}...${c_gray}\n"
         # pacstrap /mnt fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms libid3tag ncmpcpp mpc python-mpd2 lua
