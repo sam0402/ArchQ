@@ -33,21 +33,24 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 mL "Light: pcm, flac, dsd, cd" off \
                 mS "Stream: pcm, flac, mp3 radio" on \
-                mM "MPEG: +Stream, aac, alac" off ) || exit 1; clear
+                mD "DStream: dsd +Stream" off \
+                mM "MPEG: +DStream, aac, alac" off ) || exit 1; clear
         ;;
     myMPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 yL "Light: pcm, flac, dsd, cd" off \
                 yS "Stream: pcm, flac, mp3 radio" on \
-                yM "MPEG: +Stream, aac, alac" off ) || exit 1; clear
+                yD "DStream: dsd +Stream" off \
+                yM "MPEG: +DStream, aac, alac" off ) || exit 1; clear
         ;;
     RompR)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 oL "Light: pcm, flac, dsd, cd" off \
                 oS "Stream: pcm, flac, mp3 radio" on \
-                oM "MPEG: +Stream, aac, alac" off ) || exit 1; clear
+                oD "DStream: dsd +Stream" off \
+                oM "MPEG: +DStream, aac, alac" off ) || exit 1; clear
         ;;
 esac
 clear
@@ -117,6 +120,7 @@ EOF
 
         [[ $server =~ .L ]] && MPD=light || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
         [[ $server =~ .S ]] && MPD=stream
+        [[ $server =~ .D ]] && MPD=dstream
         [[ $server =~ .M ]] && MPD=ffmpeg
 
         if ! pacman -Q mpd-${MPD} >/dev/null 2>&1; then
