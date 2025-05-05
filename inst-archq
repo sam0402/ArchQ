@@ -106,7 +106,7 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 mL "Light: pcm, flac, dsd, cd" off \
                 mS "Stream: pcm, flac, mp3 radio" on \
-                mD "DStream: DSD +Stream" off \
+                mD "DStream: dsd +Stream" off \
                 mM "MPEG: +DStream, aac, alac" off ) || exit 1
         ;;
     myMPD)
@@ -114,7 +114,7 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 yL "Light: pcm, flac, dsd, cd" off \
                 yS "Stream: pcm, flac, mp3 radio" on \
-                yD "DStream: DSD +Stream" off \
+                yD "DStream: dsd +Stream" off \
                 yM "MPEG: +DStream, aac, alac" off ) || exit 1
         ;;
     RompR)
@@ -122,7 +122,7 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 oL "Light: pcm, flac, dsd, cd" off \
                 oS "Stream: pcm, flac, mp3 radio" on \
-                oD "DStream: DSD +Stream" off \
+                oD "DStream: dsd +Stream" off \
                 oM "MPEG: +DStream, aac, alac" off ) || exit 1
         ;;
     Player)
