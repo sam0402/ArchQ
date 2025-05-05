@@ -220,7 +220,7 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 
 echo -e "\n${c_blue_b}Install Arch Linux package ...${c_gray}\n"
 pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
-        vim nano wget avahi sudo dialog cpupower lm_sensors cronie ntp hdparm htop iwd nocache \
+        vim nano wget avahi sudo dialog cpupower lm_sensors ntp hdparm htop iwd nocache \
         which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
         fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb faad2 libmad \
         confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
@@ -325,7 +325,7 @@ echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
 [ $fmt = U ] && kver='6.6.17-12'
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll rcu.blimit=0 relax_domain_level=0 skew_tick=0 acpi_pm_good nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime tsc=nowatchdog hpet=disable intel_pstate=disable iomem=relaxed ipv6.disable=1 vsyscall=native/' \
+sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll rcu.blimit=0 relax_domain_level=0 skew_tick=0 nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime tsc=nowatchdog hpet=disable iomem=relaxed ipv6.disable=1 vsyscall=none/' \
 /mnt/etc/default/grub
 #thermal.off=1
 
@@ -553,6 +553,7 @@ arch-chroot /mnt systemctl disable ntpd
 arch-chroot /mnt ln -s /usr/bin/vim /usr/bin/vi
 arch-chroot /mnt touch /etc/srvmode.conf
 ###
+echo 'sysctl fs.inotify.max_user_watches=600000' >/mnt/etc/sysctl.d/90-max_user_watches.conf
 echo 'ACTION=="add", SUBSYSTEM=="pci", ATTR{power/control}="auto"' >/mnt/etc/udev/rules.d/pci_pm.rules
 cat >/mnt/etc/udev/rules.d/60-ioschedulers.rules <<EOF
 # set scheduler for NVMe
@@ -640,6 +641,11 @@ alias fflac='function _f() { mkdir -p "\$2"/"\$1"; cp "\$1"/*.{pdf,jp*g} "\$2"/"
 alias dflac='function _f() { for d in "\$1"/*;do fflac "\$d" "\$2";done; }; _f'
 EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
+
+## htop configure
+mkdir -p /mnt/home/${user}/.config/htop
+echo "screen:Main=PID USER PRIORITY NICE M_VIRT M_RESIDENT M_SHARE STATE PERCENT_CPU PERCENT_MEM TIME PROCESSOR COMM Command" >/mnt/home/${user}/.config/htop/htoprc
+chown -R ${user}: /mnt/home/${user}/.config
 
 cat >>/mnt/root/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
