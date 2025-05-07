@@ -10,7 +10,13 @@ mkgrub(){
 }
 
 ifmask=24; ifdns=8.8.8.8; ifmtu=1500
-ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en\|^wlan' | sed 's/://')
+ethers=''
+while read -r line; do
+    echo $line | grep -q UP && line="${line%% *} ""$(ip -o addr | grep ${line%% *} | awk '{print $4}' | cut -d'/' -f1)"
+    ethers+=' '$line
+done <<< $(ip -o link show | awk '{print $2,$9}' | grep '^en\|^wlan' | sed 's/://')
+# ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en\|^wlan' | sed 's/://')
+
 ifport=$(echo $ethers | cut -d ' ' -f1)
 
 systemctl is-active tailscaled >/dev/null 2>&1 && vpn=$(ip -o addr | grep tailscale0 | awk '{print $4}' | cut -d'/' -f1) || vpn="DOWN"
