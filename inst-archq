@@ -649,7 +649,6 @@ sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
 ## htop configure
 mkdir -p /mnt/home/${user}/.config/htop
 echo "screen:Main=PID USER PRIORITY NICE M_VIRT M_RESIDENT M_SHARE STATE PERCENT_CPU PERCENT_MEM TIME PROCESSOR COMM Command" >/mnt/home/${user}/.config/htop/htoprc
-chown ${user}: /mnt/home/${user}/.config
 
 cat >>/mnt/root/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
