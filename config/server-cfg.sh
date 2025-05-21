@@ -109,7 +109,7 @@ EOF
         cat >>/etc/rc.local <<EOF
     while read PID; do 
         taskset -cp 0-$((iso_1st-1)) \$PID
-    done <<< \$(ps ax -o command,tid,psr | grep -v '^\[' | grep '$iso_1st\$' | awk '{print \$(NF-1)}')
+    done <<< \$(ps -eLo command,comm,tid,psr | grep -v '^\[' | grep '$iso_1st\$' | awk '{print \$(NF-1)}')
 EOF
         fi
         cat >>/etc/rc.local <<EOF
