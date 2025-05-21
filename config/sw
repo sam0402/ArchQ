@@ -19,20 +19,20 @@ case $1 in
 		;;
 	mpd)
 		serv=mpd
-		service=$MPD'mpd-plugin'
+		service='mpd-plugin '$MPD
 		;;
 	mtroom)
 		# user="--user"
 		serv="owntone"
-		service=$MPD'avahi-daemon owntone mpd-otvol'
+		service='avahi-daemon owntone mpd-otvol '$MPD
 		;;
 	rompr)
 		serv=mpd
-		service=$MPD'avahi-daemon nginx php-fpm'
+		service='avahi-daemon nginx php-fpm '$MPD
 		;;
 	mympd)
 		serv=mpd
-		service=$MPD'mympd'
+		service='mympd '$MPD
 		;;
 	lms)
 		serv=logitechmediaserver
