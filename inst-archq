@@ -362,7 +362,7 @@ case $server in
         arch-chroot /mnt systemctl enable roonserver
         ;;
     m?|y?|o?)
-        [ $cpus -ge 6 ] && isocpu="rcu_nocbs=0-$iso_1st "
+        isocpu="rcu_nocbs=0-$iso_1st "
         [[ $server =~ .L ]] && MPD=light
         [[ $server =~ .S ]] && MPD=stream
         [[ $server =~ .D ]] && MPD=dstream
