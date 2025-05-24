@@ -96,7 +96,7 @@ case $server in
         systemctl enable --now roonserver
         ;;
     m?|y?|o?)
-        isocpu="rcu_nocbs=0-$iso_1st "
+        [ $cpus -ge 6 ] && isocpu="rcu_nocbs=$iso_1st "
         if ! grep -q 'eLo' /etc/rc.local; then
         sed -i '$d' /etc/rc.local
         cat >>/etc/rc.local <<EOF
