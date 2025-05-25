@@ -6,7 +6,7 @@ if [ -z $1 ]; then
 fi
 serv=$1
 service=$serv
-MPD='mpd '
+MPD='mpd'
 
 case $1 in
 	airplay)
