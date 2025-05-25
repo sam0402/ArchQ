@@ -11,7 +11,7 @@ MPD='mpd '
 case $1 in
 	airplay)
 		serv=shairport-sync
-		service='shairport-sync'
+		service='shairport-sync nqptp '
 		;;
 	roon)
 		serv=roonserver
