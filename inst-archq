@@ -647,7 +647,8 @@ EOF
 sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
 
 ## htop configure
-mkdir -p /mnt/home/${user}/.config/htop
+mkdir -p /mnt/root/.config/htop /mnt/home/${user}/.config/htop
+echo "screen:Main=PID USER PRIORITY NICE M_VIRT M_RESIDENT M_SHARE STATE PERCENT_CPU PERCENT_MEM TIME PROCESSOR COMM Command" >/mnt/root/.config/htop/htoprc
 echo "screen:Main=PID USER PRIORITY NICE M_VIRT M_RESIDENT M_SHARE STATE PERCENT_CPU PERCENT_MEM TIME PROCESSOR COMM Command" >/mnt/home/${user}/.config/htop/htoprc
 arch-chroot /mnt chown -R ${user}: /home/${user}/.config
 
