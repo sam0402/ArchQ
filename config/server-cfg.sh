@@ -6,7 +6,7 @@ lmsver=9.1-1
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
 
-cpus=$(getconf _NPROCESSORS_ONLN)
+cpus=$(lscpu | grep 'CPU(s):' | awk -F' ' '{print $2}')
 iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
 
 servs=''
