@@ -38,7 +38,7 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
 cat >>/etc/rc.local <<EOF
 # Stop service on Qrip
 if [ \$(uname -r | awk -F - '{print \$3}') = 'Qrip' ]; then
-    server="roonserver squeezelite mpd logitechmediaserver squeezelite shairport-sync"
+    server="roonserver squeezelite mpd mympd lyrionmediaserver squeezelite shairport-sync hqplayerd"
     for i in \$server; do   
         [ \$(systemctl status \$i 2>&1 | grep -c 'Started') = 1 ] && systemctl stop \$i 
     done
