@@ -320,7 +320,7 @@ systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-j
 # xfs_fsr /mnt/music
 
 # Qrip stop all service
-[[ "$(uname -r | cut -d- -f3)" = "Qrip" ]] && srvmode-cfg.sh stopsrv
+[[ "\$(uname -r | cut -d- -f3)" = "Qrip" ]] && srvmode-cfg.sh stopsrv
 
 # Mode active
 active=\$(head -n 1 /etc/srvmode.conf | awk -F= '{print \$2}')
