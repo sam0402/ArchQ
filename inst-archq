@@ -308,8 +308,32 @@ while read ether; do
         cd -
     fi
 done <<< \$(ip -o link show | awk '{print \$2,\$9}' | grep '^en' | cut -d':' -f1)
-sleep 1
 
+sleep 1
+systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
+# systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket
+# Play CD on MPD don't uncomment
+# systemctl stop systemd-udevd
+# systemctl stop systemd-networkd
+
+#** Reorganizer for XFS
+# xfs_fsr /mnt/music
+
+# Qrip stop all service
+[[ "$(uname -r | cut -d- -f3)" = "Qrip" ]] && srvmode-cfg.sh stopsrv
+
+# Mode active
+active=\$(head -n 1 /etc/srvmode.conf | awk -F= '{print \$2}')
+if [ ! \$active == '' ]; then
+    service=\$(grep \$active /etc/srvmode.conf | awk -F: '{print \$2}' | \\
+        sed -e 's/\(.*\)/\L\1/;s/lms/lyrionmediaserver/;s/"hqplayer naa"/naa/;s/owntone/mtroom/;')
+    for i in \$service; do
+        sw \$i >/dev/null 2>&1
+        sleep 0.2
+    done
+fi
+
+exit 0
 EOF
 
 arch-chroot /mnt sh -c 'yes | pacman -Scc'
@@ -416,6 +440,7 @@ case $server in
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
         sed -i 's/^include_optional/#include_optional/g' /mnt/etc/mpd.conf
 #### add priority for MPD
+        sed -i '$d' /mnt/etc/rc.local
         cat >>/mnt/etc/rc.local <<EOF
 if systemctl is-active mpd >/dev/null; then
     mpc enable ArchQ >/dev/null 2>&1
@@ -433,6 +458,7 @@ EOF
         cat >>/mnt/etc/rc.local <<EOF
 fi
 
+exit 0
 EOF
 ### Start mpd.. etc. service
         arch-chroot /mnt systemctl disable mpd.socket
@@ -525,33 +551,6 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/asound.conf >/
 
 pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
 arch-chroot /mnt systemctl disable avahi-daemon.socket
-
-cat >>/mnt/etc/rc.local <<EOF
-systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-journald
-# systemctl stop systemd-udevd-kernel.socket systemd-udevd-control.socket
-# Play CD on MPD don't uncomment
-# systemctl stop systemd-udevd
-# systemctl stop systemd-networkd
-
-#** Reorganizer for XFS
-# xfs_fsr /mnt/music
-
-# Qrip stop all service
-[[ "$(uname -r | cut -d- -f3)" = "Qrip" ]] && srvmode-cfg.sh stopsrv
-
-# Mode active
-active=\$(head -n 1 /etc/srvmode.conf | awk -F= '{print \$2}')
-if [ ! \$active == '' ]; then
-    service=\$(grep \$active /etc/srvmode.conf | awk -F: '{print \$2}' | \\
-        sed -e 's/\(.*\)/\L\1/;s/lms/lyrionmediaserver/;s/"hqplayer naa"/naa/;s/owntone/mtroom/;')
-    for i in \$service; do
-        sw \$i >/dev/null 2>&1
-        sleep 0.2
-    done
-fi
-
-exit 0
-EOF
 arch-chroot /mnt systemctl enable sshd ntpdate rc-local cpupower
 arch-chroot /mnt systemctl disable ntpd
 arch-chroot /mnt ln -s /usr/bin/vim /usr/bin/vi
