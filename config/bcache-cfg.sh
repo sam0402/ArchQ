@@ -5,8 +5,9 @@ clear
 
 if ! pacman -Q bcache-tools >/dev/null 2>&1; then
     pacman -Sy --noconfirm archlinux-keyring parted
-    wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/bcache-tools-1.1-1-x86_64.pkg.tar.zst
-    pacman -U --noconfirm /root/bcache-tools-1.1-1-x86_64.pkg.tar.zst
+    wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/bcache-tools-1.1-1-x86_64.pkg.tar.zst
+    wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/parted-3.5-1-x86_64.pkg.tar.zst
+    pacman -U --noconfirm /tmp/bcache-tools-1.1-1-x86_64.pkg.tar.zst parted-3.5-1-x86_64.pkg.tar.zst
     echo -e "\nSystem will reboot after 5 seconds."
     for i in {5..1}
     do
@@ -49,17 +50,19 @@ case $WK in
                 if [ ${hddpart:0-1} -eq 1 ]; then
                     [ $(expr ${start::-1} - 16) -gt 0 ] && work=true
                 else
-                    prepartnum=$(expr ${hddpart:0-1} - 1)
+                    prepartnum=$(parted $hdd 'unit s' print | grep -B 1 "^ ${hddpart:0-1}" | grep -v "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $2 }')
                     preends=$(parted $hdd 'unit s' print | grep "^ $prepartnum" | awk -F '[[:space:]]*' '{ print $4 }')
                     [ ${starts::-1} -gt ${preends::-1} ] && work=true
                 fi
                 # Rebuild parititon
-                if "$work"; then
+                if [ "$work" = "true" ]; then
                     # parted $hdd 'unit s' print
-                    sfdisk -d $hdd >./partiton_backup_$(date +"%Y%m%d_%H.%M")
+                    newpartnum=$((prepartnum + 1))
+                    newpart=${hddpart::-1}${newpartnum}
+                    sfdisk -d $hdd >~/partiton_backup_$(date +"%Y%m%d_%H.%M")
                     parted --script $hdd rm ${hddpart:0-1}
                     parted --script $hdd mkpart primary xfs $starts $ends
-                    make-bcache -B $hddpart
+                    make-bcache -B $newpart
                 else
                     echo "Can not create Bcache with retaining data."
                 fi
@@ -76,12 +79,12 @@ case $WK in
         esac
         # Build Bcache
         sleep 5
-        bcache=$(lsblk -pln -o name "$hddpart" | grep bcache | cut -d'/' -f3)
+        bcache=$(lsblk -pln -o name "$newpart" | grep bcache | cut -d'/' -f3)
         echo --- $bcache ---
         lsblk -pln -o fstype $nvmepart | grep -q bcache || (wipefs -af $nvmepart; make-bcache -C $nvmepart)
         sleep 1
         echo $(bcache-super-show $nvmepart | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/attach
-        echo writearound >/sys/block/$bcache/bcache/cache_mode
+        echo writeback >/sys/block/$bcache/bcache/cache_mode
         [ $? -ne 0 ] && echo -e "\nNeet to do it again or reboot.\n"
         lsblk $hddpart $nvmepart
         ;;
@@ -102,7 +105,7 @@ case $WK in
                 starts=$(expr ${start::-1} + 16)s
                 ends=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $4 }')
                 # parted $hdd 'unit s' print
-                sfdisk -d $hdd >./partiton_backup_$(date +"%Y%m%d_%H.%M")
+                sfdisk -d $hdd >~/partiton_backup_$(date +"%Y%m%d_%H.%M")
                 parted --script $hdd rm ${hddpart:0-1}
                 parted --script $hdd mkpart primary xfs $starts $ends
             fi
