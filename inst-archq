@@ -253,7 +253,7 @@ echo -e "nameserver 8.8.8.8\nnameserver 1.1.1.1" >> /mnt/etc/resolv.conf
 arch-chroot /mnt useradd -mU "$user"
 sed -i '0,/# %wheel/s/# %wheel/%wheel/' /mnt/etc/sudoers
 arch-chroot /mnt usermod -aG wheel $user
-echo "$user $hostname =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot,/usr/bin/qboot,/usr/bin/sw,/usr/bin/config" >>/mnt/etc/sudoers
+echo "$user $hostname =NOPASSWD: /usr/bin/systemctl poweroff,/usr/bin/systemctl halt,/usr/bin/systemctl reboot,/usr/bin/qboot,/usr/bin/mboot,/usr/bin/sw,/usr/bin/config" >>/mnt/etc/sudoers
 
 ### Set locale language
 echo -e "en_US.UTF-8 UTF-8\nja_JP.UTF-8 UTF-8\nzh_TW.UTF-8 UTF-8" >/mnt/etc/locale.gen
@@ -629,6 +629,7 @@ alias abcde='eject -t; abcde'
 alias poweroff='sudo systemctl poweroff'
 alias reboot='sudo systemctl reboot'
 alias qboot='sudo qboot'
+alias mboot='sudo mboot'
 alias config='sudo config.sh'
 alias sw='sudo sw'
 alias df='df -h'
