@@ -1,14 +1,13 @@
 #!/bin/bash
 WK=$(dialog --stdout --title "ArchQ Bcache $1" \
-            --menu "!! Caution !! Backup your data befort use." 8 0 0 C Create R Remove) || exit 1
+            --menu "!! Caution !! Please back up your data before use." 8 0 0 C Create R Remove) || exit 1
 clear
 
 if ! pacman -Q bcache-tools >/dev/null 2>&1; then
-    pacman -Sy --noconfirm archlinux-keyring parted
     wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/bcache-tools-1.1-1-x86_64.pkg.tar.zst
     wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/parted-3.5-1-x86_64.pkg.tar.zst
     pacman -U --noconfirm /tmp/bcache-tools-1.1-1-x86_64.pkg.tar.zst parted-3.5-1-x86_64.pkg.tar.zst
-    echo -e "\nSystem will reboot after 5 seconds."
+    echo -e "\nThe system will reboot in 5 seconds.\nAfter that, please go to Config → BCache again."
     for i in {5..1}
     do
         tput cup 1 25
@@ -23,7 +22,7 @@ case $WK in
         [ $1 = nvme ] && hddlst=$(lsblk -dplnx size -o name,size | grep -E "sd|nvme" | tac) || \
                         hddlst=$(lsblk -dplnx size -o name,size | grep "sd" | tac)
         nvmelst=$(lsblk -dplnx size -o name,size | grep "nvme" | tac)
-        [[ -z $nvmelst ]] && (echo "No SSD/NVME device." ; exit 1 )
+        [[ -z $nvmelst ]] && (echo "No SSD or NVMe storage device was detected." ; exit 1 )
         # Select HDD partiton
         hdd=$(dialog --stdout --title "Bache create" --menu "Select HDD" 7 0 0 $hddlst) || exit 1
         clear
@@ -64,17 +63,17 @@ case $WK in
                     parted --script $hdd mkpart primary xfs $starts $ends
                     make-bcache -B $newpart
                 else
-                    echo "Can not create Bcache with retaining data."
+                    echo "Cannot create Bcache without erasing existing data."
                 fi
             ;;
             C)
-                yes=$(dialog --stdout --title "Bache create" --yesno "\n  It will clean all data.\nConform to clean $hddpart" 0 0) || exit 1
+                yes=$(dialog --stdout --title "Bache create" --yesno "\n  This action will erase all data.\nDo you want to continue? $hddpart" 0 0) || exit 1
                 clear
                 $yes && wipefs -a $hddpart || exit 1
                 make-bcache -B $hddpart
             ;;
             B)
-                echo "Bcache of $hddpart is exist."
+                echo "Bcache for $hddpart already exists."
             ;;
         esac
         # Build Bcache
@@ -85,7 +84,7 @@ case $WK in
         sleep 1
         echo $(bcache-super-show $nvmepart | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/attach
         echo writeback >/sys/block/$bcache/bcache/cache_mode
-        [ $? -ne 0 ] && echo -e "\nNeet to do it again or reboot.\n"
+        [ $? -ne 0 ] && echo -e "\nYou need to do it again or reboot.\n"
         lsblk $hddpart $nvmepart
         ;;
     R)
