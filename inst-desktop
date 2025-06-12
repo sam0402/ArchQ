@@ -40,16 +40,16 @@ hostname=ArchQ
 #     hostname=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter hostname again" 0 0) || exit 1; clear
 # fi
 
-user=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter admin username" 0 0) || exit 1; clear
+user=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter the admin username" 0 0) || exit 1; clear
 if [ -z "$user" ];then
     dialog --stdout --title "ArchQ Desktop" --pause "\n Username cannot be empty.\n\n Default will be 'archq'." 12 0 3 || exit 1; clear
     user=archq
-    user=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Enter admin username again" 0 0) || exit 1; clear
+    user=$(dialog --stdout --title "ArchQ Desktop" --inputbox "Please re-enter the admin username." 0 0) || exit 1; clear
 fi
 password
 lang=$(dialog --stdout --title "ArchQ Desktop" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1; clear
 devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
-device=$(dialog --stdout --title "ArchQ Desktop" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
+device=$(dialog --stdout --title "ArchQ Desktop" --menu "Select installation disk" 0 0 0 ${devicelist}) || exit 1; clear
 fmt=$(dialog --stdout --title "ArchQ Desktop" --menu "Format device ${device}" 7 0 0 E Entire P Partition U "USB Storage") || exit 1; clear
 if [ $fmt = P ]; then
     partlst='dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 '
@@ -444,5 +444,5 @@ if [ -n "$old_efi" ]; then
     arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 fi
 
-dialog --stdout --title "ArchQ" --pause "\n  ArchQ is installed, unplug the USB driver.\n\n  System will reboot after 10 seconds." 12 50 10; clear
+dialog --stdout --title "ArchQ Desktop" --pause "\n ArchQ has been installed.\nPlease unplug the USB drive.\n\nThe system will reboot in 10 seconds." 12 50 10; clear
 reboot

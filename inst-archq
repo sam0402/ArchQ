@@ -31,7 +31,7 @@ password(){
     fi
     password2=$(dialog --stdout --title "ArchQ" --inputbox "Enter password again" 0 0) || exit 1; clear
     if [[ "$password" != "$password2" ]]; then
-        dialog --stdout --title "ArchQ" --pause "\n Passwd did not match.\n\n Setting password again." 12 0 3 || exit 1; clear
+        dialog --stdout --title "ArchQ" --pause "\n Passwords did not match.\n\nPlease set the password again." 12 0 3 || exit 1; clear
         password
     fi
 }
@@ -43,16 +43,16 @@ hostname=ArchQ
 #     hostname=$(dialog --stdout --title "ArchQ" --inputbox "Enter hostname again" 0 0) || exit 1; clear
 # fi
 
-user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username" 0 0) || exit 1; clear
+user=$(dialog --stdout --title "ArchQ" --inputbox "Enter the admin username" 0 0) || exit 1; clear
 if [ -z "$user" ];then
     dialog --stdout --title "ArchQ" --pause "\n Username cannot be empty.\n\n Default will be 'archq'." 12 0 3 || exit 1; clear
 user=archq
-    user=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin username again" 0 0) || exit 1; clear
+    user=$(dialog --stdout --title "ArchQ" --inputbox "Please re-enter the admin username." 0 0) || exit 1; clear
 fi
 password
 lang=$(dialog --stdout --title "ArchQ" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1; clear
 devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
-device=$(dialog --stdout --title "ArchQ" --menu "Select installtion disk" 0 0 0 ${devicelist}) || exit 1; clear
+device=$(dialog --stdout --title "ArchQ" --menu "Select installation disk" 0 0 0 ${devicelist}) || exit 1; clear
 fmt=$(dialog --stdout --title "ArchQ" --menu "Format device ${device}" 7 0 0 E Entire P Partition U "USB Storage") || exit 1; clear
 if [ $fmt = P ]; then
     partlst='dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 '
@@ -87,7 +87,7 @@ fi
 
 player=N
 server=$(dialog --stdout --title "ArchQ" \
-        --menu "Select music server or player" 7 0 0 \
+        --menu "Please select a music server or player" 7 0 0 \
         LMS "Lyrion Media Server" \
         MPD "MPD, Rigelian(iOS) | text-based client" \
         myMPD "MPD & myMPD web-based client" \
@@ -103,7 +103,7 @@ case $server in
         ;;
     MPD)
         server=$(dialog --stdout --title "ArchQ" \
-                --radiolist "Select MPD version" 7 0 0 \
+                --radiolist "Choose the MPD version to install" 7 0 0 \
                 mL "Light: pcm, flac, dsd, cd" off \
                 mS "Stream: pcm, flac, mp3 radio" on \
                 mD "DStream: dsd +Stream" off \
@@ -111,7 +111,7 @@ case $server in
         ;;
     myMPD)
         server=$(dialog --stdout --title "ArchQ" \
-                --radiolist "Select MPD version" 7 0 0 \
+                --radiolist "Choose the MPD version to install" 7 0 0 \
                 yL "Light: pcm, flac, dsd, cd" off \
                 yS "Stream: pcm, flac, mp3 radio" on \
                 yD "DStream: dsd +Stream" off \
@@ -119,7 +119,7 @@ case $server in
         ;;
     RompR)
         server=$(dialog --stdout --title "ArchQ" \
-                --radiolist "Select MPD version" 7 0 0 \
+                --radiolist "Choose the MPD version to install" 7 0 0 \
                 oL "Light: pcm, flac, dsd, cd" off \
                 oS "Stream: pcm, flac, mp3 radio" on \
                 oD "DStream: dsd +Stream" off \
@@ -127,7 +127,7 @@ case $server in
         ;;
     Player)
         player=$(dialog --stdout --title "ArchQ" \
-                --checklist "Select music player" 7 0 0 \
+                --checklist "Choose the music player to install" 7 0 0 \
                 A Airplay off \
                 S Squeezelite off \
                 R Roonbridge off \
@@ -196,7 +196,7 @@ fi
 # Wipe & format root partition
 for ((i=1; i <= $zerofill; i++))
 do
-    echo -e "${c_blue_b}Root parition fills with zero -> $i${c_white_b}"
+    echo -e "${c_blue_b}The root partition is filled with zeros. -> $i${c_white_b}"
     scrub -Sp fillzero $part_root
 done
 [ $f2fs = F ] && mkfs.f2fs -fl ArchQ "${part_root}" || mkfs.xfs -fL ArchQ "${part_root}"
@@ -676,5 +676,5 @@ if [ -n "$old_efi" ]; then
     arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 fi
 
-dialog --stdout --title "ArchQ" --pause "\n  ArchQ is installed, unplug the USB driver.\n\n  System will reboot after 10 seconds." 12 50 10; clear
+dialog --stdout --title "ArchQ" --pause "\n ArchQ has been installed.\nPlease unplug the USB drive.\n\nThe system will reboot in 10 seconds." 12 50 10; clear
 reboot
