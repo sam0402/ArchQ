@@ -44,14 +44,16 @@ case $WK in
             R)
                 # Get sectors range of partition
                 start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $3 }')
-                starts=$(expr ${start::-1} - 16)s
+                start_num=${start%s}
+                starts=$(( start_num > 16 ? start_num - 16 : 0 ))s
                 ends=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $4 }')
-                if [ ${hddpart:0-1} -eq 1 ]; then
-                    [ $(expr ${start::-1} - 16) -gt 0 ] && work=true
+                ends_num=${ends%s}
+                if [ "${hddpart:0-1}" -eq 1 ]; then
+                    [ "$start_num" -gt 16 ] && work=true
                 else
                     prepartnum=$(parted $hdd 'unit s' print | grep -B 1 "^ ${hddpart:0-1}" | grep -v "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $2 }')
                     preends=$(parted $hdd 'unit s' print | grep "^ $prepartnum" | awk -F '[[:space:]]*' '{ print $4 }')
-                    [ ${starts::-1} -gt ${preends::-1} ] && work=true
+                    [ -n "$starts" ] && [ -n "$preends_num" ] && [ "$start_num" -gt "$preends_num" ] && work=true
                 fi
                 # Rebuild parititon
                 if [ "$work" = "true" ]; then
