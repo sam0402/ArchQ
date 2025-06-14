@@ -103,7 +103,8 @@ case $WK in
             if lsblk -pln -o fstype $hddpart | grep -q bcache; then
                 # Rebuild partition
                 start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $3 }')
-                starts=$(expr ${start::-1} + 16)s
+                start_num=${start%s}
+                starts=$((start_num + 16))s
                 ends=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $4 }')
                 # parted $hdd 'unit s' print
                 sfdisk -d $hdd >~/partiton_backup_$(date +"%Y%m%d_%H.%M")
