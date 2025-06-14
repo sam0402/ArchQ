@@ -34,24 +34,24 @@ case $options in
         touch /root/.advence; /usr/bin/config
         ;;
     A)
-        /usr/bin/shairport-cfg.sh $Qver
+        /usr/bin/shairport-cfg.sh $KVER
         ;;
     B)
-        /usr/bin/smb-cfg.sh $Qver
+        /usr/bin/smb-cfg.sh $KVER
         ;;
     C)
-        /usr/bin/cpu-cfg.sh $Qver
+        /usr/bin/cpu-cfg.sh $KVER
         ;;
     D)
-        /usr/bin/mpd-cfg.sh $Qver
+        /usr/bin/mpd-cfg.sh $KVER
         ;;
     E)
-        /usr/bin/ether-cfg.sh $Qver
+        /usr/bin/ether-cfg.sh $KVER
         ;;
     F)
         pacman -Q ffmpeg | grep -q '\-12' && ff=on || ff=off
         ffen=$(dialog --stdout \
-            --title "ArchQ $Qver   $temp" \
+            --title "ArchQ $KVER   $temp" \
             --checklist "Use ArchQ FFmpeg" 7 0 0 \
             E Enable $ff ) || exit 1; clear
         if [ $ffen == 'E' ]; then
@@ -62,7 +62,7 @@ case $options in
         fi
         ;;
     G)
-        /usr/bin/datacache-cfg.sh $Qver
+        /usr/bin/datacache-cfg.sh $KVER
         ;;
     H)
         # pacman -Sy --noconfirm archlinux-keyring
@@ -71,34 +71,34 @@ case $options in
         # pacman -Syu --noconfirm
         ;;
     I)
-        /usr/bin/srvmode-cfg.sh $Qver
+        /usr/bin/srvmode-cfg.sh $KVER
         ;;
     J)
-        /usr/bin/sync_backup-cfg.sh $Qver
+        /usr/bin/sync_backup-cfg.sh $KVER
         ;;
     K)
-        /usr/bin/kernel-cfg.sh $Qver
+        /usr/bin/kernel-cfg.sh $KVER
         ;;
     M)
-        /usr/bin/partimnt-cfg.sh $Qver
+        /usr/bin/partimnt-cfg.sh $KVER
         ;;
     N)
-        /usr/bin/nfs-cfg.sh $Qver
+        /usr/bin/nfs-cfg.sh $KVER
         ;;
     O)
-        /usr/bin/server-cfg.sh $Qver
+        /usr/bin/server-cfg.sh $KVER
         ;;
     P)
-        /usr/bin/player-cfg.sh $Qver
+        /usr/bin/player-cfg.sh $KVER
         ;;
     R)
-        /usr/bin/abcde-cfg.sh $Qver
+        /usr/bin/abcde-cfg.sh $KVER
         ;;
     S)
-        /usr/bin/sqzlite-cfg.sh $Qver
+        /usr/bin/sqzlite-cfg.sh $KVER
         ;;
     T)
-        /usr/bin/timezone.sh $Qver
+        /usr/bin/timezone.sh $KVER
         ;;
     U)
         curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/usr/bin/update_scpt.sh
@@ -107,18 +107,18 @@ case $options in
         echo $git >/root/.update
         ;;
     V)
-        /usr/bin/nfserver-cfg.sh $Qver
+        /usr/bin/nfserver-cfg.sh $KVER
         ;;
     W)
-        /usr/bin/hddpower-cfg.sh $Qver
+        /usr/bin/hddpower-cfg.sh $KVER
         ;;
     X)
-        /usr/bin/desktop-cfg.sh $Qver
+        /usr/bin/desktop-cfg.sh $KVER
         ;;
     Y)
-        /usr/bin/bcache-cfg.sh $Qver
+        /usr/bin/bcache-cfg.sh $KVER
         ;;
     Z)
-        /usr/bin/zerowipe.sh $Qver
+        /usr/bin/zerowipe.sh $KVER
         ;;
 esac
