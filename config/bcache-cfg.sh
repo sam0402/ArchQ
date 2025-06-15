@@ -1,6 +1,6 @@
 #!/bin/bash
 WK=$(dialog --stdout --title "ArchQ BCache $1" \
-            --menu "!! Caution !! Please back up your data before use." 8 0 0 C Create R Remove) || exit 1
+            --menu "!! Caution !! Back up your data before use." 8 0 0 C Create R Remove) || exit 1
 clear
 
 if ! pacman -Q bcache-tools >/dev/null 2>&1; then
