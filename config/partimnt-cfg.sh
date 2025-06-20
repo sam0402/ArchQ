@@ -77,7 +77,7 @@ case $WK in
 
         options=$(dialog --stdout \
                 --title "Eject partition" \
-                --menu Select partition to delete 7 0 0 $MENU) || exit 1; clear
+                --menu "Select partition to delete" 7 0 0 $MENU) || exit 1; clear
         MP=$(echo $options | cut -d '/' -f 3)
         cd ~
         umount /mnt/$MP
