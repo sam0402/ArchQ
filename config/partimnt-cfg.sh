@@ -79,6 +79,7 @@ case $WK in
                 --title "Eject partition" \
                 --menu Select partition to delete 7 0 0 $MENU) || exit 1; clear
         MP=$(echo $options | cut -d '/' -f 3)
+        cd ~
         umount /mnt/$MP
         sed -i '/\/mnt\/'"$MP"'/d' $config
         systemctl daemon-reload
