@@ -116,7 +116,7 @@ case $options in
         /usr/bin/desktop-cfg.sh $KVER
         ;;
     Y)
-        /usr/bin/bcache-cfg.sh $KVER
+        cd ~; /usr/bin/bcache-cfg.sh $KVER; cd -
         ;;
     Z)
         /usr/bin/zerowipe.sh $KVER
