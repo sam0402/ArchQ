@@ -19,8 +19,9 @@ fi
 
 case $WK in
     C)
-        # [ "$1" = "nvme" ] && hddlst=$(lsblk -dplnx size -o name,size | grep -E "sd|nvme" | tac) || \
-        hddlst=$(lsblk -dplnx size -o name,size | grep "sd" | tac)
+        lsblk -dplnx size -o name | grep -q nvme1 \
+            && echo hddlst=$(lsblk -dplnx size -o name,size | grep -E "sd|nvme" | tac) \
+            || echo hddlst=$(lsblk -dplnx size -o name,size | grep "sd" | tac)
         [[ -z $hddlst ]] && (echo "No HDD storage device was detected."; exit 1 )
         nvmelst=$(lsblk -dplnx size -o name,size | grep "nvme" | tac)
         [[ -z $nvmelst ]] && (echo "No SSD or NVMe storage device was detected."; exit 1 )
