@@ -21,6 +21,7 @@ if ! pacman -Q bcache-tools >/dev/null 2>&1; then
     reboot
 fi
 
+mpc stop >/dev/null 2>&1
 case $WK in
     C)
         lsblk -dplnx size -o name | grep -q nvme1 \
@@ -50,16 +51,16 @@ case $WK in
         case $data in
             R)
                 # Get sectors range of partition
-                start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $3 }')
+                start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{print $3}')
                 start_num=${start%s}
                 starts=$(( start_num > 16 ? start_num - 16 : 0 ))s
-                ends=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $4 }')
+                ends=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{print $4}')
                 ends_num=${ends%s}
                 if [ "${hddpart:0-1}" -eq 1 ]; then
                     [ "$start_num" -gt 16 ] && work=true
                 else
                     prepartnum=$(parted $hdd 'unit s' print | grep -B 1 "^ ${hddpart:0-1}" | grep -v "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $2 }')
-                    preends=$(parted $hdd 'unit s' print | grep "^ $prepartnum" | awk -F '[[:space:]]*' '{ print $4 }')
+                    preends=$(parted $hdd 'unit s' print | grep "^ $prepartnum" | awk -F '[[:space:]]*' '{print $4}')
                     [ -n "$starts" ] && [ -n "$preends_num" ] && [ "$start_num" -gt "$preends_num" ] && work=true
                 fi
                 # Rebuild parititon
@@ -91,7 +92,7 @@ case $WK in
         echo --- $bcache ---
         lsblk -pln -o fstype $nvmepart | grep -q bcache || (wipefs -af $nvmepart; make-bcache --writeback -C $nvmepart)
         sleep 1
-        [ -e /sys/block/$bcache/bcache/attach] && \
+        [ -e /sys/block/$bcache/bcache/attach ] && \
             echo $(bcache-super-show $nvmepart | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/attach
         # echo writearound >/sys/block/$bcache/bcache/cache_mode
         [ $? -ne 0 ] && echo -e ${c_red_b}"\nYou need to reboot and do it again.\n"${c_write}
@@ -100,9 +101,9 @@ case $WK in
     R)
         # Remove Bcache
         bcache=$(lsblk -pln -o name | grep -m1 bcache | cut -d'/' -f3)
-        hddpart=$(lsblk -pn -o size,name | grep -B 1 bcache | grep -E "sd|nvme" | sort -nr | head -n 1 | awk -F '─' '{ print $2}')
+        hddpart=$(lsblk -pn -o size,name | grep -B 1 bcache | grep -E "sd|nvme" | sort -nr | head -n 1 | awk -F '─' '{print $2}')
         hdd=${hddpart::-1}
-        nvme=$(lsblk -pn -o size,name | grep -B 1 bcache | grep nvme | sort -n | head -n 1 | awk -F '─' '{ print $2}')
+        nvme=$(lsblk -pn -o size,name | grep -B 1 bcache | grep nvme | sort -n | head -n 1 | awk -F '─' '{print $2}')
         if $(dialog --stdout --title "Remove Bcache" --yesno "\n  Remove $bcache ?" 7 0); then   
             umount /dev/$bcache >/dev/null 2>&1
             [ -e /sys/block/$bcache/bcache/attach ] && \
@@ -114,10 +115,10 @@ case $WK in
                 echo 1 >/sys/block/$bcache/bcache/stop
             if lsblk -pln -o fstype $hddpart | grep -q bcache; then
                 # Rebuild partition
-                start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $3 }')
+                start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{print $3}')
                 start_num=${start%s}
                 starts=$((start_num + 16))s
-                ends=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $4 }')
+                ends=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{print $4}')
                 # parted $hdd 'unit s' print
                 sfdisk -d $hdd >~/partiton_CachBk_$(date +"%Y%m%d_%H.%M")
                 parted --script $hdd rm ${hddpart:0-1} >/dev/null 2>&1
