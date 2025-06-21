@@ -103,7 +103,7 @@ case $WK in
         # Remove Bcache
         bcache=$(lsblk -pln -o name | grep -m1 bcache | cut -d'/' -f3)
         hddpart=$(lsblk -pn -o size,name | grep -B 1 bcache | grep -E "sd|nvme" | sort -nr | head -n 1 | awk -F '─' '{print $2}')
-        hdd=${hddpart::-1}
+        hdd=${hddpart%[0-9]}; hdd=${hdd%p}; 
         nvme=$(lsblk -pn -o size,name | grep -B 1 bcache | grep nvme | sort -n | head -n 1 | awk -F '─' '{print $2}')
         if $(dialog --stdout --title "Remove Bcache" --yesno "\n  Remove $bcache ?" 7 0); then   
             umount /dev/$bcache >/dev/null 2>&1
