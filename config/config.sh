@@ -80,7 +80,7 @@ case $options in
         /usr/bin/kernel-cfg.sh $KVER
         ;;
     M)
-        /usr/bin/partimnt-cfg.sh $KVER
+        cd ~; /usr/bin/partimnt-cfg.sh $KVER; cd -
         ;;
     N)
         /usr/bin/nfs-cfg.sh $KVER
