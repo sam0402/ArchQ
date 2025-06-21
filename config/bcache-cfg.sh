@@ -26,27 +26,27 @@ mpc stop >/dev/null 2>&1
 case $WK in
     C)
         lsblk -dplnx size -o name | grep -q nvme1 \
-            && hddlst=$(lsblk -dplnx size -o name,size | grep -E "sd|nvme" | tac) \
-            || hddlst=$(lsblk -dplnx size -o name,size | grep "sd" | tac)
+            && hddlst=$(lsblk -dplnx size -o name,size | sort -nr | grep -E "sd|nvme") \
+            || hddlst=$(lsblk -dplnx size -o name,size | sort -nr | grep "sd")
         [[ -z $hddlst ]] && (echo "No HDD storage device was detected."; exit 1 )
-        nvmelst=$(lsblk -dplnx size -o name,size | grep "nvme" | tac)
+        nvmelst=$(lsblk -dplnx size -o name,size | sort -n | grep "nvme")
         [[ -z $nvmelst ]] && (echo "No SSD or NVMe storage device was detected."; exit 1 )
         # Select HDD partiton
         hdd=$(dialog --stdout --title "Create Bcache" --menu "Select a backing HDD/SSD" 7 0 0 $hddlst) || exit 1
         clear
         hddpartlst=$(lsblk -pln -o name,size,fstype $hdd | sed -e '1d;s/\s\+/ /g;s/\s/,/2')
-        hddpart=$(dialog --stdout --title "Device $hdd" --menu "Select partition" 7 0 0 $hddpartlst) || exit 1
+        hddpart=$(dialog --stdout --title "Backing $hdd" --menu "Select a backing partition" 7 0 0 $hddpartlst) || exit 1
         if lsblk -pln -o fstype $hddpart | grep -q bcache; then
             data=B
         else
-            data=$(dialog --stdout --title "Device $hddpart" --menu "Retain data?" 7 0 0 R Retain C Clean)
+            data=$(dialog --stdout --title "Backing $hddpart" --menu "Retain data?" 7 0 0 R Retain C Clean)
             clear
         fi
         # Select SSD/NVME partiton
-        nvme=$(dialog --stdout --title "Create Bcache" --menu "Select cache SSD" 7 0 0 $nvmelst) || exit 1
+        nvme=$(dialog --stdout --title "Create Bcache" --menu "Select a cache SSD" 7 0 0 $nvmelst) || exit 1
         clear
-        nvmepartlst=$(lsblk -pln -o name,size,fstype $nvme | sed -e '1d;s/\s\+/ /g;s/\s/,/2')
-        nvmepart=$(dialog --stdout --title "Cache $nvme" --menu "Select partition" 7 0 0 $nvmepartlst) || exit 1
+        nvmepartlst=$(lsblk -pln -o name,size,fstype $nvme | grep 'p' | sed -e 's/\s\+/ /g;s/\s/,/2')
+        nvmepart=$(dialog --stdout --title "Cache $nvme" --menu "Select a cache partition" 7 0 0 $nvmepartlst) || exit 1
         clear
         umount $hddpart
         case $data in
