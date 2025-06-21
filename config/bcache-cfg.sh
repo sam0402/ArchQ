@@ -101,7 +101,7 @@ case $WK in
         bcache=$(lsblk -pln -o name | grep -m1 bcache | cut -d'/' -f3)
         hddpart=$(lsblk -pn -o size,name | grep -B 1 bcache | grep -E "sd|nvme" | sort -nr | head -n 1 | awk -F '─' '{ print $2}')
         hdd=${hddpart::-1}
-        nvme=$(lsblk -pn -o name | grep -B 1 bcache | grep nvme | awk -F '─' '{ print $2}')
+        nvme=$(lsblk -pn -o size,name | grep -B 1 bcache | grep nvme | sort -n | head -n 1 | awk -F '─' '{ print $2}')
         if $(dialog --stdout --title "Remove Bcache" --yesno "\n  Remove $bcache ?" 7 0); then   
             umount /dev/$bcache
             echo $(bcache-super-show $nvme | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/detach
