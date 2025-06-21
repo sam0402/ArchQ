@@ -67,7 +67,7 @@ case $WK in
                     # parted $hdd 'unit s' print
                     newpartnum=$((prepartnum + 1))
                     newpart=${hddpart::-1}${newpartnum}
-                    sfdisk -d $hdd >~/partiton_backup_$(date +"%Y%m%d_%H.%M")
+                    sfdisk -d $hdd >~/partiton_PreBk_$(date +"%Y%m%d_%H.%M")
                     parted --script $hdd rm ${hddpart:0-1}
                     parted --script $hdd mkpart primary xfs $starts $ends
                     make-bcache -B $newpart
@@ -91,8 +91,9 @@ case $WK in
         echo --- $bcache ---
         lsblk -pln -o fstype $nvmepart | grep -q bcache || (wipefs -af $nvmepart; make-bcache --writeback -C $nvmepart)
         sleep 1
-        echo $(bcache-super-show $nvmepart | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/attach
-        # echo writeback >/sys/block/$bcache/bcache/cache_mode
+        [ -e /sys/block/$bcache/bcache/attach] && \
+            echo $(bcache-super-show $nvmepart | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/attach
+        # echo writearound >/sys/block/$bcache/bcache/cache_mode
         [ $? -ne 0 ] && echo -e ${c_red_b}"\nYou need to reboot and do it again.\n"${c_write}
         lsblk $hddpart $nvmepart
         ;;
@@ -103,10 +104,14 @@ case $WK in
         hdd=${hddpart::-1}
         nvme=$(lsblk -pn -o size,name | grep -B 1 bcache | grep nvme | sort -n | head -n 1 | awk -F '─' '{ print $2}')
         if $(dialog --stdout --title "Remove Bcache" --yesno "\n  Remove $bcache ?" 7 0); then   
-            umount /dev/$bcache
-            echo $(bcache-super-show $nvme | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/detach
-            echo 1 >/sys/fs/bcache/`bcache-super-show $nvme | grep cset | awk '{print $2}'`/unregister
-            echo 1 >/sys/block/$bcache/bcache/stop
+            umount /dev/$bcache >/dev/null 2>&1
+            [ -e /sys/block/$bcache/bcache/attach ] && \
+                echo $(bcache-super-show $nvme | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/detach
+            csetfile="/sys/fs/bcache/$(bcache-super-show "$nvme" | awk '/cset\.uuid/ {print $2}')/unregister"
+            [ -e "$csetfile" ] && \
+                echo 1 > "$csetfile"
+            [ -e /sys/block/$bcache/bcache/stop ] && \
+                echo 1 >/sys/block/$bcache/bcache/stop
             if lsblk -pln -o fstype $hddpart | grep -q bcache; then
                 # Rebuild partition
                 start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $3 }')
@@ -114,7 +119,7 @@ case $WK in
                 starts=$((start_num + 16))s
                 ends=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $4 }')
                 # parted $hdd 'unit s' print
-                sfdisk -d $hdd >~/partiton_backup_$(date +"%Y%m%d_%H.%M")
+                sfdisk -d $hdd >~/partiton_CachBk_$(date +"%Y%m%d_%H.%M")
                 parted --script $hdd rm ${hddpart:0-1} >/dev/null 2>&1
                 parted --script $hdd mkpart primary xfs $starts $ends
             fi
