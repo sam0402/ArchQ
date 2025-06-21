@@ -21,8 +21,9 @@ case $WK in
     C)
         # [ "$1" = "nvme" ] && hddlst=$(lsblk -dplnx size -o name,size | grep -E "sd|nvme" | tac) || \
         hddlst=$(lsblk -dplnx size -o name,size | grep "sd" | tac)
+        [[ -z $hddlst ]] && (echo "No HDD storage device was detected."; exit 1 )
         nvmelst=$(lsblk -dplnx size -o name,size | grep "nvme" | tac)
-        [[ -z $nvmelst ]] && (echo "No SSD or NVMe storage device was detected." ; exit 1 )
+        [[ -z $nvmelst ]] && (echo "No SSD or NVMe storage device was detected."; exit 1 )
         # Select HDD partiton
         hdd=$(dialog --stdout --title "Bache create" --menu "Select HDD" 7 0 0 $hddlst) || exit 1
         clear
