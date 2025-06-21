@@ -80,7 +80,7 @@ case $options in
         /usr/bin/kernel-cfg.sh $KVER
         ;;
     M)
-        cd ~; /usr/bin/partimnt-cfg.sh $KVER; cd -
+        cd ~; /usr/bin/partimnt-cfg.sh $KVER; cd - >/dev/null 2>&1
         ;;
     N)
         /usr/bin/nfs-cfg.sh $KVER
@@ -116,7 +116,7 @@ case $options in
         /usr/bin/desktop-cfg.sh $KVER
         ;;
     Y)
-        cd ~; /usr/bin/bcache-cfg.sh $KVER; cd -
+        cd ~; /usr/bin/bcache-cfg.sh $KVER; cd - >/dev/null 2>&1
         ;;
     Z)
         /usr/bin/zerowipe.sh $KVER
