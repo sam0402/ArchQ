@@ -10,8 +10,8 @@ if ! pacman -Q bcache-tools >/dev/null 2>&1; then
     echo -e "\nThe system will reboot in 5 seconds.\nAfter that, please go to Config → BCache again."
     for i in {5..1}
     do
-        tput cup 1 25
-        echo -n "$i"
+        # tput cup 1 25
+        echo -n ".$i"
         sleep 1
     done
     reboot
@@ -19,8 +19,8 @@ fi
 
 case $WK in
     C)
-        [ $1 = nvme ] && hddlst=$(lsblk -dplnx size -o name,size | grep -E "sd|nvme" | tac) || \
-                        hddlst=$(lsblk -dplnx size -o name,size | grep "sd" | tac)
+        # [ "$1" = "nvme" ] && hddlst=$(lsblk -dplnx size -o name,size | grep -E "sd|nvme" | tac) || \
+        hddlst=$(lsblk -dplnx size -o name,size | grep "sd" | tac)
         nvmelst=$(lsblk -dplnx size -o name,size | grep "nvme" | tac)
         [[ -z $nvmelst ]] && (echo "No SSD or NVMe storage device was detected." ; exit 1 )
         # Select HDD partiton
