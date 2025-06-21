@@ -1,8 +1,9 @@
 #!/bin/bash
 c_red_b=$'\e[1;38;5;196m'
+c_gray=$'\e[0;37m'
 c_write=$'\e[m'
-
 cd ~
+
 WK=$(dialog --stdout --title "ArchQ BCache $1" \
             --menu "!! Caution !! Back up your data before use." 8 0 0 C Create R Remove) || exit 1
 clear
@@ -89,7 +90,7 @@ case $WK in
         # Build Bcache
         sleep 5
         bcache=$(lsblk -pln -o name "$newpart" | grep bcache | cut -d'/' -f3)
-        echo --- $bcache ---
+        echo -e ${c_gray}"\n--- Create $bcache ---"${c_write}
         lsblk -pln -o fstype $nvmepart | grep -q bcache || (wipefs -af $nvmepart; make-bcache --writeback -C $nvmepart)
         sleep 1
         [ -e /sys/block/$bcache/bcache/attach ] && \
