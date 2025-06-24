@@ -342,6 +342,7 @@ arch-chroot /mnt pacman-key --init
 arch-chroot /mnt pacman-key --populate archlinux
 sed -i '84,85 s/^/#/' /mnt/etc/pacman.conf
 arch-chroot /mnt pacman -Sy
+arch-chroot /mnt pacman -R mympd
 
 ### Kernel
 echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
