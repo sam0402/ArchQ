@@ -32,7 +32,8 @@ case $server in
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 mL "Light: pcm, flac, dsd, cd" off \
-                mS "Stream: pcm, flac, mp3 radio" on \
+                mS "Stream: pcm, flac/mp3 radio" off \
+                mP "Streamp3: pcm, flac/mp3 radio, mp3 output" on \
                 mD "DStream: dsd +Stream" off \
                 mM "MPEG: +DStream, aac, alac" off ) || exit 1; clear
         ;;
@@ -40,7 +41,8 @@ case $server in
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 yL "Light: pcm, flac, dsd, cd" off \
-                yS "Stream: pcm, flac, mp3 radio" on \
+                yS "Stream: pcm, flac/mp3 radio" off \
+                yP "Streamp3: pcm, flac/mp3 radio, mp3 output" on \
                 yD "DStream: dsd +Stream" off \
                 yM "MPEG: +DStream, aac, alac" off ) || exit 1; clear
         ;;
@@ -48,7 +50,8 @@ case $server in
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
                 oL "Light: pcm, flac, dsd, cd" off \
-                oS "Stream: pcm, flac, mp3 radio" on \
+                oS "Stream: pcm, flac/mp3 radio" off \
+                oP "Streamp3: pcm, flac/mp3 radio, mp3 output" on \
                 oD "DStream: dsd +Stream" off \
                 oM "MPEG: +DStream, aac, alac" off ) || exit 1; clear
         ;;
@@ -96,7 +99,7 @@ case $server in
         systemctl enable --now roonserver
         ;;
     m?|y?|o?)
-        [ $cpus -ge 6 ] && isocpu="rcu_nocbs=$iso_1st "
+        isocpu="rcu_nocbs=0-$iso_1st "
         if ! grep -q 'eLo' /etc/rc.local; then
         sed -i '$d' /etc/rc.local
         cat >>/etc/rc.local <<EOF
@@ -120,6 +123,7 @@ EOF
 
         [[ $server =~ .L ]] && MPD=light || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
         [[ $server =~ .S ]] && MPD=stream
+        [[ $server =~ .P ]] && MPD=streamp3
         [[ $server =~ .D ]] && MPD=dstream
         [[ $server =~ .M ]] && MPD=ffmpeg
 
