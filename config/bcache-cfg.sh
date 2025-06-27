@@ -9,6 +9,7 @@ WK=$(dialog --stdout --title "ArchQ BCache $1" \
 clear
 
 if ! pacman -Q bcache-tools >/dev/null 2>&1; then
+    echo "Download bcache-tools ..."
     wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/bcache-tools-1.1-1-x86_64.pkg.tar.zst
     wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/parted-3.5-1-x86_64.pkg.tar.zst
     pacman -U --noconfirm /tmp/bcache-tools-1.1-1-x86_64.pkg.tar.zst /tmp/parted-3.5-1-x86_64.pkg.tar.zst
@@ -68,11 +69,11 @@ case $WK in
                 if [ "$work" = "true" ]; then
                     # parted $hdd 'unit s' print
                     newpartnum=$((prepartnum + 1))
-                    newpart=${hddpart::-1}${newpartnum}
+                    hddpart=${hddpart::-1}${newpartnum}
                     sfdisk -d $hdd >~/partiton_PreBk_$(date +"%Y%m%d_%H.%M")
                     parted --script $hdd rm ${hddpart:0-1}
                     parted --script $hdd mkpart primary xfs $starts $ends
-                    make-bcache -B $newpart
+                    make-bcache -B --force $hddpart
                 else
                     echo "Cannot create Bcache without erasing existing data."
                 fi
@@ -89,7 +90,7 @@ case $WK in
         esac
         # Build Bcache
         sleep 5
-        bcache=$(lsblk -pln -o name "$newpart" | grep bcache | cut -d'/' -f3)
+        bcache=$(lsblk -pln -o name "$hddpart" | grep bcache | cut -d'/' -f3)
         echo -e ${c_gray}"\n--- Create $bcache ---"${c_write}
         lsblk -pln -o fstype $nvmepart | grep -q bcache || (wipefs -af $nvmepart; make-bcache --writeback -C $nvmepart)
         sleep 1
