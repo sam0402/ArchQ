@@ -103,34 +103,37 @@ case $server in
         ;;
     MPD)
         server=$(dialog --stdout --title "ArchQ" \
-                --radiolist "Choose the MPD version to install" 7 0 0 \
-                mL "Light: pcm, flac, dsd, cd" off \
-                mS "Stream: pcm, flac/mp3 radio, flac output" off \
-                mP "Streamp3: pcm, flac/mp3 radio, mp3 output" on \
-                mD "DStream: dsd +Stream" off \
-                mM "MPEG: +DStream, aac, alac" off ) || exit 1
+                --radiolist "Select MPD version" 7 0 0 \
+                mU "Ultra Light: PCM, FLAC only; best SQ." off \
+                mL "Light: PCM, FLAC, DSD; plays CD." off \
+                mP "Streamp3: PCM, FLAC; MP3 radio; MP3 HTTP." on \
+                mS "Stream: PCM, FLAC; MP3 radio; FLAC HTTP." off \
+                mD "DStream: +DSD to the Stream version." off \
+                mM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
     myMPD)
         server=$(dialog --stdout --title "ArchQ" \
-                --radiolist "Choose the MPD version to install" 7 0 0 \
-                yL "Light: pcm, flac, dsd, cd" off \
-                yS "Stream: pcm, flac/mp3 radio, flac output" off \
-                yP "Streamp3: pcm, flac/mp3 radio, mp3 output" on \
-                yD "DStream: dsd +Stream" off \
-                yM "MPEG: +DStream, aac, alac" off ) || exit 1
+                --radiolist "Select MPD version" 7 0 0 \
+                yU "Ultra Light: PCM, FLAC only; best SQ." off \
+                yL "Light: PCM, FLAC, DSD; plays CD." off \
+                yP "Streamp3: PCM, FLAC; MP3 radio; MP3 HTTP." on \
+                yS "Stream: PCM, FLAC; MP3 radio; FLAC HTTP." off \
+                yD "DStream: +DSD to the Stream version." off \
+                yM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
     RompR)
         server=$(dialog --stdout --title "ArchQ" \
-                --radiolist "Choose the MPD version to install" 7 0 0 \
-                oL "Light: pcm, flac, dsd, cd" off \
-                oS "Stream: pcm, flac/mp3 radio, flac output" off \
-                oP "Streamp3: pcm, flac/mp3 radio, mp3 output" on \
-                oD "DStream: dsd +Stream" off \
-                oM "MPEG: +DStream, aac, alac" off ) || exit 1
+                --radiolist "Select MPD version" 7 0 0 \
+                oU "Ultra Light: PCM, FLAC only; best SQ." off \
+                oL "Light: PCM, FLAC, DSD; plays CD." off \
+                oP "Streamp3: PCM, FLAC; MP3 radio; MP3 HTTP." on \
+                oS "Stream: PCM, FLAC; MP3 radio; FLAC HTTP." off \
+                oD "DStream: +DSD to the Stream version." off \
+                oM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
     Player)
         player=$(dialog --stdout --title "ArchQ" \
-                --checklist "Choose the music player to install" 7 0 0 \
+                --checklist "Select a music player to install" 7 0 0 \
                 A Airplay off \
                 S Squeezelite off \
                 R Roonbridge off \
@@ -391,6 +394,7 @@ case $server in
         ;;
     m?|y?|o?)
         [ $cpus -ge 6 ] && isocpu="rcu_nocbs=$iso_1st "
+        [[ $server =~ .U ]] && MPD=ul
         [[ $server =~ .L ]] && MPD=light
         [[ $server =~ .S ]] && MPD=stream
         [[ $server =~ .P ]] && MPD=streamp3
@@ -398,7 +402,8 @@ case $server in
         [[ $server =~ .M ]] && MPD=ffmpeg
         echo -e "\n${c_blue_b}Install MPD-${MPD}...${c_gray}\n"
         # pacstrap /mnt fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms libid3tag ncmpcpp mpc python-mpd2 lua
-        [[ $server =~ .L ]] || pacstrap /mnt upmpdcli
+        [[ $MPD == ul || $MPD == light ]] || pacstrap /mnt upmpdcli
+
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
