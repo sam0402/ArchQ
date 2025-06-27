@@ -1,4 +1,8 @@
 #!/bin/bash
+c_red_b=$'\e[1;38;5;196m'
+c_gray=$'\e[0;37m'
+c_write=$'\e[m'
+
 mkgrub(){
     grub_cfg='/boot/grub/grub.cfg'
     part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
@@ -19,7 +23,8 @@ done <<< $(ip -o link show | awk '{print $2,$9}' | grep '^en\|^wlan' | sed 's/:/
 
 ifport=$(echo $ethers | cut -d ' ' -f1)
 
-systemctl is-active tailscaled >/dev/null 2>&1 && vpn=$(ip -o addr | grep tailscale0 | awk '{print $4}' | cut -d'/' -f1) || vpn="DOWN"
+vpn=$(ip -o addr | grep tailscale0 | awk '{print $4}' | cut -d'/' -f1)
+[[ -z $vpn ]] && vpn="DOWN"
 
 MENU='I "Static IP" D "DHCP"'
 if [ $(echo $ethers | wc -w) -gt 2 ]; then
@@ -35,7 +40,9 @@ if [[ ${ifport} == "Tailscale" ]]; then
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/tailscale-1.80.3-1-x86_64.pkg.tar.zst
             pacman -U --noconfirm /tmp/tailscale-1.80.3-1-x86_64.pkg.tar.zst
             systemctl enable --now tailscaled
+            echo -e ${c_gray}
             tailscale up
+            echo -e ${c_write}
             exit 0
         fi
         systemctl enable --now tailscaled
@@ -44,7 +51,7 @@ if [[ ${ifport} == "Tailscale" ]]; then
     fi
     sleep 3
     vpn=$(ip -o addr | grep tailscale0 | awk '{print $4}' | cut -d'/' -f1)
-    [[ $vpn == "" ]] && echo "Tailscale is DOWN." || echo "Tailscale IP: $vpn"
+    [[ -z $vpn ]] && echo "Tailscale is DOWN." || echo "Tailscale IP: $vpn"
     exit 0
 fi
 
