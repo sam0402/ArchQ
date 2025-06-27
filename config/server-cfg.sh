@@ -31,29 +31,32 @@ case $server in
     MPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                mL "Light: pcm, flac, dsd, cd" off \
-                mS "Stream: pcm, flac/mp3 radio, flac output" off \
-                mP "Streamp3: pcm, flac/mp3 radio, mp3 output" on \
-                mD "DStream: dsd +Stream" off \
-                mM "MPEG: +DStream, aac, alac" off ) || exit 1; clear
+                mU "Ultra Light: PCM, FLAC only; best SQ." off \
+                mL "Light: PCM, FLAC, DSD; plays CD." off \
+                mP "Streamp3: PCM, FLAC; MP3 radio; MP3 HTTP." on \
+                mS "Stream: PCM, FLAC; MP3 radio; FLAC HTTP." off \
+                mD "DStream: +DSD to the Stream version." off \
+                mM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
     myMPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                yL "Light: pcm, flac, dsd, cd" off \
-                yS "Stream: pcm, flac/mp3 radio, flac output" off \
-                yP "Streamp3: pcm, flac/mp3 radio, mp3 output" on \
-                yD "DStream: dsd +Stream" off \
-                yM "MPEG: +DStream, aac, alac" off ) || exit 1; clear
+                yU "Ultra Light: PCM, FLAC only; best SQ." off \
+                yL "Light: PCM, FLAC, DSD; plays CD." off \
+                yP "Streamp3: PCM, FLAC; MP3 radio; MP3 HTTP." on \
+                yS "Stream: PCM, FLAC; MP3 radio; FLAC HTTP." off \
+                yD "DStream: +DSD to the Stream version." off \
+                yM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
     RompR)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                oL "Light: pcm, flac, dsd, cd" off \
-                oS "Stream: pcm, flac/mp3 radio, flac output" off \
-                oP "Streamp3: pcm, flac/mp3 radio, mp3 output" on \
-                oD "DStream: dsd +Stream" off \
-                oM "MPEG: +DStream, aac, alac" off ) || exit 1; clear
+                oU "Ultra Light: PCM, FLAC only; best SQ." off \
+                oL "Light: PCM, FLAC, DSD; plays CD." off \
+                oP "Streamp3: PCM, FLAC; MP3 radio; MP3 HTTP." on \
+                oS "Stream: PCM, FLAC; MP3 radio; FLAC HTTP." off \
+                oD "DStream: +DSD to the Stream version." off \
+                oM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
 esac
 clear
@@ -120,12 +123,13 @@ fi
 
 EOF
     fi
-
-        [[ $server =~ .L ]] && MPD=light || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
+        [[ $server =~ .U ]] && MPD=ul
+        [[ $server =~ .L ]] && MPD=light
         [[ $server =~ .S ]] && MPD=stream
         [[ $server =~ .P ]] && MPD=streamp3
         [[ $server =~ .D ]] && MPD=dstream
         [[ $server =~ .M ]] && MPD=ffmpeg
+        [[ $MPD == ul || $MPD == light ]] || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
 
         if ! pacman -Q mpd-${MPD} >/dev/null 2>&1; then
             echo -e "\n${c_blue_b}Install MPD-${MPD} ...${c_gray}\n"
