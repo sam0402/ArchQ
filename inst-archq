@@ -413,7 +413,7 @@ case $server in
         # dependencies for owntone
         # pacstrap /mnt confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c
         arch-chroot /mnt pacman -U --noconfirm /root/owntone-28.10-2-x86_64.pkg.tar.zst /root/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
-        arch-chroot /mnt systemctl enable mpd
+        arch-chroot /mnt systemctl enable mpd mpd-plugin
         sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /mnt/etc/systemd/system/owntone.service
         sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /mnt/etc/systemd/system/owntone\@.service
         ### Install myMPD
