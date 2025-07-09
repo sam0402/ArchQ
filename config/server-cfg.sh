@@ -10,7 +10,7 @@ cpus=$(getconf _NPROCESSORS_CONF)
 iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
 
 servs=''
-pacman -Q lyrionmediaserver >/dev/null 2>&1 && servs+='lyrionmediaserver '
+pacman -Q lyrionmusicserver >/dev/null 2>&1 && servs+='lyrionmusicserver '
 pacman -Q mpd >/dev/null 2>&1 && servs+='mpd '
 pacman -Q mympd >/dev/null 2>&1 && servs+='mympd '
 pacman -Q roonserver >/dev/null 2>&1 && servs+='roonserver '
@@ -18,7 +18,7 @@ pacman -Q hqplayerd >/dev/null 2>&1 && servs+='hqplayerd '
 pacman -Q nginx >/dev/null 2>&1 && servs+='nginx php-fpm '
 
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
-        LMS "Lyrion Media Server" \
+        LMS "Lyrion Music Server" \
         MPD "MPD, Rigelian(iOS) | text-based client" \
         myMPD "MPD & myMPD web-based client" \
         RompR "MPD & RompR web-based client" \
@@ -66,22 +66,22 @@ case $server in
         /usr/bin/player-cfg.sh
         ;;
     LMS)
-        if ! pacman -Q lyrionmediaserver >/dev/null 2>&1; then
+        if ! pacman -Q lyrionmusicserver >/dev/null 2>&1; then
             isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
-            echo -e "\n${c_blue_b}Install Lyrion Media Server ...${c_gray}\n"
+            echo -e "\n${c_blue_b}Install Lyrion Music Server ...${c_gray}\n"
             pacman -S perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmediaserver-${lmsver}-x86_64.pkg.tar.xz
-            pacman -U --noconfirm /tmp/lyrionmediaserver-${lmsver}-x86_64.pkg.tar.xz
-            [ $cpus -ge 4 ] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /usr/lib/systemd/system/lyrionmediaserver.service
-            [ $cpus -ge 6 ] && pacman -Q squeezelite >/dev/null 2>&1 && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /usr/lib/systemd/system/lyrionmediaserver.service
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
+            pacman -U --noconfirm /tmp/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
+            [ $cpus -ge 4 ] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /usr/lib/systemd/system/lyrionmusicserver.service
+            [ $cpus -ge 6 ] && pacman -Q squeezelite >/dev/null 2>&1 && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /usr/lib/systemd/system/lyrionmusicserver.service
             sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
-            sed -i 's/novideo/novideo --charset=utf8/' /usr/lib/systemd/system/lyrionmediaserver.service
-            sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/lyrionmediaserver.service
+            sed -i 's/novideo/novideo --charset=utf8/' /usr/lib/systemd/system/lyrionmusicserver.service
+            sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/lyrionmusicserver.service
         fi
 
-        servs=${servs/lyrionmediaserver/}
+        servs=${servs/lyrionmusicserver/}
         systemctl disable --now $servs
-        systemctl enable --now lyrionmediaserver
+        systemctl enable --now lyrionmusicserver
         
         sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
         grub-mkconfig -o /boot/grub/grub.cfg
