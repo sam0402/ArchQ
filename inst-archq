@@ -88,7 +88,7 @@ fi
 player=N
 server=$(dialog --stdout --title "ArchQ" \
         --menu "Please select a music server or player" 7 0 0 \
-        LMS "Lyrion Media Server" \
+        LMS "Lyrion Music Server" \
         MPD "MPD, Rigelian(iOS) | text-based client" \
         myMPD "MPD & myMPD web-based client" \
         Roon "Roon Server" \
@@ -332,7 +332,7 @@ systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-j
 active=\$(head -n 1 /etc/srvmode.conf | awk -F= '{print \$2}')
 if [ ! \$active == '' ]; then
     service=\$(grep \$active /etc/srvmode.conf | awk -F: '{print \$2}' | \\
-        sed -e 's/\(.*\)/\L\1/;s/lms/lyrionmediaserver/;s/"hqplayer naa"/naa/;s/owntone/mtroom/;')
+        sed -e 's/\(.*\)/\L\1/;s/lms/lyrionmusicserver/;s/"hqplayer naa"/naa/;s/owntone/mtroom/;')
     for i in \$service; do
         sw \$i >/dev/null 2>&1
         sleep 0.2
@@ -372,14 +372,14 @@ iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
 ## server
 case $server in
     LMS)
-        echo -e "\n${c_blue_b}Install Lyrion Media Server ...${c_gray}\n"
-        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmediaserver-${lmsver}-x86_64.pkg.tar.xz
-        arch-chroot /mnt pacman -U --noconfirm /root/lyrionmediaserver-${lmsver}-x86_64.pkg.tar.xz
-        [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /mnt/usr/lib/systemd/system/lyrionmediaserver.service
-        [ $cpus -ge 6 ] && [[ $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /mnt/usr/lib/systemd/system/lyrionmediaserver.service
-        sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/lyrionmediaserver.service
-        sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/lyrionmediaserver.service
-        arch-chroot /mnt systemctl enable lyrionmediaserver
+        echo -e "\n${c_blue_b}Install Lyrion Music Server ...${c_gray}\n"
+        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
+        arch-chroot /mnt pacman -U --noconfirm /root/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
+        [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /mnt/usr/lib/systemd/system/lyrionmusicserver.service
+        [ $cpus -ge 6 ] && [[ $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /mnt/usr/lib/systemd/system/lyrionmusicserver.service
+        sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/lyrionmusicserver.service
+        sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/lyrionmusicserver.service
+        arch-chroot /mnt systemctl enable lyrionmusicserver
         ;;
     Roon)
         echo -e "\n${c_blue_b}Install Roon Server ...${c_gray}\n"
@@ -649,6 +649,7 @@ alias artist='kid3-cli -c "set artist '\''\$ARTIST'\''"'
 alias track='kid3-cli -c "set title '\''\$TRACK'\''"'
 alias genre='kid3-cli -c "set genre '\''\$GENRE'\''"'
 alias composer='kid3-cli -c "set composer '\''\$COMPOSER'\''"'
+alias rmcover='kid3-cli -c "set picture '\'''\''"'
 alias wipedir='function _f() { for i in {1..5}; do find "\$1" -exec scrub -Sp fillzero {} \\;; done; rm -rf "\$1"; } ; _f'
 alias hcp='function _f() { echo "\$1 >> \$2"; for i in {1..50}; do [ -z \$2 ] && break; nocache cp -a "\$1" "\$2";echo -n .\$((\$i*2));nocache cp -a "\$2"/"\$1" .;done; }; _f'
 alias fflac='function _f() { mkdir -p "\$2"/"\$1"; cp "\$1"/*.{pdf,jp*g} "\$2"/"\$1"; for i in "\$1"/*.flac; do ffmpeg -i "\$i" -vn -c:a flac -compression_level 1 -fflags +bitexact "\$2"/"\$i"; done; } ; _f'
