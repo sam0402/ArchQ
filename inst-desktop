@@ -86,7 +86,7 @@ desktop=LXDE
 server=$(dialog --stdout --title "ArchQ Desktop" \
     --menu "Select music server" 7 0 0 \
     MPD "MPD & myMPD web-based client" \
-    LMS "Lyrion Media Server" \
+    LMS "Lyrion Music Server" \
     None "Desktop only" ) || exit 1; clear
 ### select sound card
 scard="hw:0,0"
@@ -289,16 +289,16 @@ EOF
 ## server
 case $server in
     LMS)
-        echo -e "\n${c_blue_b}Install Lyrion Media Server ...${c_gray}\n"
-        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmediaserver-8.4.0-1-x86_64.pkg.tar.xz
-        arch-chroot /mnt pacman -U --noconfirm /root/lyrionmediaserver-8.4.0-1-x86_64.pkg.tar.xz
-        sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/lyrionmediaserver.service
-        sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/lyrionmediaserver.service
-        arch-chroot /mnt systemctl enable lyrionmediaserver
+        echo -e "\n${c_blue_b}Install Lyrion Music Server ...${c_gray}\n"
+        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver-8.4.0-1-x86_64.pkg.tar.xz
+        arch-chroot /mnt pacman -U --noconfirm /root/lyrionmusicserver-8.4.0-1-x86_64.pkg.tar.xz
+        sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/lyrionmusicserver.service
+        sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/lyrionmusicserver.service
+        arch-chroot /mnt systemctl enable lyrionmusicserver
         cat >>/mnt/home/$user/Desktop/lms.desktop <<EOF
 [Desktop Entry]
 Encoding=UTF-8
-Name=Lyrion Media Server
+Name=Lyrion Music Server
 Type=Link
 URL=http://localhost:9000/
 Icon=text-html
