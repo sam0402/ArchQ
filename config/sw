@@ -35,8 +35,8 @@ case $1 in
 		service='mympd '$MPD
 		;;
 	lms)
-		serv=logitechmediaserver
-		service='logitechmediaserver squeezelite'
+		serv=logitechmusicserver
+		service='logitechmusicserver squeezelite'
 		;;
 	hqe)
 		serv=hqplayerd
