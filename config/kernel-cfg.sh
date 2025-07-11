@@ -1,9 +1,14 @@
 #!/bin/bash
+
 config='/etc/fstab'
 grub_cfg='/boot/grub/grub.cfg'
+
+c_blue_b=$'\e[1;38;5;27m'
+c_gray=$'\e[m'
+
 pacman -Q ramroot >/dev/null 2>&1 || ramroot='R Ramroot'
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select command" 7 0 0 B Boot I Install M Remove $ramroot F Frequency) || exit 1; clear
+            --menu "Select a command" 7 0 0 B Boot I Install M Remove $ramroot F Frequency P @P5801x) || exit 1; clear
 
 mkgrub(){
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
@@ -18,19 +23,52 @@ mkgrub(){
 
 case $WK in
     I)
-        exec='dialog --stdout --title "ArchQ '$1'" --menu "Select to install" 7 0 0 '
+        exec='dialog --stdout --title "ArchQ '$1'" --menu "Select an item to install" 7 0 0 '
         while read line; do
             ver=$(echo $line | awk -F: '{print $1}')
             info=$(echo $line | awk -F: '{print $2}')
             exec+=$ver' '\"$info\"' '
         done <<< $(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/kver)
         options=$(eval $exec) || exit 1; clear
-
+        pacman -Q alsa-lib | grep -q '\-5' && exec+='ALSA-lib @Seagate '
+        options=$(eval $exec) || exit 1; clear
+        if [ "$options" == "ALSA-lib" ]; then
+            echo -e "${c_blue_b}Install ALSA-lib @Seagate...${c_gray}"
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /tmp/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
+            exit 0
+        fi
         if [ -n $options ]; then
             ver=$(echo $options | cut -d '-' -f 1)
             kver=$(echo $options | cut -d '-' -f 2-3)
-            echo "Install Kernel ${ver}-${kver}..."
+            echo -e "${c_blue_b}Install Kernel ${ver}-${kver}...${c_gray}"
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ver}-${kver}-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /tmp/linux-${ver}-${kver}-x86_64.pkg.tar.zst
+        fi
+        pacman -Q ramroot >/dev/null 2>&1 && ramroot -E
+        rm /boot/*-fallback.img
+        mkgrub
+        ;;
+    P)
+        exec='dialog --stdout --title "ArchQ @P5801x '$1'" --menu "Select an item to install" 7 0 0 '
+        while read line; do
+            ver=$(echo $line | awk -F: '{print $1}')
+            info=$(echo $line | awk -F: '{print $2}')
+            exec+=$ver' '\"$info\"' '
+        done <<< $(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/kver)
+        pacman -Q alsa-lib | grep -q '\-3' && exec+='ALSA-lib @P5801x '
+        options=$(eval $exec) || exit 1; clear
+        if [ "$options" == "ALSA-lib" ]; then
+            echo -e "${c_blue_b}Install ALSA-lib @P5801x...${c_gray}"
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/alsa-lib-1.1.9-5-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /tmp/alsa-lib-1.1.9-5-x86_64.pkg.tar.zst
+            exit 0
+        fi
+        if [ -n $options ]; then
+            ver=$(echo $options | cut -d '-' -f 1)
+            kver=$(echo $options | cut -d '-' -f 2-3)
+            echo -e "${c_blue_b}Install Kernel ${ver}-${kver}...${c_gray}"
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/linux-${ver}-${kver}-x86_64.pkg.tar.zst
             pacman -U --noconfirm /tmp/linux-${ver}-${kver}-x86_64.pkg.tar.zst
         fi
         pacman -Q ramroot >/dev/null 2>&1 && ramroot -E
@@ -43,7 +81,7 @@ case $WK in
         done <<< $(pacman -Q | grep linux-[DQ] | grep -v headers)
         options=$(dialog --stdout \
                 --title "ArchQ $1" \
-                --menu "Select to remove" 7 0 0 $menu) || exit 1; clear
+                --menu "Select a kernel to remove" 7 0 0 $menu) || exit 1; clear
         echo Rmove Kernel Q1xx ...
         pacman -R ${options}
         mkgrub
@@ -71,7 +109,7 @@ case $WK in
         mkgrub
         ;;
     F)
-        dialog --stdout --title "ArchQ $1" --infobox "\n\n    Wait for 10 seconds..." 7 35
+        # dialog --stdout --title "ArchQ $1" --infobox "\n\n    Wait for 10 seconds..." 7 35[]
         cpus=$(getconf _NPROCESSORS_ONLN)
         l1=$(cat /proc/interrupts | grep tick); sleep 10; l2=$(cat /proc/interrupts | grep tick)
         count='\n'
@@ -83,6 +121,6 @@ case $WK in
             [ -f /usr/bin/python ] && count+=$(python -c "print(round(($t2-$t1)/10000.0),1)" | sed 's/ /./')'\n' \
                                 || count+=$(expr $t2 / 10000 - $t1 / 10000)'\n'
         done
-        dialog --stdout --title "ArchQ $1" --msgbox "\nKernel working frequency: $count" $(expr $cpus + 6) 35; clear
+        dialog --stdout --title "ArchQ $1" --msgbox "\nKernel frequency: $count" $(expr $cpus + 6) 35; clear
         ;;
 esac
