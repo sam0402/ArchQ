@@ -29,12 +29,11 @@ case $WK in
             info=$(echo $line | awk -F: '{print $2}')
             exec+=$ver' '\"$info\"' '
         done <<< $(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/kver)
-        options=$(eval $exec) || exit 1; clear
         pacman -Q alsa-lib | grep -q '\-5' && exec+='ALSA-lib @Seagate '
         options=$(eval $exec) || exit 1; clear
         if [ "$options" == "ALSA-lib" ]; then
             echo -e "${c_blue_b}Install ALSA-lib @Seagate...${c_gray}"
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
             pacman -U --noconfirm /tmp/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
             exit 0
         fi
