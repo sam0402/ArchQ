@@ -66,7 +66,7 @@ case $WK in
         if [ -n $options ]; then
             ver=$(echo $options | cut -d '-' -f 1)
             kver=$(echo $options | cut -d '-' -f 2-3)
-            echo -e "${c_blue_b}Install Kernel ${ver}-${kver}@P5801x ...${c_gray}"
+            echo -e "${c_blue_b}Install Kernel ${ver}-${kver} @P5801x ...${c_gray}"
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/linux-${ver}-${kver}-x86_64.pkg.tar.zst
             pacman -U --noconfirm /tmp/linux-${ver}-${kver}-x86_64.pkg.tar.zst
         fi
