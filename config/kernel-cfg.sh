@@ -38,11 +38,9 @@ case $WK in
             exit 0
         fi
         if [ -n $options ]; then
-            ver=$(echo $options | cut -d '-' -f 1)
-            kver=$(echo $options | cut -d '-' -f 2-3)
-            echo -e "${c_blue_b}Install Kernel ${ver}-${kver}...${c_gray}"
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ver}-${kver}-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /tmp/linux-${ver}-${kver}-x86_64.pkg.tar.zst
+            echo -e "${c_blue_b}Install kernel ${options}...${c_gray}"
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${options}-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /tmp/linux-${options}-x86_64.pkg.tar.zst
         fi
         pacman -Q ramroot >/dev/null 2>&1 && ramroot -E
         rm /boot/*-fallback.img
@@ -64,11 +62,9 @@ case $WK in
             exit 0
         fi
         if [ -n $options ]; then
-            ver=$(echo $options | cut -d '-' -f 1)
-            kver=$(echo $options | cut -d '-' -f 2-3)
-            echo -e "${c_blue_b}Install Kernel ${ver}-${kver} @P5801x ...${c_gray}"
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/linux-${ver}-${kver}-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /tmp/linux-${ver}-${kver}-x86_64.pkg.tar.zst
+            echo -e "${c_blue_b}Install kernel ${options} @P5801x ...${c_gray}"
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/linux-${options}-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /tmp/linux-${options}-x86_64.pkg.tar.zst
         fi
         pacman -Q ramroot >/dev/null 2>&1 && ramroot -E
         rm /boot/*-fallback.img
@@ -81,7 +77,7 @@ case $WK in
         options=$(dialog --stdout \
                 --title "ArchQ $1" \
                 --menu "Select a kernel to remove" 7 0 0 $menu) || exit 1; clear
-        echo Rmove Kernel Q1xx ...
+        echo -e "${c_blue_b}Remove kernel ${options}...${c_gray}"
         pacman -R ${options}
         mkgrub
         ;;
