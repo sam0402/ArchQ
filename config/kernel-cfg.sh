@@ -29,7 +29,7 @@ case $WK in
             info=$(echo $line | awk -F: '{print $2}')
             exec+=$ver' '\"$info\"' '
         done <<< $(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/kver)
-        pacman -Q alsa-lib | grep -q '\-5' && exec+='ALSA-lib @Seagate '
+        pacman -Q alsa-lib | grep -q '\-5' && ! pacman -Q xf86-video-fbdev >/dev/null 2>&1 && exec+='ALSA-lib @Seagate '
         options=$(eval $exec) || exit 1; clear
         if [ "$options" == "ALSA-lib" ]; then
             echo -e "${c_blue_b}Install ALSA-lib @Seagate...${c_gray}"
@@ -37,7 +37,7 @@ case $WK in
             pacman -U --noconfirm /tmp/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
             exit 0
         fi
-        if [ -n $options ]; then
+        if [ -n "$options" ]; then
             echo -e "${c_blue_b}Install kernel ${options}...${c_gray}"
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${options}-x86_64.pkg.tar.zst
             pacman -U --noconfirm /tmp/linux-${options}-x86_64.pkg.tar.zst
@@ -53,7 +53,7 @@ case $WK in
             info=$(echo $line | awk -F: '{print $2}')
             exec+=$ver' '\"$info\"' '
         done <<< $(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/kver)
-        pacman -Q alsa-lib | grep -q '\-3' && exec+='ALSA-lib @P5801x '
+        pacman -Q alsa-lib | grep -q '\-3' && ! pacman -Q xf86-video-fbdev >/dev/null 2>&1 && exec+='ALSA-lib @P5801x '
         options=$(eval $exec) || exit 1; clear
         if [ "$options" == "ALSA-lib" ]; then
             echo -e "${c_blue_b}Install ALSA-lib @P5801x...${c_gray}"
@@ -61,7 +61,7 @@ case $WK in
             pacman -U --noconfirm /tmp/alsa-lib-1.1.9-5-x86_64.pkg.tar.zst
             exit 0
         fi
-        if [ -n $options ]; then
+        if [ -n "$options" ]; then
             echo -e "${c_blue_b}Install kernel ${options} @P5801x ...${c_gray}"
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/linux-${options}-x86_64.pkg.tar.zst
             pacman -U --noconfirm /tmp/linux-${options}-x86_64.pkg.tar.zst
