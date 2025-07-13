@@ -63,16 +63,17 @@ case $WK in
                 else
                     prepartnum=$(parted $hdd 'unit s' print | grep -B 1 "^ ${hddpart:0-1}" | grep -v "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $2 }')
                     preends=$(parted $hdd 'unit s' print | grep "^ $prepartnum" | awk -F '[[:space:]]*' '{print $4}')
+                    preends_num=${preends%s}
                     [ -n "$starts" ] && [ -n "$preends_num" ] && [ "$start_num" -gt "$preends_num" ] && work=true
                 fi
                 # Rebuild parititon
                 if [ "$work" = "true" ]; then
                     # parted $hdd 'unit s' print
-                    newpartnum=$((prepartnum + 1))
-                    hddpart=${hddpart::-1}${newpartnum}
                     sfdisk -d $hdd >~/partiton_PreBk_$(date +"%Y%m%d_%H.%M")
                     parted --script $hdd rm ${hddpart:0-1}
                     parted --script $hdd mkpart primary xfs $starts $ends
+                    newpartnum=$((prepartnum + 1))
+                    hddpart=${hddpart::-1}${newpartnum}
                     make-bcache -B --force $hddpart
                 else
                     echo "Cannot create Bcache without erasing existing data."
