@@ -109,13 +109,12 @@ case $WK in
         nvme=$(lsblk -pn -o size,name | grep -B 1 bcache | grep nvme | sort -n | head -n 1 | awk -F '─' '{print $2}')
         if $(dialog --stdout --title "Remove Bcache" --yesno "\n  Remove $bcache ?" 7 0); then   
             umount /dev/$bcache >/dev/null 2>&1
-            [ -e /sys/block/$bcache/bcache/attach ] && \
+            if [ -e /sys/block/$bcache/bcache/attach ]; then
                 echo $(bcache-super-show $nvme | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/detach
-            csetfile="/sys/fs/bcache/$(bcache-super-show "$nvme" | awk '/cset\.uuid/ {print $2}')/unregister"
-            [ -e "$csetfile" ] && \
+                csetfile="/sys/fs/bcache/$(bcache-super-show "$nvme" | awk '/cset\.uuid/ {print $2}')/unregister"
                 echo 1 > "$csetfile"
-            [ -e /sys/block/$bcache/bcache/stop ] && \
                 echo 1 >/sys/block/$bcache/bcache/stop
+            fi
             if lsblk -pln -o fstype $hddpart | grep -q bcache; then
                 # Rebuild partition
                 start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{print $3}')
