@@ -36,6 +36,18 @@ case $WK in
         hdd=$(dialog --stdout --title "Create Bcache" --menu "Select a backing HDD/SSD" 7 0 0 $hddlst) || exit 1
         clear
         hddpartlst=$(lsblk -pln -o name,size,fstype $hdd | sed -e '1d;s/\s\+/ /g;s/\s/,/2')
+        if [ -z "$hddpartlst" ]; then
+            if dialog --stdout --title "No Partition" --yesno "\nNo partitions found on $hdd.\nCreate a partition using the whole disk?" 0 0; then
+                clear
+                parted --script $hdd mkpart BCache xfs 1MiB 100%
+                echo "Partition created on $hdd."
+                # Refresh partition list
+                hddpartlst=$(lsblk -pln -o name,size,fstype $hdd | sed -e '1d;s/\s\+/ /g;s/\s/,/2')
+            else
+                echo "No partition created. Exiting."
+                exit 1
+            fi
+        fi
         hddpart=$(dialog --stdout --title "Backing $hdd" --menu "Select a backing partition" 7 0 0 $hddpartlst) || exit 1
         if lsblk -pln -o fstype $hddpart | grep -q bcache; then
             data=B
@@ -80,9 +92,8 @@ case $WK in
                 fi
             ;;
             C)
-                yes=$(dialog --stdout --title "Create Bcache" --yesno "\n  This action will erase all data.\nDo you want to continue? $hddpart" 0 0) || exit 1
+                dialog --stdout --title "Create Bcache" --yesno "\n  This action will erase all data.\nDo you want to continue? $hddpart" 0 0 && wipefs -a $hddpart || exit 1
                 clear
-                $yes && wipefs -a $hddpart || exit 1
                 make-bcache -B $hddpart 
             ;;
             B)
