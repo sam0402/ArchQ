@@ -71,7 +71,7 @@ case $WK in
                     # parted $hdd 'unit s' print
                     sfdisk -d $hdd >~/partiton_PreBk_$(date +"%Y%m%d_%H.%M")
                     parted --script $hdd rm ${hddpart:0-1}
-                    parted --script $hdd mkpart primary xfs $starts $ends
+                    parted --script $hdd mkpart BCache xfs $starts $ends
                     newpartnum=$((prepartnum + 1))
                     hddpart=${hddpart::-1}${newpartnum}
                     make-bcache -B --force $hddpart
@@ -125,7 +125,7 @@ case $WK in
                 # parted $hdd 'unit s' print
                 sfdisk -d $hdd >~/partiton_CachBk_$(date +"%Y%m%d_%H.%M")
                 parted --script $hdd rm ${hddpart:0-1} >/dev/null 2>&1
-                parted --script $hdd mkpart primary xfs $starts $ends
+                parted --script $hdd mkpart Linux xfs $starts $ends
             fi
         fi
         echo -e ${c_red_b}"\nReboot now [Y/n]? "${c_write}
