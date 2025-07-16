@@ -1,7 +1,7 @@
 #!/bin/bash
 config='/etc/fstab'
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu " !!! HDD Zero Wipe !!! \n Will clean device data!" 8 0 0 W "Wipe disk" F "Format XFS")
+            --menu " !!! HDD Zero Wipe !!! \n Will clean device data!" 8 0 0 W "Wipe disk" F "Format disk")
 clear
 case $WK in
     W)
@@ -38,6 +38,8 @@ case $WK in
         partition=$(dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 $partitionlist) || exit 1; clear
         yes1=$(dialog --stdout --title "Format" --yesno "Partition $(echo $partition|cut -d/ -f3) to XFS" 0 0) || exit 1; clear
         yes2=$(dialog --stdout --title "Format XFS" --yesno "   All data will be erased!!!\n  Confirm to format the $(echo $partition|cut -d/ -f3)!!" 0 0) || exit 1; clear
-        [[ $yes1] && [$yes2 ]] && mkfs.xfs -f -d agcount=16 $partition
+        if [[ $yes1] && [$yes2 ]]; then
+            echo $partiton | grep -q nvme && mkfs.f2fs -f $partition || mkfs.xfs -f -d agcount=16 $partition
+        fi
         ;;
 esac
