@@ -1,0 +1,14 @@
+[Unit]
+Description=MPD Partition Proxy for %I
+After=network.target mpd.service
+Requires=mpd.service
+
+[Service]
+ExecStart=/bin/bash -c 'socat TCP-LISTEN:660${0::1},reuseaddr,fork \
+  SYSTEM:"({ echo partition ${0:1}; echo moveoutput Stream.800${0::1}; cat; } \
+  | socat - TCP:127.0.0.1:6600)"' '%I'
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
