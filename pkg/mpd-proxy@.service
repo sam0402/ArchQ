@@ -5,7 +5,7 @@ Requires=mpd.service
 
 [Service]
 ExecStart=/bin/bash -c 'socat TCP-LISTEN:660${0::1},reuseaddr,fork \
-  SYSTEM:"({ echo partition ${0:1}; echo moveoutput Stream.800${0::1}; echo enableoutput 0; cat; } \
+  SYSTEM:"({ echo newpartition ${0:1}; echo partition ${0:1}; echo moveoutput Stream.800${0::1}; echo enableoutput 0; cat; } \
   | socat - TCP:127.0.0.1:6600)"' '%I'
 Restart=always
 
