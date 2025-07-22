@@ -425,7 +425,7 @@ case $server in
         arch-chroot /mnt systemctl enable mpd mpd-plugin
         sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /mnt/etc/systemd/system/owntone.service
         sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /mnt/etc/systemd/system/owntone\@.service
-        curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-proxy-start.service >/mnt/usr/lib/systemd/system/mpd-proxy-start.service
+     #   curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-proxy-start.service >/mnt/usr/lib/systemd/system/mpd-proxy-start.service
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-proxy\@.service >/mnt/etc/systemd/system/mpd-proxy\@.service
         ### Install myMPD
         if [[ $server =~ y. ]]; then
