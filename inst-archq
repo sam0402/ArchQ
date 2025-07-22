@@ -164,47 +164,40 @@ mkboot(){
 
 # Foramt and install in one partition
 old_efi=''
-case $fmt in
-    P)
-        # Rebuild partition if EFI < 200MB
-        if [ $(lsblk $part_boot -pln -o size | tr -d [:alpha:]) -lt 200 ]; then
-            boot_start=$(parted $device 'unit s' print | grep "^ ${part_root:0-1}" | tail -1 | awk -F '[[:space:]]*' '{ print $3 }')
-            boot_end=$(expr ${boot_start::-1} + 524287)s
-            root_start=$(expr ${boot_start::-1} + 524288)s
-            parted --script "${device}" -- \
-                rm "${part_root:0-1}" \
-                mkpart EFI fat32 $boot_start $boot_end \
-                set "${part_root:0-1}" boot on \
-                mkpart ArchQ ext4 $root_start 100%
-            old_efi=$part_boot
-            part_boot=$part_root
-            part_root=$(ls ${device}* | grep -E "^${device}p?$((${part_root:0-1} + 1))$")
-            # Format boot partition (EFI/ESP)
-            mkboot
-        fi
-        ;;
-    E|U)
-        # Install in entire disk
-        [ $server = LMS ] && root_size=4500 || root_size=3500
-        root_end=$(( $root_size + 257 + 1 ))MiB
-        data_start=$(( $root_end + 16 ))KiB
-        parted --script "${device}" -- mklabel gpt \
-            mkpart EFI fat32 1Mib 257MiB \
-            set 1 boot on \
-            mkpart ArchQ ext4 257MiB ${root_end} \
-            mkpart Data ext4 ${data_start} 100%
-
-        part_boot="$(ls ${device}* | grep -E "^${device}p?1$")"
-        part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
+if [ $fmt = P ]; then
+    # Rebuild partition if EFI < 200MB
+    if [ $(lsblk $part_boot -pln -o size | tr -d [:alpha:]) -lt 200 ]; then
+        boot_start=$(parted $device 'unit s' print | grep "^ ${part_root:0-1}" | tail -1 | awk -F '[[:space:]]*' '{ print $3 }')
+        boot_end=$(expr ${boot_start::-1} + 524287)s
+        root_start=$(expr ${boot_start::-1} + 524288)s
+        parted --script "${device}" -- \
+            rm "${part_root:0-1}" \
+            mkpart EFI fat32 $boot_start $boot_end \
+            set "${part_root:0-1}" boot on \
+            mkpart ArchQ ext4 $root_start 100%
+        old_efi=$part_boot
+        part_boot=$part_root
+        part_root=$(ls ${device}* | grep -E "^${device}p?$((${part_root:0-1} + 1))$")
         # Format boot partition (EFI/ESP)
         mkboot
-        ;;
-    R)
-        # Retain music (partition 3)
-        part_boot="$(ls ${device}* | grep -E "^${device}p?1$")"
-        part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
-        mkboot
-esac
+    fi
+else
+    # Install in entire disk
+    [ $server = LMS ] && root_size=4500 || root_size=3500
+    root_end=$(( $root_size + 257 + 1 ))MiB
+    parted --script "${device}" -- mklabel gpt \
+        mkpart EFI fat32 1Mib 257MiB \
+        set 1 boot on \
+        mkpart ArchQ ext4 257MiB ${root_end} \
+        mkpart Data ext4 ${root_end} 100%
+
+    # Simple globbing was not enough as on one device I needed to match /dev/mmcblk0p1
+    # but not /dev/mmcblk0boot1 while being able to match /dev/sda1 on other devices.
+    part_boot="$(ls ${device}* | grep -E "^${device}p?1$")"
+    part_root="$(ls ${device}* | grep -E "^${device}p?2$")"
+    # Format boot partition (EFI/ESP)
+    mkboot
+fi
 
 # Wipe & format root partition
 for ((i=1; i <= $zerofill; i++))
