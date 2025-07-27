@@ -145,7 +145,6 @@ EOF
                 sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone.service
                 sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone\@.service
                 sed -i '$d' /etc/rc.local
-                curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-proxy-start.service >/usr/lib/systemd/system/mpd-proxy-start.service
                 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-proxy\@.service >/etc/systemd/system/mpd-proxy\@.service
             fi
             if [[ $server =~ y. ]]; then
