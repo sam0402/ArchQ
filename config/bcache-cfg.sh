@@ -27,10 +27,10 @@ mpc stop >/dev/null 2>&1
 case $WK in
     C)
         lsblk -dplnx size -o name | grep -q nvme1 \
-            && hddlst=$(lsblk -dplnx size -o name,size | sort -nr | grep -E "sd|nvme") \
-            || hddlst=$(lsblk -dplnx size -o name,size | sort -nr | grep "sd")
+            && hddlst=$(lsblk -dplnx size -o name,size | sort -n | grep -E "sd|nvme") \
+            || hddlst=$(lsblk -dplnx size -o name,size | sort -n | grep "sd")
         [[ -z $hddlst ]] && (echo "No HDD storage device was detected."; exit 1 )
-        nvmelst=$(lsblk -dplnx size -o name,size | sort -n | grep "nvme")
+        nvmelst=$(lsblk -dplnx size -o name,size | sort -nr | grep "nvme")
         [[ -z $nvmelst ]] && (echo "No SSD or NVMe storage device was detected."; exit 1 )
         # Select HDD partiton
         hdd=$(dialog --stdout --title "Create Bcache" --menu "Select a backing HDD/SSD" 7 0 0 $hddlst) || exit 1
