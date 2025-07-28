@@ -135,7 +135,7 @@ case $WK in
                 # parted $hdd 'unit s' print
                 sfdisk -d $hdd >~/partiton_CachBk_$(date +"%Y%m%d_%H.%M")
                 parted --script $hdd rm ${hddpart:0-1} >/dev/null 2>&1
-                parted --script $hdd mkpart Linux xfs $starts $ends
+                parted --script $hdd mkpart Linux xfs $starts $ends >/dev/null 2>&1
             fi
         fi
         echo -e ${c_red_b}"\nReboot now [Y/n]? "${c_write}
