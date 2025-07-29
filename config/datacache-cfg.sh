@@ -1,6 +1,6 @@
 #!/bin/bash
 serpath='/usr/lib/systemd/system/'
-service=("mpd" "lyrionmediaserver" "squeezelite" "shairport-sync" "owntone" "hqplayerd" "networkaudio")
+service=("mpd" "lyrionmusicserver" "squeezelite" "shairport-sync" "owntone" "hqplayerd" "networkaudio")
 nickname=("MPD" "LMS" "Squeezelite" "Airplay" "OwnTone" "HQPlayerEmbedded" "NAA")
 
 arrList=(); arrService=()
