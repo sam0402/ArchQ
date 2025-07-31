@@ -133,7 +133,7 @@ case $server in
         ;;
     Player)
         player=$(dialog --stdout --title "ArchQ" \
-                --checklist "Select a music player to install" 7 0 0 \
+                --checklist "Select a music player" 7 0 0 \
                 A Airplay off \
                 S Squeezelite off \
                 R Roonbridge off \
@@ -341,13 +341,6 @@ fi
 
 exit 0
 EOF
-
-arch-chroot /mnt sh -c 'yes | pacman -Scc'
-rm -rf /mnt/etc/pacman.d/gnupg
-arch-chroot /mnt pacman-key --init
-arch-chroot /mnt pacman-key --populate archlinux
-sed -i '84,85 s/^/#/' /mnt/etc/pacman.conf
-arch-chroot /mnt pacman -Sy
 
 ### Kernel
 echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
@@ -693,4 +686,11 @@ if [ -n "$old_efi" ]; then
 fi
 
 dialog --stdout --title "ArchQ" --pause "\n ArchQ has been installed.\nPlease unplug the USB drive.\n\nThe system will reboot in 10 seconds." 12 50 10; clear
+arch-chroot /mnt sh -c 'yes | pacman -Scc'
+rm -rf /mnt/etc/pacman.d/gnupg
+arch-chroot /mnt pacman-key --init
+arch-chroot /mnt pacman-key --populate archlinux
+sed -i '84,85 s/^/#/' /mnt/etc/pacman.conf
+arch-chroot /mnt pacman -Sy
+
 reboot
