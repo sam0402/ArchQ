@@ -64,7 +64,7 @@ if [ $fmt = P ]; then
     part_root=$(eval $partlst) || exit 1; clear
     part_boot=$(lsblk -pln -o name,parttypename | grep EFI | grep $device | awk 'NR==1 {print $1}')
 fi
-zerofill=1
+zerofill=0
 # zerofill=$(dialog --stdout --title "ArchQ" --inputbox "Wipe disk times" 0 30 0) || exit 1; clear
 # f2fs=$(dialog --stdout --title "ArchQ" --menu "Format ${device} file system" 8 0 0 F "F2FS (SSD,Flash)" X "XFS (HDD)") || exit 1; clear
 echo ${device} | grep -q 'nvme' && f2fs=F || f2fs=X
@@ -228,7 +228,7 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 [ -f /mnt/boot/${cpu}-ucode.img ] || pacstrap /mnt ${cpu}-ucode
 
 echo -e "\n${c_blue_b}Install Arch Linux package ...${c_gray}\n"
-pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
+pacstrap /mnt base linux-firmware grub efibootmgr mkinitcpio os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
         vim nano wget avahi sudo dialog cpupower lm_sensors ntp hdparm htop iwd nocache \
         which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
         fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb faad2 libmad \
@@ -274,12 +274,6 @@ arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime
 arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
 # echo "root:$password" | chpasswd --root /mnt
 arch-chroot /mnt sh -c "echo root:$password | chpasswd"
-arch-chroot /mnt mkinitcpio -p linux
-arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --removable --bootloader-id=$hostname
-arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
-
-echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
-[ $f2fs = X ] && sed -i 's/MODULES=()/MODULES=(xfs)/' /mnt/etc/mkinitcpio.conf
 
 ### Ethernet IP
 echo ......................
@@ -342,18 +336,27 @@ fi
 exit 0
 EOF
 
-### Kernel
-echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
-[ $cpu = amd ] && ker=Q308AMD
-[ $cpu = amd ] && kver='6.1.54-1'
-# [ $server = N ] && ker=${ker}w
-[ $fmt = U ] && ker=Q352WU
-[ $fmt = U ] && kver='6.6.17-12'
-arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+arch-chroot /mnt sh -c 'yes | pacman -Scc'
+rm -rf /mnt/etc/pacman.d/gnupg
+arch-chroot /mnt pacman-key --init
+arch-chroot /mnt pacman-key --populate archlinux
+sed -i '84,85 s/^/#/' /mnt/etc/pacman.conf
+arch-chroot /mnt pacman -Sy
+
+sed -i 's/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /mnt/etc/default/grub
 sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll rcu.blimit=0 relax_domain_level=0 skew_tick=0 nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime tsc=nowatchdog hpet=disable iomem=relaxed ipv6.disable=1 vsyscall=none/' \
 /mnt/etc/default/grub
-#thermal.off=1
+arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --removable --bootloader-id=$hostname
+
+echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
+[ $f2fs = X ] && sed -i 's/MODULES=()/MODULES=(xfs)/' /mnt/etc/mkinitcpio.conf
+
+### Kernel
+[ $cpu = amd ] && (ker=Q308AMD; kver='6.1.54-1')
+echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
+arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+arch-chroot /mnt mkinitcpio -p linux-Q352WU
 
 isocpu=''
 cpus=$(getconf _NPROCESSORS_CONF)
@@ -686,11 +689,4 @@ if [ -n "$old_efi" ]; then
 fi
 
 dialog --stdout --title "ArchQ" --pause "\n ArchQ has been installed.\nPlease unplug the USB drive.\n\nThe system will reboot in 10 seconds." 12 50 10; clear
-arch-chroot /mnt sh -c 'yes | pacman -Scc'
-rm -rf /mnt/etc/pacman.d/gnupg
-arch-chroot /mnt pacman-key --init
-arch-chroot /mnt pacman-key --populate archlinux
-sed -i '84,85 s/^/#/' /mnt/etc/pacman.conf
-arch-chroot /mnt pacman -Sy
-
 reboot

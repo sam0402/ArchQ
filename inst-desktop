@@ -153,7 +153,7 @@ echo -e "\n${c_blue_b}Install Arch Linux package ...${c_gray}\n"
 lxd=''
 [ $desktop = LXDE ] && lxd="lxdm noto-fonts-cjk midori cantata fcitx5-im fcitx5-configtool falkon lxde lxpanel"
 [ $desktop = LXQt ] && lxd="lxdm noto-fonts-cjk midori cantata fcitx5-im fcitx5-configtool falkon lxqt xdg-utils breeze-icons fcitx5-qt fcitx5-chewing fcitx5-mozc"
-pacstrap /mnt base linux linux-firmware grub efibootmgr os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
+pacstrap /mnt base linux-firmware grub efibootmgr mkinitcpio os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
         vim nano wget avahi sudo dialog cpupower lm_sensors ntp hdparm htop iwd nocache \
         which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
         fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmad \
@@ -191,12 +191,6 @@ arch-chroot /mnt ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime
 arch-chroot /mnt sh -c "echo $user:$password | chpasswd"
 # echo "root:$password" | chpasswd --root /mnt
 arch-chroot /mnt sh -c "echo root:$password | chpasswd"
-arch-chroot /mnt mkinitcpio -p linux
-arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --removable --bootloader-id=$hostname
-arch-chroot /mnt sed -i 's/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /etc/default/grub
-
-echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
-[ $f2fs = X ] && sed -i 's/MODULES=()/MODULES=(xfs)/' /mnt/etc/mkinitcpio.conf
 
 ### Ethernet IP
 echo ......................
@@ -212,7 +206,7 @@ else
     echo "Gateway=$ifgw" >>/mnt/etc/systemd/network/10-${ifport}.network
     echo "DNS=$ifgw $ifdns" >>/mnt/etc/systemd/network/10-${ifport}.network
 fi
-    arch-chroot /mnt systemctl enable systemd-networkd
+arch-chroot /mnt systemctl enable systemd-networkd
 
 ## Add Ethernet dectect to rc.local
 sed -i '$d' /mnt/etc/rc.local
@@ -235,13 +229,26 @@ sleep 1
 
 EOF
 
+arch-chroot /mnt sh -c 'yes | pacman -Scc'
+rm -rf /mnt/etc/pacman.d/gnupg
+arch-chroot /mnt pacman-key --init
+arch-chroot /mnt pacman-key --populate archlinux
+sed -i '84,85 s/^/#/' /mnt/etc/pacman.conf
+arch-chroot /mnt pacman -Sy
+
+sed -i 's/^#\?GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/;s/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' /mnt/etc/default/grub
+sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll rcu.blimit=0 relax_domain_level=0 skew_tick=0 nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime tsc=nowatchdog hpet=disable iomem=relaxed ipv6.disable=1 vsyscall=none/' \
+/mnt/etc/default/grub
+arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --removable --bootloader-id=$hostname
+
+echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mkinitcpio.conf
+[ $f2fs = X ] && sed -i 's/MODULES=()/MODULES=(xfs)/' /mnt/etc/mkinitcpio.conf
+
 ### Kernel
 echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-sed -i 's/loglevel=3/loglevel=0 nohz=off idle=poll rcu_nocb_poll nosmt noirqdebug no_timer_check clocksource=tsc tsc=reliable tsc=noirqtime tsc=nowatchdog hpet=disable iomem=relaxed ipv6.disable=1 vsyscall=none/' \
-/mnt/etc/default/grub
-arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+arch-chroot /mnt mkinitcpio -p linux-D44S
 
 ### Setup Desktop (LXDE || LXQt)
 echo "LANG=en_US.UTF-8" >/mnt/home/$user/.xinitrc
@@ -438,11 +445,4 @@ if [ -n "$old_efi" ]; then
 fi
 
 dialog --stdout --title "ArchQ Desktop" --pause "\n ArchQ has been installed.\nPlease unplug the USB drive.\n\nThe system will reboot in 10 seconds." 12 50 10; clear
-arch-chroot /mnt sh -c 'yes | pacman -Scc'
-rm -rf /mnt/etc/pacman.d/gnupg
-arch-chroot /mnt pacman-key --init
-arch-chroot /mnt pacman-key --populate archlinux
-sed -i '84,85 s/^/#/' /mnt/etc/pacman.conf
-arch-chroot /mnt pacman -Sy
-
 reboot
