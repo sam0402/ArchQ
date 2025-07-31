@@ -122,7 +122,7 @@ if [ $fmt = P ]; then
     fi
 else
     # Install in entire disk
-    [ $server = LMS ] && root_size=6800 || root_size=5800
+    [ $server = LMS ] && root_size=6144 || root_size=5120
     root_end=$(( $root_size + 257 + 1 ))MiB
   parted --script "${device}" -- mklabel gpt \
         mkpart EFI fat32 1Mib 385MiB \
