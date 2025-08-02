@@ -41,7 +41,8 @@ brow_mtp(){
 MENU=''
 pacman -Q mympd >/dev/null 2>&1 && MENU+='M "myMPD :80" '
 pacman -Q rompr >/dev/null 2>&1 && MENU+='R "RompR :6660" '
-exec='dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 '$MENU'C "Cantata :8080" N "Ncmpcpp | Rigelian(iOS)"'
+pacman -Q mpd-streamp3 >/dev/null 2>&1 && MENU+='U "Multi user" '
+exec='dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 C "Cantata :8080" N "Ncmpcpp | Rigelian(iOS)" '$MENU''
 client=$(eval $exec)|| exit 1
 clear
 case $client in
@@ -67,37 +68,20 @@ case $client in
         pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd php-fpm
         systemctl enable --now mpd nginx
         ;;
-    # U)
-        # if [[ ! -d /usr/share/mpd ]]; then
-        #     curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_config.tar.gz | tar -xz -C /usr/share
-        #     curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/mpdconf >/usr/bin/mpdconf
-        #     chmod +x /usr/bin/mpdconf
-        # fi
-        # users=$(dialog --stdout --title "ArchQ MPD multi" --inputbox "Add users" 0 25 0) || exit 1; clear
-        # num=$(grep 'mpd' /etc/passwd | wc -l)
-        # users=$(( $users + $num - 1 ))
+    U)
         # Httpd stream multi user
-        # for ((i=$num; i <= $users; i++))
-        # do
-        #     useradd -mU "mpd$i"
-        #     sh -c "echo mpd$i:mpd | chpasswd"
-        #     mkdir -p /home/mpd$i/.config
-        #     cp -a /usr/share/mpd /home/mpd$i/.config
-        #     chown -R mpd$i: /home/mpd$i/.config
-        #     port=$(( $(id -u mpd$i) + 5600 ))
-        #     sed -i 's/port.*"/port\t"'"$port"'"/' /home/mpd$i/.config/mpd/mpd.conf
-        #     sport=$(( $(id -u mpd$i) + 7000 ))
-        #     sed -i 's/port.*"/port\t"'"$sport"'"/' /home/mpd$i/.config/mpd/httpd.out
-        #     ln -s /usr/lib/systemd/user/mpd.service /usr/lib/systemd/user/mpd$i.service
-        #     cp /usr/lib/systemd/user/mpd.socket /usr/lib/systemd/user/mpd$i.socket
-        #     sed -i 's/ListenStream=6600/ListenStream='"$port"'/' /usr/lib/systemd/user/mpd$i.socket
-        #     systemctl enable --now avahi-daemon
-            # systemctl --user -M mpd$i@ enable mpd$i.socket
-            # echo "User mpd$i's control port: $port, stream port: $sport"
-        # done
-        # echo "Use command 'mpdcfg mpd[$num-$users]' to configure."
-        # exit 1
-        # ;;
+        max=$(ls /etc/systemd/system/multi-user.target.wants/ | grep mpd-proxy | grep -oP '(?<=@)[0-9]' | \
+            awk '{max=$1; for(i=2;i<=NF;i++) if($i>max) max=$i; print max}')
+        new=$((max + 1)); port=800${new}
+        user=$(dialog --stdout --title "ArchQ MPD User" --inputbox "Add user name" 0 25) || exit 1; clear
+
+        cp /etc/mpd.d/httpd.out /etc/mpd.d/${port}.out
+        sed -i 's/mp3/'"$port"'/;s/port.*"/port\t"'"$port"'"/' /etc/mpd.d/${port}.out
+        grep -q ${port} $config && echo "include_optional \"mpd.d/${port}.out\"" >>$config
+        systemctl enable mpd-proxy@${new}${user}
+        echo "User $user's stream port: $port"
+        exit 1
+        ;;
 esac
 
 # ### Select sound device
@@ -224,8 +208,8 @@ if [[ $h1 == on ]]; then
     sed -i 's/^#.\?include_optional "mpd.d\/httpd.out"/include_optional "mpd.d\/httpd.out"/' $config
     http_flac=off; http_wave=off; http_lame=off
     declare http_$(cat $ht_conf | grep 'encoder' $2 | cut -d'"' -f2)=on
-    MENU='flac 　 '$http_flac' wave 　 '$http_wave
-    pacman -Q mpd-ffmpeg >/dev/null 2>&1 && MENU=${MENU}' mp3 　 '$http_lame
+    pacman -Q mpd-streamp3 && MENU='mp3 　 '$http_lame' wave 　 '$http_wave || MENU='flac 　 '$http_flac' wave 　 '$http_wave
+    pacman -Q mpd-ffmpeg && MENU=${MENU}' mp3 　 '$http_lame
     encoder=$(dialog --stdout --title "ArchQ MPD" --radiolist "Http:8000 codec" 7 0 0 $MENU) || exit 1
     clear
     sed -i 's/name.*"/name\t"'"Stream.$encoder"'"/' $ht_conf
