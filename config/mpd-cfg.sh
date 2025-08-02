@@ -70,18 +70,40 @@ case $client in
         ;;
     U)
         # Httpd stream multi user
-        max=$(ls /etc/systemd/system/multi-user.target.wants/ | grep mpd-proxy | grep -oP '(?<=@)[0-9]' | \
-            awk '{max=$1; for(i=2;i<=NF;i++) if($i>max) max=$i; print max}')
-        new=$((max + 1)); port=800${new}
-        user=$(dialog --stdout --title "ArchQ MPD User" --inputbox "Add user name" 0 25) || exit 1; clear
+        new=$(ls /etc/systemd/system/multi-user.target.wants/ | grep 'mpd-proxy@' | grep -oP '(?<=@)[0-9]+' |
+            awk 'BEGIN{max=0} {if($1>max) max=$1} END{print max+1}')
+        port=800${new}
+        proxys=$(ls /etc/systemd/system/multi-user.target.wants/ | grep 'mpd-proxy')
+        ls /etc/systemd/system/multi-user.target.wants/mpd-proxy@*.service >/dev/null 2>&1 && RM='R Remove '
+        exec="dialog --stdout --title 'ArchQ MPD' --menu 'Multi User' 7 0 0 A Add $RM"
+        WK=$(eval $exec)|| exit 1
+        case $WK in
+            A)
+                user=$(dialog --stdout --title "ArchQ MPD User" --inputbox "Add user name" 0 25) || exit 1; clear
 
-        cp /etc/mpd.d/httpd.out /etc/mpd.d/${port}.out
-        sed -i 's/mp3/'"$port"'/;s/port.*"/port\t"'"$port"'"/' /etc/mpd.d/${port}.out
-        grep -q ${port} $config && echo "include_optional \"mpd.d/${port}.out\"" >>$config
-        systemctl enable mpd-proxy@${new}${user}
-        echo "User $user's stream port: $port"
-        exit 1
+                cp /etc/mpd.d/httpd.out /etc/mpd.d/${port}.out
+                sed -i 's/mp3/'"$port"'/;s/port.*"/port\t"'"$port"'"/' /etc/mpd.d/${port}.out
+                grep -q ${port} $config && echo "include_optional \"mpd.d/${port}.out\"" >>$config
+                systemctl enable --now mpd-proxy@${new}${user}
+                echo "$user's MPD control port: 660$new; Stream port: $port"
+                ;;
+            R)
+                MENU=''
+                while read user; do
+                    MENU+=" \"$user\" \"\""
+                done <<< $(ls /etc/systemd/system/multi-user.target.wants/ | grep '^mpd-proxy@.*\.service$' | grep -oP '(?<=@).*(?=\.service)')
+                if ! [ $user == '' ]; then
+                    exec="dialog --stdout --title 'ArchQ MPD User' --menu 'Select user to remove' 7 0 0 $MENU"
+                    user=$(eval $exec)|| exit 1
+                    sed -i "/800${user:0:1}/d" $config
+                    systemctl disable --now mpd-proxy@${user}
+                    echo "MPD User ${user:1} is removed."
+                fi
+                ;;
+            esac
+        exit 0
         ;;
+        
 esac
 
 # ### Select sound device
