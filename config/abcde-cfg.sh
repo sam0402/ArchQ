@@ -86,6 +86,7 @@ sed -i 's/^#\?OFFSET=".*/OFFSET="'"$OFFSET"'"/' $config
 sed -i 's/^#\?CDSPEEDVALUE=".*/CDSPEEDVALUE="'"$CDSPEEDVALUE"'"/' $config
 sed -i 's/^#\?EJECTCD=.*/EJECTCD='"$EJECTCD"'/' $config
 sed -i 's/^#\?CLOSETRAY=.*/CLOSETRAY='"$CLOSETRAY"'/' $config
+sed -i 's/musicbrainz,//' $config
 [ $TAGS == 'y' ] && sed -i 's/^KID3CLI=".*/KID3CLI="kid3-cli"/' $config || sed -i 's/^KID3CLI=".*/KID3CLI=""/' $config
 
 [ -n "$ans" ] && ans=$(dialog --stdout --title "abCDe" --yesno "Reboot to work for abcde?" 0 0) || exit 1; clear
