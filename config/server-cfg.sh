@@ -33,8 +33,7 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 mU "Ultra Light: PCM, FLAC only; best SQ" off \
                 mL "Light: PCM, FLAC, DSD; plays CD" off \
-                mP "Streamp3: PCM, FLAC; MP3 radio; MP3 HTTP" on \
-                mS "Stream: PCM, FLAC; MP3 radio; FLAC HTTP" off \
+                mS "Stream: PCM, FLAC; MP3 radio; http:8000" on \
                 mD "DStream: +DSD to the Stream version" off \
                 mM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
@@ -43,8 +42,7 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 yU "Ultra Light: PCM, FLAC only; best SQ" off \
                 yL "Light: PCM, FLAC, DSD; plays CD" off \
-                yP "Streamp3: PCM, FLAC; MP3 radio; MP3 HTTP" on \
-                yS "Stream: PCM, FLAC; MP3 radio; FLAC HTTP" off \
+                yS "Stream: PCM, FLAC; MP3 radio; http:8000" on \
                 yD "DStream: +DSD to the Stream version" off \
                 yM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
@@ -53,8 +51,7 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 oU "Ultra Light: PCM, FLAC only; best SQ" off \
                 oL "Light: PCM, FLAC, DSD; plays CD" off \
-                oP "Streamp3: PCM, FLAC; MP3 radio; MP3 HTTP" on \
-                oS "Stream: PCM, FLAC; MP3 radio; FLAC HTTP" off \
+                oS "Stream: PCM, FLAC; MP3 radio; http:8000" on \
                 oD "DStream: +DSD to the Stream version" off \
                 oM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
@@ -126,7 +123,6 @@ EOF
         [[ $server =~ .U ]] && MPD=ul
         [[ $server =~ .L ]] && MPD=light
         [[ $server =~ .S ]] && MPD=stream
-        [[ $server =~ .P ]] && MPD=streamp3
         [[ $server =~ .D ]] && MPD=dstream
         [[ $server =~ .M ]] && MPD=ffmpeg
         [[ $MPD == ul || $MPD == light ]] || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
