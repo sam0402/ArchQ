@@ -41,7 +41,7 @@ brow_mtp(){
 MENU=''
 pacman -Q mympd >/dev/null 2>&1 && MENU+='M "myMPD :80" '
 pacman -Q rompr >/dev/null 2>&1 && MENU+='R "RompR :6660" '
-pacman -Q mpd-streamp3 >/dev/null 2>&1 && MENU+='U "Multi user" '
+pacman -Q mpd-stream >/dev/null 2>&1 && MENU+='U "Multi user" '
 exec='dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 C "Cantata :8080" N "Ncmpcpp | Rigelian(iOS)" '$MENU''
 client=$(eval $exec)|| exit 1
 clear
@@ -230,8 +230,7 @@ if [[ $h1 == on ]]; then
     sed -i 's/^#.\?include_optional "mpd.d\/httpd.out"/include_optional "mpd.d\/httpd.out"/' $config
     http_flac=off; http_wave=off; http_lame=off
     declare http_$(cat $ht_conf | grep 'encoder' $2 | cut -d'"' -f2)=on
-    pacman -Q mpd-streamp3 && MENU='mp3 　 '$http_lame' wave 　 '$http_wave || MENU='flac 　 '$http_flac' wave 　 '$http_wave
-    pacman -Q mpd-ffmpeg && MENU=${MENU}' mp3 　 '$http_lame
+    pacman -Q mpd-ffmpeg || pacman -Q mpd-stream && MENU=' mp3 　 '$http_lame' flac 　 '$http_flac' wave 　 '$http_wave
     encoder=$(dialog --stdout --title "ArchQ MPD" --radiolist "Http:8000 codec" 7 0 0 $MENU) || exit 1
     clear
     sed -i 's/name.*"/name\t"'"Stream.$encoder"'"/' $ht_conf
