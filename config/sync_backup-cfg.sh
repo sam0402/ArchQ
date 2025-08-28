@@ -26,7 +26,8 @@ OP='rw'
 [ $FS = hfsplus ] && OP='rw,force,noatime'
 [ $FS = apfs ] && OP='readwrite'
 [ $FS = f2fs ] && OP='rw,noatime'
-[ $FS = xfs ] && OP='rw,noatime'
+[ $FS = exfat ] && OP='rw,noatime,iocharset=utf8'
+
 if [ $FS = ntfs ]; then
     FS=ntfs3; OP='iocharset=utf8'
 fi
