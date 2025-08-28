@@ -23,7 +23,7 @@ PT=$(echo $partdata | cut -d ' ' -f 1)
 FS=$(echo $partdata | cut -d ' ' -f 2)
 OP='rw' 
 [ $FS = ext4 ] && OP='defaults,noatime'
-[ $FS = hfsplus ] && OP='rw,force,noatime'
+[ $FS = hfsplus ] && OP='rw,force,noatime,nls=utf8'
 [ $FS = apfs ] && OP='readwrite'
 [ $FS = f2fs ] && OP='rw,noatime'
 [ $FS = exfat ] && OP='rw,noatime,iocharset=utf8'

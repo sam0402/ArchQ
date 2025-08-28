@@ -18,7 +18,7 @@ case $WK in
 
         OP='rw,noatime' 
         [ $FS = ext4 ] && OP+=',defaults'
-        [ $FS = hfsplus ] && OP+=',force'
+        [ $FS = hfsplus ] && OP+=',force,nls=utf8'
         if [ $FS = ntfs ]; then
             FS=ntfs3; OP+=',iocharset=utf8'
         fi
