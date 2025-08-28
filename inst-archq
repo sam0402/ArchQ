@@ -106,8 +106,7 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 mU "Ultra Light: PCM, FLAC only; best SQ" off \
                 mL "Light: PCM, FLAC, DSD; plays CD" off \
-                mP "Streamp3: PCM, FLAC; MP3 radio; MP3 HTTP" on \
-                mS "Stream: PCM, FLAC; MP3 radio; FLAC HTTP" off \
+                mS "Stream: PCM, FLAC; MP3 radio; http:8000" on \
                 mD "DStream: +DSD to the Stream version" off \
                 mM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
@@ -116,8 +115,7 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 yU "Ultra Light: PCM, FLAC only; best SQ" off \
                 yL "Light: PCM, FLAC, DSD; plays CD" off \
-                yP "Streamp3: PCM, FLAC; MP3 radio; MP3 HTTP" on \
-                yS "Stream: PCM, FLAC; MP3 radio; FLAC HTTP" off \
+                yS "Stream: PCM, FLAC; MP3 radio; http:8000" on \
                 yD "DStream: +DSD to the Stream version" off \
                 yM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
@@ -126,8 +124,7 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 oU "Ultra Light: PCM, FLAC only; best SQ" off \
                 oL "Light: PCM, FLAC, DSD; plays CD" off \
-                oP "Streamp3: PCM, FLAC; MP3 radio; MP3 HTTP" on \
-                oS "Stream: PCM, FLAC; MP3 radio; FLAC HTTP" off \
+                oS "Stream: PCM, FLAC; MP3 radio; http:8000" on \
                 oD "DStream: +DSD to the Stream version" off \
                 oM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
@@ -392,7 +389,6 @@ case $server in
         [[ $server =~ .U ]] && MPD=ul
         [[ $server =~ .L ]] && MPD=light
         [[ $server =~ .S ]] && MPD=stream
-        [[ $server =~ .P ]] && MPD=streamp3
         [[ $server =~ .D ]] && MPD=dstream
         [[ $server =~ .M ]] && MPD=ffmpeg
         echo -e "\n${c_blue_b}Install MPD-${MPD}...${c_gray}\n"
@@ -630,6 +626,7 @@ arch-chroot /mnt ln -s /usr/bin/config.sh /usr/bin/config
 cat >>/mnt/home/${user}/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
 export KVER=\$(uname -r | cut -d- -f3)
+PS1='[\u@\h:\[\e[${PSC}m\]$KVER\[\e[m\] \W]\$ '
 alias ...='cd ../../'
 alias dir='command ls -lSrah'
 alias egrep='egrep --color=auto'
@@ -667,7 +664,7 @@ arch-chroot /mnt chown -R ${user}: /home/${user}/.config
 cat >>/mnt/root/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
 export KVER=\$(uname -r | cut -d- -f3)
-PS1='[\u@\h:\e[0;\${PSC}m\$KVER\e[m \W]\$ '
+PS1='[\u@\h:\[\e[\${PSC}m\]\$KVER\[\e[m\] \W]\\\$ '
 alias ...='cd ../../'
 alias dir='command ls -lSrah'
 alias egrep='egrep --color=auto'
