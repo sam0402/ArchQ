@@ -119,7 +119,7 @@ max-lease-time 7200;
 authoritative;
 subnet 10.10.10.0 netmask 255.255.255.224 {
   range 10.10.10.10 10.10.10.20;
-  option routers 10.10.10.1;
+#  option routers 10.10.10.1;
   option broadcast-address 10.10.10.31;
   option domain-name-servers 10.10.10.1, 8.8.8.8;
 #  option domain-name "archq.local";
