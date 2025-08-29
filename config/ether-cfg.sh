@@ -16,7 +16,10 @@ mkgrub(){
 ifmask=24; ifdns=8.8.8.8; ifmtu=1500
 ethers=''
 while read -r line; do
-    echo $line | grep -q UP && line="${line%% *} ""$(ip -o addr| grep ${line%% *}| awk '{print $4}'| cut -d'/' -f1| head -n 1)"
+    if echo $line | grep -q UP; then
+        if_status=$(ip -o addr| grep ${line%% *}| awk '{print $4}'| cut -d'/' -f1| head -n 1)
+        [ -z $if_status ] && line="${line%% *} DHCP/NoIP" || line="${line%% *} ""$if_status"
+    fi
     ethers+=' '$line
 done <<< $(ip -o link show | awk '{print $2,$9}' | grep '^en\|^wlan' | sed 's/://')
 # ethers=$(ip -o link show | awk '{print $2,$9}' | grep '^en\|^wlan' | sed 's/://')
