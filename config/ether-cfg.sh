@@ -110,7 +110,7 @@ if [[ $ip == S ]]; then
     echo Name=${ifport} >>$config
     echo  >>$config
     echo [Network] >>$config
-    echo Address=10.10.10.0/27 >>$config
+    echo Address=10.10.10.1/27 >>$config
     echo Gateway=10.10.10.1 >>$config
 
     cat >/etc/dhcpd.conf <<EOF
