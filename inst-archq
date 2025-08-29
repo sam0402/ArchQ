@@ -626,7 +626,7 @@ arch-chroot /mnt ln -s /usr/bin/config.sh /usr/bin/config
 cat >>/mnt/home/${user}/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
 export KVER=\$(uname -r | cut -d- -f3)
-PS1='[\u@\h:\[\e[${PSC}m\]$KVER\[\e[m\] \W]\$ '
+PS1='[\u@\h:\[\e[${PSC}m\]$KVER\[\e[m\] \W]\$\$ '
 alias ...='cd ../../'
 alias dir='command ls -lSrah'
 alias egrep='egrep --color=auto'
