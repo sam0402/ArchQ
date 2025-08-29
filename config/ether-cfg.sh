@@ -126,7 +126,10 @@ subnet 10.10.10.0 netmask 255.255.255.224 {
 }
 EOF
     echo "Configure the ${ifport} as a DHCP server."
-    systemctl enable --now dhcpd4
+    systemctl enable dhcpd4
+    echo -n "Reboot to active DHCP Server [Y/n]?"
+    input=''; read input
+    [[ -z $input || $input = y ]] && reboot
     exit 0
 fi
 
