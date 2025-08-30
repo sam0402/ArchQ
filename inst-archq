@@ -652,8 +652,7 @@ alias hcp='function _f() { echo "\$1 >> \$2"; for i in {1..50}; do [ -z \$2 ] &&
 alias fflac='function _f() { mkdir -p "\$2"/"\$1"; cp "\$1"/*.{pdf,jp*g} "\$2"/"\$1"; for i in "\$1"/*.flac; do ffmpeg -i "\$i" -vn -c:a flac -compression_level 1 -fflags +bitexact "\$2"/"\$i"; done; } ; _f'
 alias dflac='function _f() { for d in "\$1"/*;do fflac "\$d" "\$2";done; }; _f'
 EOF
-sed -i 's/\\h/\\h:\\e[0\;${PSC}m$KVER\\e[m/' /mnt/home/${user}/.bashrc
-
+sed -i 's/\\h/\\h:\\[\\e[${PSC}m\\]$KVER\\[\\e[m\\]/' /mnt/home/${user}/.bashrc
 ## htop configure
 mkdir -p /mnt/root/.config/htop /mnt/home/${user}/.config/htop
 echo "screen:Main=PID USER PRIORITY NICE M_VIRT M_RESIDENT M_SHARE STATE PERCENT_CPU PERCENT_MEM TIME PROCESSOR COMM Command" >/mnt/root/.config/htop/htoprc
@@ -663,7 +662,7 @@ arch-chroot /mnt chown -R ${user}: /home/${user}/.config
 cat >>/mnt/root/.bashrc <<EOF
 \$(uname -r | grep -q Qrip) && PSC=36 || PSC=31
 export KVER=\$(uname -r | cut -d- -f3)
-PS1='[\u@\h:\e[0;\${PSC}m\$KVER\e[m \W]\$ '
+PS1='[\u@\h:\[\e[\${PSC}m\]\$KVER\[\e[m\] \W]\\$ '
 alias ...='cd ../../'
 alias dir='command ls -lSrah'
 alias egrep='egrep --color=auto'
