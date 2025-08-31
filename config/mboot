@@ -24,6 +24,3 @@ sudo sed -i '1s/Active=.*/Active='"${options[$input]}"'/' $config
 qboot=$(cat $config | sed '1d' | grep "${options[$input]}" | awk -F: '{print $3}')
 echo "ArchQ change to mode '${c_red_b}${options[$input]}'${c_write}."
 sudo qboot $qboot
-echo -n "Reboot now [Y/n]? "
-input=''; read input
-[[ -z $input || $input = y ]] && sudo reboot
