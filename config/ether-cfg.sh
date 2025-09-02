@@ -30,12 +30,11 @@ vpn=$(ip -o addr | grep tailscale0 | awk '{print $4}' | cut -d'/' -f1 | head -n 
 [[ -z $vpn ]] && vpn="DOWN"
 
 MENU='I "Static IP" D "DHCP"'
-if [ $(echo $ethers | wc -w) -gt 2 ]; then
-    MENU+=' S "DHCP Server" '
-    ifport=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select network device" 7 0 0 ${ethers} Tailscale ${vpn}) || exit 1; clear
-fi
+[ $(echo $ethers | wc -w) -gt 2 ] && MENU+=' S "DHCP Server" '
 
+ifport=$(dialog --stdout --title "ArchQ $1" \
+    --menu "Select network device" 7 0 0 ${ethers} Tailscale ${vpn}) || exit 1; clear
+    
 ### Tailscale setup
 if [[ ${ifport} == "Tailscale" ]]; then
     if ! systemctl is-active tailscaled >/dev/null 2>&1; then
