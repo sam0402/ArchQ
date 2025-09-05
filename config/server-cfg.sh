@@ -189,6 +189,7 @@ EOF
         # /usr/bin/mpd-cfg.sh
         usermod -aG optical mpd
         systemctl enable --now mpd
+        server=MPD
         ;;
     HQPE4|HQPE5)
         echo -e "\n${c_blue_b}Install HQPlayer Embedded${server:4:1}...${c_gray}\n"
