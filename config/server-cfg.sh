@@ -230,3 +230,4 @@ EOF
         systemctl enable --now hqplayerd
         ;;
 esac
+echo ${c_blue_b}${server}${c_gray}" is started."
