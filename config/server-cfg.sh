@@ -186,7 +186,7 @@ EOF
         ### Start mpd.. etc. service
         servs=${servs/mpd/}
         echo systemctl disable --now $servs mpd.socket
-        /usr/bin/mpd-cfg.sh
+        # /usr/bin/mpd-cfg.sh
         usermod -aG optical mpd
         systemctl enable --now mpd
         ;;
