@@ -39,7 +39,8 @@ case $WK in
         if [ -z "$hddpartlst" ]; then
             if dialog --stdout --title "No Partition" --yesno "\nNo partitions found on $hdd.\nCreate a partition using the whole disk?" 0 0; then
                 clear
-                parted --script $hdd mkpart BCache xfs 1MiB 100%
+                parted --script $hdd -- mklabel gpt \
+                    mkpart BCache xfs 1MiB 100%
                 echo "Partition created on $hdd."
                 # Refresh partition list
                 hddpartlst=$(lsblk -pln -o name,size,fstype $hdd | sed -e '1d;s/\s\+/ /g;s/\s/,/2')
