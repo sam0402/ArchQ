@@ -15,8 +15,11 @@ HEADERS = ({'User-Agent':
         'Accept-Language': 'en-US, en;q=0.5'})
 
 def track_titles(soup):
-    attrs = {'itemprop': 'name'}
-    return [div.text.strip() for div in soup.find_all('div', attrs=attrs)]
+    return [
+        div.get('title')
+        for div in soup.find_all('div', class_='track__items')
+        if div.get('title')
+    ]
 
 def track_artists(soup):
     attrs = {'class': 'track__item track__item--artist track__item--performer'}
@@ -27,8 +30,15 @@ def track_infos(soup):
     return [p.text.strip() for p in soup.find_all('p', attrs=attrs)]
 
 def album_metas(soup):
-    attrs = {'class': 'album-about__item album-about__item--link'}
-    return [a.text.strip() for a in soup.find_all('a', attrs=attrs)]
+    metas = {}
+    for li in soup.find_all('li', class_='album-about__item'):
+        text = li.get_text(separator=' ', strip=True)
+        if ':' in text:
+            key, value = text.split(':', 1)
+            key = key.strip()
+            value = ' '.join(a.get_text(strip=True) for a in li.find_all('a'))
+            metas[key] = value
+    return metas
 
 def track_nums(soup):
     attrs = {'class': 'track__item track__item--number'}
@@ -39,10 +49,10 @@ def track_nums(soup):
 #     return [span.text.strip() for span in soup.find_all('td', attrs=attrs)]
 
 def album_title(soup):
-    return soup.find('h1', attrs={'class':'album-meta__title'}).text
+    return soup.find('span', attrs={'class':'album-title'}).text
 
 def album_artist(soup):
-    return soup.find('span', attrs={'class':'album-meta__artist'}).text
+    return soup.find('span', attrs={'class':'artist-name'}).text
 
 def track_year(soup):
     return soup.find('li', attrs={'class':'album-meta__item'}).text
@@ -51,7 +61,11 @@ def album_cover(soup):
     return soup.find('img', attrs={'class':'album-cover__image'})
 
 def album_no(soup):
-    return soup.find('div', attrs={'class':'c-product-block__metadata'}).text if soup.find('div', attrs={'class':'c-product-block__metadata'}) else ''
+    for li in soup.find_all('li'):
+        strong = li.find('strong')
+        if strong and 'Catalogue No' in strong.get_text():
+            return li.get_text(strip=True).replace(strong.get_text(), '').strip()
+    return None
 
 # def album_description(soup):
 #     return soup.find('p', attrs={'class':'album-info__text'}).text
@@ -77,19 +91,16 @@ if __name__ == "__main__":
     metas = album_metas(soup)
     # durations = track_durations(soup)
     artist = album_artist(soup)
-    composer = metas[len(metas)-3].strip()
-    label = metas[len(metas)-2].strip().split()[0]
+    label = metas.get('Label', '').split(" ")[0]
     year = re.findall("\d+", track_year(soup))[-1]
     # description = album_description(soup)
 
     # Query Catalog No from Prestomusic
-    query = album + ' ' + artist + ' ' + label + ' FLAC'
+    query = album + ' ' + artist + ' ' + label
     catalogurl = "https://www.prestomusic.com/classical/search?search_query=" + urllib.parse.quote(query)
     catalog = requests.get(catalogurl, headers=HEADERS).content
     catalog_soup = BeautifulSoup(catalog, "lxml")
-    catalog_no = ''
-    if album_no(catalog_soup):
-        catalog_no = album_no(catalog_soup).strip().split("\n")[3].split(": ")[1]
+    catalog_no = album_no(catalog_soup)
 
 dbfile=glob.glob(rf"{args.workpath}/cddbread.0")[0]
 
@@ -104,10 +115,9 @@ with open(dbfile, "r+") as file:
 
     file.write(f"DTITLE={artist.strip()} / {album.strip()}\n")
     # file.write(f"COMPOSER={album.strip().split(':')[0]}\n")
-    file.write(f"DCOMPOSER={composer}\n")
+    file.write(f"DCOMPOSER={metas.get('Composer', '').strip()}\n")
     file.write(f"DYEAR={year}\n")
-    file.write(f"DGENRE={metas[-1].strip()}\n")
-    # print(f"DGENRE={metas[4].strip()}\n")
+    file.write(f"DGENRE={metas.get('Genre', '').strip()}\n")
     file.write(f"DCATALOGNO={catalog_no}\n")
 
     ### Track Name
@@ -116,24 +126,27 @@ with open(dbfile, "r+") as file:
         if num.strip() == '1':
             discount = discount + 1
         if discount == args.W:
-            file.write(f"TTITLE{int(num.strip())-1}=")
+            file.write(f"TTITLE{int(num.strip())-1}={title.strip()}\n")
             ## Multi Artists
-            if MULTI_ARTIST and len(t_artists) != 0:
-                file.write(f"{t_artists[i].strip()} / ")
-            file.write(f"{title.strip()}\n")
+            # if MULTI_ARTIST and len(t_artists) != 0:
+            #     file.write(f"{t_artists[i].strip()} / ")
+            # file.write(f"{title.strip()}\n")
             # print(f"TTITLE{num}={t_artist.strip()}\n")
 
     ### Composer
     discount = 0
     tcount = 0
-    for info, num in zip(infos[::2], nums ):
+    for info_text, num in zip(infos[::2], nums):
         if num.strip() == '1':
-            discount = discount + 1
+            discount += 1
+
         if discount == args.W:
-            for infoitem in info.strip().split(' - '):
-                if len(infoitem.strip().split(', ')) == 2 and infoitem.strip().split(', ')[1] == 'Composer':
-                    file.write(f"TCOMPOSER{int(num.strip())-1}={infoitem.strip().split(', ')[0].title()}\n")
-            tcount = tcount + 1
+            for infoitem in info_text.strip().split(' - '):
+                parts = [p.strip() for p in infoitem.split(', ', 1)]
+                if len(parts) == 2 and parts[1] == 'Composer':
+                    composer = parts[0]
+                    file.write(f"TCOMPOSER{int(num.strip())-1}={composer}\n")
+            tcount += 1
 
     ### EXTEND
     file.write(f"EXTD=\n")
