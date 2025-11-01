@@ -92,7 +92,7 @@ if __name__ == "__main__":
     # durations = track_durations(soup)
     artist = album_artist(soup)
     label = metas.get('Label', '').split(" ")[0]
-    year = re.findall("\d+", track_year(soup))[-1]
+    year = re.findall(r"\d+", track_year(soup))[-1]
     # description = album_description(soup)
 
     # Query Catalog No from Prestomusic
