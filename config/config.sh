@@ -102,7 +102,7 @@ case $options in
         curl -L https://raw.githubusercontent.com/sam0402/ArchQ/main/config/update_scpt.sh >/usr/bin/update_scpt.sh
         chmod +x /usr/bin/update_scpt.sh
         /usr/bin/update_scpt.sh
-        echo $git >/root/.update
+        echo $gitupd >/root/.update
         ;;
     V)
         /usr/bin/nfserver-cfg.sh $KVER
