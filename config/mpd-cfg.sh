@@ -60,7 +60,8 @@ case $client in
     N)
         pacman -Q ncmpcpp >/dev/null 2>&1 || (pacman -Sy --noconfirm archlinux-keyring ncmpcpp; yes | pacman -Scc >/dev/null 2>&1)
         systemctl disable --now nginx php-fpm avahi-daemon
-        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd php-fpm
+        pacman -Q mympd >/dev/null 2>&1 && pacman -R --noconfirm mympd php-fpm
+        systemctl enable --now mpd
         ;;
     C)  
         rm /etc/nginx/sites-enabled/rompr
