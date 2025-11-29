@@ -7,10 +7,7 @@ temp=$(sensors | grep 'Core 0' | awk '{print $3}')
 ipaddr=$(ip -o addr | grep en | awk 'NR == 1 {print $4}')
 MENU=''
 [[ "$gitupd" -gt "$num" || -z $num ]] && MENU+='U Update '
-pacman -Q mpd-ul >/dev/null 2>&1 && MENU+='D MPD '
-pacman -Q mpd-light >/dev/null 2>&1 && MENU+='D MPD '
-pacman -Q mpd-stream >/dev/null 2>&1 && MENU+='D MPD ' 
-pacman -Q mpd-ffmpeg >/dev/null 2>&1 && MENU+='D MPD ' 
+pacman -Q mpd >/dev/null 2>&1 && MENU+='D MPD '
 pacman -Q squeezelite >/dev/null 2>&1 && MENU+='S Squeezelite '
 pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='A Airplay '
 
