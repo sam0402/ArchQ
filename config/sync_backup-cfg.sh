@@ -39,5 +39,5 @@ yes=$(dialog --stdout --title "Synchronization Backup $1" \
  
 echo -e "Synchronization backup /mnt/$SOURCE to ${partition}${delmsg}."
 mount -t $FS -m -o $OP $partition /mnt/music_bk
-nocache rsync -avch $DEL --progress /mnt/$SOURCE/. /mnt/music_bk/.
+nocache rsync -avh $DEL --progress /mnt/$SOURCE/. /mnt/music_bk/.
 [[ $options =~ D ]] && umount /mnt/music_bk
