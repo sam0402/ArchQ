@@ -1,4 +1,6 @@
 #!/bin/bash
+
+tsver=1.90.9-1
 c_red_b=$'\e[1;38;5;196m'
 c_gray=$'\e[0;37m'
 c_write=$'\e[m'
@@ -39,8 +41,8 @@ ifport=$(dialog --stdout --title "ArchQ $1" \
 if [[ ${ifport} == "Tailscale" ]]; then
     if ! systemctl is-active tailscaled >/dev/null 2>&1; then
         if ! pacman -Q tailscale >/dev/null 2>&1; then
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/tailscale-1.80.3-1-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /tmp/tailscale-1.80.3-1-x86_64.pkg.tar.zst
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/tailscale-$tsver-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /tmp/tailscale-$tsver-x86_64.pkg.tar.zst
             systemctl enable --now tailscaled
             echo -e ${c_gray}
             tailscale up
