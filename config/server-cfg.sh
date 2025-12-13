@@ -135,6 +135,7 @@ EOF
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/vmtouch-1.3.1-1-any.pkg.tar.zst
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/socat-1.7.4.4-1-x86_64.pkg.tar.zst
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libsndfile-1.2.0-3-x86_64.pkg.tar.zst
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
                 pacman -U --noconfirm /tmp/*.pkg.tar.zst
                 sed -i '58,92d' /usr/bin/mpd-plugin.py
