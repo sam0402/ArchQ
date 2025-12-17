@@ -322,6 +322,7 @@ EOF
         arch-chroot /mnt systemctl enable mpd mympd
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
+        sed -i 's/album,title/album,albumartist,title/' /mnt/etc/mpd.conf
         sed -i 's/^include_optional/#include_optional/g' /mnt/etc/mpd.conf
 #### add priority for MPD
         cat >>/mnt/etc/rc.local <<EOF

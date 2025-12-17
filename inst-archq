@@ -448,6 +448,7 @@ case $server in
         fi
 ### setup mpd
         [[ -n "$scard" ]] && sed -i 's/^#\?.* \?\tdevice.*"/\tdevice '"\"$scard\""'/' /mnt/etc/mpd.conf
+        sed -i 's/album,title/album,albumartist,title/' /mnt/etc/mpd.conf
         sed -i 's/^include_optional/#include_optional/g' /mnt/etc/mpd.conf
 #### add priority for MPD
         sed -i '$d' /mnt/etc/rc.local
