@@ -175,6 +175,7 @@ EOF
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
             pacman -R --noconfirm $(pacman -Q mpd | awk '{print $1}')
             pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
+            sed -i 's/album,title/album,albumartist,title/' /etc/mpd.conf
             sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
         fi
 # cpu isolation
