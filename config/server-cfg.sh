@@ -160,7 +160,6 @@ EOF
             mkdir -p /var/lib/private/mympd/config/
             echo 'Unknown' >/var/lib/private/mympd/config/album_group_tag
             pacman -U --noconfirm /tmp/*.pkg.tar.zst
-            systemctl enable --now mympd
         fi
         if [[ $server =~ o. ]]; then
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
@@ -189,7 +188,7 @@ EOF
         fi
         ### Start mpd.. etc. service
         servs=${servs/mpd/}
-        echo systemctl disable --now $servs mpd.socket
+        systemctl disable --now $servs mpd.socket
         # /usr/bin/mpd-cfg.sh
         usermod -aG optical mpd
         systemctl enable --now mpd
