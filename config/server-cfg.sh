@@ -151,6 +151,7 @@ EOF
                 pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
                 sed -i 's/album,title/album,albumartist,title/' /etc/mpd.conf
                 sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
+                systemctl enable --now mpd mpd.socket
             fi
         fi
         if [[ $server =~ y. ]]; then
