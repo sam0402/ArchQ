@@ -27,6 +27,7 @@ server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
         HQPE4 "HQPlayer Embedded 4" \
         Player "Airplay | Squeezelite | Roonbridge | HQP NAA" ) || exit 1; clear
 yes | pacman -Scc
+
 case $server in
     MPD)
         server=$(dialog --stdout --title "ArchQ" \
@@ -144,39 +145,39 @@ EOF
                 sed -i '$d' /etc/rc.local
                 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-proxy\@.service >/etc/systemd/system/mpd-proxy\@.service
             fi
-            if [[ $server =~ y. ]]; then
-                pacman -Q mympd >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
-                pacman -Q libnewt >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
-                mkdir -p /var/lib/private/mympd/config/
-                echo 'Unknown' >/var/lib/private/mympd/config/album_group_tag
-                pacman -U --noconfirm /tmp/*.pkg.tar.zst
-                systemctl enable mympd
-            fi
-            if [[ $server =~ o. ]]; then
-                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
-                pacman -U --noconfirm /tmp/rompr-*.pkg.tar.zst
-                ### Setup RompR
-                mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
-                sed -i '$i include /etc/nginx/sites-enabled/*;' /etc/nginx/nginx.conf
-                curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/etc/nginx/sites-available/rompr
-                curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cantata_nginx >/etc/nginx/sites-available/cantata
-                sed -i 's/hostname/'"${HOSTNAME,,}"'/' /etc/nginx/sites-available/rompr
-                sed -i 's/hostname/'"${HOSTNAME,,}"'/' /etc/nginx/sites-available/cantata
-                sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /etc/php/php.ini
-                sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /etc/php/php.ini
-                sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /usr/lib/systemd/system/nginx.service
-                ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
-                ln -s /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
-                chmod 644 /etc/nginx/sites-enabled/*
-                systemctl enable nginx php-fpm avahi-daemon
+            if [[ $(pacman -Q mpd-${MPD} | awk '{print $2}') != ${mpdver} ]]; then
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
+                pacman -R --noconfirm $(pacman -Q mpd | awk '{print $1}')
+                pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
+                sed -i 's/album,title/album,albumartist,title/' /etc/mpd.conf
+                sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
             fi
         fi
-        if [[ $(pacman -Q mpd-${MPD} | awk '{print $2}') != ${mpdver} ]]; then
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
-            pacman -R --noconfirm $(pacman -Q mpd | awk '{print $1}')
-            pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
-            sed -i 's/album,title/album,albumartist,title/' /etc/mpd.conf
-            sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
+        if [[ $server =~ y. ]]; then
+            pacman -Q mympd >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
+            pacman -Q libnewt >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
+            mkdir -p /var/lib/private/mympd/config/
+            echo 'Unknown' >/var/lib/private/mympd/config/album_group_tag
+            pacman -U --noconfirm /tmp/*.pkg.tar.zst
+            systemctl enable --now mympd
+        fi
+        if [[ $server =~ o. ]]; then
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
+            pacman -U --noconfirm /tmp/rompr-*.pkg.tar.zst
+            ### Setup RompR
+            mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+            sed -i '$i include /etc/nginx/sites-enabled/*;' /etc/nginx/nginx.conf
+            curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/etc/nginx/sites-available/rompr
+            curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cantata_nginx >/etc/nginx/sites-available/cantata
+            sed -i 's/hostname/'"${HOSTNAME,,}"'/' /etc/nginx/sites-available/rompr
+            sed -i 's/hostname/'"${HOSTNAME,,}"'/' /etc/nginx/sites-available/cantata
+            sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /etc/php/php.ini
+            sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /etc/php/php.ini
+            sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /usr/lib/systemd/system/nginx.service
+            ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
+            ln -s /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
+            chmod 644 /etc/nginx/sites-enabled/*
+            systemctl enable nginx php-fpm avahi-daemon
         fi
 # cpu isolation
         if [ $cpus -ge 6 ]; then
