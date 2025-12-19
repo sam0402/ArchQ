@@ -15,7 +15,8 @@ pacman -Q mpd >/dev/null 2>&1 && servs+='mpd '
 pacman -Q mympd >/dev/null 2>&1 && servs+='mympd '
 pacman -Q roonserver >/dev/null 2>&1 && servs+='roonserver '
 pacman -Q hqplayerd >/dev/null 2>&1 && servs+='hqplayerd '
-pacman -Q nginx >/dev/null 2>&1 && servs+='nginx php-fpm '
+pacman -Q nginx >/dev/null 2>&1 && servs+='nginx '
+pacman -Q php-fpm >/dev/null 2>&1 && servs+='php-fpm '
 
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
         LMS "Lyrion Music Server" \
@@ -151,7 +152,6 @@ EOF
                 pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
                 sed -i 's/album,title/album,albumartist,title/' /etc/mpd.conf
                 sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
-                systemctl enable --now mpd mpd.socket
             fi
         fi
         if [[ $server =~ y. ]]; then
@@ -160,6 +160,8 @@ EOF
             mkdir -p /var/lib/private/mympd/config/
             echo 'Unknown' >/var/lib/private/mympd/config/album_group_tag
             pacman -U --noconfirm /tmp/*.pkg.tar.zst
+            systemctl enable --now mympd
+            servs=$(echo " $servs " | sed 's/ mympd / /' | xargs)
         fi
         if [[ $server =~ o. ]]; then
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
@@ -187,7 +189,7 @@ EOF
             grub-mkconfig -o /boot/grub/grub.cfg
         fi
         ### Start mpd.. etc. service
-        servs=${servs/mpd/}
+        servs=$(echo " $servs " | sed 's/ mpd / /' | xargs)
         systemctl disable --now $servs mpd.socket
         # /usr/bin/mpd-cfg.sh
         usermod -aG optical mpd
@@ -234,4 +236,5 @@ EOF
         systemctl enable --now hqplayerd
         ;;
 esac
-echo ${c_blue_b}${server}${c_gray}" is started."
+[ -n "$MPD" ] && MPD="-$MPD"
+echo -e "\n"${c_blue_b}${server}${MPD}${c_gray}" is started."
