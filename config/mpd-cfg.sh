@@ -47,27 +47,30 @@ client=$(eval $exec)|| exit 1
 clear
 case $client in
     R)
-        rm /etc/nginx/sites-enabled/cantata
-        ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
-        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd php-fpm
-        systemctl enable --now mpd nginx php-fpm avahi-daemon
+        rm -f /etc/nginx/sites-enabled/cantata
+        ln -sf /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
+        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd
+        systemctl enable --now mpd php-fpm avahi-daemon
+        systemctl enable nginx && systemctl restart nginx
         ;;
     M)
         pacman -Q mympd >/dev/null 2>&1 || (pacman -Sy --noconfirm archlinux-keyring mympd; yes | pacman -Scc >/dev/null 2>&1)
-        systemctl disable --now nginx php-fpm
-        systemctl enable --now mpd mympd
+        pacman -Q nginx >/dev/null 2>&1 && systemctl disable --now nginx php-fpm
+        systemctl enable --now mpd mympd avahi-daemon
         ;;
     N)
         pacman -Q ncmpcpp >/dev/null 2>&1 || (pacman -Sy --noconfirm archlinux-keyring ncmpcpp; yes | pacman -Scc >/dev/null 2>&1)
-        systemctl disable --now nginx php-fpm avahi-daemon
-        pacman -Q mympd >/dev/null 2>&1 && pacman -R --noconfirm mympd php-fpm
+        pacman -Q nginx >/dev/null 2>&1 && systemctl disable --now nginx php-fpm avahi-daemon
+        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd avahi-daemon
         systemctl enable --now mpd
         ;;
     C)  
-        rm /etc/nginx/sites-enabled/rompr
-        ln -s /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
-        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd php-fpm
-        systemctl enable --now mpd nginx
+        rm -f /etc/nginx/sites-enabled/rompr
+        ln -sf /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
+        pacman -Q php-fpm >/dev/null 2>&1 && systemctl disable --now php-fpm avahi-daemon
+        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd avahi-daemon
+        systemctl enable --now mpd
+        systemctl enable nginx && systemctl restart nginx
         ;;
     U)
         # Httpd stream multi user
@@ -288,3 +291,4 @@ sed -i 's/^#\?music_directory.*"/music_directory\t"\/mnt\/'"$mdir"'"/' $config
 
 ### Restart MPD
 systemctl restart mpd
+echo "MPD is configured and restarted."
