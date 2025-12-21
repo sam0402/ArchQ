@@ -35,7 +35,7 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 mU "Ultra Light: PCM, FLAC only; best SQ" off \
                 mL "Light: PCM, FLAC, DSD; plays CD" off \
-                mR "Radio: PCM, FLAC; All radio formats" on \
+                mR "Radio: PCM, FLAC; Radio: FLAC MP3 AAC OPUS" on \
                 mS "Stream: PCM, FLAC; MP3 radio; http output:8000" off \
                 mD "DStream: +DSD to the Stream version" off \
                 mM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
@@ -45,7 +45,7 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 yU "Ultra Light: PCM, FLAC only; best SQ" off \
                 yL "Light: PCM, FLAC, DSD; plays CD" off \
-                yR "Radio: PCM, FLAC; All radio formats" on \
+                yR "Radio: PCM, FLAC; Radio: FLAC MP3 AAC OPUS" on \
                 yS "Stream: PCM, FLAC; MP3 radio; http output:8000" off \
                 yD "DStream: +DSD to the Stream version" off \
                 yM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
@@ -55,7 +55,7 @@ case $server in
                 --radiolist "Select MPD version" 7 0 0 \
                 oU "Ultra Light: PCM, FLAC only; best SQ" off \
                 oL "Light: PCM, FLAC, DSD; plays CD" off \
-                oR "Radio: PCM, FLAC; All radio formats" on \
+                oR "Radio: PCM, FLAC; Radio: FLAC MP3 AAC OPUS" on \
                 oS "Stream: PCM, FLAC; MP3 radio; http output:8000" off \
                 oD "DStream: +DSD to the Stream version" off \
                 oM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
