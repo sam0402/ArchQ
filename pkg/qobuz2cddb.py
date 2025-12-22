@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup
 from itertools import count
 
 MAXIMAGE = True
-MULTI_ARTIST = True
 
 HEADERS = ({'User-Agent':
         'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36',
@@ -134,7 +133,7 @@ with open(dbfile, "r+") as file:
 
             file.write(f"TTITLE{int(num.strip())-1}={title.strip()}")
             # Multi Artists
-            if MULTI_ARTIST and len(performers) != 0:
+            if len(performers) != 0:
                 file.write(f" / {', '.join(performers)}")
             file.write("\n")
 
