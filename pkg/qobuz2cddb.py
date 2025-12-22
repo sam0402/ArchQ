@@ -129,7 +129,7 @@ with open(dbfile, "r+") as file:
             performers = []
             for item in info_text.strip().split(' - '):
                 parts = item.split(', ')
-                if len(parts) == 2 and parts[1].strip() == 'Performer':
+                if len(parts) == 2 and (parts[1].strip() == 'Performer' or parts[1].strip() == 'MainArtist'):
                     performers.append(parts[0].strip())
 
             file.write(f"TTITLE{int(num.strip())-1}={title.strip()}")
