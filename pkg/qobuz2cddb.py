@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from itertools import count
 
 MAXIMAGE = True
-MULTI_ARTIST = False
+MULTI_ARTIST = True
 
 HEADERS = ({'User-Agent':
         'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36',
@@ -122,16 +122,21 @@ with open(dbfile, "r+") as file:
 
     ### Track Name
     discount = 0
-    for i, title, num  in zip(count(0), titles, nums):
+    for i, title, num, info_text in zip(count(0), titles, nums, infos[::2]):
         if num.strip() == '1':
             discount = discount + 1
         if discount == args.W:
-            file.write(f"TTITLE{int(num.strip())-1}={title.strip()}\n")
-            ## Multi Artists
-            # if MULTI_ARTIST and len(t_artists) != 0:
-            #     file.write(f"{t_artists[i].strip()} / ")
-            # file.write(f"{title.strip()}\n")
-            # print(f"TTITLE{num}={t_artist.strip()}\n")
+            performers = []
+            for item in info_text.strip().split(' - '):
+                parts = item.split(', ')
+                if len(parts) == 2 and parts[1].strip() == 'Performer':
+                    performers.append(parts[0].strip())
+
+            file.write(f"TTITLE{int(num.strip())-1}={title.strip()}")
+            # Multi Artists
+            if MULTI_ARTIST and len(performers) != 0:
+                file.write(f" / {', '.join(performers)}")
+            file.write("\n")
 
     ### Composer
     discount = 0
