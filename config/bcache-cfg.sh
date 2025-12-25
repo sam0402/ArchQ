@@ -66,30 +66,37 @@ case $WK in
         case $data in
             R)
                 # Get sectors range of partition
-                start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{print $3}')
-                start_num=${start%s}
-                starts=$(( start_num > 16 ? start_num - 16 : 0 ))s
-                ends=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{print $4}')
-                ends_num=${ends%s}
-                if [ "${hddpart:0-1}" -eq 1 ]; then
-                    [ "$start_num" -gt 16 ] && work=true
+                # FIX: Use lsblk and parted -m for robust parsing
+                part_num=$(lsblk -no PARTN "$hddpart")
+                p_info=$(parted -m "$hdd" unit s print | grep "^${part_num}:")
+                start_s=$(echo "$p_info" | cut -d: -f2 | tr -d 's')
+                end_s=$(echo "$p_info" | cut -d: -f3 | tr -d 's')
+                
+                work=false
+                if [ "$part_num" -eq 1 ]; then
+                    [ "$start_s" -ge 16 ] && work=true
                 else
-                    prepartnum=$(parted $hdd 'unit s' print | grep -B 1 "^ ${hddpart:0-1}" | grep -v "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{ print $2 }')
-                    preends=$(parted $hdd 'unit s' print | grep "^ $prepartnum" | awk -F '[[:space:]]*' '{print $4}')
-                    preends_num=${preends%s}
-                    [ -n "$starts" ] && [ -n "$preends_num" ] && [ "$start_num" -gt "$preends_num" ] && work=true
+                    # Check gap with previous partition
+                    # Find the highest end sector less than current start
+                    prev_end_s=$(parted -m "$hdd" unit s print | grep -v "^${part_num}:" | awk -F: -v s="$start_s" '{gsub("s","",$3); if ($3 < s) print $3}' | sort -nr | head -n1)
+                    if [ -z "$prev_end_s" ]; then
+                         [ "$start_s" -ge 16 ] && work=true
+                    else
+                         gap=$((start_s - prev_end_s))
+                         [ "$gap" -ge 16 ] && work=true
+                    fi
                 fi
                 # Rebuild parititon
                 if [ "$work" = "true" ]; then
-                    # parted $hdd 'unit s' print
                     sfdisk -d $hdd >~/partiton_PreBk_$(date +"%Y%m%d_%H.%M")
-                    parted --script $hdd rm ${hddpart:0-1}
-                    parted --script $hdd mkpart BCache xfs $starts $ends
-                    newpartnum=$((prepartnum + 1))
-                    hddpart=${hddpart::-1}${newpartnum}
+                    new_start_s=$((start_s - 16))
+                    parted --script $hdd rm $part_num
+                    parted --script $hdd mkpart BCache xfs ${new_start_s}s ${end_s}s
+                    sleep 1
                     make-bcache -B --force $hddpart
                 else
-                    echo "Cannot create Bcache without erasing existing data."
+                    echo "Cannot create Bcache without erasing existing data (insufficient space)."
+                    exit 1
                 fi
             ;;
             C)
@@ -115,28 +122,38 @@ case $WK in
         ;;
     R)
         # Remove Bcache
-        bcache=$(lsblk -pln -o name | grep -m1 bcache | cut -d'/' -f3)
-        hddpart=$(lsblk -pn -o size,name | grep -B 1 bcache | grep -E "sd|nvme" | sort -nr | head -n 1 | awk -F '─' '{print $2}')
-        hdd=${hddpart%[0-9]}; hdd=${hdd%p}; 
+        bcache_path=$(lsblk -pln -o name | grep -m1 bcache)
+        [ -z "$bcache_path" ] && { echo "No bcache device found."; exit 1; }
+        bcache=${bcache_path##*/}
+        
+        hddpart=$(lsblk -no PKNAME "$bcache_path")
+        hddpart="/dev/$hddpart"
+        hdd_dev=$(lsblk -no PKNAME "$hddpart")
+        hdd="/dev/$hdd_dev"
+        
+        # Try to find cache set uuid (SSD) if possible, keeping original heuristic logic for nvme var
         nvme=$(lsblk -pn -o size,name | grep -B 1 bcache | grep nvme | sort -n | head -n 1 | awk -F '─' '{print $2}')
+        
         if $(dialog --stdout --title "Remove Bcache" --yesno "\n  Remove $bcache ?" 7 0); then   
-            umount /dev/$bcache >/dev/null 2>&1
+            umount "$bcache_path" >/dev/null 2>&1
             if [ -e /sys/block/$bcache/bcache/attach ]; then
-                echo $(bcache-super-show $nvme | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/detach
-                csetfile="/sys/fs/bcache/$(bcache-super-show "$nvme" | awk '/cset\.uuid/ {print $2}')/unregister"
-                echo 1 > "$csetfile"
+                [ -n "$nvme" ] && echo $(bcache-super-show $nvme | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/detach
+                [ -n "$nvme" ] && csetfile="/sys/fs/bcache/$(bcache-super-show "$nvme" | awk '/cset\.uuid/ {print $2}')/unregister"
+                [ -n "$csetfile" ] && echo 1 > "$csetfile"
                 echo 1 >/sys/block/$bcache/bcache/stop
             fi
             if lsblk -pln -o fstype $hddpart | grep -q bcache; then
                 # Rebuild partition
-                start=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{print $3}')
-                start_num=${start%s}
-                starts=$((start_num + 16))s
-                ends=$(parted $hdd 'unit s' print | grep "^ ${hddpart:0-1}" | awk -F '[[:space:]]*' '{print $4}')
-                # parted $hdd 'unit s' print
+                part_num=$(lsblk -no PARTN "$hddpart")
+                p_info=$(parted -m "$hdd" unit s print | grep "^${part_num}:")
+                start_s=$(echo "$p_info" | cut -d: -f2 | tr -d 's')
+                end_s=$(echo "$p_info" | cut -d: -f3 | tr -d 's')
+                
+                new_start_s=$((start_s + 16))
+                
                 sfdisk -d $hdd >~/partiton_CachBk_$(date +"%Y%m%d_%H.%M")
-                parted --script $hdd rm ${hddpart:0-1} >/dev/null 2>&1
-                parted --script $hdd mkpart Linux xfs $starts $ends >/dev/null 2>&1
+                parted --script $hdd rm $part_num >/dev/null 2>&1
+                parted --script $hdd mkpart Linux xfs ${new_start_s}s ${end_s}s >/dev/null 2>&1
             fi
         fi
         echo -e ${c_red_b}"\nReboot now [Y/n]? "${c_write}
