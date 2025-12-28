@@ -1,7 +1,7 @@
 #!/bin/bash
 config='/etc/fstab'
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu " ! ! Format & HDD 0 Wipe ! ! \n All data will be erased!" 8 0 0 F "Format disk" W "Wipe disk")
+            --menu " ! ! Format & HDD 0 Wipe ! ! \n All data will be erased!" 8 0 0 F "Format XFS" W "Wipe disk")
 clear
 case $WK in
     W)
@@ -28,7 +28,7 @@ case $WK in
         ;;
     F)
         devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | grep sd | tac)
-        device=$(dialog --stdout --title "Format disk" --menu "Select HDD device" 7 0 0 $devicelist) || exit 1
+        device=$(dialog --stdout --title "Format XFS" --menu "Select HDD device" 7 0 0 $devicelist) || exit 1
         partitionlist=$(lsblk -pln -o name,size $device | sed -e '1d;s/\s\+/ /g')
         if [[ "$partitionlist" == "" ]]; then
             yes=$(dialog --stdout --title "Format XFS" --yesno "No partitions are found on the $device ! \nA partition will be created to occupy the whole disk.\n   Create a partition on the ${device}?" 0 0) || exit 1; clear
