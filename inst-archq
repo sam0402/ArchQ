@@ -532,13 +532,13 @@ if [[ $player =~ A ]]; then
     arch-chroot /mnt systemctl enable shairport-sync nqptp
 fi
 if  [[ $player =~ R ]]; then
-    echo echo -e "\n${c_blue_b}Install Roonbridge ...${c_gray}\n"
+    echo -e "\n${c_blue_b}Install Roonbridge ...${c_gray}\n"
     arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
     arch-chroot /mnt systemctl enable roonbridge
 fi
 if  [[ $player =~ H ]]; then
-    echo echo -e "\n${c_blue_b}Install HQPlayer NAA ...${c_gray}\n"
+    echo -e "\n${c_blue_b}Install HQPlayer NAA ...${c_gray}\n"
     naa_deb=$(curl -sL https://www.signalyst.com/bins/naa/linux/bookworm/ | grep "networkaudiod_5" | grep _amd64.deb | tail -n1 | awk -F'"' '{print $8}')
     curl -L "https://www.signalyst.com/bins/naa/linux/bookworm/$naa_deb" | bsdtar xf - -C /tmp
     mkdir -p /tmp/naa
