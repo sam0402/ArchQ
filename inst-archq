@@ -80,7 +80,7 @@ ifconfig=$(dialog --stdout --title "ArchQ" --ok-label "Ok" --form "Enter $ifport
             "Gateway" 3 1   "192.168.1.254" 3 10 15 0 \
             "DNS"     4 1   "$ifdns"        4 10 15 0) || exit 1; clear
 ifaddr=$(echo $ifconfig | cut -d' ' -f1)
-ifmast=$(echo $ifconfig | cut -d' ' -f2)
+ifmask=$(echo $ifconfig | cut -d' ' -f2)
 ifgw=$(echo $ifconfig | cut -d' ' -f3)
 ifdns=$(echo $ifconfig | cut -d' ' -f4)
 fi
@@ -167,7 +167,7 @@ old_efi=''
 if [ $fmt = P ]; then
     # Rebuild partition if EFI < 200MB
     if [ $(lsblk $part_boot -pln -o size | tr -d [:alpha:]) -lt 200 ]; then
-        boot_start=$(parted $device 'unit s' print | grep "^ ${part_root:0-1}" | tail -1 | awk -F '[[:space:]]*' '{ print $3 }')
+        boot_start=$(parted $device 'unit s' print | grep "^ ${part_root: -1}" | tail -1 | awk -F '[[:space:]]*' '{ print $3 }')
         boot_end=$(expr ${boot_start::-1} + 524287)s
         root_start=$(expr ${boot_start::-1} + 524288)s
         parted --script "${device}" -- \
@@ -186,7 +186,7 @@ else
     [ $server = LMS ] && root_size=4096 || root_size=3072
     root_end=$(( $root_size + 257 + 1 ))MiB
     parted --script "${device}" -- mklabel gpt \
-        mkpart EFI fat32 1Mib 257MiB \
+        mkpart EFI fat32 1MiB 257MiB \
         set 1 boot on \
         mkpart ArchQ ext4 257MiB ${root_end} \
         mkpart Data ext4 ${root_end} 100%
@@ -230,7 +230,7 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 echo -e "\n${c_blue_b}Install Arch Linux package ...${c_gray}\n"
 pacstrap /mnt base linux-firmware grub efibootmgr mkinitcpio os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
         vim nano wget avahi sudo dialog cpupower lm_sensors ntp hdparm htop iwd nocache \
-        which avahi glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
+        which glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
         fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb faad2 libmad \
         confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
         nginx php-sqlite php-gd php-fpm php-intl imagemagick libwmf libjxl libconfig \
@@ -358,7 +358,7 @@ echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mk
 echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-arch-chroot /mnt mkinitcpio -p linux-Q352WU
+arch-chroot /mnt mkinitcpio -p linux-${ker}
 
 isocpu=''
 cpus=$(getconf _NPROCESSORS_CONF)
