@@ -38,12 +38,11 @@ NAME='<null>'; ALSA_PARAMS='<null>'; BUFFER='<null>'; CODEC='<null>'; PRIORITY='
 MAX_RATE='<null>'; UPSAMPLE='<null>'; MAC='<null>'; SERVER_IP='<null>'; VOLUME='<null>'
 
 while read line; do
-eval $(grep -v '#' | sed 's/-. //')
-#echo $(grep -v '#' | sed 's/-. //')
+    eval $(grep -v '#' | sed 's/-. //')
 done < $config
 
-if [[ ${inst} =~ DSD ]]; then
-    DOP='0:u32be'
+if [[ ${ver} =~ dsd ]]; then
+    [ "$DOP" = '<null>' ] && DOP='0:u32be'
     echo $CODEC | grep -q dsd || CODEC=$CODEC',dsd'
     INFO="\nDSD format: dop, u8, u16le, u16be, u32le, u32be"
 else
