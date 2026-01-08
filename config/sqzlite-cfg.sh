@@ -9,13 +9,13 @@ option=$(dialog --stdout --title "ArchQ Squeezelite $1" \
         0 "1.9 PCM" 1 "1.9 DSD" 2 "2.0 PCM" 3 "2.0 DSD" \
         ) || exit 1; clear
 
-ver=${ver/-[15]/-pcm}; ver=${ver/-[26]/-dsd}
+ver=${ver/-[17]/-pcm}; ver=${ver/-[27]/-dsd}
 if [ "${ver}" != ${inst[$option]} ]; then
     cpus=$(getconf _NPROCESSORS_ONLN)
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-${inst[$option]}-x86_64.pkg.tar.zst
     pacman -U --noconfirm /tmp/squeezelite-${inst[$option]}-x86_64.pkg.tar.zst
     ver=$(pacman -Q squeezelite | awk -F ' ' '{print $2}')
-    ver=${ver/-[15]/-pcm}; ver=${ver/-[26]/-dsd}
+    ver=${ver/-[17]/-pcm}; ver=${ver/-[28]/-dsd}
 fi
 
 ## Select sound device
