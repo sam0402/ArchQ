@@ -156,7 +156,6 @@ EOF
                 if [[ $MPD == ul ]]; then
                     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-2-x86_64.pkg.tar.zst
                     pacman -U --noconfirm /tmp/flac-1.4.3-2-x86_64.pkg.tar.zst
-                fi
                 else
                     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-1-x86_64.pkg.tar.zst
                     pacman -U --noconfirm /tmp/flac-1.4.3-1-x86_64.pkg.tar.zst
