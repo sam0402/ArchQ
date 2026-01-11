@@ -6,7 +6,7 @@ set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 ker=Q352WU; kver='6.12.12-12'
-mpdver=0.23.17-24
+mpdver=0.23.17-36
 mympdver=20.0.0-1
 lmsver=9.1-1
 
@@ -402,7 +402,7 @@ case $server in
         if ! [[ $MPD == ul || $MPD == light ]]; then
             pacstrap /mnt upmpdcli
             arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli-1.9.6-1-x86_64.pkg.tar.zst
-            arch-chroot /mnt pacman -U --noconfirm /root/upmpdcli-1.9.6-1-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm /root/upmpdcli-1.9.6-1-x86_64.pkg.tar.zst /root/flac-1.4.3-1-x86_64.pkg.tar.zst
         fi
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
@@ -410,9 +410,14 @@ case $server in
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/vmtouch-1.3.1-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/socat-1.7.4.4-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.10-2-x86_64.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libsndfile-1.2.0-3-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-1-x86_64.pkg.tar.zst
+        # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libsndfile-1.2.0-3-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst /root/libsndfile-1.2.0-3-x86_64.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst /root/flac-1.4.3-1-x86_64.pkg.tar.zst
+        if [[ $MPD == ul ]]; then
+            arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-2-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm /root/flac-1.4.3-2-x86_64.pkg.tar.zst
+        fi
         sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/mpd.service
         # dependencies for owntone
         # pacstrap /mnt confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c
