@@ -1,5 +1,5 @@
 #!/bin/bash
-mpdver=0.23.17-24
+mpdver=0.23.17-36
 mympdver=20.0.0-1
 lmsver=9.1-1
 
@@ -141,7 +141,8 @@ EOF
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/vmtouch-1.3.1-1-any.pkg.tar.zst
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/socat-1.7.4.4-1-x86_64.pkg.tar.zst
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
-                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libsndfile-1.2.0-3-x86_64.pkg.tar.zst
+                wget -P /tmt https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-1-x86_64.pkg.tar.zst
+                # wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libsndfile-1.2.0-3-x86_64.pkg.tar.zst
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
                 pacman -U --noconfirm /tmp/*.pkg.tar.zst
                 sed -i '58,92d' /usr/bin/mpd-plugin.py
@@ -152,6 +153,14 @@ EOF
             fi
             if [[ $(pacman -Q mpd-${MPD} | awk '{print $2}') != ${mpdver} ]]; then
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
+                if [[ $MPD == ul ]]; then
+                    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-2-x86_64.pkg.tar.zst
+                    pacman -U --noconfirm /tmp/flac-1.4.3-2-x86_64.pkg.tar.zst
+                fi
+                else
+                    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-1-x86_64.pkg.tar.zst
+                    pacman -U --noconfirm /tmp/flac-1.4.3-1-x86_64.pkg.tar.zst
+                fi
                 pacman -R --noconfirm $(pacman -Q mpd | awk '{print $1}')
                 pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
                 sed -i 's/album,title/album,albumartist,title/' /etc/mpd.conf
