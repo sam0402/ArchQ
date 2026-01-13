@@ -54,8 +54,8 @@ case $ACTION in
         fi
         BACKING_PART=$(dialog --stdout --title "Backing $BACKING_DISK" --menu "Select a backing partition" 7 0 0 $BACKING_PART_LIST) || exit 1
         if lsblk -pln -o fstype $BACKING_PART | grep -q bcache; then
-            # data=$(dialog --stdout --title "Backing $BACKING_PART" --menu "Bcache detected" 7 0 0 B "Use existing" C "Clean & Create")
-            data=B
+            data=$(dialog --stdout --title "Backing $BACKING_PART" --menu "Bcache detected" 7 0 0 B "Use existing" C "Clean & Create")
+            # data=B
             clear
         else
             data=$(dialog --stdout --title "Backing $BACKING_PART" --menu "Retain data?" 7 0 0 R Retain C Clean)
