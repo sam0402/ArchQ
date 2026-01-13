@@ -266,7 +266,7 @@ pertime=$(echo $options | awk '//{print $2 }')
 buftime=$(($pertime * 6))
 bitdepth=$(echo $options | awk '//{print $3 }')
 sampling=$(echo $options | awk '//{print $4 }')
-mdir=$(echo $echo $options | awk '//{print $5}' | sed 's"/"\\\/"g')
+mdir=$(echo $options | awk '//{print $5}' | sed 's"/"\\\/"g')
 
 ## Set ramdisk
 # rd_GB=$(echo $options | awk '//{print $3 }')
