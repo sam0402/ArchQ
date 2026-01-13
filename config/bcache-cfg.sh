@@ -54,8 +54,8 @@ case $ACTION in
         fi
         BACKING_PART=$(dialog --stdout --title "Backing $BACKING_DISK" --menu "Select a backing partition" 7 0 0 $BACKING_PART_LIST) || exit 1
         if lsblk -pln -o fstype $BACKING_PART | grep -q bcache; then
-            data=$(dialog --stdout --title "Backing $BACKING_PART" --menu "Bcache detected" 7 0 0 B "Use existing" C "Clean & Create")
-            # data=B
+            # data=$(dialog --stdout --title "Backing $BACKING_PART" --menu "Bcache detected" 7 0 0 B "Use existing" C "Clean & Create")
+            data=B
             clear
         else
             data=$(dialog --stdout --title "Backing $BACKING_PART" --menu "Retain data?" 7 0 0 R Retain C Clean)
@@ -116,8 +116,12 @@ case $ACTION in
             ;;
         esac
         # Build Bcache
-        sleep 5
-        bcache=$(lsblk -pln -o name "$BACKING_PART" | grep bcache | cut -d'/' -f3)
+        for i in {1..5}; do
+            bcache=$(lsblk -pln -o name "$BACKING_PART" | grep bcache | cut -d'/' -f3)
+            [ -n "$bcache" ] && break
+            sleep 1
+        done
+        [ -z "$bcache" ] && { echo "Error: Bcache device not found on $BACKING_PART"; exit 1; }
         echo -e ${c_gray}"\n--- Create $bcache ---"${c_write}
         lsblk -pln -o fstype $CACHE_PART | grep -q bcache || (wipefs -af $CACHE_PART; make-bcache --writeback -C $CACHE_PART)
         sleep 1
