@@ -356,8 +356,7 @@ echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mk
 ### Kernel
 [ $cpu = amd ] && (ker=Q308AMD; kver='6.1.54-1')
 echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
-arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst)
 arch-chroot /mnt mkinitcpio -p linux-${ker}
 
 isocpu=''
@@ -371,8 +370,7 @@ iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
 case $server in
     LMS)
         echo -e "\n${c_blue_b}Install Lyrion Music Server ...${c_gray}\n"
-        arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
-        arch-chroot /mnt pacman -U --noconfirm /root/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
+        arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz)
         [ $cpus -ge 4 ] && [[ ! $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /mnt/usr/lib/systemd/system/lyrionmusicserver.service
         [ $cpus -ge 6 ] && [[ $player =~ S ]] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /mnt/usr/lib/systemd/system/lyrionmusicserver.service
         sed -i 's/novideo/novideo --charset=utf8/' /mnt/usr/lib/systemd/system/lyrionmusicserver.service
@@ -401,27 +399,23 @@ case $server in
         # pacstrap /mnt fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms libid3tag ncmpcpp mpc python-mpd2 lua
         if ! [[ $MPD == ul || $MPD == light ]]; then
             pacstrap /mnt upmpdcli
-            arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli-1.9.6-1-x86_64.pkg.tar.zst
-            arch-chroot /mnt pacman -U --noconfirm /root/upmpdcli-1.9.6-1-x86_64.pkg.tar.zst /root/flac-1.4.3-1-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli-1.9.6-1-x86_64.pkg.tar.zst)
         fi
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/vmtouch-1.3.1-1-any.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/socat-1.7.4.4-1-x86_64.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.10-2-x86_64.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-1-x86_64.pkg.tar.zst
-        # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libsndfile-1.2.0-3-x86_64.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
-        arch-chroot /mnt pacman -U --noconfirm /root/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst /root/flac-1.4.3-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst)
+        arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst)
+        arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst)
+        arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/vmtouch-1.3.1-1-any.pkg.tar.zst)
+        arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/socat-1.7.4.4-1-x86_64.pkg.tar.zst)
+        arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.10-2-x86_64.pkg.tar.zst)
+        arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-1-x86_64.pkg.tar.zst)
+        # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libsndfile-1.2.0-3-x86_64.pkg.tar.zst)
+        arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst)
         if [[ $MPD == ul ]]; then
-            arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-2-x86_64.pkg.tar.zst
-            arch-chroot /mnt pacman -U --noconfirm /root/flac-1.4.3-2-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-2-x86_64.pkg.tar.zst)
         fi
         sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/mpd.service
         # dependencies for owntone
         # pacstrap /mnt confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c
-        arch-chroot /mnt pacman -U --noconfirm /root/vmtouch-1.3.1-1-any.pkg.tar.zst /root/socat-1.7.4.4-1-x86_64.pkg.tar.zst /root/owntone-28.10-2-x86_64.pkg.tar.zst /root/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
         arch-chroot /mnt systemctl enable mpd mpd-plugin
         sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /mnt/etc/systemd/system/owntone.service
         sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /mnt/etc/systemd/system/owntone\@.service
@@ -429,9 +423,8 @@ case $server in
         ### Install myMPD
         if [[ $server =~ y. ]]; then
             echo -e "\n${c_blue_b}Install myMPD ...${c_gray}\n"
-            arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
-            arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
-            arch-chroot /mnt pacman -U --noconfirm /root/mympd-${mympdver}-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst)
+            arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst)
             mkdir -p /mnt/var/lib/private/mympd/config/
             echo 'Unknown' >/mnt/var/lib/private/mympd/config/album_group_tag
             arch-chroot /mnt systemctl enable mympd
@@ -440,8 +433,7 @@ case $server in
         if [[ $server =~ o. ]]; then
             echo -e "\n${c_blue_b}Install RompR ...${c_gray}\n"
             # pacstrap /mnt nginx php-sqlite php-gd php-fpm php-intl imagemagick
-            arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
-            arch-chroot /mnt pacman -U --noconfirm /root/rompr-2.00-1-any.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst)
             mkdir -p /mnt/etc/nginx/sites-available /mnt/etc/nginx/sites-enabled
             sed -i '$i include /etc/nginx/sites-enabled/*;' /mnt/etc/nginx/nginx.conf
             curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/mnt/etc/nginx/sites-available/rompr
@@ -502,10 +494,10 @@ EOF
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayerd.service >/mnt/usr/lib/systemd/system/hqplayerd.service
 
         ## lib link
-        arch-chroot /mnt ln -s /usr/liblibgupnp-1.2.so.1 /usr/lib/libgupnp-1.2.so.0
-        arch-chroot /mnt ln -s /usr/liblibgupnp-av-1.0.so.3 /usr/lib/libgupnp-av-1.0.so.2
-        arch-chroot /mnt ln -s /usr/liblibomp.so /usr/lib/libomp.so.5
-        arch-chroot /mnt ln -s /usr/liblibFLAC.so.12 /usr/lib/libFLAC.so.8
+        arch-chroot /mnt ln -s /usr/lib/libgupnp-1.2.so.1 /usr/lib/libgupnp-1.2.so.0
+        arch-chroot /mnt ln -s /usr/lib/libgupnp-av-1.0.so.3 /usr/lib/libgupnp-av-1.0.so.2
+        arch-chroot /mnt ln -s /usr/lib/libomp.so /usr/lib/libomp.so.5
+        arch-chroot /mnt ln -s /usr/lib/libFLAC.so.12 /usr/lib/libFLAC.so.8
         arch-chroot /mnt ln -s /opt/hqplayerd/lib/libsgllnx64-2.29.02.so /usr/lib/libsgllnx64-2.29.02.so
         arch-chroot /mnt ln -s /opt/hqplayerd/lib/libsglarm64-2.31.0.0.so /usr/lib/libsglarm64-2.31.0.0.so
         arch-chroot /mnt ln -s /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt
@@ -516,18 +508,15 @@ esac
 if [[ $player =~ S ]]; then
     echo -e "\n${c_blue_b}Install Squeezelite ...${c_gray}\n"
     # pacstrap /mnt faad2 libmad
-    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-pcm-x86_64.pkg.tar.zst
-    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
-    arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-dsd-x86_64.pkg.tar.zst
+    arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-pcm-x86_64.pkg.tar.zst)
     [[ -n "$scard" ]] && sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/squeezelite.conf
     arch-chroot /mnt systemctl enable squeezelite
 fi
 if [[ $player =~ A ]]; then
     echo -e "\n${c_blue_b}Install Airplay ...${c_gray}\n"
     # pacstrap /mnt libconfig
-    arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-4.3.3-2-x86_64.pkg.tar.zst
-    arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nqptp-1.2.5-1-x86_64.pkg.tar.zst
-    arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-4.3.3-2-x86_64.pkg.tar.zst /root/nqptp-1.2.5-1-x86_64.pkg.tar.zst
+    arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-4.3.3-2-x86_64.pkg.tar.zst)
+    arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nqptp-1.2.5-1-x86_64.pkg.tar.zst)
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync.service >/mnt/usr/lib/systemd/system/shairport-sync.service
     [[ -n "$scard" ]] && sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/;s/^\/\?\/\?\toutput_format = ".*";/\toutput_format = "S32_LE";/' /mnt/etc/shairport-sync.conf
     sed -i 's/^\/\?\/\?\tperiod_size = <.*>;/\tperiod_size = 78;/;s/^\/\?\/\?\tbuffer_size = <.*>;/\tbuffer_size = 468;/' /mnt/etc/shairport-sync.conf
@@ -539,8 +528,7 @@ if [[ $player =~ A ]]; then
 fi
 if  [[ $player =~ R ]]; then
     echo -e "\n${c_blue_b}Install Roonbridge ...${c_gray}\n"
-    arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
-    arch-chroot /mnt pacman -U --noconfirm /root/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
+    arch-chroot /mnt pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst)
     arch-chroot /mnt systemctl enable roonbridge
 fi
 if  [[ $player =~ H ]]; then
@@ -565,8 +553,7 @@ echo -e "\n${c_blue_b}Setting service ...${c_gray}\n"
 cp /archq/qt5-base-5.15.9+kde+r151-1-x86_64.pkg.tar.zst /archq/kid3-common-3.9.3-2-x86_64.pkg.tar.zst /archq/double-conversion-3.2.1-1-x86_64.pkg.tar.zst /mnt/root
 ## Instal alsa-lib-1.1.9
 cp /archq/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /mnt/root
-arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm --overwrite '*' <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst)
 arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /root/qt5-base-5.15.9+kde+r151-1-x86_64.pkg.tar.zst /root/kid3-common-3.9.3-2-x86_64.pkg.tar.zst /root/double-conversion-3.2.1-1-x86_64.pkg.tar.zst
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/asound.conf >/mnt/etc/asound.conf
 
