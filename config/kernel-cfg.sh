@@ -33,14 +33,12 @@ case $WK in
         options=$(eval $exec) || exit 1; clear
         if [ "$options" == "ALSA-lib" ]; then
             echo -e "${c_blue_b}Install ALSA-lib @Seagate...${c_gray}"
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /tmp/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst
+            pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-3-x86_64.pkg.tar.zst)
             exit 0
         fi
         if [ -n "$options" ]; then
             echo -e "${c_blue_b}Install kernel ${options}...${c_gray}"
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${options}-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /tmp/linux-${options}-x86_64.pkg.tar.zst
+            pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${options}-x86_64.pkg.tar.zst)
         fi
         pacman -Q ramroot >/dev/null 2>&1 && ramroot -E
         rm /boot/*-fallback.img
@@ -57,14 +55,12 @@ case $WK in
         options=$(eval $exec) || exit 1; clear
         if [ "$options" == "ALSA-lib" ]; then
             echo -e "${c_blue_b}Install ALSA-lib @P5801x...${c_gray}"
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/alsa-lib-1.1.9-5-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /tmp/alsa-lib-1.1.9-5-x86_64.pkg.tar.zst
+            pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/alsa-lib-1.1.9-5-x86_64.pkg.tar.zst)
             exit 0
         fi
         if [ -n "$options" ]; then
             echo -e "${c_blue_b}Install kernel ${options} @P5801x ...${c_gray}"
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/linux-${options}-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /tmp/linux-${options}-x86_64.pkg.tar.zst
+            pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/linux-${options}-x86_64.pkg.tar.zst)
         fi
         pacman -Q ramroot >/dev/null 2>&1 && ramroot -E
         rm /boot/*-fallback.img
@@ -98,8 +94,7 @@ case $WK in
         mkgrub
         ;;
     R)
-        wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ramroot-2.0.2-2-x86_64.pkg.tar.zst
-        pacman -U --noconfirm /tmp/ramroot-2.0.2-2-x86_64.pkg.tar.zst
+        pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ramroot-2.0.2-2-x86_64.pkg.tar.zst)
         pacman -Scc --noconfirm >/dev/null 2>&1
         mkgrub
         ;;
