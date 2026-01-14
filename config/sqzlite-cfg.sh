@@ -12,7 +12,8 @@ option=$(dialog --stdout --title "ArchQ Squeezelite $1" \
 ver=${ver/-[17]/-pcm}; ver=${ver/-[28]/-dsd}
 if [ "${ver}" != ${inst[$option]} ]; then
     cpus=$(getconf _NPROCESSORS_ONLN)
-    pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-${inst[$option]}-x86_64.pkg.tar.zst)
+    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-${inst[$option]}-x86_64.pkg.tar.zst
+    pacman -U --noconfirm /tmp/squeezelite-${inst[$option]}-x86_64.pkg.tar.zst
     ver=$(pacman -Q squeezelite | awk -F ' ' '{print $2}')
     ver=${ver/-[17]/-pcm}; ver=${ver/-[28]/-dsd}
 fi
