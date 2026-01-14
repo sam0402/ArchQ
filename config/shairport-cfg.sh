@@ -25,10 +25,12 @@ fi
 SelVer()
 {
     airver=$(dialog --stdout --title "ArchQ Airplay $1" --menu "Select version" 7 0 0 1 Classic 2 Multiroom) || exit 1; clear
-    pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-${version}-${airver}-x86_64.pkg.tar.zst)
+    wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-${version}-${airver}-x86_64.pkg.tar.zst
+    pacman -U --noconfirm /tmp/shairport-sync-${version}-${airver}-x86_64.pkg.tar.zst
     if [[ $airver == '2' ]]; then
       curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync.service >/usr/lib/systemd/system/shairport-sync.service
-      pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nqptp-1.2.5-1-x86_64.pkg.tar.zst)
+      wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nqptp-1.2.5-1-x86_64.pkg.tar.zst
+      pacman -U --noconfirm /tmp/nqptp-1.2.5-1-x86_64.pkg.tar.zst
     else
       systemctl disable --now nqptp
       pacman -R --noconfirm nqptp

@@ -72,7 +72,8 @@ case $server in
             isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
             echo -e "\n${c_blue_b}Install Lyrion Music Server ...${c_gray}\n"
             pacman -S perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious
-            pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz)
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
+            pacman -U --noconfirm /tmp/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
             [ $cpus -ge 4 ] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /usr/lib/systemd/system/lyrionmusicserver.service
             [ $cpus -ge 6 ] && pacman -Q squeezelite >/dev/null 2>&1 && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /usr/lib/systemd/system/lyrionmusicserver.service
             sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
@@ -175,7 +176,8 @@ EOF
             servs=$(echo " $servs " | sed 's/ mympd / /' | xargs)
         fi
         if [[ $server =~ o. ]]; then
-            pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst)
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
+            pacman -U --noconfirm /tmp/rompr-*.pkg.tar.zst
             ### Setup RompR
             mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
             sed -i '$i include /etc/nginx/sites-enabled/*;' /etc/nginx/nginx.conf

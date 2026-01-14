@@ -6,7 +6,8 @@ clear
 case $WK in
     W)
         # if ! pacman -Q scrub >/dev/null 2>&1; then
-        #     pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/scrub-2.6.1-1-x86_64.pkg.tar.zst)
+        #     wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/scrub-2.6.1-1-x86_64.pkg.tar.zst
+        #     pacman -U --noconfirm /root/scrub-2.6.1-1-x86_64.pkg.tar.zst
         # fi
         devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | grep sd | tac)
         device=$(dialog --stdout --title "Wipe disk" --menu "Select HDD device" 7 0 0 $devicelist) || exit 1; clear
