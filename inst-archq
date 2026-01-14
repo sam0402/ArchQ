@@ -104,31 +104,31 @@ case $server in
     MPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                mU "Ultra Light: PCM, FLAC only; best SQ" off \
-                mL "Light: PCM, FLAC, DSD; plays CD" off \
-                mR "Radio: PCM, FLAC; Radio: FLAC MP3 AAC OPUS" on \
-                mS "Stream: PCM, FLAC; MP3 radio; http output:8000" off \
-                mD "DStream: +DSD to the Stream version" off \
+                mU "Ultra: PCM, FLAC only; best SQ" off \
+                mL "Light: PCM, CD; Radio: FLAC, MP3" on \
+                mD "DSD: Ultra+DSD; Radio: FLAC" off \
+                mR "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
+                mS "Stream: PCM; Radio:FLAC MP3; http output:8000" off \
                 mM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
     myMPD)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                yU "Ultra Light: PCM, FLAC only; best SQ" off \
-                yL "Light: PCM, FLAC, DSD; plays CD" off \
-                yR "Radio: PCM, FLAC; Radio: FLAC MP3 AAC OPUS" on \
-                yS "Stream: PCM, FLAC; MP3 radio; http output:8000" off \
-                yD "DStream: +DSD to the Stream version" off \
+                yU "Ultra: PCM, FLAC only; best SQ" off \
+                yL "Light: PCM, CD; Radio: FLAC, MP3" on \
+                yD "DSD: Ultra+DSD; Radio: FLAC" off \
+                yR "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
+                yS "Stream: PCM; Radio:FLAC MP3; http output:8000" off \
                 yM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
     RompR)
         server=$(dialog --stdout --title "ArchQ" \
                 --radiolist "Select MPD version" 7 0 0 \
-                oU "Ultra Light: PCM, FLAC only; best SQ" off \
-                oL "Light: PCM, FLAC, DSD; plays CD" off \
-                oR "Radio: PCM, FLAC; Radio: FLAC MP3 AAC OPUS" on \
-                oS "Stream: PCM, FLAC; MP3 radio; http output:8000" off \
-                oD "DStream: +DSD to the Stream version" off \
+                oU "Ultra: PCM, FLAC only; best SQ" off \
+                oL "Light: PCM, CD; Radio: FLAC, MP3" on \
+                oD "DSD: Ultra+DSD; Radio: FLAC" off \
+                oR "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
+                oS "Stream: PCM; Radio:FLAC MP3; http output:8000" off \
                 oM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
         ;;
     Player)
