@@ -127,8 +127,8 @@ EOF
         [[ $server =~ .U ]] && MPD=ul
         [[ $server =~ .L ]] && MPD=light
         [[ $server =~ .R ]] && MPD=radio
+        [[ $server =~ .D ]] && MPD=dsd
         [[ $server =~ .S ]] && MPD=stream
-        [[ $server =~ .D ]] && MPD=dstream
         [[ $server =~ .M ]] && MPD=ffmpeg
         [[ $MPD == ul || $MPD == light ]] || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
 
@@ -151,13 +151,16 @@ EOF
                 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-proxy\@.service >/etc/systemd/system/mpd-proxy\@.service
             fi
             if [[ $(pacman -Q mpd-${MPD} | awk '{print $2}') != ${mpdver} ]]; then
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
                 if [[ $MPD == ul ]]; then
-                    pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-2-x86_64.pkg.tar.zst)
+                    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-2-x86_64.pkg.tar.zst
+                    pacman -U --noconfirm /tmp/flac-1.4.3-2-x86_64.pkg.tar.zst
                 else
-                    pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-1-x86_64.pkg.tar.zst)
+                    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-1-x86_64.pkg.tar.zst
+                    pacman -U --noconfirm /tmp/flac-1.4.3-1-x86_64.pkg.tar.zst
                 fi
                 pacman -R --noconfirm $(pacman -Q mpd | awk '{print $1}')
-                pacman -U --noconfirm <(curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst)
+                pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
                 sed -i 's/album,title/album,albumartist,title/' /etc/mpd.conf
                 sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
             fi
