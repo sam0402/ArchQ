@@ -113,6 +113,7 @@ case $ACTION in
                 echo "Bcache for $BACKING_PART already exists."
                 modprobe bcache >/dev/null 2>&1
                 [ -f /sys/fs/bcache/register ] && echo "$BACKING_PART" > /sys/fs/bcache/register 2>/dev/null
+                BP_EXIST=true
             ;;
         esac
         # Build Bcache
@@ -122,13 +123,22 @@ case $ACTION in
             sleep 1
         done
         [ -z "$bcache" ] && { echo "Error: Bcache device not found on $BACKING_PART"; exit 1; }
-        echo -e ${c_gray}"\n--- Create $bcache ---"${c_write}
+        echo -e ${GRAY}"\n--- Create $bcache ---"${RESET}
         lsblk -pln -o fstype $CACHE_PART | grep -q bcache || (wipefs -af $CACHE_PART; make-bcache --writeback -C $CACHE_PART)
         sleep 1
         [ -e /sys/block/$bcache/bcache/attach ] && \
             echo $(bcache-super-show $CACHE_PART | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/attach
         # echo writearound >/sys/block/$bcache/bcache/cache_mode
-        [ $? -ne 0 ] && echo -e ${c_red_b}"\nYou need to reboot and do it again.\n"${c_write}
+        if [ $? -ne 0 ] && [ "$BP_EXIST" = true ]; then
+            if dialog --stdout --title "Failed to create Bcache." --yesno "\n Need to remove $BACKING_PART and create again. This may delete all data." 7 0; then
+                [ -e "/sys/block/$bcache/bcache/stop" ] && echo 1 > "/sys/block/$bcache/bcache/stop"
+                sleep 1
+                BACKING_DISK="/dev/$(basename $(readlink -f /sys/class/block/${BACKING_PART##*/}/..))"
+                part_num=$(cat /sys/class/block/${BACKING_PART##*/}/partition)
+                parted -s "$BACKING_DISK" rm "$part_num"
+            fi
+            echo -e ${RED}"\nYou need to reboot and create Bcache again.\n"${RESET}
+        fi
         lsblk $BACKING_PART $CACHE_PART
         ;;
     R)
@@ -175,11 +185,11 @@ case $ACTION in
                 sfdisk -d $BACKING_DISK >~/partiton_CachBk_$(date +"%Y%m%d_%H.%M")
                 parted --script $BACKING_DISK rm $part_num >/dev/null 2>&1
                 parted --script $BACKING_DISK mkpart Linux xfs ${new_start_s}s ${end_s}s >/dev/null 2>&1
-                echo -e ${c_gray}"\n--- $bcache Removed ---"${c_write}
+                echo -e ${GRAY}"\n--- $bcache Removed ---"${RESET}
                 lsblk -pln -o name,size,fstype $BACKING_PART
             fi
         fi
-        echo -e ${c_red_b}"\nReboot now [Y/n]? "${c_write}
+        echo -e ${RED}"\nReboot now [Y/n]? "${RESET}
         read -r input
         [[ -z $input || $input = y ]] && reboot
         ;;
