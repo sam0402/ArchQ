@@ -81,6 +81,7 @@ case "$WK" in
         if ! pacman -Q cachefilesd >/dev/null 2>&1 ; then
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cachefilesd-0.10.10-2-x86_64.pkg.tar.zst
             pacman -U --noconfirm /tmp/cachefilesd-0.10.10-2-x86_64.pkg.tar.zst
+            curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/config/cachefilesd.conf >/etc/cachefilesd.conf
         fi
         systemctl enable --now cachefilesd
         n=1
