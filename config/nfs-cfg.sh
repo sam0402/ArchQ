@@ -96,4 +96,6 @@ case "$WK" in
         systemctl disable --now cachefilesd
         ;;
     esac
+    ;;
+esac
 systemctl daemon-reload
