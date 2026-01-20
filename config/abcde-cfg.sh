@@ -40,9 +40,7 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     ans=n
 fi
 
-while read line; do
-    eval $(grep '=' | grep -v '#')
-done < $config
+eval $(grep '=' "$config" | grep -v '#')
 
 [ -z $KID3CLI ] && TAGS=n || TAGS=y
 
@@ -89,5 +87,7 @@ sed -i 's/^#\?CLOSETRAY=.*/CLOSETRAY='"$CLOSETRAY"'/' $config
 sed -i 's/musicbrainz,//' $config
 [ $TAGS == 'y' ] && sed -i 's/^KID3CLI=".*/KID3CLI="kid3-cli"/' $config || sed -i 's/^KID3CLI=".*/KID3CLI=""/' $config
 
-[ -n "$ans" ] && ans=$(dialog --stdout --title "abCDe" --yesno "Reboot to work for abcde?" 0 0) || exit 1; clear
-[ "$ans" ] && reboot
+[ -z "$ans" ] && exit 1
+dialog --stdout --title "abCDe" --yesno "Reboot to work for abcde?" 0 0 || exit 1
+clear
+reboot

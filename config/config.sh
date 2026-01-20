@@ -54,7 +54,7 @@ case $options in
             E Enable $ff ) || exit 1; clear
         if [ $ffen == 'E' ]; then
             wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A5.1.2-12-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /root/ffmpeg-2:5.1.12-12-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /root/ffmpeg-2:5.1.2-12-x86_64.pkg.tar.zst
         else
             pacman -S --noconfirm ffmpeg
         fi
