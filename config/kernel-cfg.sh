@@ -12,7 +12,7 @@ pacman -Q alsa-lib | grep -qE 'alsa-lib .*-(5|6)$' \
   || alsalib='A ALSAlib@P5801x'
 
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select a command" 7 0 0 B Boot I Install M Remove $ramroot F Frequency P @P5801x $alsalib) || exit 1; clear
+            --menu "Select an action:" 7 0 0 B Boot I Install M Remove $ramroot F Frequency P @P5801x $alsalib) || exit 1; clear
 
 mkgrub(){
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
