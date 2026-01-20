@@ -7,8 +7,12 @@ c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
 
 pacman -Q ramroot >/dev/null 2>&1 || ramroot='R Ramroot'
+pacman -Q alsa-lib | grep -qE 'alsa-lib .*-(5|6)$' \
+  && alsalib='A ALSAlib@Seagate' \
+  || alsalib='A ALSAlib@P5801x'
+
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select a command" 7 0 0 B Boot I Install M Remove $ramroot F Frequency P @P5801x) || exit 1; clear
+            --menu "Select a command" 7 0 0 B Boot I Install M Remove $ramroot F Frequency P @P5801x $alsalib) || exit 1; clear
 
 mkgrub(){
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
@@ -28,7 +32,7 @@ case $WK in
             ver=$(echo $line | awk -F: '{print $1}')
             info=$(echo $line | awk -F: '{print $2}')
             exec+=$ver' '\"$info\"' '
-        done <<< $(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/kver)
+        done <<< "$(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/kver)"
         pacman -Q alsa-lib | grep -q '\-5' && ! pacman -Q xf86-video-fbdev >/dev/null 2>&1 && exec+='ALSA-lib @Seagate '
         options=$(eval $exec) || exit 1; clear
         if [ "$options" == "ALSA-lib" ]; then
@@ -52,7 +56,7 @@ case $WK in
             ver=$(echo $line | awk -F: '{print $1}')
             info=$(echo $line | awk -F: '{print $2}')
             exec+=$ver' '\"$info\"' '
-        done <<< $(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/kver)
+        done <<< "$(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/kver)"
         pacman -Q alsa-lib | grep -q '\-3' && ! pacman -Q xf86-video-fbdev >/dev/null 2>&1 && exec+='ALSA-lib @P5801x '
         options=$(eval $exec) || exit 1; clear
         if [ "$options" == "ALSA-lib" ]; then
@@ -73,7 +77,7 @@ case $WK in
     M)
         while read line; do
             menu+=${line}' '
-        done <<< $(pacman -Q | grep linux-[DQ] | grep -v headers)
+        done <<< "$(pacman -Q | grep linux-[DQ] | grep -v headers)"
         options=$(dialog --stdout \
                 --title "ArchQ $1" \
                 --menu "Select a kernel to remove" 7 0 0 $menu) || exit 1; clear
@@ -89,7 +93,7 @@ case $WK in
         while read line; do
             echo $line | grep 'fallback' || bootlist+=$n' '\"$line\"' '
             n=`expr $n + 1`
-        done <<< $(grep 'menuentry ' $grub_cfg | cut -d "'" -f2 | sed '$d;s/Arch Linux, with Linux //;s/ initramfs//'|cut -d' ' -f1-2)
+        done <<< "$(grep 'menuentry ' $grub_cfg | cut -d "'" -f2 | sed '$d;s/Arch Linux, with Linux //;s/ initramfs//'|cut -d' ' -f1-2)"
         bootlist+='S "Save Default"'
         options=$(eval $bootlist) || exit 1; clear
 
@@ -113,9 +117,32 @@ case $WK in
             t1=$(echo $l1 | grep tick | cut -d ' ' -f $i)
             t2=$(echo $l2 | grep tick | cut -d ' ' -f $i)
             count+='Core'$(expr $i - 2)': '
-            [ -f /usr/bin/python ] && count+=$(python -c "print(round(($t2-$t1)/10000.0),1)" | sed 's/ /./')'\n' \
+            [ -f /usr/bin/python ] && count+=$(python -c "print(round(($t2-$t1)/10000.0,1))")'\n' \
                                 || count+=$(expr $t2 / 10000 - $t1 / 10000)'\n'
         done
         dialog --stdout --title "ArchQ $1" --msgbox "\nKernel frequency: $count" $(expr $cpus + 6) 35; clear
         ;;
+    A)
+        if pacman -Q alsa-lib | grep -q '\-5'; then
+            echo -e "${c_blue_b}Install ALSA-lib @Seagate...${c_gray}"
+            if pacman -Q xf86-video-fbdev >/dev/null 2>&1; then
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-8-x86_64.pkg.tar.zst
+                pacman -U --noconfirm /tmp/alsa-lib-1.1.9-8-x86_64.pkg.tar.zst
+            else
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-7-x86_64.pkg.tar.zst
+                pacman -U --noconfirm /tmp/alsa-lib-1.1.9-7-x86_64.pkg.tar.zst
+            fi
+        elif pacman -Q alsa-lib | grep -q '\-7'; then
+            echo -e "${c_blue_b}Install ALSA-lib @P5801x...${c_gray}"
+            if pacman -Q xf86-video-fbdev >/dev/null 2>&1; then
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/alsa-lib-1.1.9-6-x86_64.pkg.tar.zst
+                pacman -U --noconfirm /tmp/alsa-lib-1.1.9-6-x86_64.pkg.tar.zst
+            else
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/alsa-lib-1.1.9-5-x86_64.pkg.tar.zst
+                pacman -U --noconfirm /tmp/alsa-lib-1.1.9-5-x86_64.pkg.tar.zst
+            fi
+        else
+            echo -e "${c_blue_b}ALSA-lib is up to date.${c_gray}"
+        fi
+        ;;    
 esac
