@@ -255,6 +255,7 @@ echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt mkinitcpio -p linux-${ker}
+arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 ### Setup Desktop (LXDE || LXQt)
 echo "LANG=en_US.UTF-8" >/mnt/home/$user/.xinitrc
