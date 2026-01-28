@@ -6,7 +6,7 @@ set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 ker=D44S; kver='6.12.12-12'
-mpdver=0.23.17-24
+mpdver=0.23.17-36
 mympdver=20.0.0-1
 lmsver=9.1-1
 
@@ -49,8 +49,8 @@ fi
 password
 lang=$(dialog --stdout --title "ArchQ Desktop" --menu "Select language" 7 0 0 E "English" J "Japanese" T "Chinese TW") || exit 1; clear
 devicelist=$(lsblk -dplnx size -o name,size | grep -Ev "boot|rpmb|loop" | tac)
-device=$(dialog --stdout --title "ArchQ Desktop" --menu "Select installation disk" 0 0 0 ${devicelist}) || exit 1; clear
-fmt=$(dialog --stdout --title "ArchQ Desktop" --menu "Format device ${device}" 7 0 0 E Entire P Partition U "USB Storage") || exit 1; clear
+device=$(dialog --stdout --title "ArchQ" --menu "Select installation disk" 0 0 0 ${devicelist}) || exit 1; clear
+fmt=$(dialog --stdout --title "ArchQ" --menu "Format device ${device}" 7 0 0 E Entire P "Partition / Retain Music" U "USB Storage") || exit 1; clear
 if [ $fmt = P ]; then
     partlst='dialog --stdout --title "Device $device" --menu "Select partition" 7 0 0 '
     while read line; do
@@ -59,12 +59,12 @@ if [ $fmt = P ]; then
         partlst+=$partname' '\"$partlable\"' '
     done <<< $(lsblk -pln -o name,size,partlabel,fstype $device | sed -e '1d')
     part_root=$(eval $partlst) || exit 1; clear
-    part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
+    part_boot=$(lsblk -pln -o name,parttypename | grep EFI | grep $device | awk 'NR==1 {print $1}')
 fi
 
 echo ${device} | grep -q 'nvme' && f2fs=F || f2fs=X
 ifport=$(ip -o link show | awk '{print $2,$9}' | grep -m1 '^en.*UP' | sed 's/:.*//')
-ip=$(dialog --stdout --title "ArchQ Desktop" --menu "Select IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1; clear
+ip=$(dialog --stdout --title "ArchQ" --menu "${ifport} IP setting" 7 0 0 D "DHCP" S "Static IP") || exit 1; clear
 if [ $ip = S ]; then
 ifmask=24; ifdns=8.8.8.8
 ifconfig=$(dialog --stdout --title "ArchQ Desktop" --ok-label "Ok" --form "Enter $ifport IP setting" 10 35 0 \
@@ -127,8 +127,8 @@ else
   parted --script "${device}" -- mklabel gpt \
         mkpart EFI fat32 1MiB 385MiB \
     set 1 boot on \
-        mkpart ArchQ ext4 385MiB ${root_end}
-        # mkpart Database ext4 ${root_end} 100%
+        mkpart ArchQ ext4 385MiB ${root_end} \
+        mkpart Database ext4 ${root_end} 100%
 
 # Simple globbing was not enough as on one device I needed to match /dev/mmcblk0p1 
 # but not /dev/mmcblk0boot1 while being able to match /dev/sda1 on other devices.
@@ -140,6 +140,10 @@ fi
 
 # format root partition
 [ $f2fs = F ] && mkfs.f2fs -fl ArchQ "${part_root}" || mkfs.xfs -fL ArchQ "${part_root}"
+# Wipe & format data partition
+part_data="$(ls ${device}* | grep -E "^${device}p?3$")"
+wipefs "${part_data}"
+[ $f2fs = F ] && mkfs.f2fs -fl Data "${part_data}" || mkfs.xfs -fL Data "${part_data}"
 
 ## Mount root & boot partition
 mount "${part_root}" /mnt
