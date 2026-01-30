@@ -402,7 +402,7 @@ case $server in
         if ! [[ $MPD == ul || $MPD == light ]]; then
             pacstrap /mnt upmpdcli
             arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli-1.9.6-1-x86_64.pkg.tar.zst
-            arch-chroot /mnt pacman -U --noconfirm /root/upmpdcli-1.9.6-1-x86_64.pkg.tar.zst /root/flac-1.4.3-1-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm /root/upmpdcli-1.9.6-1-x86_64.pkg.tar.zst
         fi
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
