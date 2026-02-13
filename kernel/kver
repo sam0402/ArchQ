@@ -3,6 +3,7 @@ Q441S-6.12.12-12:≦8 Core Speed Step
 Q441C-6.12.12-12:≦8 Core Console
 Q396-6.12.12-12:≦8 Core
 Q352-6.12.12-12:≦8 Core
+A352-6.12.12-2:≦8 Core AMD @P5801x
 Q352H-6.6.17-12:≦8 Core HDMI
 Q308-6.6.17-12:≦8 Core
 Q44-6.12.12-12:≦8 Core
@@ -12,4 +13,3 @@ D44S-6.12.12-12:≦4 Core Desktop Speed Step
 Qdbug-6.12.12-12:Qrip Console
 Q441-6.6.17-12:≦8 Core 
 D352-6.6.17-12:≦8 Core Desktop
-Q308AMD-6.1.54-1:≦8 Core
