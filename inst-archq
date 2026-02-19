@@ -8,7 +8,7 @@ trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 ker=Q352WU; kver='6.12.12-12'
 mpdver=0.23.17-36
 mympdver=20.0.0-1
-lmsver=9.1-1
+lmsver=9.1-2
 
 c_blue_b=$'\e[1;38;5;27m'
 c_green_b=$'\e[1;38;5;46m'
