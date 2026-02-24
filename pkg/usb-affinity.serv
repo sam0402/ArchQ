@@ -1,0 +1,10 @@
+[Unit]
+Description=Bind USB Interrupts to CPU 5
+After=systemd-modules-load.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'for i in $(grep xhci_hcd /proc/interrupts | awk -F: '{print $1}' | tr -d ' '); do echo 20 | sudo tee /proc/irq/$i/smp_affinity > /dev/null; done'
+
+[Install]
+WantedBy=multi-user.target
