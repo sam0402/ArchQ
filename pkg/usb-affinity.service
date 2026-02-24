@@ -1,6 +1,6 @@
 [Unit]
 Description=Bind USB Interrupts to CPU 5
-After=systemd-modules-load.service
+After=multi-user.target
 
 [Service]
 Type=oneshot
