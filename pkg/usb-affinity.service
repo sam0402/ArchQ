@@ -4,7 +4,7 @@ After=systemd-modules-load.service
 
 [Service]
 Type=oneshot
-ExecStart=/bin/sh -c 'for i in $(grep xhci_hcd /proc/interrupts | awk -F: '{print $1}' | tr -d ' '); do echo 20 | sudo tee /proc/irq/$i/smp_affinity > /dev/null; done'
+ExecStart=/bin/sh -c 'for i in $(grep xhci_hcd /proc/interrupts | awk -F: "{print \$1}" | tr -d " "); do echo 20 > /proc/irq/$i/smp_affinity; done'
 
 [Install]
 WantedBy=multi-user.target
