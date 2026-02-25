@@ -1,5 +1,5 @@
 [Unit]
-Description=Bind USB Interrupts to CPU 5
+Description=Bind USB Interrupts to CPU (5)
 After=systemd-modules-load.service
 
 [Service]
