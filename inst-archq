@@ -599,6 +599,8 @@ EOF
 curl -sL https://raw.githubusercontent.com/bb-qq/r8152/master/50-usb-realtek-net.rules >/mnt/etc/udev/rules.d/50-usb-realtek-net.rules
 # hot plug
 #curl -sL https://raw.githubusercontent.com/bb-qq/r8152/master/51-usb-r8152-net.rules >/mnt/etc/udev/rules.d/51-usb-r8152-net.rules
+# USB Affinity
+curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/usb-affinity.service >/mnt/usr/lib/systemd/system/usb-affinity.service
 ## Patch
 sed -i 's/#Storage=auto/Storage=none/' /mnt/etc/systemd/journald.conf
 sed -i 's/wait-online/wait-online --any/' /mnt/usr/lib/systemd/system/systemd-networkd-wait-online.service
