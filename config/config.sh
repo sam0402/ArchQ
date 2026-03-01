@@ -21,7 +21,7 @@ fi
 [ -f /root/.advence ] && MENU2+='0 "Basic config" ' || MENU2+='1 "Advence config" '
 uname -r | grep -q D && MENU2='X Desktop C "CPU frequency" O Server T Timezone '
 
-exec='dialog --stdout --title "'$ipaddr'  '$temp'" --menu "'$HOSTNAME'.local  Config" 7 0 0 '$MENU'K "Kernel/ALSAlib" M "Partition mount" '$MENU2
+exec='dialog --stdout --title "'$ipaddr'  '$temp'" --menu "'$HOSTNAME'.local  Config" 7 0 0 '$MENU'K Kernel M "Partition mount" '$MENU2
 
 options=$(eval $exec) || exit 1; clear
 case $options in
