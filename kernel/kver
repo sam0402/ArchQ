@@ -1,17 +1,15 @@
-Q441-6.12.12-12:≦8 Core
-Q441-6.12.12-16:≦6 Core
+Q441-6.18.7-6:≦6 Core @P5801x
+Q441-6.18.7-8:≦8 Core @P5801x
+Q352-6.18.7-4:≦4 Core @P5801x
+A220-6.18.7-8:≦8 Core AMD @P5801x
+Qrip-6.18.7-:≦8 Core Rip CD
 Q441S-6.12.12-12:≦8 Core Speed Step
 Q441C-6.12.12-12:≦8 Core Console
 Q396-6.12.12-12:≦8 Core
 Q352-6.12.12-12:≦8 Core
 Q352H-6.6.17-12:≦8 Core HDMI
-Q308-6.6.17-12:≦8 Core
 A352-6.12.12-2:≦8 Core AMD @P5801x
-A220-6.12.12-2:≦8 Core AMD @P5801x
 Q44-6.12.12-12:≦8 Core
-Qrip-6.12.12-12:≦6 Core Rip CD
 D44-6.12.12-12:≦4 Core Desktop
 D44S-6.12.12-12:≦4 Core Desktop Speed Step
 Qdbug-6.12.12-12:Qrip Console
-Q441-6.6.17-12:≦8 Core 
-D352-6.6.17-12:≦8 Core Desktop
