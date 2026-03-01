@@ -8,7 +8,7 @@ trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 ker=D44S; kver='6.12.12-12'
 mpdver=0.23.17-36
 mympdver=20.0.0-1
-lmsver=9.1-1
+lmsver=9.1-2
 
 c_blue_b=$'\e[1;38;5;27m'
 c_green_b=$'\e[1;38;5;46m'
@@ -357,12 +357,14 @@ esac
 
 ### Other setting
 echo -e "\n${c_blue_b}Setting service ...${c_gray}\n"
-arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A6.0-5-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm /root/ffmpeg-2:6.0-5-x86_64.pkg.tar.zst
+arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2%3A6.0-5-x86_64.pkg.tar.zst
+arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/linux-firmware-realtek-20260221-1-any.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/ffmpeg-2:6.0-5-x86_64.pkg.tar.zst /root/linux-firmware-realtek-20260221-1-any.pkg.tar.zst
 ## Instal alsa-lib-1.1.9
 cp /archq/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /mnt/root
-arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-8-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-8-x86_64.pkg.tar.zst
+arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-12-x86_64.pkg.tar.zst
+arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libevl-6.18-56-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-8-x86_64.pkg.tar.zst /root/libevl-6.18-56-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst
 
 cat >>/mnt/etc/rc.local <<EOF
