@@ -4,7 +4,8 @@ user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
 grub_cfg='/boot/grub/grub.cfg'
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
-
+#kver=$(pacman -Q | grep linux-Q | awk 'NR==1{print $2}')
+kver=6.18.7-8
 mkgrub(){
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
         part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
@@ -25,7 +26,6 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/python-soupsieve-2.4-1-any.pkg.tar.zst
     pacman -U --noconfirm /tmp/*.pkg.tar.zst
     if ! pacman -Q linux-Qrip >/dev/null 2>&1 ; then
-        kver=$(pacman -Q | grep linux-Q | awk 'NR==1{print $2}')
         wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
         echo -e "\nInstall kernel ${c_blue_b}Qrip${c_gray} ...\n"
         mkgrub
