@@ -393,8 +393,6 @@ EOF
 curl -sL https://raw.githubusercontent.com/bb-qq/r8152/master/50-usb-realtek-net.rules >/mnt/etc/udev/rules.d/50-usb-realtek-net.rules
 # USB Affinity
 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/usb-affinity.service >/mnt/usr/lib/systemd/system/usb-affinity.service
-cpu_mask=$(printf "%x" $((1<<(cpus-1))))
-sed -i "s/echo 20/echo $cpu_mask/" /mnt/usr/lib/systemd/system/usb-affinity.service
 arch-chroot /mnt systemctl enable usb-affinity
 
 ## Patch
