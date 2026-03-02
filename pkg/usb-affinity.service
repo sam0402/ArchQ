@@ -1,10 +1,10 @@
 [Unit]
-Description=Bind USB Interrupts to CPU (5)
+Description=Bind USB Interrupts to last CPU
 After=systemd-modules-load.service
 
 [Service]
 Type=oneshot
-ExecStart=/bin/sh -c 'for i in $(grep xhci_hcd /proc/interrupts | awk -F: "{print \$1}" | tr -d " "); do echo 20 > /proc/irq/$i/smp_affinity; done'
+ExecStart=/bin/sh -c 'cpus=$(getconf _NPROCESSORS_ONLN-1); for i in $(grep xhci_hcd /proc/interrupts | awk -F: "{print \$1}" | tr -d " "); do echo 20 > /proc/irq/$i/smp_affinity_list; done'
 RemainAfterExit=yes
 
 [Install]
