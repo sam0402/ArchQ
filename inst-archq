@@ -573,7 +573,7 @@ curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/asound.conf >/
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lame-3.100-4-x86_64.pkg.tar.zst
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libmad-0.15.1b-12-x86_64.pkg.tar.zst
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/linux-firmware-realtek-20260221-1-any.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm /root/lame-3.100-4-x86_64.pkg.tar.zst /root/libmad-0.15.1b-12-x86_64.pkg.tar.zst /root/linux-firmware-realtek-20260221-1-any.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/lame-3.100-4-x86_64.pkg.tar.zst /root/libmad-0.15.1b-12-x86_64.pkg.tar.zst /root/linux-firmware-realtek-20260221-1-any.pkg.tar.zst
 
 pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
 arch-chroot /mnt systemctl disable avahi-daemon.socket
