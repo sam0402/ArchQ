@@ -3,6 +3,8 @@ Q441-6.18.7-6s:≦6 Core @Seagate
 Q441-6.18.7-8:≦8 Core @P5801x
 Q352-6.18.7-4:≦4 Core @P5801x
 A220-6.18.7-8:≦8 Core AMD @P5801x
+D441-6.18.7-8:≦8 Core Desktop @P5801x
+D176-6.18.7-8:≦6 Core Desktop @P5801x
 Qrip-6.18.7-:≦8 Core Rip CD
 Q441S-6.12.12-12:≦8 Core Speed Step
 Q441C-6.12.12-12:≦8 Core Console
