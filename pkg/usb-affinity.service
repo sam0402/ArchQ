@@ -1,6 +1,6 @@
 [Unit]
 Description=Bind USB Interrupts to last CPU
-After=systemd-modules-load.service
+After=network.target sound.target multi-user.target
 
 [Service]
 Type=oneshot
