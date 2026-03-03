@@ -196,7 +196,7 @@ EOF
 # cpu isolation
         if [ $cpus -ge 6 ]; then
             echo cpu isolation ...
-            sed -i '/dop/i\\tcpu_affinity\t"'"$iso_1st"'"' /etc/mpd.conf
+            grep -q '^[[:space:]]*cpu_affinity' /etc/mpd.conf || sed -i '/dop/i\tcpu_affinity\t"'"$iso_1st"'"' /etc/mpd.conf
             sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
             grub-mkconfig -o /boot/grub/grub.cfg
         fi
