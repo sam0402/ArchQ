@@ -4,20 +4,20 @@ After=systemd-modules-load.service
 
 [Service]
 Type=oneshot
-PreExecStart=/bin/sh -c '\
-  TARGET=$(find /sys/bus/usb/drivers/snd-usb-audio -maxdepth 1 -type l -not -name "module" | head -n 1); \
-  if [ -n "$TARGET" ]; then \
-    PCI_PATH=$(readlink -f "$TARGET" | sed "s/\\/usb[0-9].*//"); \
-    TARGET_CPU=$(($(getconf _NPROCESSORS_ONLN) - 1)); \
-    for irq_num in $(ls $PCI_PATH/msi_irqs/); do \
-      echo $TARGET_CPU > /proc/irq/$irq_num/smp_affinity_list; \
-    done; \
-  fi'
 ExecStart=/bin/sh -c '\
   TARGET=$(find /sys/bus/usb/drivers/uas -maxdepth 1 -type l -not -name "module" | head -n 1); \
   if [ -n "$TARGET" ]; then \
     PCI_PATH=$(readlink -f "$TARGET" | sed "s/\\/usb[0-9].*//"); \
     TARGET_CPU=$(($(getconf _NPROCESSORS_ONLN) - 2)); \
+    for irq_num in $(ls $PCI_PATH/msi_irqs/); do \
+      echo $TARGET_CPU > /proc/irq/$irq_num/smp_affinity_list; \
+    done; \
+  fi'
+ExecStart=/bin/sh -c '\
+  TARGET=$(find /sys/bus/usb/drivers/snd-usb-audio -maxdepth 1 -type l -not -name "module" | head -n 1); \
+  if [ -n "$TARGET" ]; then \
+    PCI_PATH=$(readlink -f "$TARGET" | sed "s/\\/usb[0-9].*//"); \
+    TARGET_CPU=$(($(getconf _NPROCESSORS_ONLN) - 1)); \
     for irq_num in $(ls $PCI_PATH/msi_irqs/); do \
       echo $TARGET_CPU > /proc/irq/$irq_num/smp_affinity_list; \
     done; \
