@@ -14,7 +14,7 @@ ExecStart=/bin/sh -c '\
     done; \
   fi'
 ExecStart=/bin/sh -c '\
- TARGET=$(find /sys/bus/usb/drivers/snd-usb-audio -maxdepth 1 -type l -not -name "module" | head -n 1); \
+  TARGET=$(find /sys/bus/usb/drivers/snd-usb-audio -maxdepth 1 -type l -not -name "module" | head -n 1); \
   if [ -n "$TARGET" ]; then \
     PCI_PATH=$(readlink -f "$TARGET" | sed "s/\\/usb[0-9].*//"); \
     TARGET_CPU=$(($(getconf _NPROCESSORS_ONLN) - 1)); \
