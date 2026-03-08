@@ -1,6 +1,6 @@
 #!/bin/bash
 
-tsver=1.90.9-1
+tsver=1.94.2-1
 c_red_b=$'\e[1;38;5;196m'
 c_gray=$'\e[0;37m'
 c_write=$'\e[m'
