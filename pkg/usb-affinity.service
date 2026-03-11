@@ -1,6 +1,6 @@
 [Unit]
 Description=Bind USB Interrupts to last CPU
-After=network.target sound.target multi-user.target
+After=sound.target multi-user.target
 
 [Service]
 Type=oneshot
