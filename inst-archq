@@ -229,7 +229,7 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 
 echo -e "\n${c_blue_b}Install Arch Linux package ...${c_gray}\n"
 pacstrap /mnt base linux-firmware grub efibootmgr mkinitcpio os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
-        vim nano wget avahi sudo dialog cpupower lm_sensors ntp hdparm htop iwd nocache libevl \
+        vim nano wget avahi sudo dialog cpupower lm_sensors ntp hdparm htop iwd nocache \
         which glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
         fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb faad2 libmad \
         confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c python-mpd2 \
