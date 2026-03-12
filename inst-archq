@@ -354,7 +354,7 @@ echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mk
 [ $f2fs = X ] && sed -i 's/MODULES=()/MODULES=(xfs)/' /mnt/etc/mkinitcpio.conf
 
 ### Kernel
-[ $cpu = amd ] && (ker=Q308AMD; kver='6.1.54-1')
+[ $cpu = amd ] && (ker=Q308AMD; kver='6.1.54-1'; )
 echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
