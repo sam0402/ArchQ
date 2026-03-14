@@ -228,7 +228,7 @@ cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
 [ -f /mnt/boot/${cpu}-ucode.img ] || pacstrap /mnt ${cpu}-ucode
 
 echo -e "\n${c_blue_b}Install Arch Linux package ...${c_gray}\n"
-pacstrap /mnt base linux-firmware grub efibootmgr mkinitcpio os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
+pacstrap /mnt base linux linux-firmware grub efibootmgr mkinitcpio os-prober gptfdisk f2fs-tools xfsprogs openssh dhclient \
         vim nano wget avahi sudo dialog cpupower lm_sensors ntp hdparm htop iwd nocache \
         which glibc cifs-utils icu parted scrub mc usbutils tmux rsync nfs-utils \
         fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb faad2 libmad \
@@ -356,9 +356,9 @@ echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mk
 ### Kernel
 [ $cpu = amd ] && { ker=A220; kver='6.18.7-8'; }
 echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
+arch-chroot /mnt mkinitcpio -p linux
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-arch-chroot /mnt mkinitcpio -p linux-${ker}
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 isocpu=''
 cpus=$(getconf _NPROCESSORS_CONF)
