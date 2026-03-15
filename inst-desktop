@@ -253,7 +253,8 @@ echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mk
 ### Kernel
 echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libevl-6.18-56-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst /root/libevl-6.18-56-x86_64.pkg.tar.zst
 arch-chroot /mnt mkinitcpio -p linux-${ker}
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
@@ -363,8 +364,7 @@ arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/ffmpeg-2:6.0-5-x86_
 ## Instal alsa-lib-1.1.9
 cp /archq/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /mnt/root
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-12-x86_64.pkg.tar.zst
-arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libevl-6.18-56-x86_64.pkg.tar.zst
-arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-12-x86_64.pkg.tar.zst /root/libevl-6.18-56-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/alsa-lib-1.1.9-12-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -Udd --noconfirm /root/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst
 
 cat >>/mnt/etc/rc.local <<EOF
