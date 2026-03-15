@@ -3,19 +3,19 @@ config='/etc/squeezelite.conf'
 
 ### Select squeezelite version
 ver=$(pacman -Q squeezelite | awk -F ' ' '{print $2}')
-inst=(1.9.8.1317-pcm 1.9.8.1317-dsd 2.0.0.1518-pcm 2.0.0.1518-dsd)
+inst=(1.9.8.1317-11 1.9.8.1317-12 1.9.8.1317-13 1.9.8.1317-14)
 option=$(dialog --stdout --title "ArchQ Squeezelite $1" \
         --menu "Select: ${inst}" 7 0 0 \
-        0 "1.9 PCM" 1 "1.9 DSD" \
+        0 "PCM@P5801x" 1 "DSD@P5801x" 2 "PCM@Seagate" 3 "DSD@Seagate"\
         ) || exit 1; clear
 
-ver=${ver/-[13]/-pcm}; ver=${ver/-[24]/-dsd}
+ver=${ver/-1[13]/-pcm}; ver=${ver/-1[24]/-dsd}
 if [ "${ver}" != ${inst[$option]} ]; then
     cpus=$(getconf _NPROCESSORS_ONLN)
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-${inst[$option]}-x86_64.pkg.tar.zst
     pacman -U --noconfirm /tmp/squeezelite-${inst[$option]}-x86_64.pkg.tar.zst
     ver=$(pacman -Q squeezelite | awk -F ' ' '{print $2}')
-    ver=${ver/-[17]/-pcm}; ver=${ver/-[28]/-dsd}
+    ver=${ver/-1[13]/-pcm}; ver=${ver/-1[24]/-dsd}
 fi
 
 ## Select sound device
