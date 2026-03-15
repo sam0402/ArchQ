@@ -6,7 +6,7 @@ grub_cfg='/boot/grub/grub.cfg'
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
 
-pacman -Q ramroot >/dev/null 2>&1 || ramroot='R Ramroot'
+# pacman -Q ramroot >/dev/null 2>&1 || ramroot='R Ramroot'
 # pacman -Q alsa-lib | grep -qE 'alsa-lib .*-(5|6)$' \
 #   && alsalib='A ALSAlib@Seagate' \
 #   || alsalib='A ALSAlib@P5801x'
