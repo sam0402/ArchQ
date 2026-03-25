@@ -7,12 +7,13 @@ c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
 
 # pacman -Q ramroot >/dev/null 2>&1 || ramroot='R Ramroot'
-# pacman -Q alsa-lib | grep -qE 'alsa-lib .*-(5|6)$' \
-#   && alsalib='A ALSAlib@Seagate' \
-#   || alsalib='A ALSAlib@P5801x'
+pacman -Q alsa-lib | grep -qE 'alsa-lib .*-21$' \
+  && alsalib='A ALSAlib@Soft' \
+  || alsalib='A ALSAlib@Forward'
+pacman -Q xf86-video-fbdev >/dev/null 2>&1 && alsalib=''
 
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select an action:" 7 0 0 B Boot I Install M Remove $ramroot F Frequency P @P5801x) || exit 1; clear
+            --menu "Select an action:" 7 0 0 B Boot I Install M Remove $ramroot F Frequency $alsalib) || exit 1; clear
 
 mkgrub(){
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
@@ -123,24 +124,14 @@ case $WK in
         dialog --stdout --title "ArchQ $1" --msgbox "\nKernel frequency: $count" $(expr $cpus + 6) 35; clear
         ;;
     A)
-        if pacman -Q alsa-lib | grep -q '\-5'; then
-            echo -e "${c_blue_b}Install ALSA-lib @Seagate...${c_gray}"
-            if pacman -Q xf86-video-fbdev >/dev/null 2>&1; then
-                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-8-x86_64.pkg.tar.zst
-                pacman -U --noconfirm /tmp/alsa-lib-1.1.9-8-x86_64.pkg.tar.zst
-            else
-                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-7-x86_64.pkg.tar.zst
-                pacman -U --noconfirm /tmp/alsa-lib-1.1.9-7-x86_64.pkg.tar.zst
-            fi
-        elif pacman -Q alsa-lib | grep -q '\-7'; then
-            echo -e "${c_blue_b}Install ALSA-lib @P5801x...${c_gray}"
-            if pacman -Q xf86-video-fbdev >/dev/null 2>&1; then
-                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/alsa-lib-1.1.9-6-x86_64.pkg.tar.zst
-                pacman -U --noconfirm /tmp/alsa-lib-1.1.9-6-x86_64.pkg.tar.zst
-            else
-                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/i5801/alsa-lib-1.1.9-5-x86_64.pkg.tar.zst
-                pacman -U --noconfirm /tmp/alsa-lib-1.1.9-5-x86_64.pkg.tar.zst
-            fi
+        if pacman -Q alsa-lib | grep -q '\-11'; then
+            echo -e "${c_blue_b}Install ALSA-lib @Forward...${c_gray}"
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-21-x86_64.pkg.tar.zst
+                pacman -U --noconfirm /tmp/alsa-lib-1.1.9-21-x86_64.pkg.tar.zst
+        elif pacman -Q alsa-lib | grep -q '\-21'; then
+            echo -e "${c_blue_b}Install ALSA-lib @Soft...${c_gray}"
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-11-x86_64.pkg.tar.zst
+                pacman -U --noconfirm /tmp/alsa-lib-1.1.9-11-x86_64.pkg.tar.zst
         else
             echo -e "${c_blue_b}ALSA-lib is up to date.${c_gray}"
         fi

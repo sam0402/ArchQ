@@ -74,10 +74,8 @@ case $server in
             pacman -S perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
             pacman -U --noconfirm /tmp/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
-            [ $cpus -ge 4 ] && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_1st"' $MAINPID' /usr/lib/systemd/system/lyrionmusicserver.service
-            [ $cpus -ge 6 ] && pacman -Q squeezelite >/dev/null 2>&1 && sed -i 's/^PIDFile/#PIDFile/;/ExecStart=/iType=idle\nNice=-20\nExecStartPost=/usr/bin/taskset -cp '"$iso_2nd"' $MAINPID' /usr/lib/systemd/system/lyrionmusicserver.service
+            curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver.service >/usr/lib/systemd/system/lyrionmusicserver.service
             sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
-            sed -i 's/novideo/novideo --charset=utf8/' /usr/lib/systemd/system/lyrionmusicserver.service
             sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/lyrionmusicserver.service
         fi
 
@@ -116,8 +114,8 @@ EOF
         if [ $cpus -ge 6 ]; then
         cat >>/etc/rc.local <<EOF
     while read PID; do 
-        taskset -cp 0-$((iso_1st-1)) \$PID
-    done <<< \$(ps -eLo command,comm,tid,psr | grep -v '^\[\|output' | grep '$iso_1st\$' | awk '{print \$(NF-1)}')
+        taskset -cp 0-\$((\$(getconf _NPROCESSORS_ONLN)-1)) \$PID
+    done <<< \$(ps -eLo command,comm,tid,psr | grep -v '^\[\|output' | grep "\$((\$(getconf _NPROCESSORS_ONLN)-1))\$" | awk '{print \$(NF-1)}')
 EOF
         fi
         cat >>/etc/rc.local <<EOF
