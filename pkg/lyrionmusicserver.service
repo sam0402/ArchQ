@@ -1,0 +1,22 @@
+[Unit]
+Description=Lyrion Music Server Daemon
+After=network.target
+
+[Service]
+User=lyrionms
+Group=lyrionms
+WorkingDirectory=/opt/lyrionmusicserver
+RuntimeDirectory=lyrionmusicserver
+#PIDFile=${RUNTIME_DIRECTORY}/slimserver.pid
+Type=idle
+Nice=-20
+ExecStartPost=/bin/sh -c "taskset -cp $(($(getconf _NPROCESSORS_ONLN)-1)) $MAINPID; exit 0"
+ExecStart=/opt/lyrionmusicserver/slimserver.pl \
+        --prefsdir /opt/lyrionmusicserver/prefs \
+        --cachedir /opt/lyrionmusicserver/cache \
+        --logdir /opt/lyrionmusicserver/Logs \
+        --pidfile ${RUNTIME_DIRECTORY}/slimserver.pid \
+        --noimage --novideo --charset=utf8
+
+[Install]
+WantedBy=multi-user.target
