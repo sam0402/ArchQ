@@ -3,13 +3,13 @@ config='/etc/squeezelite.conf'
 
 ### Select squeezelite version
 ver=$(pacman -Q squeezelite | awk -F ' ' '{print $2}')
-inst=(1.9.8.1317-11 1.9.8.1317-12 1.9.8.1317-13 1.9.8.1317-14)
+inst=(1.9.8.1317-21 1.9.8.1317-22 1.9.8.1317-11 1.9.8.1317-12)
 option=$(dialog --stdout --title "ArchQ Squeezelite $1" \
         --menu "Select: ${inst}" 7 0 0 \
-        0 "PCM@P5801x" 1 "DSD@P5801x" \
+        0 "PCM" 1 "DSD" \
         ) || exit 1; clear
 
-ver=${ver/-1[13]/-pcm}; ver=${ver/-1[24]/-dsd}
+ver=${ver/-2[13]/-pcm}; ver=${ver/-2[24]/-dsd}
 if [ "${ver}" != ${inst[$option]} ]; then
     cpus=$(getconf _NPROCESSORS_ONLN)
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-${inst[$option]}-x86_64.pkg.tar.zst
