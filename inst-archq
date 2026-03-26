@@ -375,7 +375,7 @@ case $server in
         arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
         arch-chroot /mnt pacman -U --noconfirm /root/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver.service >/mnt/usr/lib/systemd/system/lyrionmusicserver.service
-        [ $cpus -ge 6 ] && [[ $player =~ S ]] && sed -i 's|\$(($(getconf _NPROCESSORS_ONLN)-1))|$((($(getconf _NPROCESSORS_ONLN)-1)/2))|' /mnt/usr/lib/systemd/system/lyrionmusicserver.service
+        [ $cpus -ge 6 ] && [[ $player =~ S ]] && sed -i 's|)-1)|)/2)|' /mnt/usr/lib/systemd/system/lyrionmusicserver.service
         sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/lyrionmusicserver.service
         arch-chroot /mnt systemctl enable lyrionmusicserver
         ;;
