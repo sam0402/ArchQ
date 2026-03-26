@@ -1,17 +1,18 @@
-Q441-6.18.7-6:≦6 Core @P5801x
+Q441-6.18.7-6:≦6 Core
 Q441-6.18.7-6s:≦6 Core @Seagate
-Q441-6.18.7-8:≦8 Core @P5801x
+Q441-6.18.7-8:≦8 Core
 Q441C-6.18.7-8:≦6 Core Console
-Q352-6.18.7-4:≦4 Core @P5801x
-Q352-6.18.7-8:≦8 Core @P5801x
-Q220-6.18.7-4:≦4 Core @P5801x
-A220-6.18.7-8:≦8 Core AMD @P5801x
-D441-6.18.7-8:≦8 Core Desktop @P5801x
-D176-6.18.7-8:≦6 Core Desktop @P5801x
-D44-6.18.7-16:≦16 Core Desktop @P5801x
+Q396-6.18.7-6:≦6 Core
+Q352-6.18.7-4:≦4 Core
+Q352-6.18.7-8:≦8 Core
+Q220-6.18.7-4:≦4 Core
+A220-6.18.7-8:≦8 Core AMD
+D441-6.18.7-8:≦8 Core Desktop
+D176-6.18.7-8:≦6 Core Desktop
+D44-6.18.7-16:≦16 Core Desktop
 Qrip-6.18.7-:≦8 Core Rip CD
 Q441S-6.12.12-12:≦8 Core Speed Step
-A352-6.12.12-2:≦8 Core AMD @P5801x
+A352-6.12.12-2:≦8 Core AMD
 Q44-6.12.12-12:≦8 Core
 Qdbug-6.12.12-12:Qrip Console
 Q352H-6.6.17-12:≦8 Core HDMI
