@@ -10,7 +10,7 @@ If the CPU has more than 4 cores, MPD, LMS, and Squeezelite will run on isolated
 
 
 Install step:
-1. Download the [ArchQ Linux install 202603.iso](https://drive.google.com/file/d/1bqNAHWCVYq9W6zstT_Bb9QY7M2Bl3_hH/view?usp=share_link), [mirror](https://miya.teracloud.jp/share/11d11c7bd85018e9)
+1. Download the [ArchQ Linux install 202603.iso](https://drive.google.com/file/d/1uDIDai9H3tQFIr_3kumONXQZtX8qkZ5p/view?usp=share_link), [mirror](https://miya.teracloud.jp/share/11d11c7bd85018e9)
 
 2. Flash ISO image to USB drive by [Etcher](https://www.balena.io/etcher/?).
 
