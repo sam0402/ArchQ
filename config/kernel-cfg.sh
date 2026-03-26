@@ -7,9 +7,9 @@ c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
 
 # pacman -Q ramroot >/dev/null 2>&1 || ramroot='R Ramroot'
-pacman -Q alsa-lib | grep -qE 'alsa-lib .*-.5$' \
-  && alsalib='A ALSAlib@Soft' \
-  || alsalib='A ALSAlib@Forward'
+pacman -Q alsa-lib | grep -qE 'alsa-lib .*-1.$' \
+  && alsalib='A ALSAlib@Forward' \
+  || alsalib='A ALSAlib@Soft'
 pacman -Q xf86-video-fbdev >/dev/null 2>&1 && alsalib=''
 
 WK=$(dialog --stdout --title "ArchQ $1" \
