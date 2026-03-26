@@ -515,8 +515,8 @@ esac
 if [[ $player =~ S ]]; then
     echo -e "\n${c_blue_b}Install Squeezelite ...${c_gray}\n"
     # pacstrap /mnt faad2 libmad
-    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-11-x86_64.pkg.tar.zst
-    arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-11-x86_64.pkg.tar.zst
+    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-21-x86_64.pkg.tar.zst
+    arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-21-x86_64.pkg.tar.zst
     [[ -n "$scard" ]] && sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/squeezelite.conf
     arch-chroot /mnt systemctl enable squeezelite
 fi
