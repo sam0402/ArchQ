@@ -5,7 +5,7 @@ config='/etc/squeezelite.conf'
 ver=$(pacman -Q squeezelite | awk -F ' ' '{print $2}')
 inst=(1.9.8.1317-21 1.9.8.1317-22 1.9.8.1317-11 1.9.8.1317-12)
 option=$(dialog --stdout --title "ArchQ Squeezelite $1" \
-        --menu "Select: ${inst}" 7 0 0 \
+        --menu "Select version:" 7 0 0 \
         0 "PCM" 1 "DSD" \
         ) || exit 1; clear
 

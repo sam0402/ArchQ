@@ -8,13 +8,13 @@ c_gray=$'\e[m'
 cpus=$(getconf _NPROCESSORS_ONLN)
 
 # pacman -Q ramroot >/dev/null 2>&1 || ramroot='R Ramroot'
-pacman -Q alsa-lib | grep -qE 'alsa-lib .*-1.$' \
-  && alsalib='A ALSAlib@Dynamic' \
-  || alsalib='A ALSAlib@Soft'
+# pacman -Q alsa-lib | grep -qE 'alsa-lib .*-1.$' \
+#   && alsalib='A ALSAlib@Dynamic' \
+#   || alsalib='A ALSAlib@Soft'
 pacman -Q xf86-video-fbdev >/dev/null 2>&1 && alsalib=''
 
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select an action:" 7 0 0 B Boot I Install M Remove $ramroot F Frequency $alsalib) || exit 1; clear
+            --menu "Select an action:" 7 0 0 B Boot I Install M Remove $ramroot F Frequency A ALSAlib) || exit 1; clear
 
 mkgrub(){
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
@@ -111,16 +111,16 @@ case $WK in
         dialog --stdout --title "ArchQ $1" --msgbox "\nKernel frequency: $count" $(expr $cpus + 6) 35; clear
         ;;
     A)
-        if pacman -Q alsa-lib | grep -q '\-15'; then
-            echo -e "${c_blue_b}Install ALSA-lib @Dynamic...${c_gray}"
-                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-25-x86_64.pkg.tar.zst
-                pacman -U --noconfirm /tmp/alsa-lib-1.1.9-25-x86_64.pkg.tar.zst
-        elif pacman -Q alsa-lib | grep -q '\-25'; then
-            echo -e "${c_blue_b}Install ALSA-lib @Soft...${c_gray}"
-                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-15-x86_64.pkg.tar.zst
-                pacman -U --noconfirm /tmp/alsa-lib-1.1.9-15-x86_64.pkg.tar.zst
-        else
-            echo -e "${c_blue_b}ALSA-lib is up to date.${c_gray}"
-        fi
+        inst=(' ' Soft Dynamic)
+        pacman -Q alsa-lib | grep -q '\-1.' && alsaver=Soft || alsaver=Dynamic
+        
+        op=$(dialog --stdout --title "ALSA-lib: $alsaver $1" \
+            --menu "Select verson:" 7 0 0 \
+            1 "Soft" 2 "Dynamic" ) || exit 1; clear
+        echo -e "${c_blue_b}Install ALSA-lib ${inst[$op]}...${c_gray}"
+        wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-${op}5-x86_64.pkg.tar.zst
+        pacman -U --noconfirm /tmp/alsa-lib-1.1.9-${op}5-x86_64.pkg.tar.zst
+        dialog --stdout --title "ALSA-lib $1" --yesno "The ${inst[$op]} is up to date. \nReboot to take effect?" 0 0 && echo reboot || exit 0
+        clear
         ;;    
 esac
