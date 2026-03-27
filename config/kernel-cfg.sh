@@ -120,7 +120,7 @@ case $WK in
         echo -e "${c_blue_b}Install ALSA-lib ${inst[$op]}...${c_gray}"
         wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-${op}5-x86_64.pkg.tar.zst
         pacman -U --noconfirm /tmp/alsa-lib-1.1.9-${op}5-x86_64.pkg.tar.zst
-        dialog --stdout --title "ALSA-lib $1" --yesno "The ${inst[$op]} is up to date. \nReboot to take effect?" 0 0 && echo reboot || exit 0
+        dialog --stdout --title "ALSA-lib $1" --yesno "The ${inst[$op]} is up to date. \nReboot to take effect?" 0 0 && reboot || exit 0
         clear
         ;;    
 esac
