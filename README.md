@@ -45,9 +45,8 @@ Supported Hardware: (Include Macbook or Mac mini Intel version)
 Stand-alone: Install
  1. LMS + Squeezelite
  2. MPD (CD play, Multiroom, Httpd Stream)
- 3. Roon
- 5. HQPlayer Embedded 4 & 5
- 6. Airplay
+ 3. HQPlayer Embedded 4 & 5
+ 4. Airplay
 
 Client-server:
 
