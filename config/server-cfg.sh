@@ -1,5 +1,5 @@
 #!/bin/bash
-mpdver=0.23.17-36
+mpdver=0.23.18-1
 mympdver=20.0.0-1
 lmsver=9.1-2
 
@@ -30,35 +30,25 @@ server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
 yes | pacman -Scc
 
 case $server in
-    MPD)
-        server=$(dialog --stdout --title "ArchQ" \
-                --radiolist "Select MPD version" 7 0 0 \
-                mU "Ultra: PCM, FLAC only; best SQ" off \
-                mL "Light: PCM, CD; Radio: FLAC, MP3" on \
-                mD "DSD: PCM, DSD; Radio: FLAC" off \
-                mR "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
-                mS "Stream: PCM; Radio:FLAC MP3; http output:8000" off \
-                mM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
-        ;;
-    myMPD)
-        server=$(dialog --stdout --title "ArchQ" \
-                --radiolist "Select MPD version" 7 0 0 \
-                yU "Ultra: PCM, FLAC only; best SQ" off \
-                yL "Light: PCM, CD; Radio: FLAC, MP3" on \
-                yD "DSD: PCM, DSD; Radio: FLAC" off \
-                yR "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
-                yS "Stream: PCM; Radio:FLAC MP3; http output:8000" off \
-                yM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
-        ;;
-    RompR)
-        server=$(dialog --stdout --title "ArchQ" \
-                --radiolist "Select MPD version" 7 0 0 \
-                oU "Ultra: PCM, FLAC only; best SQ" off \
-                oL "Light: PCM, CD; Radio: FLAC, MP3" on \
-                oD "DSD: PCM, DSD; Radio: FLAC" off \
-                oR "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
-                oS "Stream: PCM; Radio:FLAC MP3; http output:8000" off \
-                oM "MPEG: All features of the above; +AAC, ALAC" off ) || exit 1
+    MPD|myMPD|RompR)
+        case "$server" in
+            MPD)   pfx="m" ;;
+            myMPD) pfx="y" ;;
+            RompR) pfx="o" ;;
+        esac
+
+        choice=$(dialog --stdout --title "ArchQ" \
+            --radiolist "Select MPD version" 7 0 0 \
+            ${pfx}U "Ultra: PCM, FLAC only; best SQ" off \
+            ${pfx}L "Slim: Ultra (SlimProto output)" off \
+            ${pfx}I "Light: PCM, CD; Radio: FLAC, MP3" on \
+            ${pfx}D "DSD: PCM, DSD; Radio: FLAC" off \
+            ${pfx}R "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
+            ${pfx}S "Stream: PCM; Radio:FLAC MP3; http output:8000" off \
+            ${pfx}M "MPEG: All features of the above; +AAC, ALAC" off
+        ) || exit 1
+
+        server="$choice"
         ;;
 esac
 clear
@@ -123,12 +113,15 @@ fi
 
 EOF
     fi
-        [[ $server =~ .U ]] && MPD=ul
-        [[ $server =~ .L ]] && MPD=light
-        [[ $server =~ .R ]] && MPD=radio
-        [[ $server =~ .D ]] && MPD=dsd
-        [[ $server =~ .S ]] && MPD=stream
-        [[ $server =~ .M ]] && MPD=ffmpeg
+        case "$server" in
+            *U) MPD=ul ;;
+            *L) MPD=slim ;;
+            *I) MPD=light ;;
+            *D) MPD=dsd ;;
+            *R) MPD=radio ;;
+            *S) MPD=stream ;;
+            *M) MPD=ffmpeg ;;
+        esac
         [[ $MPD == ul || $MPD == light ]] || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
 
         if ! pacman -Q mpd-${MPD} >/dev/null 2>&1; then
