@@ -1,0 +1,936 @@
+diff -Nur mpd-0.23.17/meson_options.txt mpd-0.23.18/meson_options.txt
+--- mpd-0.23.17/meson_options.txt	2025-01-30 00:11:53.000000000 +0800
++++ mpd-0.23.18/meson_options.txt	2026-03-28 23:54:02.000000000 +0800
+@@ -173,6 +173,7 @@
+ option('ao', type: 'feature', description: 'libao output plugin')
+ option('fifo', type: 'boolean', value: true, description: 'FIFO output plugin')
+ option('httpd', type: 'boolean', value: true, description: 'HTTP streaming output plugin')
++option('slim', type: 'feature', value: 'disabled', description: 'SlimProto output plugin (Squeezebox/LMS)')
+ option('jack', type: 'feature', description: 'JACK output plugin')
+ option('openal', type: 'feature', description: 'OpenAL output plugin')
+ option('oss', type: 'feature', description: 'Open Sound System support')
+diff -Nur mpd-0.23.17/src/output/plugins/meson.build mpd-0.23.18/src/output/plugins/meson.build
+--- mpd-0.23.17/src/output/plugins/meson.build	2025-01-30 00:11:53.000000000 +0800
++++ mpd-0.23.18/src/output/plugins/meson.build	2026-03-29 00:24:24.000000000 +0800
+@@ -44,6 +44,14 @@
+   need_encoder = true
+ endif
+ 
++output_features.set('ENABLE_SLIM_OUTPUT', get_option('slim').allowed())
++if get_option('slim').allowed()
++  output_plugins_sources += 'SlimOutputPlugin.cxx'
++  if not get_option('httpd')
++    output_plugins_deps += [ event_dep, net_dep ]
++  endif
++endif
++
+ libjack_dep = dependency('jack', version: '>= 0.100', required: get_option('jack'))
+ output_features.set('ENABLE_JACK', libjack_dep.found())
+ if libjack_dep.found()
+diff -Nur mpd-0.23.17/src/output/plugins/SlimOutputPlugin.cxx mpd-0.23.18/src/output/plugins/SlimOutputPlugin.cxx
+--- mpd-0.23.17/src/output/plugins/SlimOutputPlugin.cxx	1970-01-01 08:00:00.000000000 +0800
++++ mpd-0.23.18/src/output/plugins/SlimOutputPlugin.cxx	2026-03-29 08:22:41.000000000 +0800
+@@ -0,0 +1,848 @@
++/*
++ * Copyright 2003-2021 The Music Player Daemon Project
++ * http://www.musicpd.org
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program; if not, write to the Free Software Foundation, Inc.,
++ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
++ */
++
++/*
++ * Slim output plugin – streams raw PCM to Squeezelite via SlimProto.
++ *
++ * Three threads:
++ *   SlimThread  – SlimProto TCP control server (port slimproto_port)
++ *   HttpThread  – HTTP audio streaming server  (port http_port)
++ *   SendThread  – broadcasts PCM pages to HTTP clients
++ *
++ * S24_P32 is repacked to 24-bit packed (3 bytes/sample) before queuing
++ * to prevent the ×1/256 volume bug that would occur if the sign-extension
++ * byte were sent as a 32-bit sample.
++ *
++ * mpd.conf:
++ *   audio_output {
++ *       type           "slim"
++ *       name           "Squeezelite"
++ *       ip             "192.168.1.80"   # restrict to this Squeezelite IP
++ *       slimproto_port 3483             # optional
++ *       http_port      9000             # optional
++ *       gain           100              # optional, 0–100
++ *   }
++ */
++
++#include "config.h"
++#include "SlimOutputPlugin.hxx"
++#include "../OutputAPI.hxx"
++#include "config/Block.hxx"
++#include "Log.hxx"
++#include "util/Domain.hxx"
++#include "pcm/AudioFormat.hxx"
++#include "pcm/Pack.hxx"
++#include "pcm/SampleFormat.hxx"
++
++#include <arpa/inet.h>
++#include <netinet/in.h>
++#include <netinet/tcp.h>
++#include <sys/select.h>
++#include <sys/socket.h>
++#include <unistd.h>
++#include <cerrno>
++#include <cstring>
++
++#include <algorithm>
++#include <atomic>
++#include <condition_variable>
++#include <cstdint>
++#include <memory>
++#include <mutex>
++#include <queue>
++#include <stdexcept>
++#include <string>
++#include <thread>
++#include <vector>
++
++static constexpr Domain domain("slim");
++
++/* strm command codes (squeezelite/slimproto.c switch(strm->command)) */
++enum class SlimStrmCmd : char {
++    Timestamp = 't',
++    Stop      = 'q',
++    Flush     = 'f',
++    Pause     = 'p',
++    Unpause   = 'u',
++};
++
++/* ============================================================
++ * SlimProto wire-format structures (all fields big-endian)
++ * Server→client:  uint16_t size + char[4] opcode + data
++ * Client→server:  char[4] opcode + uint32_t size + payload
++ * ============================================================ */
++#pragma pack(push, 1)
++
++struct SlimAUDE {
++    uint16_t size;
++    char     op[4];   /* "aude" */
++    uint8_t  spdif;
++    uint8_t  dac;
++};
++
++struct SlimAUDG {
++    uint16_t size;
++    char     op[4];   /* "audg" */
++    uint32_t old_l, old_r;
++    uint8_t  dvc, preamp;
++    uint32_t new_l, new_r;
++};
++
++struct SlimSTRMdata {
++    char     op[4];         /* "strm" */
++    char     command;
++    uint8_t  autostart;
++    uint8_t  format;        /* 'p'=PCM */
++    uint8_t  sampleSize;
++    uint8_t  samplingRate;
++    uint8_t  channels;
++    uint8_t  endianness;
++    uint8_t  threshold;     /* KB before autostart */
++    uint8_t  spdifEnable;
++    uint8_t  transPeriod;
++    uint8_t  transType;
++    uint8_t  flags;
++    uint8_t  outThreshold;  /* 1/10 s of output buffer before play */
++    uint8_t  slaves;
++    uint32_t replayGain;
++    uint16_t serverPort;
++    uint32_t serverIP;      /* 0 = use control-server IP */
++    /* HTTP request appended here */
++};
++
++/* STAT payload (client→server), 53 bytes after 8-byte header */
++struct SlimSTATpayload {
++    char     event[4];
++    uint8_t  num_crlf, mas_initialized, mas_mode;
++    uint32_t stream_buffer_size, stream_buffer_fullness;
++    uint32_t bytes_received_H, bytes_received_L;
++    uint16_t signal_strength;
++    uint32_t jiffies;
++    uint32_t output_buffer_size, output_buffer_fullness;
++    uint32_t elapsed_seconds;
++    uint16_t voltage;
++    uint32_t elapsed_milliseconds;
++    uint32_t server_timestamp;
++    uint16_t error_code;
++};
++
++#pragma pack(pop)
++
++/* ============================================================
++ * Format helpers
++ * ============================================================ */
++
++/* squeezelite/pcm.c sample_rates[]: index N maps to char '0'+N */
++static constexpr uint32_t slim_sample_rates[] = {
++    11025, 22050, 32000, 44100, 48000,
++     8000, 12000, 16000, 24000, 96000,
++    88200, 176400, 192000, 352800, 384000, 705600, 768000
++};
++
++static char mapSampleRate(unsigned sr) noexcept
++{
++    for (size_t i = 0; i < std::size(slim_sample_rates); ++i)
++        if (slim_sample_rates[i] == sr)
++            return static_cast<char>('0' + i);
++    return '3'; /* fallback: 44.1 kHz */
++}
++
++static char mapSampleSize(SampleFormat fmt) noexcept
++{
++    switch (fmt) {
++    case SampleFormat::S8:      return '0';
++    case SampleFormat::S16:     return '1';
++    case SampleFormat::S24_P32: return '2'; /* packed to true 24-bit before queuing */
++    case SampleFormat::S32:     return '3';
++    default:                    return '1';
++    }
++}
++
++/* Send all bytes; returns false on error */
++static bool SendAll(int fd, const void *data, size_t len) noexcept
++{
++    const uint8_t *p = static_cast<const uint8_t *>(data);
++    while (len > 0) {
++        ssize_t n = send(fd, p, len, MSG_NOSIGNAL);
++        if (n <= 0) return false;
++        p += n; len -= (size_t)n;
++    }
++    return true;
++}
++
++/* ============================================================
++ * SlimOutput
++ * ============================================================ */
++
++class SlimOutput final : public AudioOutput {
++    /* Configuration */
++    const std::string client_ip;
++    const unsigned    slim_port;
++    const unsigned    http_port;
++    const unsigned    gain_pct;
++
++    /* Audio format (set in Open()) */
++    AudioFormat audio_fmt{};
++
++    /* Cached HTTP 200 response (built in Open()) */
++    std::string http_resp;
++
++    /* Cached bytes-per-second (sample_rate × frame_size, set in Open()) */
++    uint64_t bytes_per_sec = 0;
++
++    using Page    = std::vector<uint8_t>;
++    using PagePtr = std::unique_ptr<Page>;
++
++    /* HTTP clients */
++    struct HttpClient { int fd; };
++    std::mutex              clients_mtx;
++    std::vector<HttpClient> http_clients;
++
++    /* Audio queue: Play() → SendThread */
++    std::mutex              audio_mtx;
++    std::condition_variable audio_cv;
++    std::queue<PagePtr>     audio_queue;
++    /* Set when ≥1 HTTP client is connected; SendThread waits on this
++     * so pages queued while squeezelite is reconnecting are not lost. */
++    std::atomic<bool>       has_client{false};
++
++    /* Thread lifecycle */
++    std::atomic<bool> running{false};
++    std::thread       slim_thr, http_thr, send_thr;
++
++    /* Active SlimProto connection fd */
++    std::mutex slim_fd_mtx;
++    int        slim_fd{-1};
++
++    /* Pause state (written by output thread and Close()) */
++    std::atomic<bool> paused{false};
++
++    /* Real-time throttle */
++    using Clock = std::chrono::steady_clock;
++    Clock::time_point stream_start{};
++    Clock::time_point pause_start{};
++    uint64_t          bytes_sent = 0;
++
++public:
++    SlimOutput(const ConfigBlock &block);
++    ~SlimOutput() noexcept override;
++
++    static AudioOutput *Create([[maybe_unused]] EventLoop &,
++                               const ConfigBlock &block)
++    {
++        return new SlimOutput(block);
++    }
++
++private:
++    void            Open(AudioFormat &af) override;
++    void            Close() noexcept override;
++    Clock::duration Delay() const noexcept override;
++    size_t          Play(const void *chunk, size_t size) override;
++    void            Cancel() noexcept override;
++    bool            Pause() noexcept override;
++
++    void SlimThread();
++    void HttpThread();
++    void SendThread();
++
++    bool SendStart(int fd);
++    bool SendSlimCtrl(SlimStrmCmd cmd, uint32_t ms = 0) noexcept;
++
++    static int MakeTcpServer(unsigned port, const char *tag) noexcept;
++};
++
++/* ============================================================
++ * Construction / destruction
++ * ============================================================ */
++
++SlimOutput::SlimOutput(const ConfigBlock &block)
++    : AudioOutput(FLAG_PAUSE)
++    , client_ip(block.GetBlockValue("ip", ""))
++    , slim_port(block.GetBlockValue("slimproto_port", 3483U))
++    , http_port(block.GetBlockValue("http_port", 9000U))
++    , gain_pct(block.GetBlockValue("gain", 100U))
++{
++    /* Consume legacy "encoder" option to suppress "unknown option" warnings */
++    (void)block.GetBlockValue("encoder", "wave");
++}
++
++SlimOutput::~SlimOutput() noexcept
++{
++    if (running) Close();
++}
++
++/* ============================================================
++ * Open
++ * ============================================================ */
++
++void SlimOutput::Open(AudioFormat &af)
++{
++    audio_fmt     = af;
++    bytes_per_sec = static_cast<uint64_t>(af.sample_rate) * af.GetFrameSize();
++
++    /* Pre-build the HTTP 200 response (same for every client connection) */
++    http_resp = "HTTP/1.0 200 OK\r\nContent-Type: application/octet-stream\r\n"
++                "Connection: close\r\n\r\n";
++
++    bytes_sent = 0;
++    paused     = false;
++
++    running  = true;
++    slim_thr = std::thread(&SlimOutput::SlimThread, this);
++    http_thr = std::thread(&SlimOutput::HttpThread, this);
++    send_thr = std::thread(&SlimOutput::SendThread, this);
++
++    FmtInfo(domain, "slim: opened {}Hz {}ch PCM ({})",
++            af.sample_rate, (unsigned)af.channels,
++            af.format == SampleFormat::S24_P32 ? "S24_P32→24bit" :
++            af.format == SampleFormat::S16     ? "S16" :
++            af.format == SampleFormat::S32     ? "S32" : "S8");
++    if (!client_ip.empty())
++        FmtInfo(domain, "slim: accepting only {}", client_ip);
++}
++
++/* ============================================================
++ * Close
++ * ============================================================ */
++
++void SlimOutput::Close() noexcept
++{
++    SendSlimCtrl(SlimStrmCmd::Stop);
++    paused  = false;
++    running = false;
++    audio_cv.notify_all();
++
++    /* Unblock SlimThread's recv() */
++    {
++        std::lock_guard<std::mutex> lk(slim_fd_mtx);
++        if (slim_fd >= 0) shutdown(slim_fd, SHUT_RDWR);
++    }
++
++    if (slim_thr.joinable()) slim_thr.join();
++    if (http_thr.joinable()) http_thr.join();
++
++    /* Unblock SendThread's send() so send_thr.join() doesn't hang */
++    {
++        std::lock_guard<std::mutex> lk(clients_mtx);
++        for (auto &c : http_clients) shutdown(c.fd, SHUT_RDWR);
++    }
++    if (send_thr.joinable()) send_thr.join();
++
++    {
++        std::lock_guard<std::mutex> lk(clients_mtx);
++        for (auto &c : http_clients) close(c.fd);
++        http_clients.clear();
++    }
++    has_client = false;
++
++    FmtInfo(domain, "slim: closed");
++}
++
++/* ============================================================
++ * Play
++ * ============================================================ */
++
++size_t SlimOutput::Play(const void *chunk, size_t size)
++{
++    if (paused) {
++        stream_start += Clock::now() - pause_start;
++        SendSlimCtrl(SlimStrmCmd::Unpause);
++        paused = false;
++        FmtInfo(domain, "slim: unpause");
++    }
++
++    if (bytes_sent == 0)
++        stream_start = Clock::now();
++    bytes_sent += size;
++
++    PagePtr page;
++    if (audio_fmt.format == SampleFormat::S24_P32) {
++        /* S24_P32: byte[3] is sign-extension padding; squeezelite would
++         * treat it as a 32-bit sample giving ×1/256 volume (-48 dB). */
++        const size_t n = size / 4;
++        page = std::make_unique<Page>(n * 3);
++        pcm_pack_24(page->data(),
++                    static_cast<const int32_t *>(chunk),
++                    static_cast<const int32_t *>(chunk) + n);
++    } else {
++        const uint8_t *p = static_cast<const uint8_t *>(chunk);
++        page = std::make_unique<Page>(p, p + size);
++    }
++
++    {
++        std::lock_guard<std::mutex> lk(audio_mtx);
++        /* Safety valve: drop oldest page if the consumer falls far behind */
++        if (audio_queue.size() >= 500)
++            audio_queue.pop();
++        audio_queue.push(std::move(page));
++    }
++    audio_cv.notify_one();
++
++    return size;
++}
++
++/* ============================================================
++ * Delay – real-time throttle (keep MPD kTargetGapSec ahead of wall clock)
++ *
++ * Using wall-clock elapsed rather than squeezelite's elapsed_ms avoids
++ * a startup-latency bias that would keep Delay() returning 500 ms
++ * continuously and starve squeezelite's buffer every ~1 s.
++ * ============================================================ */
++
++SlimOutput::Clock::duration SlimOutput::Delay() const noexcept
++{
++    if (paused || bytes_sent == 0 || bytes_per_sec == 0)
++        return Clock::duration::zero();
++
++    /* 0.5 s keeps squeezelite's buffer filled on a LAN while keeping
++     * MPD's position display accurate (it starts at ~0.5 s, not ~2 s). */
++    constexpr double kTargetGapSec = 0.5;
++    constexpr auto   kMaxSleep     = std::chrono::milliseconds(200);
++
++    using Dsec = std::chrono::duration<double>;
++    const auto audio_dur  = std::chrono::duration_cast<Clock::duration>(
++        Dsec(static_cast<double>(bytes_sent) / static_cast<double>(bytes_per_sec)));
++    const auto elapsed    = Clock::now() - stream_start;
++    const auto ahead      = audio_dur - elapsed;
++    const auto look_ahead = std::chrono::duration_cast<Clock::duration>(Dsec(kTargetGapSec));
++
++    if (ahead > look_ahead) {
++        auto sleep = ahead - look_ahead;
++        return (sleep > kMaxSleep) ? kMaxSleep : sleep;
++    }
++    return Clock::duration::zero();
++}
++
++/* ============================================================
++ * Cancel
++ * ============================================================ */
++
++void SlimOutput::Cancel() noexcept
++{
++    /* Flush squeezelite: disconnect HTTP, clear decode+output buffers */
++    SendSlimCtrl(SlimStrmCmd::Flush);
++
++    bytes_sent = 0;
++    paused     = false;
++
++    /* Close HTTP clients now so SendThread holds new pages in the queue
++     * until squeezelite reconnects — prevents the first ~0.5 s from being
++     * sent to the old (flushing) connection and silently discarded. */
++    {
++        std::lock_guard<std::mutex> lk(clients_mtx);
++        for (auto &c : http_clients) { shutdown(c.fd, SHUT_RDWR); close(c.fd); }
++        http_clients.clear();
++    }
++    has_client = false;
++
++    {
++        std::queue<PagePtr> discard;
++        std::lock_guard<std::mutex> lk(audio_mtx);
++        std::swap(discard, audio_queue);
++    }
++
++    {
++        std::lock_guard<std::mutex> lk(slim_fd_mtx);
++        if (slim_fd >= 0) SendStart(slim_fd);
++    }
++}
++
++/* ============================================================
++ * Pause
++ * ============================================================ */
++
++bool SlimOutput::Pause() noexcept
++{
++    if (!paused) {
++        pause_start = Clock::now();
++        SendSlimCtrl(SlimStrmCmd::Pause);
++        paused = true;
++        FmtInfo(domain, "slim: pause");
++    }
++    return true;
++}
++
++/* ============================================================
++ * SendSlimCtrl – send a minimal strm control packet (thread-safe)
++ * ============================================================ */
++
++bool SlimOutput::SendSlimCtrl(SlimStrmCmd cmd, uint32_t ms) noexcept
++{
++    SlimSTRMdata sd{};
++    memcpy(sd.op, "strm", 4);
++    sd.command    = static_cast<char>(cmd);
++    sd.replayGain = htonl(ms);
++
++    const uint16_t pkt_size = htons((uint16_t)sizeof(sd));
++    std::lock_guard<std::mutex> lk(slim_fd_mtx);
++    if (slim_fd < 0) return false;
++    if (!SendAll(slim_fd, &pkt_size, sizeof(pkt_size))) return false;
++    return SendAll(slim_fd, &sd, sizeof(sd));
++}
++
++/* ============================================================
++ * SlimThread – SlimProto control server
++ * ============================================================ */
++
++void SlimOutput::SlimThread()
++{
++    int lfd = MakeTcpServer(slim_port, "slimproto");
++    if (lfd < 0) return;
++
++    /* UDP discovery: same port, responds 'd'/'D' → 'E' */
++    int ufd = socket(AF_INET, SOCK_DGRAM, 0);
++    if (ufd >= 0) {
++        int one = 1;
++        setsockopt(ufd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
++        struct sockaddr_in ua{};
++        ua.sin_family      = AF_INET;
++        ua.sin_addr.s_addr = INADDR_ANY;
++        ua.sin_port        = htons((uint16_t)slim_port);
++        if (bind(ufd, (struct sockaddr *)&ua, sizeof(ua)) < 0) {
++            close(ufd); ufd = -1;
++        }
++    }
++
++    FmtInfo(domain, "slim: SlimProto listening on port {}", slim_port);
++
++    while (running) {
++        fd_set fds;
++        FD_ZERO(&fds);
++        FD_SET(lfd, &fds);
++        if (ufd >= 0) FD_SET(ufd, &fds);
++        const int maxfd = (ufd > lfd) ? ufd : lfd;
++        struct timeval tv{1, 0};
++        if (select(maxfd + 1, &fds, nullptr, nullptr, &tv) <= 0) continue;
++
++        if (ufd >= 0 && FD_ISSET(ufd, &fds)) {
++            char buf[32];
++            struct sockaddr_in from{};
++            socklen_t fl = sizeof(from);
++            ssize_t nr = recvfrom(ufd, buf, sizeof(buf), 0,
++                                  (struct sockaddr *)&from, &fl);
++            if (nr > 0 && (buf[0] == 'd' || buf[0] == 'D'))
++                sendto(ufd, "E", 1, 0, (struct sockaddr *)&from, fl);
++        }
++
++        if (!FD_ISSET(lfd, &fds)) continue;
++
++        struct sockaddr_in caddr{};
++        socklen_t clen = sizeof(caddr);
++        int cfd = accept(lfd, (struct sockaddr *)&caddr, &clen);
++        if (cfd < 0) continue;
++
++        char remip[INET_ADDRSTRLEN];
++        inet_ntop(AF_INET, &caddr.sin_addr, remip, sizeof(remip));
++
++        if (!client_ip.empty() && client_ip != remip) {
++            FmtWarning(domain, "slim: rejecting {} (expected {})", remip, client_ip);
++            close(cfd);
++            continue;
++        }
++
++        FmtInfo(domain, "slim: Squeezelite connected from {}", remip);
++
++        /* TCP_NODELAY: control packets sent immediately without coalescing */
++        { int f = 1; setsockopt(cfd, IPPROTO_TCP, TCP_NODELAY, &f, sizeof(f)); }
++        /* SO_SNDTIMEO: prevent send() blocking forever if squeezelite stalls */
++        { struct timeval t{5,0}; setsockopt(cfd, SOL_SOCKET, SO_SNDTIMEO, &t, sizeof(t)); }
++
++        {
++            std::lock_guard<std::mutex> lk(slim_fd_mtx);
++            if (slim_fd >= 0) close(slim_fd);
++            slim_fd = cfd;
++        }
++
++        constexpr uint32_t kMaxPayload = 4096;
++        uint8_t payload[kMaxPayload];
++        bool started = false;
++
++        auto last_ping    = Clock::now() - std::chrono::seconds(60);
++        auto last_stat_rx = Clock::now();
++        constexpr auto kPingInterval = std::chrono::milliseconds(5000);
++        constexpr auto kDeadTimeout  = std::chrono::seconds(30);
++
++        while (running) {
++            if (started) {
++                const auto now = Clock::now();
++                if (now - last_ping >= kPingInterval) {
++                    SendSlimCtrl(SlimStrmCmd::Timestamp);
++                    last_ping = now;
++                }
++                if (now - last_stat_rx > kDeadTimeout) {
++                    FmtWarning(domain, "slim: no STAT for {}s – dropping",
++                        (int)std::chrono::duration_cast<std::chrono::seconds>(
++                            now - last_stat_rx).count());
++                    break;
++                }
++            }
++
++            fd_set rfds;
++            FD_ZERO(&rfds);
++            FD_SET(cfd, &rfds);
++            struct timeval poll_tv{0, 100'000};
++            const int sel = select(cfd + 1, &rfds, nullptr, nullptr, &poll_tv);
++            if (sel < 0) break;
++            if (sel == 0) continue;
++
++            uint8_t hdr[8];
++            if (recv(cfd, hdr, 8, MSG_WAITALL) != 8) break;
++
++            uint32_t plen;
++            memcpy(&plen, hdr + 4, 4);
++            plen = ntohl(plen);
++            if (plen > kMaxPayload) {
++                FmtWarning(domain, "slim: oversized packet ({}), dropping", plen);
++                break;
++            }
++            if (plen > 0 && recv(cfd, payload, plen, MSG_WAITALL) != (ssize_t)plen)
++                break;
++
++            const Clock::time_point arrival_tp = Clock::now();
++
++            if (!started && memcmp(hdr, "HELO", 4) == 0) {
++                FmtInfo(domain, "slim: HELO – sending stream commands");
++                if (!SendStart(cfd)) break;
++                started      = true;
++                last_stat_rx = arrival_tp;
++
++            } else if (memcmp(hdr, "STAT", 4) == 0 &&
++                       plen >= (uint32_t)sizeof(SlimSTATpayload)) {
++
++                SlimSTATpayload sp;
++                memcpy(&sp, payload, sizeof(sp));
++                last_stat_rx = arrival_tp;
++
++                /* Log notable events; STMt (keepalive) is silent */
++                struct { const char *ev; bool warn; const char *msg; }
++                static const kLog[] = {
++                    {"STMs", false, "track started"},
++                    {"STMl", false, "buffer full"},
++                    {"STMd", false, "decode done"},
++                    {"STMf", false, "flushed"},
++                    {"STMp", false, "paused"},
++                    {"STMr", false, "resumed"},
++                    {"STMc", false, "HTTP connected"},
++                    {"STMu", true,  "output underrun"},
++                    {"STMo", true,  "output buf underrun"},
++                    {"STMn", true,  "decoder unsupported"},
++                };
++                for (auto &e : kLog) {
++                    if (memcmp(sp.event, e.ev, 4) == 0) {
++                        if (e.warn) FmtWarning(domain, "slim: {}", e.msg);
++                        else        FmtInfo(domain, "slim: {}", e.msg);
++                        break;
++                    }
++                }
++            }
++            /* RESP, DSCO, BYE! … just consume */
++        }
++
++        FmtInfo(domain, "slim: Squeezelite disconnected");
++        {
++            std::lock_guard<std::mutex> lk(slim_fd_mtx);
++            if (slim_fd == cfd) slim_fd = -1;
++        }
++        close(cfd);
++    }
++
++    close(lfd);
++    if (ufd >= 0) close(ufd);
++}
++
++/* ============================================================
++ * HttpThread – HTTP streaming server
++ * ============================================================ */
++
++void SlimOutput::HttpThread()
++{
++    int lfd = MakeTcpServer(http_port, "http");
++    if (lfd < 0) return;
++
++    FmtInfo(domain, "slim: HTTP listening on port {}", http_port);
++
++    while (running) {
++        fd_set fds;
++        FD_ZERO(&fds);
++        FD_SET(lfd, &fds);
++        struct timeval tv{1, 0};
++        if (select(lfd + 1, &fds, nullptr, nullptr, &tv) <= 0) continue;
++
++        struct sockaddr_in caddr{};
++        socklen_t clen = sizeof(caddr);
++        int cfd = accept(lfd, (struct sockaddr *)&caddr, &clen);
++        if (cfd < 0) continue;
++
++        /* SO_SNDTIMEO: prevent SendThread blocking forever on stalled client */
++        { struct timeval t{5,0}; setsockopt(cfd, SOL_SOCKET, SO_SNDTIMEO, &t, sizeof(t)); }
++        /* SO_RCVTIMEO: prevent stalled HTTP request blocking accept() */
++        { struct timeval t{5,0}; setsockopt(cfd, SOL_SOCKET, SO_RCVTIMEO, &t, sizeof(t)); }
++
++        /* Read and discard the HTTP request */
++        char reqbuf[1024]{};
++        if (recv(cfd, reqbuf, sizeof(reqbuf) - 1, 0) <= 0) { close(cfd); continue; }
++
++        /* http_resp pre-built in Open() */
++        if (!SendAll(cfd, http_resp.data(), http_resp.size())) { close(cfd); continue; }
++
++        FmtInfo(domain, "slim: HTTP client connected");
++        {
++            std::lock_guard<std::mutex> lk(clients_mtx);
++            http_clients.push_back({cfd});
++            has_client = true;
++        }
++        audio_cv.notify_all();
++    }
++
++    close(lfd);
++}
++
++/* ============================================================
++ * SendThread – broadcast audio pages to HTTP clients
++ * ============================================================ */
++
++void SlimOutput::SendThread()
++{
++    std::vector<int> fds; /* reused across iterations to avoid per-page allocation */
++    while (true) {
++        PagePtr page;
++        {
++            std::unique_lock<std::mutex> lk(audio_mtx);
++            audio_cv.wait(lk, [&]{
++                return !running ||
++                       (!audio_queue.empty() && has_client.load(std::memory_order_relaxed));
++            });
++            if (!running) break;
++            page = std::move(audio_queue.front());
++            audio_queue.pop();
++        }
++
++        fds.clear();
++        {
++            std::lock_guard<std::mutex> lk(clients_mtx);
++            for (auto &c : http_clients) fds.push_back(c.fd);
++        }
++
++        for (int fd : fds) {
++            if (!SendAll(fd, page->data(), page->size())) {
++                FmtInfo(domain, "slim: HTTP client disconnected");
++                {
++                    std::lock_guard<std::mutex> lk(clients_mtx);
++                    http_clients.erase(
++                        std::remove_if(http_clients.begin(), http_clients.end(),
++                            [fd](const HttpClient &c) { return c.fd == fd; }),
++                        http_clients.end());
++                    if (http_clients.empty())
++                        has_client = false;
++                }
++                close(fd);
++            }
++        }
++    }
++}
++
++/* ============================================================
++ * SendStart – send aude + audg + strm-s to Squeezelite
++ * ============================================================ */
++
++bool SlimOutput::SendStart(int fd)
++{
++    SlimAUDE aude{};
++    aude.size  = htons((uint16_t)(sizeof(aude) - sizeof(aude.size)));
++    memcpy(aude.op, "aude", 4);
++    aude.dac   = 1;
++    if (!SendAll(fd, &aude, sizeof(aude))) return false;
++
++    const uint32_t vol = (uint32_t)((uint64_t)gain_pct * 0x10000u / 100u);
++    SlimAUDG audg{};
++    audg.size   = htons((uint16_t)(sizeof(audg) - sizeof(audg.size)));
++    memcpy(audg.op, "audg", 4);
++    audg.old_l  = htonl(128);
++    audg.old_r  = htonl(128);
++    audg.dvc    = 1;
++    audg.preamp = 255;
++    audg.new_l  = htonl(vol);
++    audg.new_r  = htonl(vol);
++    if (!SendAll(fd, &audg, sizeof(audg))) return false;
++
++    static constexpr char httpreq[] = "GET /stream?player=1 HTTP/1.0\r\n\r\n";
++    constexpr size_t      httpreq_len = sizeof(httpreq) - 1;
++
++    SlimSTRMdata sd{};
++    memcpy(sd.op, "strm", 4);
++    sd.command      = 's';
++    sd.autostart    = '1';
++    sd.format       = 'p';   /* always raw PCM */
++    sd.sampleSize   = mapSampleSize(audio_fmt.format);
++    sd.samplingRate = mapSampleRate(audio_fmt.sample_rate);
++    sd.channels     = (audio_fmt.channels == 1) ? '1' : '2';
++    sd.endianness   = '1';   /* little-endian */
++    sd.threshold    = 32;  /* KB stream-buffer pre-fill before autostart (~0.18 s @CD) */
++    sd.outThreshold = 2;   /* ×0.1 s output-buffer pre-fill before play (0.2 s) */
++    sd.serverPort   = htons((uint16_t)http_port);
++
++    const uint16_t pkt_size = htons((uint16_t)(sizeof(sd) + httpreq_len));
++    if (!SendAll(fd, &pkt_size,  sizeof(pkt_size)))  return false;
++    if (!SendAll(fd, &sd,        sizeof(sd)))         return false;
++    if (!SendAll(fd, httpreq,    httpreq_len))         return false;
++
++    FmtInfo(domain, "slim: strm-s ({}Hz {}ch {})",
++            audio_fmt.sample_rate, (unsigned)audio_fmt.channels,
++            mapSampleSize(audio_fmt.format));
++    return true;
++}
++
++/* ============================================================
++ * MakeTcpServer
++ * ============================================================ */
++
++int SlimOutput::MakeTcpServer(unsigned port, const char *tag) noexcept
++{
++    int fd = socket(AF_INET, SOCK_STREAM, 0);
++    if (fd < 0) { FmtError(domain, "slim/{}: socket: {}", tag, strerror(errno)); return -1; }
++
++    int one = 1;
++    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
++
++    struct sockaddr_in a{};
++    a.sin_family      = AF_INET;
++    a.sin_addr.s_addr = INADDR_ANY;
++    a.sin_port        = htons((uint16_t)port);
++
++    if (bind(fd, (struct sockaddr *)&a, sizeof(a)) < 0) {
++        FmtError(domain, "slim/{}: bind({}): {}", tag, port, strerror(errno));
++        close(fd); return -1;
++    }
++    if (listen(fd, 5) < 0) {
++        FmtError(domain, "slim/{}: listen: {}", tag, strerror(errno));
++        close(fd); return -1;
++    }
++    return fd;
++}
++
++/* ============================================================
++ * Plugin registration
++ * ============================================================ */
++
++const struct AudioOutputPlugin slim_output_plugin = {
++    "slim",
++    nullptr,
++    SlimOutput::Create,
++    nullptr,
++};
+diff -Nur mpd-0.23.17/src/output/plugins/SlimOutputPlugin.hxx mpd-0.23.18/src/output/plugins/SlimOutputPlugin.hxx
+--- mpd-0.23.17/src/output/plugins/SlimOutputPlugin.hxx	1970-01-01 08:00:00.000000000 +0800
++++ mpd-0.23.18/src/output/plugins/SlimOutputPlugin.hxx	2026-03-19 08:32:46.000000000 +0800
+@@ -0,0 +1,25 @@
++/*
++ * Copyright 2003-2021 The Music Player Daemon Project
++ * http://www.musicpd.org
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program; if not, write to the Free Software Foundation, Inc.,
++ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
++ */
++
++#ifndef MPD_SLIM_OUTPUT_PLUGIN_HXX
++#define MPD_SLIM_OUTPUT_PLUGIN_HXX
++
++extern const struct AudioOutputPlugin slim_output_plugin;
++
++#endif
+diff -Nur mpd-0.23.17/src/output/Registry.cxx mpd-0.23.18/src/output/Registry.cxx
+--- mpd-0.23.17/src/output/Registry.cxx	2025-01-30 00:11:53.000000000 +0800
++++ mpd-0.23.18/src/output/Registry.cxx	2026-03-28 11:48:54.000000000 +0800
+@@ -26,7 +26,12 @@
+ #include "plugins/FifoOutputPlugin.hxx"
+ #include "plugins/SndioOutputPlugin.hxx"
+ #include "plugins/snapcast/SnapcastOutputPlugin.hxx"
++#ifdef ENABLE_HTTPD_OUTPUT
+ #include "plugins/httpd/HttpdOutputPlugin.hxx"
++#endif
++#ifdef ENABLE_SLIM_OUTPUT
++#include "plugins/SlimOutputPlugin.hxx"
++#endif
+ #include "plugins/HaikuOutputPlugin.hxx"
+ #include "plugins/JackOutputPlugin.hxx"
+ #include "plugins/NullOutputPlugin.hxx"
+@@ -98,6 +103,9 @@
+ #ifdef ENABLE_HTTPD_OUTPUT
+ 	&httpd_output_plugin,
+ #endif
++#ifdef ENABLE_SLIM_OUTPUT
++	&slim_output_plugin,
++#endif
+ #ifdef ENABLE_SNAPCAST_OUTPUT
+ 	&snapcast_output_plugin,
+ #endif
