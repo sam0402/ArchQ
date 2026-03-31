@@ -118,7 +118,7 @@ case $WK in
             --menu "Select verson:" 7 0 0 \
             1 "Soft" 2 "Dynamic" ) || exit 1; clear
         echo -e "${c_blue_b}Install ALSA-lib ${inst[$op]}...${c_gray}"
-        wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-${op}5-x86_64.pkg.tar.zst
+        wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-${op}1-x86_64.pkg.tar.zst
         pacman -U --noconfirm /tmp/alsa-lib-1.1.9-${op}5-x86_64.pkg.tar.zst
         dialog --stdout --title "ALSA-lib $1" --yesno "The ${inst[$op]} is up to date. \nReboot to take effect?" 0 0 && reboot || exit 0
         clear
