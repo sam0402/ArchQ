@@ -1,6 +1,6 @@
 #!/bin/bash
 mpdver=0.23.18-1
-mympdver=20.0.0-1
+mympdver=25.0.0-1
 lmsver=9.1-2
 
 c_blue_b=$'\e[1;38;5;27m'
