@@ -6,7 +6,7 @@ set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 ker=Q352WU; kver='6.18.7-6'
-mpdver=0.23.17-36
+mpdver=0.23.18-1
 mympdver=25.0.0-1
 lmsver=9.1-2
 
@@ -422,9 +422,11 @@ case $server in
         ### Install myMPD
         if [[ $server =~ y. ]]; then
             echo -e "\n${c_blue_b}Install myMPD ...${c_gray}\n"
+            arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libutf8proc-2.9.0-1-x86_64.pkg.tar.zst
             arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
             arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
-            arch-chroot /mnt pacman -U --noconfirm /root/mympd-${mympdver}-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm /root/mympd-${mympdver}-x86_64.pkg.tar.zst /root/libutf8proc-2.9.0-1-x86_64.pkg.tar.zst /root/libnewt-0.52.24-2-x86_64.pkg.tar.zst
+            arch-chroot /mnt
             mkdir -p /mnt/var/lib/private/mympd/config/
             echo 'Unknown' >/mnt/var/lib/private/mympd/config/album_group_tag
             arch-chroot /mnt systemctl enable mympd
