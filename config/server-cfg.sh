@@ -1,5 +1,5 @@
 #!/bin/bash
-mpdver=0.23.18-1
+mpdver=0.23.17-36
 mympdver=25.0.0-1
 lmsver=9.1-2
 
