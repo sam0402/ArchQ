@@ -1,5 +1,5 @@
 #!/bin/bash
-mpdver=0.23.17-36
+mpdver=0.23.18-1
 mympdver=25.0.0-1
 lmsver=9.1-2
 
@@ -158,7 +158,8 @@ EOF
             fi
         fi
         if [[ $server =~ y. ]]; then
-            pacman -Q mympd >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
+            pacman -Q mympd >/dev/null 2>&1 ||   wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
+            pacman -Q mympd >/dev/null 2>&1 ||   wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libutf8proc-2.9.0-1-x86_64.pkg.tar.zst
             pacman -Q libnewt >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
             mkdir -p /var/lib/private/mympd/config/
             echo 'Unknown' >/var/lib/private/mympd/config/album_group_tag
