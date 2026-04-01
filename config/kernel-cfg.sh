@@ -111,16 +111,34 @@ case $WK in
         dialog --stdout --title "ArchQ $1" --msgbox "\nKernel frequency: $count" $(expr $cpus + 6) 35; clear
         ;;
     A)
-        inst=(' ' Soft Dynamic)
-        pacman -Q alsa-lib | grep -q '\-1.' && alsaver=Soft || alsaver=Dynamic
+        a_name=(Halo Soft Analytical Dynamic)
+        ver=(11 15 21 25)
+
+        declare -A name2ver ver2name
+
+        for i in "${!a_name[@]}"; do
+            name2ver[${a_name[$i]}]=${ver[$i]}
+            ver2name[${ver[$i]}]=${a_name[$i]}
+        done
+
+        inst_ver=$(pacman -Q alsa-lib | awk -F '-' '{print $3}')
+
+        menu_items=()
+        for name in "${a_name[@]}"; do
+            menu_items+=("$name" "")
+        done
+
+        op=$(dialog --stdout \
+            --title "ALSA-lib current: ${ver2name[$inst_ver]}" \
+            --menu "Select version:" 7 0 0 \
+            "${menu_items[@]}" )|| exit 1
+        clear
         
-        op=$(dialog --stdout --title "ALSA-lib: $alsaver $1" \
-            --menu "Select verson:" 7 0 0 \
-            1 "Soft" 2 "Dynamic" ) || exit 1; clear
-        echo -e "${c_blue_b}Install ALSA-lib ${inst[$op]}...${c_gray}"
-        wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-${op}1-x86_64.pkg.tar.zst
-        pacman -U --noconfirm /tmp/alsa-lib-1.1.9-${op}1-x86_64.pkg.tar.zst
-        dialog --stdout --title "ALSA-lib $1" --yesno "The ${inst[$op]} is up to date. \nReboot to take effect?" 0 0 && reboot || exit 0
+        echo -e "${c_blue_b}Install ALSA-lib ${name2ver[$op]}...${c_gray}"
+        wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-${name2ver[$op]}-x86_64.pkg.tar.zst
+        pacman -U --noconfirm /tmp/alsa-lib-1.1.9-${name2ver[$op]}-x86_64.pkg.tar.zst
+
+        dialog --stdout --title "ALSA-lib $1" --yesno "The ${op} is up to date. \nReboot to take effect?" 0 0 && reboot || exit 0
         clear
         ;;    
 esac
