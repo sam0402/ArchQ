@@ -129,7 +129,7 @@ case $WK in
         done
 
         op=$(dialog --stdout \
-            --title "ALSA-lib current: ${ver2name[$inst_ver]}" \
+            --title "ALSA-lib ${ver2name[$inst_ver]}" \
             --menu "Select version:" 7 0 0 \
             "${menu_items[@]}" )|| exit 1
         clear
