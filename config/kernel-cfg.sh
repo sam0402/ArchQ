@@ -134,7 +134,7 @@ case $WK in
             "${menu_items[@]}" )|| exit 1
         clear
         
-        echo -e "${c_blue_b}Install ALSA-lib ver2name[${op}]...${c_gray}"
+        echo -e "${c_blue_b}Install ALSA-lib ${op}...${c_gray}"
         wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-${name2ver[$op]}-x86_64.pkg.tar.zst
         pacman -U --noconfirm /tmp/alsa-lib-1.1.9-${name2ver[$op]}-x86_64.pkg.tar.zst
 
