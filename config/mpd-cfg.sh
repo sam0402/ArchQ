@@ -138,7 +138,9 @@ if [ $client = M ]; then
     p1=off
     MENU="P Multi-player $p0 "
 fi
-pacman -Q mpd-light >/dev/null 2>&1 || MENU+='M Multi-room '$m0' H "Http Stream:8000" '$h0' '
+if ! pacman -Q mpd-ul >/dev/null 2>&1 && ! pacman -Q mpd-slim >/dev/null 2>&1; then
+    MENU+="M Multi-room ${m0} H \"Http Stream:8000\" ${h0} "
+fi
 cat $config | grep owntone | grep -q '#' || m0=on 
 cat $config | grep httpd | grep -q '#' || h0=on
 cat $config | grep -q "#[[:space:]]dop" || d0=on
