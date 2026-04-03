@@ -61,7 +61,7 @@ options=$(dialog --stdout \
     "Max Sample rate"       6 1   "$MAX_RATE"      6 25 60 0 \
     "Upsampling setting"    7 1   "$UPSAMPLE"      7 25 60 0 \
     "MAC address"           8 1   "$MAC"           8 25 60 0 \
-    "LMS ip"                9 1   "$SERVER_IP"     9 25 60 0 \
+    "LMS/Slim ip"           9 1   "$SERVER_IP"     9 25 60 0 \
     "Device supports DSD/DoP"  10 1   "$DOP"      10 25 60 0 \
     "ALSA volume control"   11 1   "$VOLUME"      11 25 60 0 ) || exit 1; clear
     # "other Options"         12 1   "$OPTIONS"     12 25 60 0
