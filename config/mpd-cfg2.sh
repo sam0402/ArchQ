@@ -111,23 +111,23 @@ case $client in
 esac
 
 # ### Select sound device
-# if [ ! $(aplay -L | grep ':') ]; then
-#     dialog --title "ArchQ MPD $1" --msgbox "No Sound Device" 7 30
-# else
-#     devs='hw:0,0 　 '
-#     while read line; do
-#         devs+=${line}' 　 '
-#     done <<< $(aplay -L | grep ':')
+if [ ! $(aplay -L | grep ':') ]; then
+    dialog --title "ArchQ MPD $1" --msgbox "No Sound Device" 7 30
+else
+    devs='hw:0,0 　 '
+    while read line; do
+        devs+=${line}' 　 '
+    done <<< $(aplay -L | grep ':')
 
-#     device=$(dialog --stdout \
-#             --title "ArchQ MPD $1" \
-#             --menu "Ouput device" 7 0 0 ${devs}) || exit 1; clear
-#     sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
-# fi
+    device=$(dialog --stdout \
+            --title "ArchQ MPD $1" \
+            --menu "Ouput device" 7 0 0 ${devs}) || exit 1; clear
+    sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
+fi
 
 ### ALSA ###
 ## Volume Control
-# vol_ctrl ALSA $config
+vol_ctrl ALSA $config
 
 ### Include audio output & Dop
 m0=off; h0=off; d0=off
@@ -222,7 +222,7 @@ echo '}'                            >>$ot_conf
         options=$(dialog --stdout --title "ArchQ MPD" --menu "Remove player(partition)" 7 0 0 $MENU ) || exit 1; clear
         systemctl disable --now owntone@${options}
         sed -i '/mtp_'"$options"'/d' $config
-        rm -f "/etc/mpd.d/mtp_${options}.out" "/etc/owntone-${options}.conf" "/etc/systemd/system/owntone@${options}"
+        rm -f /etc/mpd.d/mtp_${options}.out /etc/owntone-${options}.conf "/etc/systemd/system/owntone@${options}"
         brow_mtp
         ;;
     esac
@@ -250,23 +250,23 @@ fi
 ### Buffer, bitDepth, Upsampling, & Music Directory 
 mdir=$(grep 'music_directory' $config | cut -d'"' -f2 | cut -d'/' -f3-)
 buffer=$(grep 'audio_buffer_size' $config | cut -d'"' -f2 | cut -d'/' -f3-)
-# pertime=$(grep 'period_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
-sqzlip=$(grep 'ip' $config | cut -d'"' -f2 | cut -d'/' -f3-)
-# bitdepth=$(grep -P '\tallowed_formats' $config | awk '{print $2}' | cut -d':' -f2)
-# sampling=$(grep 'upsampling_two_multiple' $config | cut -d'"' -f2)
+pertime=$(grep 'period_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
+bitdepth=$(grep -P '\tallowed_formats' $config | awk '{print $2}' | cut -d':' -f2)
+sampling=$(grep 'upsampling_two_multiple' $config | cut -d'"' -f2)
 
 options=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Buffer & Music directory" 0 40 0 \
     "Audio Buffer >=128"        1 1 $buffer   1 25 40 0 \
-    "Squeezelite IP"            2 1 $sqzlip   2 25 40 0 \
-    "Music Dir          /mnt/"  3 1 "$mdir"   3 25 40 0 ) || exit 1; clear
+    "Period Time(μs)"           2 1 $pertime  2 25 40 0 \
+    "Bit Depth(16/24/32)"       3 1 $bitdepth 3 25 40 0 \
+    "Upsampling Two Multiple"   4 1 $sampling 4 25 40 0 \
+    "Music Dir          /mnt/"  5 1 "$mdir"   5 25 40 0 ) || exit 1; clear
     
 buffer=$(echo $options | awk '//{print $1 }')
-sqzlip=$(echo $options | awk '//{print $2 }')
-mdir=$(echo $options | awk '//{print $3}' | sed 's"/"\\\/"g')
-# pertime=$(echo $options | awk '//{print $2 }')
-# buftime=$(($pertime * 6))
-# bitdepth=$(echo $options | awk '//{print $3 }')
-# sampling=$(echo $options | awk '//{print $4 }')
+pertime=$(echo $options | awk '//{print $2 }')
+buftime=$(($pertime * 6))
+bitdepth=$(echo $options | awk '//{print $3 }')
+sampling=$(echo $options | awk '//{print $4 }')
+mdir=$(echo $options | awk '//{print $5}' | sed 's"/"\\\/"g')
 
 ## Set ramdisk
 # rd_GB=$(echo $options | awk '//{print $3 }')
@@ -281,10 +281,9 @@ mdir=$(echo $options | awk '//{print $3}' | sed 's"/"\\\/"g')
 #     sed -i 's/rdsize=.*/rdsize='"$ramdisk"'/' /usr/bin/mpd-rdcheck.sh
 # fi
 sed -i 's/^#\?audio_buffer_size.*"/audio_buffer_size\t"'"$buffer"'"/' $config
-# sed -i 's/^#\?.* \?\tbuffer_time.*"/\tbuffer_time\t"'"$buftime"'"/;s/^#\?.* \?\tperiod_time.*"/\tperiod_time\t"'"$pertime"'"/' $config
-# sed -i 's/^#\?.allowed_formats .*"*:..:/\tallowed_formats "*:'"$bitdepth"':/' $config
-# sed -i 's/^#\?.upsampling_two_multiple.*"/\tupsampling_two_multiple\t"'"$sampling"'"/' $config
-sed -i 's/^#\?.ip.*"/\tip\t\t"'"$sqzlip"'"/' $config
+sed -i 's/^#\?.* \?\tbuffer_time.*"/\tbuffer_time\t"'"$buftime"'"/;s/^#\?.* \?\tperiod_time.*"/\tperiod_time\t"'"$pertime"'"/' $config
+sed -i 's/^#\?.allowed_formats .*"*:..:/\tallowed_formats "*:'"$bitdepth"':/' $config
+sed -i 's/^#\?.upsampling_two_multiple.*"/\tupsampling_two_multiple\t"'"$sampling"'"/' $config
 sed -i 's/^#\?music_directory.*"/music_directory\t"\/mnt\/'"$mdir"'"/' $config
 
 ### Blissify scan music directory as mpd

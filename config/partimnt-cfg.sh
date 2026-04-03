@@ -17,13 +17,13 @@ case $WK in
         ID=$(echo $partdata | cut -d ' ' -f 3)
 
         OP='rw,noatime' 
-        [ $FS = ext4 ] && OP+=',defaults'
-        [ $FS = hfsplus ] && OP+=',force,nls=utf8'
-        if [ $FS = ntfs ]; then
+        [ "$FS" = "ext4" ] && OP+=',defaults'
+        [ "$FS" = "hfsplus" ] && OP+=',force,nls=utf8'
+        if [ "$FS" = "ntfs" ]; then
             FS=ntfs3; OP+=',iocharset=utf8'
         fi
-        [ $FS = exfat ] && OP+=',iocharset=utf8'
-        [ $FS = apfs ] && OP='readwrite,noatime'
+        [ "$FS" = "exfat" ] && OP+=',iocharset=utf8'
+        [ "$FS" = "apfs" ] && OP='readwrite,noatime'
 
         options=$(dialog --stdout \
             --title "Partition $partition ($FS)" \
@@ -34,9 +34,9 @@ case $WK in
         clear
         MP=$(echo $options |  awk '//{print $1 }')
         OP=$(echo $options |  awk '//{print $2 }')
-        [ $FS = exfat ] && OP+=',iocharset=utf8'
-        [ $FS = xfs ] && OP+=',attr2,inode64,logbufs=8,logbsize=32k,noquota'
-        [ $FS = f2fs ] && OP+=',background_gc=on,nogc_merge,discard,discard_unit=block,inline_xattr,inline_data,inline_dentry,flush_merge,extent_cache,mode=adaptive,active_logs=6,alloc_mode=reuse,checkpoint_merge,fsync_mode=posix,memory=normal,errors=continue'
+        [ "$FS" = "exfat" ] && OP+=',iocharset=utf8'
+        [ "$FS" = "xfs" ] && OP+=',attr2,inode64,logbufs=8,logbsize=32k,noquota'
+        [ "$FS" = "f2fs" ] && OP+=',background_gc=on,nogc_merge,discard,discard_unit=block,inline_xattr,inline_data,inline_dentry,flush_merge,extent_cache,mode=adaptive,active_logs=6,alloc_mode=reuse,checkpoint_merge,fsync_mode=posix,memory=normal,errors=continue'
         [ -z $OP ] && echo "Error: Missing mount point." && exit 1
 
     # mount for root || user
