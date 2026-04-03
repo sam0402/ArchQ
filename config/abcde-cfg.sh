@@ -28,6 +28,7 @@ if ! pacman -Q abcde >/dev/null 2>&1 ; then
     if ! pacman -Q linux-Qrip >/dev/null 2>&1 ; then
         wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-Qrip-${kver}-x86_64.pkg.tar.zst
         echo -e "\nInstall kernel ${c_blue_b}Qrip${c_gray} ...\n"
+        pacman -U --noconfirm /tmp/linux-Qrip-${kver}-x86_64.pkg.tar.zst
         mkgrub
     fi
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/abcde.conf >/etc/abcde.conf
