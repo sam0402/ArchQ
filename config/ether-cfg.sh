@@ -61,6 +61,10 @@ fi
 
 ### Wireless SSID setup
 if [[ ${ifport:0:4} == "wlan" ]] ; then
+    if ! pacman -Q iwd >/dev/null 2>&1 ; then
+        wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/iwd-2.4-1-x86_64.pkg.tar.zst
+        pacman -U --noconfirm /tmp/*.pkg.tar.zst
+    fi
     iw_conf(){
         # ssid_list=$(iwctl station wlan0 get-networks | awk '{print $1}')
         iw_conf=$(dialog --stdout --title "ArchQ $1" \
@@ -71,13 +75,13 @@ if [[ ${ifport:0:4} == "wlan" ]] ; then
         iwpasswd=$(echo $iw_conf | awk '//{print $2 }')
     }
     iw_conf
-    if iwctl --passphrase $iwpasswd station wlan0 connect $iwssid; then
-        :
-    else
+    if ! iwctl --passphrase $iwpasswd station wlan0 connect $iwssid; then
         dialog --stdout --title "ArchQ $1" --pause "\n Connect fail!\n\n Setting $ifport again." 12 0 3 || exit 1; clear
         iw_conf
-    fi 
+    fi
     systemctl enable --now iwd
+    config="/etc/systemd/network/10-${ifport}.network"
+    touch $config
 fi
 
 if [ -f "/etc/systemd/network/10-${ifport}.network" ]; then
@@ -92,9 +96,11 @@ if [ -f "/etc/systemd/network/10-${ifport}.network" ]; then
     [[ -n $MTUBytes ]] && ifmtu=$(echo $MTUBytes | cut -d',' -f2)
 fi
 
-grep -q "IPv6PrivacyExtensions=true\|DHCP=true" $config && v6_o='on' || v6_o='off'
+if [ -f "$config" ]; then
+    grep -q "IPv6PrivacyExtensions=true\|DHCP=true" $config && v6_o='on' || v6_o='off'
+fi
 
-if [[ ${ifport:0:2} == "en" ]]; then
+if [[ ${ifport:0:2} == "en" || ${ifport:0:4} == "wlan" ]]; then
     ip='D'
     exec='dialog --stdout --title "ArchQ $1" --menu "Select IP setting" 7 0 0 '$MENU
     ip=$(eval $exec) || exit 1; clear
