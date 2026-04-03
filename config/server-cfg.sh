@@ -238,5 +238,8 @@ EOF
         systemctl enable --now hqplayerd
         ;;
 esac
-[ -n "$MPD" ] && MPD="-$MPD"
+if [ -n "$MPD" ]; then
+    MPD="-$MPD"
+    uname -r | grep -vq D && ! pacman -Q squeezelite >/dev/null 2>&1 && sqzlite-cfg.sh
+fi
 echo -e "\n"${c_blue_b}${server}${MPD}${c_gray}" is started."
