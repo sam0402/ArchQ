@@ -3,6 +3,10 @@ grub_cfg='/boot/grub/grub.cfg'
 naa_deb=$(curl -sL https://www.signalyst.com/bins/naa/linux/bookworm/ | grep "networkaudiod_5" | grep _amd64.deb | tail -n1 | awk -F'"' '{print $8}')
 naa_ver=${naa_deb#*_}; naa_ver=${naa_ver%-*}
 
+cpus=$(getconf _NPROCESSORS_CONF)
+[ $(cat /sys/devices/system/cpu/smt/active) ] && cpus=$((cpus/2))
+iso_1st=$((cpus-1)); iso_2nd=$((cpus/2))
+
 mkgrub(){
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
         part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
@@ -31,7 +35,6 @@ player=$(dialog --stdout --title "ArchQ $1" --checklist "Active player" 7 0 0 \
 [[ $player =~ R ]] && r1=on
 [[ $player =~ H ]] && h1=on
 
-cpus=$(getconf _NPROCESSORS_ONLN)
 if [[ $player =~ S ]] && ! pacman -Q squeezelite >/dev/null 2>&1; then
     /usr/bin/sqzlite-cfg.sh
 fi
@@ -69,10 +72,9 @@ fi
 if [[ $s0 != $s1 ]]; then
     if [[ $s1 == on ]]; then
         act+='squeezelite '
-        iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
         isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
         [ $cpus -ge 4 ] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
-        [ $cpus -ge 6 ] && [ $(systemctl is-active logitechmediaserver) = active ] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
+        [ $cpus -ge 6 ] && [ $(systemctl is-active lyrionmusicserver) = active ] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
         sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
     else
         inact+='squeezelite '
