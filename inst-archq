@@ -120,6 +120,7 @@ case $server in
         ) || exit 1
 
         server="$choice"
+        [[ $server ~= L ]] && player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
         ;;
     Player)
         player=$(dialog --stdout --title "ArchQ" \
