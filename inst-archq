@@ -6,9 +6,10 @@ set -uo pipefail
 trap 's=$?; echo "$0: Error on line "$LINENO": $BASH_COMMAND"; exit $s' ERR
 
 ker=Q352WU; kver='6.18.7-6'
-mpdver=0.23.18-1
+mpdver=0.23.18-2
 mympdver=25.0.0-1
 lmsver=9.1-2
+sqver=21
 
 c_blue_b=$'\e[1;38;5;27m'
 c_green_b=$'\e[1;38;5;46m'
@@ -111,7 +112,6 @@ case $server in
         choice=$(dialog --stdout --title "ArchQ" \
             --radiolist "Select MPD version" 7 0 0 \
             ${pfx}U "Ultra: PCM, FLAC only; best SQ" off \
-            ${pfx}L "Slim: Ultra (SlimProto output)" off \
             ${pfx}I "Light: PCM, CD; Radio: FLAC, MP3" on \
             ${pfx}D "DSD: PCM, DSD; Radio: FLAC" off \
             ${pfx}R "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
@@ -120,7 +120,6 @@ case $server in
         ) || exit 1
 
         server="$choice"
-        [[ $server =~ .L ]] && player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable)
         ;;
     Player)
         player=$(dialog --stdout --title "ArchQ" \
@@ -381,12 +380,12 @@ case $server in
         arch-chroot /mnt systemctl enable roonserver
         ;;
     m?|y?|o?)
+        player=S
         [ $cpus -ge 6 ] && isocpu="rcu_nocbs=$iso_1st "
         case "$server" in
             *U) MPD=ul ;;
-            *L) MPD=slim ;;
             *I) MPD=light ;;
-            *D) MPD=dsd ;;
+            *D) MPD=dsd; sqver=22 ;;
             *R) MPD=radio ;;
             *S) MPD=stream ;;
             *M) MPD=ffmpeg ;;
@@ -461,9 +460,7 @@ case $server in
 if systemctl is-active mpd >/dev/null; then
     mpc enable ArchQ >/dev/null 2>&1
     chrt -fp 85 \$(pgrep mpd)
-    chrt -p 90 \$(ps -T -C mpd -o tid,comm= | awk '\$2=="player"{print \$1}')
     chrt -fp 54 \$(pgrep ksoftirqd/\$(ps -eLo comm,cpuid | grep "output:ArchQ" | awk '{print \$2}'))
-    chrt -p 94 \$(ps -T -C mpd -o tid,comm= | awk '\$2 ~ /^output:Squ/ {print \$1}')
 EOF
         if [ $cpus -ge 6 ]; then
         cat >>/mnt/etc/rc.local <<EOF
@@ -513,9 +510,10 @@ esac
 if [[ $player =~ S ]]; then
     echo -e "\n${c_blue_b}Install Squeezelite ...${c_gray}\n"
     # pacstrap /mnt faad2 libmad
-    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-21-x86_64.pkg.tar.zst
-    arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-21-x86_64.pkg.tar.zst
+    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-${sqver}-x86_64.pkg.tar.zst
+    arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-${sqver}-x86_64.pkg.tar.zst
     [[ -n "$scard" ]] && sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/squeezelite.conf
+    [[ $server =~ [myo]. ]] && sed -i 's/^#SERVER_IP="-s .*/SERVER_IP="127.0.0.1"/' /mnt/etc/squeezelite.conf
     arch-chroot /mnt systemctl enable squeezelite
 fi
 if [[ $player =~ A ]]; then
