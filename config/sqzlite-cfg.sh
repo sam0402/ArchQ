@@ -42,7 +42,7 @@ while read line; do
 done < $config
 
 if [[ ${ver} =~ dsd ]]; then
-    [ "$DOP" = '<null>'] || [ -z "$DOP" ] && DOP='0:u32be'
+    [ "$DOP" = '<null>' ] || [ -z "$DOP" ] && DOP='0:u32be'
     echo $CODEC | grep -q dsd || CODEC=$CODEC',dsd'
     INFO="\nDSD format: dop, u8, u16le, u16be, u32le, u32be"
 else

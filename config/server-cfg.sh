@@ -1,5 +1,5 @@
 #!/bin/bash
-mpdver=0.23.18-1
+mpdver=0.23.18-2
 mympdver=25.0.0-1
 lmsver=9.1-2
 
@@ -40,7 +40,6 @@ case $server in
         choice=$(dialog --stdout --title "ArchQ" \
             --radiolist "Select MPD version" 7 0 0 \
             ${pfx}U "Ultra: PCM, FLAC only; best SQ" off \
-            ${pfx}L "Slim: Ultra (SlimProto output)" off \
             ${pfx}I "Light: PCM, CD; Radio: FLAC, MP3" on \
             ${pfx}D "DSD: PCM, DSD; Radio: FLAC" off \
             ${pfx}R "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
@@ -104,7 +103,7 @@ EOF
         if [ $cpus -ge 6 ]; then
         cat >>/etc/rc.local <<EOF
     while read PID; do 
-        taskset -cp 0-\$((\$(getconf _NPROCESSORS_ONLN)-1)) \$PID
+        taskset -cp 0-\$((\$(getconf _NPROCESSORS_CONF)-1)) \$PID
     done <<< \$(ps -eLo command,comm,tid,psr | grep -v '^\[\|output' | grep "\$((\$(getconf _NPROCESSORS_ONLN)-1))\$" | awk '{print \$(NF-1)}')
 EOF
         fi
@@ -115,7 +114,6 @@ EOF
     fi
         case "$server" in
             *U) MPD=ul ;;
-            *L) MPD=slim ;;
             *I) MPD=light ;;
             *D) MPD=dsd ;;
             *R) MPD=radio ;;
