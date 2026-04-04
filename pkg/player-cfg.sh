@@ -1,5 +1,12 @@
  #!/bin/bash
 grub_cfg='/boot/grub/grub.cfg'
+naa_deb=$(curl -sL https://www.signalyst.com/bins/naa/linux/bookworm/ | grep "networkaudiod_5" | grep _amd64.deb | tail -n1 | awk -F'"' '{print $8}')
+naa_ver=${naa_deb#*_}; naa_ver=${naa_ver%-*}
+
+cpus=$(getconf _NPROCESSORS_CONF)
+[ "$(cat /sys/devices/system/cpu/smt/active)" = 1 ] && cpus=$((cpus/2))
+iso_1st=$((cpus-1)); iso_2nd=$((cpus/2))
+
 mkgrub(){
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
         part_boot=$(lsblk -pln -o name,parttypename | grep EFI | awk 'NR==1 {print $1}')
@@ -21,14 +28,13 @@ player=$(dialog --stdout --title "ArchQ $1" --checklist "Active player" 7 0 0 \
         S Squeezelite   $s0 \
         A Airplay       $a0 \
         R Roonbridge    $r0 \
-        H "HQPlayer NAA" $h0 ) || exit 1; clear
+        H "HQPlayer NAA $naa_ver" $h0 ) || exit 1; clear
 
 [[ $player =~ S ]] && s1=on
 [[ $player =~ A ]] && a1=on
 [[ $player =~ R ]] && r1=on
 [[ $player =~ H ]] && h1=on
 
-cpus=$(getconf _NPROCESSORS_ONLN)
 if [[ $player =~ S ]] && ! pacman -Q squeezelite >/dev/null 2>&1; then
     /usr/bin/sqzlite-cfg.sh
 fi
@@ -38,8 +44,9 @@ if [[ $player =~ A ]] && ! pacman -Q shairport-sync >/dev/null 2>&1; then
     pacman -U --noconfirm /tmp/shairport-sync-4.3.3-2-x86_64.pkg.tar.zst /tmp/nqptp-1.2.5-1-x86_64.pkg.tar.zst
     curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync.service >/usr/lib/systemd/system/shairport-sync.service
     sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = \"hw:0,0\";/' /etc/shairport-sync.conf
+    # sed -i 's/^\/\?\/\?\toutput_format = ".*";/\toutput_format = "S32_LE";/' /etc/shairport-sync.conf
+    sed -i 's/^\/\?\/\?\tperiod_size = <.*>;/\tperiod_size = 78;/;s/^\/\?\/\?\tbuffer_size = <.*>;/\tbuffer_size = 468;/' /etc/shairport-sync.conf
     sed -i 's/^\/\?\/\?\tresync_threshold_in_seconds = 0.050;/\tresync_threshold_in_seconds = 0.025;/' /etc/shairport-sync.conf
-    sed -i 's/Requires=/Requires=nqptp.service /' /usr/lib/systemd/system/shairport-sync.service
     sed -i '/Install/iNice=-20\n' /usr/lib/systemd/system/shairport-sync.service
     sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/shairport-sync.service
     systemctl daemon-reload
@@ -51,23 +58,26 @@ if [[ $player =~ R ]] && ! pacman -Q roonbridge >/dev/null 2>&1; then
     pacman -U --noconfirm /tmp/roonbridge-1.8.1125-2-x86_64.pkg.tar.zst
     systemctl daemon-reload
 fi
-if [[ $player =~ H ]] && ! pacman -Q hqplayer-network-audio-daemon >/dev/null 2>&1; then
-    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayer-network-audio-daemon-4.4.0-1-x86_64.pkg.tar.zst
-    pacman -U --noconfirm /tmp/hqplayer-network-audio-daemon-4.4.0-1-x86_64.pkg.tar.zst
-    systemctl daemon-reload
+if [[ $player =~ H ]]; then
+    curl -L "https://www.signalyst.com/bins/naa/linux/bookworm/$naa_deb" | bsdtar xf - -C /tmp
+    mkdir -p /tmp/naa
+    bsdtar Jxf /tmp/data.tar.xz -C /tmp/naa
+    install -Dm644 "/tmp/naa/etc/default/networkaudiod" "/etc/default/networkaudiod"
+    install -Dm644 "/tmp/naa/etc/networkaudiod/networkaudiod.xml" "/etc/networkaudiod/networkaudiod.xml"
+    install -Dm644 "/tmp/naa/lib/systemd/system/networkaudiod.service" "/usr/lib/systemd/system/networkaudio.service"
+    install -Dm644 "/tmp/naa/usr/share/doc/networkaudiod/copyright" "/usr/share/licenses/networkaudiod/COPYING"
+    install -Dm755 "/tmp/naa/usr/sbin/networkaudiod" "/usr/bin/networkaudiod"
 fi
 
 if [[ $s0 != $s1 ]]; then
     if [[ $s1 == on ]]; then
         act+='squeezelite '
-        iso_1st=$((cpus-1)); iso_2nd=$((cpus/2-1))
         isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
-        [ $cpus -ge 4 ] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
-        [ $cpus -ge 6 ] && [ $(systemctl is-active logitechmediaserver) = active ] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
+        [ $cpus -ge 6 ] && [ $(systemctl is-active lyrionmusicserver) = active ] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
         sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
     else
         inact+='squeezelite '
-        sed -i 's/'"$isocpu"'//' /etc/default/grub
+        sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX=""/' /etc/default/grub
     fi
     mkgrub
 fi
@@ -78,9 +88,6 @@ if [[ $a0 != $a1 ]]; then
 fi
 if [[ $r0 != $r1 ]]; then
     [[ $r1 == 'on' ]] && act+='roonbridge ' || inact+='roonbridge '
-fi
-if [[ $s0 != $s1 ]]; then
-    [[ $s1 == 'on' ]] && act+='squeezelite ' || inact+='squeezelite '
 fi
 if [[ $h0 != $h1 ]]; then
     [[ $h1 == 'on' ]] && act+='networkaudio ' || inact+='networkaudio '
