@@ -352,7 +352,7 @@ arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 isocpu=''
 cpus=$(getconf _NPROCESSORS_CONF)
-[ $(cat /sys/devices/system/cpu/smt/active) ] && cpus=$((cpus/2))
+[ "$(cat /sys/devices/system/cpu/smt/active)" = 1 ] && cpus=$((cpus/2))
 iso_1st=$((cpus-1)); iso_2nd=$((cpus/2))
 #cpus=$(getconf _NPROCESSORS_ONLN)
 [ $cpus -ge 4 ] && [[ $server = LMS || $player =~ S ]] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
