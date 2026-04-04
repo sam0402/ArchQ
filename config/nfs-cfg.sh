@@ -32,7 +32,7 @@ case "$WK" in
             MPs=$(echo $line | cut -d ' ' -f 2 | cut -d '/' -f 3)
             MENU=${MENU}$n' /mnt/'$MPs' '
       fi
-      n=`expr $n + 1`
+      ((n++))
     done < $config
     if [ -n "$MENU" ]; then
         options=$(dialog --stdout \
@@ -70,7 +70,7 @@ case "$WK" in
             SNs=$(echo $SNs | sed 's"/"\\\/"g')
             sed -i ''"$n"'s/'"$IPs"'/'"$IP"'/g;s/'"$MPs"'/'"$MP"'/;s/'"$SNs"'/'"$SN"'/;s/'"$OPs"'/'"$OP"'/' $config
       fi  
-      n=`expr $n + 1`
+      ((n++))
     done < $config
     ;;
     C)
@@ -90,7 +90,7 @@ case "$WK" in
                 opts=$(echo $line | cut -d ' ' -f 4)
                 [[ $opts =~ fsc ]] || sed -i ''"$n"'s/ nfs '"$opts"'/ nfs '"$opts"',fsc/' $config
           fi
-          n=`expr $n + 1`
+          ((n++))
         done < $config
         ;;
       D)

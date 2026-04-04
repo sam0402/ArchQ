@@ -1,6 +1,6 @@
 #!/bin/bash
 #serv=$(echo $0 | awk -F/ '{print $NF}')
-if [ -z $1 ]; then
+if [ -z "$1" ]; then
 	echo "Using: sw mpd, roon, lms, rompr, airplay, mtroom, hqe, naa and other service."
 	exit 1
 fi
@@ -35,8 +35,8 @@ case $1 in
 		service='mympd '$MPD
 		;;
 	lms)
-		serv=logitechmusicserver
-		service='logitechmusicserver squeezelite'
+		serv=lyrionmusicserver
+		service='lyrionmusicserver squeezelite'
 		;;
 	hqe)
 		serv=hqplayerd
@@ -57,15 +57,15 @@ else
 	else
 		STATUS='on'
 		sudo systemctl start $service
-		if systemctl is-active mpd >/dev/null && [ $1 = mpd ]; then
+		if systemctl is-active mpd >/dev/null && [ "$1" = mpd ]; then
 			mpc enable ArchQ >/dev/null 2>&1
 			chrt -fp 81 $(pgrep mpd)
 			chrt -fp 54 $(pgrep ksoftirqd/$(ps -eLo comm,cpuid| grep "output:"|awk '{print $2}'))
-			mpc disable Multiroom Stream >/dev/null
+			mpc disable Multiroom >/dev/null; mpc disable Stream >/dev/null
 		fi
-		if systemctl is-active owntone >/dev/null && [ $1 = mtroom -o $1 = owntone ]; then
+		if systemctl is-active owntone >/dev/null && [[ "$1" = mtroom || "$1" = owntone ]]; then
 			mpc enable Multiroom >/dev/null; mpc disable ArchQ >/dev/null
-			chrt -p 81 `pidof -s owntone`
+			chrt -p 81 $(pidof -s owntone)
 			chrt -p 93 $(ps -T -C owntone -o tid,comm= | awk '$2=="player"{print $1}')
 			chrt -p 91 $(ps -T -C owntone -o tid,comm= | awk '$2=="input"{print $1}')
 		fi

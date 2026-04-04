@@ -4,7 +4,7 @@ naa_deb=$(curl -sL https://www.signalyst.com/bins/naa/linux/bookworm/ | grep "ne
 naa_ver=${naa_deb#*_}; naa_ver=${naa_ver%-*}
 
 cpus=$(getconf _NPROCESSORS_CONF)
-[ $(cat /sys/devices/system/cpu/smt/active) ] && cpus=$((cpus/2))
+[ "$(cat /sys/devices/system/cpu/smt/active)" = 1 ] && cpus=$((cpus/2))
 iso_1st=$((cpus-1)); iso_2nd=$((cpus/2))
 
 mkgrub(){
@@ -73,12 +73,11 @@ if [[ $s0 != $s1 ]]; then
     if [[ $s1 == on ]]; then
         act+='squeezelite '
         isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
-        [ $cpus -ge 4 ] && isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
         [ $cpus -ge 6 ] && [ $(systemctl is-active lyrionmusicserver) = active ] && isocpu="isolcpus=$iso_1st,$iso_2nd rcu_nocbs=$iso_1st,$iso_2nd "
         sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
     else
         inact+='squeezelite '
-        sed -i 's/'"$isocpu"'//' /etc/default/grub
+        sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX=""/' /etc/default/grub
     fi
     mkgrub
 fi
@@ -89,9 +88,6 @@ if [[ $a0 != $a1 ]]; then
 fi
 if [[ $r0 != $r1 ]]; then
     [[ $r1 == 'on' ]] && act+='roonbridge ' || inact+='roonbridge '
-fi
-if [[ $s0 != $s1 ]]; then
-    [[ $s1 == 'on' ]] && act+='squeezelite ' || inact+='squeezelite '
 fi
 if [[ $h0 != $h1 ]]; then
     [[ $h1 == 'on' ]] && act+='networkaudio ' || inact+='networkaudio '

@@ -87,7 +87,7 @@ case $client in
 
                 cp /etc/mpd.d/httpd.out /etc/mpd.d/${port}.out
                 sed -i 's/mp3/'"$port"'/;s/port.*"/port\t"'"$port"'"/' /etc/mpd.d/${port}.out
-                grep -q ${port} $config && echo "include_optional \"mpd.d/${port}.out\"" >>$config
+                grep -q ${port} $config || echo "include_optional \"mpd.d/${port}.out\"" >>$config
                 systemctl enable --now mpd-proxy@${new}${user}
                 echo "$user's MPD control port: 660$new; Stream port: $port"
                 ;;
@@ -132,6 +132,9 @@ esac
 ### Include audio output & Dop
 m0=off; h0=off; d0=off
 m1=off; h1=off; d1=off
+cat $config | grep owntone | grep -q '#' || m0=on
+cat $config | grep httpd | grep -q '#' || h0=on
+cat $config | grep -q "#[[:space:]]dop" || d0=on
 MENU=''
 if [ $client = M ]; then
     cat $config | grep 'mtp_' | grep -q '^i' && p0=on || p0=off
@@ -139,9 +142,6 @@ if [ $client = M ]; then
     MENU="P Multi-player $p0 "
 fi
 pacman -Q mpd-ul >/dev/null 2>&1 || MENU+='M Multi-room '$m0' H "Http Stream:8000" '$h0' '
-cat $config | grep owntone | grep -q '#' || m0=on 
-cat $config | grep httpd | grep -q '#' || h0=on
-cat $config | grep -q "#[[:space:]]dop" || d0=on
 exec='dialog --stdout --title "ArchQ MPD" --checklist "Output method" 7 0 0 '$MENU'D "DSD over PCM" '$d0
 output=$(eval $exec) || exit 1; clear
 

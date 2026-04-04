@@ -11,10 +11,10 @@ cpus=$(getconf _NPROCESSORS_ONLN)
 # pacman -Q alsa-lib | grep -qE 'alsa-lib .*-1.$' \
 #   && alsalib='A ALSAlib@Dynamic' \
 #   || alsalib='A ALSAlib@Soft'
-pacman -Q xf86-video-fbdev >/dev/null 2>&1 && alsalib=''
+pacman -Q xf86-video-fbdev >/dev/null 2>&1 || alsalib='A ALSAlib'
 
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select an action:" 7 0 0 B Boot I Install M Remove $ramroot F Frequency A ALSAlib) || exit 1; clear
+            --menu "Select an action:" 7 0 0 B Boot I Install M Remove $ramroot F Frequency $alsalib) || exit 1; clear
 
 mkgrub(){
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
@@ -65,7 +65,7 @@ case $WK in
         ;;
     M)
         while read line; do
-            menu+=${line}' '
+            menu+="$line "
         done <<< "$(pacman -Q | grep linux-[DQ] | grep -v headers)"
         options=$(dialog --stdout \
                 --title "ArchQ $1" \
@@ -81,7 +81,7 @@ case $WK in
         bootlist='dialog --stdout --title "ArchQ $1" --menu "Select default boot" 7 0 0 '
         while read line; do
             echo $line | grep 'fallback' || bootlist+=$n' '\"$line\"' '
-            n=`expr $n + 1`
+            ((n++))
         done <<< "$(grep 'menuentry ' $grub_cfg | cut -d "'" -f2 | sed '$d;s/Arch Linux, with Linux //;s/ initramfs//'|cut -d' ' -f1-2)"
         bootlist+='S "Save Default"'
         options=$(eval $bootlist) || exit 1; clear
@@ -104,11 +104,11 @@ case $WK in
         do
             t1=$(echo $l1 | grep tick | cut -d ' ' -f $i)
             t2=$(echo $l2 | grep tick | cut -d ' ' -f $i)
-            count+='Core'$(expr $i - 2)': '
+            count+="Core$((i - 2)): "
             [ -f /usr/bin/python ] && count+=$(python -c "print(round(($t2-$t1)/10000.0,1))")'\n' \
-                                || count+=$(expr $t2 / 10000 - $t1 / 10000)'\n'
+                                || count+="$((t2 / 10000 - t1 / 10000))\n"
         done
-        dialog --stdout --title "ArchQ $1" --msgbox "\nKernel frequency: $count" $(expr $cpus + 6) 35; clear
+        dialog --stdout --title "ArchQ $1" --msgbox "\nKernel frequency: $count" $((cpus + 6)) 35; clear
         ;;
     A)
         a_name=(Halo Soft Analytical Dynamic)

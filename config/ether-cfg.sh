@@ -86,9 +86,7 @@ fi
 
 if [ -f "/etc/systemd/network/10-${ifport}.network" ]; then
     config="/etc/systemd/network/10-${ifport}.network"
-    while read line; do
-        eval $(grep '=' | sed 's/ /,/g')
-    done < $config
+    eval $(grep '=' "$config" | sed 's/ /,/g')
 
     [[ -n $Address ]] && ifip=$(echo $Address | cut -d'/' -f1)
     [[ -n $Address ]] && ifmask=$(echo $Address | cut -d'/' -f2)

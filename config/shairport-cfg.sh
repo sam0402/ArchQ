@@ -54,12 +54,14 @@ Config()
   [[ $SEL =~ V ]] && v1=on
   [[ $SEL =~ A ]] && a1=on
 
-  if [[ $v0 != $v1 ]] && [[ $v1 == 'off' ]]; then
-      sed -i 's/^\/\?\/\?\tignore_volume_control = "no";/\tignore_volume_control = "yes";/' $config
-      echo "Turn off volume control."
-  else
-      sed -i 's/^\/\?\/\?\tignore_volume_control = "yes";/\tignore_volume_control = "no";/' $config
-      echo "Turn on volume control."
+  if [[ $v0 != $v1 ]]; then
+      if [[ $v1 == 'off' ]]; then
+          sed -i 's/^\/\?\/\?\tignore_volume_control = "no";/\tignore_volume_control = "yes";/' $config
+          echo "Turn off volume control."
+      else
+          sed -i 's/^\/\?\/\?\tignore_volume_control = "yes";/\tignore_volume_control = "no";/' $config
+          echo "Turn on volume control."
+      fi
   fi
   if [[ $a0 != $a1 ]]; then
     if [[ $a1 == 'on' ]]; then

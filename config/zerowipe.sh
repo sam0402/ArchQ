@@ -1,7 +1,7 @@
 #!/bin/bash
 config='/etc/fstab'
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu " ! ! Format & HDD 0 Wipe ! ! \n All data will be erased!" 8 0 0 F "Format XFS" W "Wipe disk")
+            --menu " ! ! Format & HDD 0 Wipe ! ! \n All data will be erased!" 8 0 0 F "Format XFS" W "Wipe disk") || exit 1
 clear
 case $WK in
     W)
@@ -23,7 +23,7 @@ case $WK in
         for ((i=1; i <= $times; i++))
         do
             echo "Fill zero -> $i"
-            scrub -Sp fillzero $partition
+            dd if=/dev/zero of=$partition bs=4M status=progress conv=fsync
         done
         ;;
     F)

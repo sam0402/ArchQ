@@ -75,7 +75,7 @@ CLOSETRAY=$(echo $options | awk '//{print $7 }')
 [ -z $CLOSETRAY ] && echo "Fail! Auto Close Tray is null." && exit 1
 
 # umount ${OUTPUTDIR}
-[ -f "$OUTPUTDIR" ] && chown $user: ${OUTPUTDIR}
+[ -d "$OUTPUTDIR" ] && chown $user: ${OUTPUTDIR}
 # mount ${OUTPUTDIR}
 
 OUTPUTDIR=$(echo $OUTPUTDIR | sed 's"/"\\\/"g')
@@ -88,7 +88,7 @@ sed -i 's/^#\?CLOSETRAY=.*/CLOSETRAY='"$CLOSETRAY"'/' $config
 sed -i 's/musicbrainz,//' $config
 [ $TAGS == 'y' ] && sed -i 's/^KID3CLI=".*/KID3CLI="kid3-cli"/' $config || sed -i 's/^KID3CLI=".*/KID3CLI=""/' $config
 
-[ -z "$ans" ] && exit 1
+[ -z "$ans" ] && exit 0
 dialog --stdout --title "abCDe" --yesno "Reboot to work for abcde?" 0 0 || exit 1
 clear
 reboot

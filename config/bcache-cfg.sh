@@ -35,7 +35,7 @@ case $ACTION in
         SSD_LIST=$(lsblk -dplnx size -o name,size | sort -nr | grep "nvme")
         [[ -z $SSD_LIST ]] && { echo "No SSD or NVMe storage device was detected."; exit 1; }
 
-        # Select HDD partiton
+        # Select HDD partition
         BACKING_DISK=$(dialog --stdout --title "Create Bcache" --menu "Select a backing HDD/SSD" 7 0 0 $DISK_LIST) || exit 1
         clear
         BACKING_PART_LIST=$(lsblk -pln -o name,size,fstype $BACKING_DISK | sed -e '1d;s/\s\+/ /g;s/\s/,/2')
@@ -61,7 +61,7 @@ case $ACTION in
             data=$(dialog --stdout --title "Backing $BACKING_PART" --menu "Retain data?" 7 0 0 R Retain C Clean)
             clear
         fi
-        # Select SSD/NVME partiton
+        # Select SSD/NVME partition
         CACHE_DISK=$(dialog --stdout --title "Create Bcache" --menu "Select a cache SSD" 7 0 0 $SSD_LIST) || exit 1
         clear
         CACHE_PART_LIST=$(lsblk -pln -o name,size,fstype $CACHE_DISK | grep 'p' | sed -e 's/\s\+/ /g;s/\s/,/2')
@@ -91,9 +91,9 @@ case $ACTION in
                          [ "$gap" -ge 16 ] && work=true
                     fi
                 fi
-                # Rebuild parititon
+                # Rebuild partition
                 if [ "$work" = "true" ]; then
-                    sfdisk -d $BACKING_DISK >~/partiton_PreBk_$(date +"%Y%m%d_%H.%M")
+                    sfdisk -d $BACKING_DISK >~/partition_PreBk_$(date +"%Y%m%d_%H.%M")
                     new_start_s=$((start_s - 16))
                     parted --script $BACKING_DISK rm $part_num
                     parted --script $BACKING_DISK mkpart BCache xfs ${new_start_s}s ${end_s}s
@@ -124,12 +124,15 @@ case $ACTION in
         done
         [ -z "$bcache" ] && { echo "Error: Bcache device not found on $BACKING_PART"; exit 1; }
         echo -e ${GRAY}"\n--- Create $bcache ---"${RESET}
-        lsblk -pln -o fstype $CACHE_PART | grep -q bcache || (wipefs -af $CACHE_PART; make-bcache --writeback -C $CACHE_PART)
+        lsblk -pln -o fstype $CACHE_PART | grep -q bcache || { wipefs -af $CACHE_PART; make-bcache --writeback -C $CACHE_PART; }
         sleep 1
-        [ -e /sys/block/$bcache/bcache/attach ] && \
+        attach_ret=1
+        if [ -e /sys/block/$bcache/bcache/attach ]; then
             echo $(bcache-super-show $CACHE_PART | grep cset | awk '{print $2}') >/sys/block/$bcache/bcache/attach
+            attach_ret=$?
+        fi
         # echo writearound >/sys/block/$bcache/bcache/cache_mode
-        if [ $? -ne 0 ] && [ "$BP_EXIST" = true ]; then
+        if [ $attach_ret -ne 0 ] && [ "$BP_EXIST" = true ]; then
             if dialog --stdout --title "Failed to create Bcache." --yesno "\n Need to remove $BACKING_PART and create again. This may delete all data." 7 0; then
                 [ -e "/sys/block/$bcache/bcache/stop" ] && echo 1 > "/sys/block/$bcache/bcache/stop"
                 sleep 1
@@ -182,7 +185,7 @@ case $ACTION in
                 
                 new_start_s=$((start_s + 16))
                 
-                sfdisk -d $BACKING_DISK >~/partiton_CachBk_$(date +"%Y%m%d_%H.%M")
+                sfdisk -d $BACKING_DISK >~/partition_CachBk_$(date +"%Y%m%d_%H.%M")
                 parted --script $BACKING_DISK rm $part_num >/dev/null 2>&1
                 parted --script $BACKING_DISK mkpart Linux xfs ${new_start_s}s ${end_s}s >/dev/null 2>&1
                 echo -e ${GRAY}"\n--- $bcache Removed ---"${RESET}

@@ -57,8 +57,8 @@ case $server in
         /usr/bin/player-cfg.sh
         ;;
     LMS)
+        isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
         if ! pacman -Q lyrionmusicserver >/dev/null 2>&1; then
-            isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
             echo -e "\n${c_blue_b}Install Lyrion Music Server ...${c_gray}\n"
             pacman -S perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
@@ -240,6 +240,6 @@ EOF
 esac
 if [ -n "$MPD" ]; then
     MPD="-$MPD"
-    uname -r | grep -vq D && ! pacman -Q squeezelite >/dev/null 2>&1 && sqzlite-cfg.sh
+    uname -r | grep -vq D && ! pacman -Q squeezelite >/dev/null 2>&1 && /usr/bin/sqzlite-cfg.sh
 fi
 echo -e "\n"${c_blue_b}${server}${MPD}${c_gray}" is started."
