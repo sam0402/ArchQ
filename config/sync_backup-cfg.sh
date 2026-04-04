@@ -1,5 +1,6 @@
 #!/bin/bash
 
+list=''
 while read line; do
     list+=${line}' 　 '
 done <<< $(ls /mnt)
@@ -32,6 +33,8 @@ partdata=$(lsblk -pln -o name,fstype $partition)
 options=$(dialog --stdout --title "Synchronization $WK $1" --checklist "" 7 0 0 \
         D "Delete files don't exist in the source" on \
         U "Umount partition(/mnt/muz_bk) after finished" on) || exit 1; clear
+DEL=''
+delmsg=''
 [[ $options =~ D ]] && DEL="--delete"
 [[ $options =~ D ]] && delmsg=",\nand deletes files in the destination if they don't exist in the source"
 
@@ -62,10 +65,10 @@ case $WK in
     Restore)
         yes=$(dialog --stdout --title "Synchronization ${WK^^} $1" \
                 --colors --yesno "Restore files from\n$partition to \Z1/mnt/$TARGET\Zn." 0 0) || exit 1; clear
-        echo -e "Restore ${partition}${delmsg} to /mnt/$SOURCE."
+        echo -e "Restore ${partition}${delmsg} to /mnt/$TARGET."
         mount -t $FS -m -o $OP $partition /mnt/muz_bk
         nocache rsync -avh $DEL --progress /mnt/muz_bk/. /mnt/$TARGET/.
         ;;
 esac
 
-[[ $options =~ D ]] && umount /mnt/muz_bk
+[[ $options =~ U ]] && umount /mnt/muz_bk
