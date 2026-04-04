@@ -513,7 +513,7 @@ if [[ $player =~ S ]]; then
     arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-1.9.8.1317-${sqver}-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-${sqver}-x86_64.pkg.tar.zst
     [[ -n "$scard" ]] && sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/squeezelite.conf
-    [[ $server =~ [myo]. ]] && sed -i 's/^#SERVER_IP="-s .*/SERVER_IP="127.0.0.1"/' /mnt/etc/squeezelite.conf
+    [[ $server =~ [myo]. ]] && sed -i 's/^#SERVER_IP="-s .*/SERVER_IP="-s 127.0.0.1"/' /mnt/etc/squeezelite.conf
     arch-chroot /mnt systemctl enable squeezelite
 fi
 if [[ $player =~ A ]]; then
