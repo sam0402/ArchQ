@@ -22,7 +22,7 @@ c_gray=$'\e[0;37m'
 echo root:archq | chpasswd
 pacman -Sy --noconfirm archlinux-keyring pacman-contrib dialog scrub
 desk=$(dialog --stdout --title "ArchQ" --menu "Install" 7 0 0 M "Music Server|Player without GUI" D "Desktop with LMS|MPD Server") || exit 1; clear
-[ $desk = D ] && curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/inst-desktop | bash
+[ $desk = D ] && { curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/inst-desktop | bash; exit; }
 ### Get infomation from user ###
 password(){
     password=$(dialog --stdout --title "ArchQ" --inputbox "Enter admin password" 0 0) || exit 1; clear
@@ -346,9 +346,9 @@ echo $device | grep -q nvme && sed -i 's/MODULES=()/MODULES=(nvme)/' /mnt/etc/mk
 ### Kernel
 [ $cpu = amd ] && { ker=A220; kver='6.18.7-8'; }
 echo -e "\n${c_blue_b}Install ArchQ Kernel ...${c_gray}\n"
-arch-chroot /mnt mkinitcpio -p linux
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/kernel/linux-${ker}-${kver}-x86_64.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm /root/linux-${ker}-${kver}-x86_64.pkg.tar.zst
+arch-chroot /mnt mkinitcpio -p linux-${ker}
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 isocpu=''
 cpus=$(getconf _NPROCESSORS_CONF)
@@ -426,7 +426,6 @@ case $server in
             arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
             arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
             arch-chroot /mnt pacman -U --noconfirm /root/mympd-${mympdver}-x86_64.pkg.tar.zst /root/libutf8proc-2.9.0-1-x86_64.pkg.tar.zst /root/libnewt-0.52.24-2-x86_64.pkg.tar.zst
-            arch-chroot /mnt
             mkdir -p /mnt/var/lib/private/mympd/config/
             echo 'Unknown' >/mnt/var/lib/private/mympd/config/album_group_tag
             arch-chroot /mnt systemctl enable mympd
@@ -496,10 +495,10 @@ EOF
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayerd.service >/mnt/usr/lib/systemd/system/hqplayerd.service
 
         ## lib link
-        arch-chroot /mnt ln -s /usr/liblibgupnp-1.2.so.1 /usr/lib/libgupnp-1.2.so.0
-        arch-chroot /mnt ln -s /usr/liblibgupnp-av-1.0.so.3 /usr/lib/libgupnp-av-1.0.so.2
-        arch-chroot /mnt ln -s /usr/liblibomp.so /usr/lib/libomp.so.5
-        arch-chroot /mnt ln -s /usr/liblibFLAC.so.12 /usr/lib/libFLAC.so.8
+        arch-chroot /mnt ln -s /usr/lib/libgupnp-1.2.so.1 /usr/lib/libgupnp-1.2.so.0
+        arch-chroot /mnt ln -s /usr/lib/libgupnp-av-1.0.so.3 /usr/lib/libgupnp-av-1.0.so.2
+        arch-chroot /mnt ln -s /usr/lib/libomp.so /usr/lib/libomp.so.5
+        arch-chroot /mnt ln -s /usr/lib/libFLAC.so.12 /usr/lib/libFLAC.so.8
         arch-chroot /mnt ln -s /opt/hqplayerd/lib/libsgllnx64-2.29.02.so /usr/lib/libsgllnx64-2.29.02.so
         arch-chroot /mnt ln -s /opt/hqplayerd/lib/libsglarm64-2.31.0.0.so /usr/lib/libsglarm64-2.31.0.0.so
         arch-chroot /mnt ln -s /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt
@@ -568,7 +567,7 @@ arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/m
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/linux-firmware-realtek-20260221-1-any.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/lame-3.100-4-x86_64.pkg.tar.zst /root/libmad-0.15.1b-12-x86_64.pkg.tar.zst /root/linux-firmware-realtek-20260221-1-any.pkg.tar.zst
 
-pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
+arch-chroot /mnt pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
 arch-chroot /mnt systemctl disable avahi-daemon.socket
 arch-chroot /mnt systemctl enable sshd ntpdate rc-local cpupower
 arch-chroot /mnt systemctl disable ntpd
