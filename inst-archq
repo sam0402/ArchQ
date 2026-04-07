@@ -173,7 +173,7 @@ if [ $fmt = P ]; then
     fi
 else
     # Install in entire disk
-    [ $server = LMS ] && root_size=4096 || root_size=3560
+    [ $server = LMS ] && root_size=4096 || root_size=3584
     root_end=$(( $root_size + 257 + 1 ))MiB
     parted --script "${device}" -- mklabel gpt \
         mkpart EFI fat32 1MiB 257MiB \
@@ -567,7 +567,6 @@ arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/m
 arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/linux-firmware-realtek-20260221-1-any.pkg.tar.zst
 arch-chroot /mnt pacman -U --noconfirm --overwrite '*' /root/lame-3.100-4-x86_64.pkg.tar.zst /root/libmad-0.15.1b-12-x86_64.pkg.tar.zst /root/linux-firmware-realtek-20260221-1-any.pkg.tar.zst
 
-arch-chroot /mnt pacman -Sdd --noconfirm qt5-base kid3-common double-conversion
 arch-chroot /mnt systemctl disable avahi-daemon.socket
 arch-chroot /mnt systemctl enable sshd ntpdate rc-local cpupower
 arch-chroot /mnt systemctl disable ntpd
