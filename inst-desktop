@@ -163,7 +163,7 @@ pacstrap /mnt base linux-firmware grub efibootmgr mkinitcpio os-prober gptfdisk 
         fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmad \
         perl-webservice-musicbrainz perl-musicbrainz-discid perl-net-ssleay perl-io-socket-ssl perl-uri perl-mojolicious \
         alsa-lib mpc mympd rc-local libid3tag taglib lua \
-        tigervnc upplay xf86-video-fbdev audacious deadbeef-static karchive5 ${lxd}
+        tigervnc upplay xf86-video-fbdev audacious deadbeef-static karchive karchive5 ${lxd}
 [ $desktop = LXDE ] && arch-chroot /mnt pacman -R --noconfirm lxmusic
 [ $desktop = LXQt ] && arch-chroot /mnt pacman -R --noconfirm lxqt-powermanagement
 
