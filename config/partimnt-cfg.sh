@@ -34,7 +34,11 @@ case $WK in
         clear
         MP=$(echo $options |  awk '//{print $1 }')
         OP=$(echo $options |  awk '//{print $2 }')
-        [ "$FS" = "xfs" ] && OP+=',attr2,inode64,logbufs=8,logbsize=32k,noquota'
+        if [ "$FS" = "xfs" ]; then
+            OP+=',attr2,inode64,logbufs=8'
+            [[ $device =~ "nvme" ]] && OP+=',logbsize=256k' || OP+=',logbsize=32k'
+            OP+=',allocsize=64M,noquota'
+        fi
         [ "$FS" = "f2fs" ] && OP+=',background_gc=on,nogc_merge,discard,discard_unit=block,inline_xattr,inline_data,inline_dentry,flush_merge,extent_cache,mode=adaptive,active_logs=6,alloc_mode=reuse,checkpoint_merge,fsync_mode=posix,memory=normal,errors=continue'
         [ -z $OP ] && echo "Error: Missing mount point." && exit 1
 
