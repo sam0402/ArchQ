@@ -143,7 +143,7 @@ fi
 # Wipe & format data partition
 part_data="$(ls ${device}* | grep -E "^${device}p?3$")"
 wipefs "${part_data}"
-[ $f2fs = F ] && mkfs.f2fs -fl Data "${part_data}" || mkfs.xfs -fL Data "${part_data}"
+mkfs.xfs -fL Data "${part_data}"
 
 ## Mount root & boot partition
 mount "${part_root}" /mnt
