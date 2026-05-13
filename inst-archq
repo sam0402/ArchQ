@@ -91,6 +91,7 @@ server=$(dialog --stdout --title "ArchQ" \
         --menu "Please select a music server or player" 7 0 0 \
         LMS "Lyrion Music Server" \
         MPD "MPD, Rigelian(iOS) | text-based client" \
+        MPD-alsa "MPD ALSA output with text client" \
         myMPD "MPD & myMPD web-based client" \
         Roon "Roon Server" \
         HQPE5 "HQPlayer Embedded 5" \
@@ -107,6 +108,7 @@ case $server in
             MPD)   pfx="m" ;;
             myMPD) pfx="y" ;;
             RompR) pfx="o" ;;
+            MPD-alsa) pfx="a"; mpdver=0.23.17-36 ;;
         esac
 
         choice=$(dialog --stdout --title "ArchQ" \
