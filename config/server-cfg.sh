@@ -21,6 +21,7 @@ pacman -Q php-fpm >/dev/null 2>&1 && servs+='php-fpm '
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
         LMS "Lyrion Music Server" \
         MPD "MPD, Rigelian(iOS) | text-based client" \
+        MPD-alsa "MPD ALSA output with text client" \
         myMPD "MPD & myMPD web-based client" \
         RompR "MPD & RompR web-based client" \
         Roon "Roon Server" \
@@ -35,6 +36,7 @@ case $server in
             MPD)   pfx="m" ;;
             myMPD) pfx="y" ;;
             RompR) pfx="o" ;;
+            MPD-alsa) pfx="a"; mpdver=0.23.17-36 ;;
         esac
 
         choice=$(dialog --stdout --title "ArchQ" \
@@ -43,7 +45,7 @@ case $server in
             ${pfx}I "Light: PCM, CD; Radio: FLAC, MP3" on \
             ${pfx}D "DSD: PCM, DSD; Radio: FLAC" off \
             ${pfx}R "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
-            ${pfx}S "Stream: PCM; Radio:FLAC MP3; http output:8000" off \
+            ${pfx}S "Stream: PCM; Radio: FLAC MP3; http output:8000" off \
             ${pfx}M "MPEG: All features of the above; +AAC, ALAC" off
         ) || exit 1
 
