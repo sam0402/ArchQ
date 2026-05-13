@@ -117,7 +117,7 @@ case $server in
             ${pfx}I "Light: PCM, CD; Radio: FLAC, MP3" on \
             ${pfx}D "DSD: PCM, DSD; Radio: FLAC" off \
             ${pfx}R "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
-            ${pfx}S "Stream: PCM; Radio:FLAC MP3; http output:8000" off \
+            ${pfx}S "Stream: PCM; Radio: FLAC MP3; http output:8000" off \
             ${pfx}M "MPEG: All features of the above; +AAC, ALAC" off
         ) || exit 1
 
@@ -382,7 +382,7 @@ case $server in
         arch-chroot /mnt systemctl enable roonserver
         ;;
     m?|y?|o?)
-        player=S
+        [[ $server =~ a. ]] || player=S
         [ $cpus -ge 6 ] && isocpu="rcu_nocbs=$iso_1st "
         case "$server" in
             *U) MPD=ul ;;
