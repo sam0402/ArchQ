@@ -141,7 +141,7 @@ if [ $client = M ]; then
     p1=off
     MENU="P Multi-player $p0 "
 fi
-pacman -Q mpd-ul >/dev/null 2>&1 || MENU+='M Multi-room '$m0' H "Http Stream:8000" '$h0' '
+pacman -Q mpd-ul >/dev/null 2>&1 || MENU+='M Multi-room '$m0' H "Http Stream:9000" '$h0' '
 exec='dialog --stdout --title "ArchQ MPD" --checklist "Output method" 7 0 0 '$MENU'D "DSD over PCM" '$d0
 output=$(eval $exec) || exit 1; clear
 
@@ -235,7 +235,7 @@ if [[ $h1 == on ]]; then
     http_flac=off; http_wave=off; http_lame=off
     declare http_$(cat $ht_conf | grep 'encoder' | cut -d'"' -f2)=on
     pacman -Q mpd-ffmpeg || pacman -Q mpd-stream && MENU=' mp3 　 '$http_lame' flac 　 '$http_flac' wave 　 '$http_wave
-    encoder=$(dialog --stdout --title "ArchQ MPD" --radiolist "Http:8000 codec" 7 0 0 $MENU) || exit 1
+    encoder=$(dialog --stdout --title "ArchQ MPD" --radiolist "Http:9000 codec" 7 0 0 $MENU) || exit 1
     clear
     sed -i 's/name.*"/name\t"'"Stream.$encoder"'"/' $ht_conf
     [[ $encoder == 'mp3' ]] && encoder=lame
