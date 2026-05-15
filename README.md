@@ -30,7 +30,7 @@ Install step:
 
 Enter command `reboot` if need to.
 
-Enjoy it!　[![Donate](images/buymeacoffee.png)](https://buymeacoff.ee/samshu.tw)
+Enjoy it!
  
 [ArchQ Chinese manual](http://www.stsd99.com/phpBB3/viewtopic.php?f=61&t=3210&sid=702a4898b30a89bc20ba1276940ef412) 
 
