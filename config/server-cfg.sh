@@ -1,5 +1,5 @@
 #!/bin/bash
-uname -r | grep -q D && mpdver=0.23.17-36 || mpdver=0.23.18-3
+uname -r | grep -q D && mpdver=0.23.17-36 || mpdver=0.23.18-2
 mympdver=25.0.0-1
 lmsver=9.1-2
 
@@ -21,7 +21,8 @@ pacman -Q php-fpm >/dev/null 2>&1 && servs+='php-fpm '
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
         LMS "Lyrion Music Server" \
         MPD "MPD, Rigelian(iOS) | text-based client" \
-        MPD-alsa "MPD ALSA output with text client" \
+        MPD-Ai "MPD AI optimization; text client" \
+        MPD-alsa "MPD ALSA output; text client" \
         myMPD "MPD & myMPD web-based client" \
         RompR "MPD & RompR web-based client" \
         Roon "Roon Server" \
@@ -36,7 +37,8 @@ case $server in
             MPD)   pfx="m" ;;
             myMPD) pfx="y" ;;
             RompR) pfx="o" ;;
-            MPD-alsa) pfx="a"; mpdver=0.23.17-36 ;;
+            MPD-Ai) pfx="m"; mpdver=0.23.18-3 ;;
+            MPD-alsa) pfx="m"; mpdver=0.23.17-36 ;;
         esac
 
         choice=$(dialog --stdout --title "ArchQ" \
