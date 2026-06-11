@@ -110,7 +110,7 @@ case $server in
             myMPD) pfx="y" ;;
             RompR) pfx="o" ;;
             MPD-Ai) pfx="m"; mpdver=0.23.18-3 ;;
-            MPD-alsa) pfx="m"; mpdver=0.23.17-36 ;;
+            MPD-alsa) pfx="a"; mpdver=0.23.17-36 ;;
         esac
 
         choice=$(dialog --stdout --title "ArchQ" \
