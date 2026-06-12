@@ -1,0 +1,30 @@
+# Name of your player
+NAME="-n arch"
+# Output, hw: devices are normally the best choice
+AUDIO_DEV="-o hw:0,0"
+# Specify the ALSA params to open output device
+ALSA_PARAMS="-a 60:4::1"
+# Buffer size. Specify internal Stream and Output buffer sizes in Kb
+BUFFER="-b 20000:500000"
+# Restrict codec to those specified, otherwise load all available codecs
+CODEC="-c pcm,dsd"
+# Various Options. Add another option
+#OPTIONS="-W "
+# Connect to the specified Server, otherwise autodiscovery will find the server
+SERVER_IP="-s 127.0.0.1"
+# MAC address
+#MAC="-m "
+# Set real time priority of output thread
+#PRIORITY="-p "
+# Sample rates supported, allows output to be off when Squeezelite is started
+#MAX_RATE="-r "
+# Set ALSA control for volume adjustment
+# VOLUME="-V "
+# Resampling parameters
+#UPSAMPLE=""
+# Device support DoP (DSD over PCM)
+DOP="-D 0:u32be"
+# 
+#VISULIZER=""
+#LOG_FILE="-f /var/log/squeezelite.log"
+#LOG_LEVEL=""
