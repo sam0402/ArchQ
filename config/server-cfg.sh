@@ -1,6 +1,6 @@
 #!/bin/bash
 uname -r | grep -q D && mpdver=0.23.17-36 || mpdver=0.23.18-2
-mympdver=25.0.0-1
+mympdver=20.1.3-1
 lmsver=9.1-2
 
 c_blue_b=$'\e[1;38;5;27m'
@@ -161,11 +161,12 @@ EOF
         fi
         if [[ $server =~ y. ]]; then
             pacman -Q mympd >/dev/null 2>&1 ||   wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
-            pacman -Q mympd >/dev/null 2>&1 ||   wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libutf8proc-2.9.0-1-x86_64.pkg.tar.zst
-            pacman -Q libnewt >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
+            # pacman -Q mympd >/dev/null 2>&1 ||   wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libutf8proc-2.9.0-1-x86_64.pkg.tar.zst
+            # pacman -Q libnewt >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
             mkdir -p /var/lib/private/mympd/config/
             echo 'Unknown' >/var/lib/private/mympd/config/album_group_tag
-            pacman -U --noconfirm /tmp/*.pkg.tar.zst
+            ln -sf /usr/lib/libFLAC.so.12.1.0 /usr/lib/libFLAC.so.14
+            pacman -Ud --noconfirm /tmp/*.pkg.tar.zst
             systemctl enable --now mympd
             servs=$(echo " $servs " | sed 's/ mympd / /' | xargs)
         fi
