@@ -20,11 +20,9 @@ pacman -Q php-fpm >/dev/null 2>&1 && servs+='php-fpm '
 
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
         LMS "Lyrion Music Server" \
-        MPD "MPD, Rigelian(iOS) | text-based client" \
-        MPD-Ai "MPD AI optimization; text client" \
-        MPD-alsa "MPD ALSA output; text client" \
-        myMPD "MPD & myMPD web-based client" \
-        RompR "MPD & RompR web-based client" \
+        MPD "MPD Slim output" \
+        MPD-Ai "MPD AI optimization" \
+        MPD-alsa "MPD ALSA output" \
         Roon "Roon Server" \
         HQPE5 "HQPlayer Embedded 5" \
         HQPE4 "HQPlayer Embedded 4" \
@@ -32,11 +30,9 @@ server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
 yes | pacman -Scc
 
 case $server in
-    MPD|myMPD|RompR)
+    MPD|MPD-Ai|MPD-alsa)
         case "$server" in
-            MPD)   pfx="m" ;;
-            myMPD) pfx="y" ;;
-            RompR) pfx="o" ;;
+            MPD)   pfx="m"; [[ $mpdver == 0.23.17-36 ]] || mpdver=0.23.18-2 ;;
             MPD-Ai) pfx="m"; mpdver=0.23.18-3 ;;
             MPD-alsa) pfx="a"; mpdver=0.23.17-36 ;;
         esac
@@ -49,12 +45,16 @@ case $server in
             ${pfx}R "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
             ${pfx}S "Stream: PCM; Radio: FLAC MP3; http output:9000" off \
             ${pfx}M "MPEG: All features of the above; +AAC, ALAC" off
-        ) || exit 1
+        ) || exit 1; clear
 
-        server="$choice"
+        ver=${choice:1:1}
+        client=$(dialog --stdout --title "ArchQ" --menu "Select MPD client" 7 0 0 \
+            m "Rigelian(iOS) | text-based client" \
+            y "myMPD web-based client" \
+            o "RompR web-based client") || exit 1; clear
+        server="${client}${ver}"
         ;;
 esac
-clear
 case $server in
     Player)  
         # sed -i 's/'"$isocpu"'//' /etc/default/grub
