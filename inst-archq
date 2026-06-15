@@ -427,7 +427,8 @@ case $server in
         if [[ $server =~ y. ]]; then
             echo -e "\n${c_blue_b}Install myMPD ...${c_gray}\n"
             arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
-            arch-chroot /mnt pacman -U --noconfirm /root/mympd-${mympdver}-x86_64.pkg.tar.zst
+            arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm /root/mympd-${mympdver}-x86_64.pkg.tar.zst /root/libnewt-0.52.24-2-x86_64.pkg.tar.zst
             mkdir -p /mnt/var/lib/private/mympd/config/
             echo 'Unknown' >/mnt/var/lib/private/mympd/config/album_group_tag
             arch-chroot /mnt systemctl enable mpd mympd
