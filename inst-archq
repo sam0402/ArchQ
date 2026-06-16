@@ -104,12 +104,12 @@ case $server in
     LMS)
         player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
         ;;
-    MPD|myMPD|RompR)
+    MPD|MPD-Ai|MPD-alsa|myMPD|RompR)
         case "$server" in
-            MPD)   pfx="m" ;;
+            MPD)    pfx="m" ;;
+            MPD-Ai) pfx="m"; mpdver=0.23.18-3 ;;
             myMPD) pfx="y" ;;
             RompR) pfx="o" ;;
-            MPD-Ai) pfx="m"; mpdver=0.23.18-3 ;;
             MPD-alsa) pfx="a"; mpdver=0.23.17-36 ;;
         esac
 
