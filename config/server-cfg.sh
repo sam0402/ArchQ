@@ -243,6 +243,6 @@ EOF
 esac
 if [ -n "$MPD" ]; then
     MPD="-$MPD"
-    uname -r | grep -vq D && ! pacman -Q squeezelite >/dev/null 2>&1 && /usr/bin/sqzlite-cfg.sh
+    uname -r | grep -vq D && [[ $pfx != "a" ]] && ! pacman -Q squeezelite >/dev/null 2>&1 && /usr/bin/sqzlite-cfg.sh
 fi
 echo -e "\n"${c_blue_b}${server}${MPD}${c_gray}" is started."
