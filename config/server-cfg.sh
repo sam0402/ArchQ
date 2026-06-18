@@ -1,5 +1,5 @@
 #!/bin/bash
-uname -r | grep -q D && mpdver=0.23.17-36 || mpdver=0.23.18-2
+uname -r | grep -q D && mpdver=0.23.17-36 || mpdver=0.23.18-4
 mympdver=20.0.0-1
 lmsver=9.1-2
 
