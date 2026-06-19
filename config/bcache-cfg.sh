@@ -5,7 +5,7 @@ RESET=$'\e[m'
 cd ~
 
 ACTION=$(dialog --stdout --title "ArchQ BCache $1" \
-            --menu "!! Caution !! Back up your data before use." 8 0 0 C Create R Remove) || exit 1
+            --menu "!! Caution !! Back up your data before use." 9 0 0 C Create R Remove P "Restore Partition") || exit 1
 clear
 
 if ! pacman -Q bcache-tools >/dev/null 2>&1; then
@@ -93,7 +93,7 @@ case $ACTION in
                 fi
                 # Rebuild partition
                 if [ "$work" = "true" ]; then
-                    sfdisk -d $BACKING_DISK >~/partition_PreBk_$(date +"%Y%m%d_%H.%M")
+                    sfdisk -d $BACKING_DISK >/root/partition_PreBk_$(date +"%Y%m%d_%H.%M")
                     new_start_s=$((start_s - 16))
                     parted --script $BACKING_DISK rm $part_num
                     parted --script $BACKING_DISK mkpart BCache xfs ${new_start_s}s ${end_s}s
@@ -185,7 +185,7 @@ case $ACTION in
                 
                 new_start_s=$((start_s + 16))
                 
-                sfdisk -d $BACKING_DISK >~/partition_CachBk_$(date +"%Y%m%d_%H.%M")
+                sfdisk -d $BACKING_DISK >/root/partition_CachBk_$(date +"%Y%m%d_%H.%M")
                 parted --script $BACKING_DISK rm $part_num >/dev/null 2>&1
                 parted --script $BACKING_DISK mkpart Linux xfs ${new_start_s}s ${end_s}s >/dev/null 2>&1
                 echo -e ${GRAY}"\n--- $bcache Removed ---"${RESET}
@@ -195,5 +195,47 @@ case $ACTION in
         echo -e ${RED}"\nReboot now [Y/n]? "${RESET}
         read -r input
         [[ -z $input || $input = y ]] && reboot
+        ;;
+    P)
+        # Detect Storage Devices
+        lsblk -dplnx size -o name | grep -q nvme1 && \
+            DISK_LIST=$(lsblk -dplnx size -o name,size | sort -n | grep -E "sd|nvme") || \
+            DISK_LIST=$(lsblk -dplnx size -o name,size | sort -n | grep "sd")
+        
+        [[ -z $DISK_LIST ]] && { echo "No HDD/SSD storage device was detected."; exit 1; }
+
+        # Select target disk
+        TARGET_DISK=$(dialog --stdout --title "Restore Partition" --menu "Select a disk to restore partition table" 8 0 0 $DISK_LIST) || exit 1
+        clear
+
+        # Generate menu of backup files
+        BK_LIST=""
+        for f in /root/partition_PreBk_*; do
+            [ -f "$f" ] || continue
+            BK_LIST="$BK_LIST $f $(basename $f)"
+        done
+
+        if [ -z "$BK_LIST" ]; then
+            dialog --stdout --title "Restore Partition" --msgbox "No partition backup files found in /root/partition_PreBk_*" 0 0
+            exit 1
+        fi
+
+        # Select backup file
+        BACKUP_FILE=$(dialog --stdout --title "Restore Partition" --menu "Select a partition backup file to restore" 12 0 0 $BK_LIST) || exit 1
+        clear
+
+        # Confirm restore
+        if dialog --stdout --title "Restore Partition" --yesno "\nAre you sure you want to restore partition table of $TARGET_DISK using:\n$BACKUP_FILE?\n\nThis will overwrite the partition table!" 10 60; then
+            clear
+            echo "Restoring partition table..."
+            sfdisk --no-reread "$TARGET_DISK" < "$BACKUP_FILE"
+            echo "Partition table restored."
+            echo -e ${RED}"\nReboot now [Y/n]? "${RESET}
+            read -r input
+            [[ -z $input || $input = y ]] && reboot
+        else
+            echo "Operation cancelled."
+            exit 0
+        fi
         ;;
 esac
