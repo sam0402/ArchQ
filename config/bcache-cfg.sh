@@ -225,7 +225,7 @@ case $ACTION in
         clear
 
         # Confirm restore
-        if dialog --stdout --title "Restore Partition" --yesno "\nAre you sure you want to restore partition table of $TARGET_DISK using:\n$BACKUP_FILE?\n\nThis will overwrite the partition table!" 10 60; then
+        if dialog --stdout --title "Restore Partition" --yesno "\nWARNING: This will restore the partition table of $TARGET_DISK to its original state (before BCache creation).\nAll partition changes made for BCache will be undone.\n\nAre you sure you want to proceed with restore using:\n$BACKUP_FILE?" 13 65; then
             clear
             echo "Restoring partition table..."
             sfdisk --no-reread "$TARGET_DISK" < "$BACKUP_FILE"
