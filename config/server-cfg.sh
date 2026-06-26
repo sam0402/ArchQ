@@ -37,14 +37,19 @@ case $server in
             MPD-alsa) pfx="a"; mpdver=0.23.17-36 ;;
         esac
 
+        opts=()
+        [[ $server == "MPD" ]] && opts+=( ${pfx}W "Wav: PCM, WAV, AIFF only; best SQ" off )
+        opts+=(
+            ${pfx}U "Ultra: PCM, FLAC only; higher SQ" off
+            ${pfx}I "Light: PCM, CD; Radio: FLAC, MP3" on
+            ${pfx}D "DSD: PCM, DSD; Radio: FLAC" off
+            ${pfx}R "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off
+            ${pfx}S "Stream: PCM; Radio: FLAC MP3" off
+            ${pfx}M "MPEG: All features of the above; +AAC, ALAC" off
+        )
         choice=$(dialog --stdout --title "ArchQ" \
             --radiolist "Select MPD version" 7 0 0 \
-            ${pfx}U "Ultra: PCM, FLAC only; best SQ" off \
-            ${pfx}I "Light: PCM, CD; Radio: FLAC, MP3" on \
-            ${pfx}D "DSD: PCM, DSD; Radio: FLAC" off \
-            ${pfx}R "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
-            ${pfx}S "Stream: PCM; Radio: FLAC MP3; http output:9000" off \
-            ${pfx}M "MPEG: All features of the above; +AAC, ALAC" off
+            "${opts[@]}"
         ) || exit 1; clear
 
         ver=${choice:1:1}
@@ -118,13 +123,14 @@ EOF
     fi
         case "$server" in
             *U) MPD=ul ;;
+            *W) MPD=wav ;;
             *I) MPD=light ;;
             *D) MPD=dsd ;;
             *R) MPD=radio ;;
             *S) MPD=stream ;;
             *M) MPD=ffmpeg ;;
         esac
-        [[ $MPD == ul || $MPD == light ]] || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
+        [[ $MPD == ul || $MPD == light || $MPD == wav ]] || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
 
         if ! pacman -Q mpd-${MPD} >/dev/null 2>&1; then
             echo -e "\n${c_blue_b}Install MPD-${MPD} ...${c_gray}\n"

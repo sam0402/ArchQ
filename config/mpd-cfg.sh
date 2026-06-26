@@ -141,7 +141,7 @@ if [ $client = M ]; then
     p1=off
     MENU="P Multi-player $p0 "
 fi
-pacman -Q mpd-ul >/dev/null 2>&1 || MENU+='M Multi-room '$m0' H "Http Stream:9000" '$h0' '
+pacman -Q mpd-ul >/dev/null 2>&1 || pacman -Q mpd-wav >/dev/null 2>&1 || MENU+='M Multi-room '$m0' H "Http Stream:9000" '$h0' '
 exec='dialog --stdout --title "ArchQ MPD" --checklist "Output method" 7 0 0 '$MENU'D "DSD over PCM" '$d0
 output=$(eval $exec) || exit 1; clear
 
