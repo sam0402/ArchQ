@@ -4,9 +4,9 @@
 CONFIG='/etc/squeezelite.conf'
 TITLE="ArchQ Squeezelite $1"
 
-# Available packages indexed by dialog option: [0]=PCM-new [1]=DSD-new [2]=PCM-old [3]=DSD-old
+# Available packages indexed by dialog option: [0]=PCM-emotional [1]=DSD-emotional [2]=PCM-neutral [3]=DSD-neutral
 PKG_VER='1.9.8.1317'
-PKGS=("${PKG_VER}-21" "${PKG_VER}-22" "${PKG_VER}-11" "${PKG_VER}-12")
+PKGS=("${PKG_VER}-21" "${PKG_VER}-22" "${PKG_VER}-31" "${PKG_VER}-32")
 
 die() { echo "Error: $*" >&2; exit 1; }
 
@@ -36,7 +36,7 @@ ver=$(pacman -Q squeezelite 2>/dev/null | awk '{print $2}') \
 
 option=$(dialog --stdout --title "$TITLE" \
     --menu "Select version:" 7 0 0 \
-    0 "PCM" 1 "DSD") || exit 1
+    0 "PCM Emotional" 1 "DSD Emotional" 2 "PCM Neutral" 3 "DSD Neutral") || exit 1
 clear
 
 target="${PKGS[$option]}"
@@ -49,8 +49,8 @@ fi
 
 # Derive display label from pkgrel
 case "${ver##*-}" in
-    21|11) ver_label="${PKG_VER}-pcm" ;;
-    22|12) ver_label="${PKG_VER}-dsd" ;;
+    21|22) ver_label="${PKG_VER}-emotional" ;;
+    31|32) ver_label="${PKG_VER}-neutral" ;;
     *)     ver_label="$ver" ;;
 esac
 
