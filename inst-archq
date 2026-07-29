@@ -468,7 +468,7 @@ EOF
         cat >>/mnt/etc/rc.local <<EOF
     while read PID; do 
         taskset -cp 0-\$((\$(getconf _NPROCESSORS_ONLN)-2)) \$PID
-    done <<< \$(ps -eLo tid,psr | grep "\$((\$(getconf _NPROCESSORS_ONLN)-1))\$" | awk '{print \$1}')
+    done <<< \$(ps -eLo tid,comm,psr | grep -v 'sqzl-output' | grep "\$((\$(getconf _NPROCESSORS_ONLN)-1))\$" | awk '{print \$1}')
 EOF
         sed -i '/dop/i\\tcpu_affinity\t"'"$iso_1st"'"' /mnt/etc/mpd.conf
         fi
