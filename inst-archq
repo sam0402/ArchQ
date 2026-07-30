@@ -466,6 +466,7 @@ if systemctl is-active mpd >/dev/null; then
 EOF
         if [ $cpus -ge 6 ]; then
         cat >>/mnt/etc/rc.local <<EOF
+    sleep 5
     while read PID; do 
         taskset -cp 0-\$((\$(getconf _NPROCESSORS_ONLN)-2)) \$PID
     done <<< \$(ps -eLo tid,comm,psr | grep -v 'sqzl-output' | grep "\$((\$(getconf _NPROCESSORS_ONLN)-1))\$" | awk '{print \$1}')
