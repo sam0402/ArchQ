@@ -160,7 +160,7 @@ EOF
                     pacman -U --noconfirm /tmp/flac-1.4.3-1-x86_64.pkg.tar.zst
                 fi
                 pacman -R --noconfirm $(pacman -Q mpd | awk '{print $1}')
-                pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst /tmp/libnewt-0.52.24-2-x86_64.pkg.tar.zst
+                pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
                 sed -i 's/album,title/album,albumartist,title/' /etc/mpd.conf
                 sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
             fi
