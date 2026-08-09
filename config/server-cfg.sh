@@ -32,7 +32,7 @@ yes | pacman -Scc
 case $server in
     MPD|MPD-Ai|MPD-alsa)
         case "$server" in
-            MPD)   pfx="m"; [[ $mpdver == 0.23.17-36 ]] || mpdver=0.23.18-2 ;;
+            MPD)   pfx="m"; [[ $mpdver == 0.23.17-36 ]] || mpdver=0.23.18-4 ;;
             MPD-Ai) pfx="m"; mpdver=0.23.18-3 ;;
             MPD-alsa) pfx="a"; mpdver=0.23.17-36 ;;
         esac
