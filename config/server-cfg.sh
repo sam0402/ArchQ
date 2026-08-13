@@ -44,7 +44,7 @@ case $server in
             ${pfx}I "Light: PCM, CD; Radio: FLAC, MP3" on
             ${pfx}D "DSD: PCM, DSD; Radio: FLAC" off
             ${pfx}R "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off
-            ${pfx}S "Stream: PCM; Radio: FLAC MP3" off
+            ${pfx}S "Stream: PCM; Radio: FLAC AAC" off
             ${pfx}M "MPEG: All features of the above; +AAC, ALAC" off
         )
         choice=$(dialog --stdout --title "ArchQ" \
