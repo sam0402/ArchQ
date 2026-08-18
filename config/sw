@@ -59,8 +59,8 @@ else
 		sudo systemctl start $service
 		if systemctl is-active mpd >/dev/null && [ "$1" = mpd ]; then
 			mpc enable ArchQ >/dev/null 2>&1
-			chrt -fp 58 $(pgrep mpd)
-			chrt -fp 54 $(pgrep ksoftirqd/$(ps -eLo comm,cpuid| grep "output:"|awk '{print $2}'))
+			chrt -fp 35 $(pgrep mpd)
+			chrt -fp 45 $(pgrep ksoftirqd/$(ps -eLo comm,cpuid| grep "output:"|awk '{print $2}'))
 			mpc disable Multiroom >/dev/null; mpc disable Stream >/dev/null
 		fi
 		if systemctl is-active owntone >/dev/null && [[ "$1" = mtroom || "$1" = owntone ]]; then
