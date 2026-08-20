@@ -91,7 +91,6 @@ server=$(dialog --stdout --title "ArchQ" \
         --menu "Please select a music server or player" 7 0 0 \
         LMS "Lyrion Music Server" \
         MPD "MPD, Rigelian(iOS) | text-based client" \
-        MPD-Ai "MPD AI optimization; text client" \
         MPD-alsa "MPD ALSA output; text client" \
         myMPD "MPD & myMPD web-based client" \
         Roon "Roon Server" \
