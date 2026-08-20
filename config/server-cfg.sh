@@ -21,7 +21,6 @@ pacman -Q php-fpm >/dev/null 2>&1 && servs+='php-fpm '
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
         LMS "Lyrion Music Server" \
         MPD "MPD Slim output" \
-        MPD-Ai "MPD AI optimization" \
         MPD-alsa "MPD ALSA output" \
         Roon "Roon Server" \
         HQPE5 "HQPlayer Embedded 5" \
