@@ -24,9 +24,9 @@ cfg_get() {
 cfg_set() {
     local key=$1 flag=$2 val=$3
     if [[ -z "$val" ]]; then
-        sed -i "s|^#\?${key}=\"${flag}.*|#${key}=\"${flag} \"|" "$CONFIG"
+        sed -i "s|^#.\?${key}=\"${flag}.*|#${key}=\"${flag} \"|" "$CONFIG"
     else
-        sed -i "s|^#\?${key}=\"${flag}.*|${key}=\"${flag} ${val}\"|" "$CONFIG"
+        sed -i "s|^#.\?${key}=\"${flag}.*|${key}=\"${flag} ${val}\"|" "$CONFIG"
     fi
 }
 
@@ -80,13 +80,18 @@ sed -i "s|^AUDIO_DEV=\"-o .*|AUDIO_DEV=\"-o ${device}\"|" "$CONFIG"
 #--- Load current settings ---
 NAME=$(cfg_get NAME)
 ALSA_PARAMS=$(cfg_get ALSA_PARAMS)
+ALSA_PARAMS=${ALSA_PARAMS:-60:4::1}
 BUFFER=$(cfg_get BUFFER)
+BUFFER=${BUFFER:-20000:500000}
 CODEC=$(cfg_get CODEC)
+CODEC=${SERVER_IP:-pcm}
 PRIORITY=$(cfg_get PRIORITY)
+PRIORITY=${PRIORITY:-95:80:65:50}
 MAX_RATE=$(cfg_get MAX_RATE)
 UPSAMPLE=$(cfg_get UPSAMPLE)
 MAC=$(cfg_get MAC)
 SERVER_IP=$(cfg_get SERVER_IP)
+SERVER_IP=${SERVER_IP:-127.0.0.1}
 DOP=$(cfg_get DOP)
 VOLUME=$(cfg_get VOLUME)
 
