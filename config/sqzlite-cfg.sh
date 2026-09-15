@@ -6,7 +6,7 @@ TITLE="ArchQ Squeezelite $1"
 
 # Available packages indexed by dialog option: [0]=PCM-emotional [1]=DSD-emotional [2]=PCM-neutral [3]=DSD-neutral
 PKG_VER='1.9.8.1317'
-PKGS=("${PKG_VER}-21" "${PKG_VER}-22" "${PKG_VER}-31" "${PKG_VER}-32" "${PKG_VER}-41" "${PKG_VER}-42" "${PKG_VER}-51" "${PKG_VER}-52")
+PKGS=("${PKG_VER}-31" "${PKG_VER}-32" "${PKG_VER}-61" "${PKG_VER}-62")
 
 die() { echo "Error: $*" >&2; exit 1; }
 
@@ -36,7 +36,7 @@ ver=$(pacman -Q squeezelite 2>/dev/null | awk '{print $2}') \
 
 option=$(dialog --stdout --title "$TITLE" \
     --menu "Select version:" 7 0 0 \
-    0 "PCM Emotional" 1 "DSD Emotional" 2 "PCM Neutral" 3 "DSD Neutral" 4 "PCM Emotional TinyALSA" 5 "DSD Emotional TinyALSA" 6 "PCM Neutral TinyALSA" 7 "DSD Neutral TinyALSA") || exit 1
+    0 "PCM ALSA" 1 "DSD ALSA" 2 "PCM TinyALSA" 3 "DSD TinyALSA") || exit 1
 clear
 
 target="${PKGS[$option]}"
@@ -53,10 +53,8 @@ fi
 
 # Derive display label from pkgrel
 case "${ver##*-}" in
-    21|22) ver_label="${PKG_VER}-emotional" ;;
-    31|32) ver_label="${PKG_VER}-neutral" ;;
-    41|42) ver_label="${PKG_VER}-emotinyalsa" ;;
-    51|52) ver_label="${PKG_VER}-neutinyalsa" ;;
+    31|32) ver_label="${PKG_VER}-alsa" ;;
+    61|62) ver_label="${PKG_VER}-tinyalsa" ;;
     *)     ver_label="$ver" ;;
 esac
 
