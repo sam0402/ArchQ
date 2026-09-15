@@ -9,7 +9,7 @@ ker=Q352WU; kver='6.18.7-6'
 mpdver=0.23.18-4
 mympdver=20.0.0-1
 lmsver=9.1-2
-sqver=51
+sqver=61
 
 c_blue_b=$'\e[1;38;5;27m'
 c_green_b=$'\e[1;38;5;46m'
@@ -388,7 +388,7 @@ case $server in
         case "$server" in
             *U) MPD=ul ;;
             *I) MPD=light ;;
-            *D) MPD=dsd; sqver=52 ;;
+            *D) MPD=dsd; sqver=62 ;;
             *R) MPD=radio ;;
             *S) MPD=stream ;;
             *M) MPD=ffmpeg ;;
