@@ -4,9 +4,10 @@
 CONFIG='/etc/squeezelite.conf'
 TITLE="ArchQ Squeezelite $1"
 
-# Available packages indexed by dialog option: [0]=PCM-emotional [1]=DSD-emotional [2]=PCM-neutral [3]=DSD-neutral
+# Available packages indexed by dialog option: [0]=PCM-ALSA [1]=DSD-ALSA [2]=PCM-TinyALSA [3]=DSD-TinyALSA
 PKG_VER='1.9.8.1317'
 PKGS=("${PKG_VER}-31" "${PKG_VER}-32" "${PKG_VER}-61" "${PKG_VER}-62")
+LABELS=("PCM ALSA" "DSD ALSA" "PCM TinyALSA" "DSD TinyALSA")
 
 die() { echo "Error: $*" >&2; exit 1; }
 
@@ -36,10 +37,11 @@ ver=$(pacman -Q squeezelite 2>/dev/null | awk '{print $2}') \
 
 option=$(dialog --stdout --title "$TITLE" \
     --menu "Select version:" 7 0 0 \
-    0 "PCM ALSA" 1 "DSD ALSA" 2 "PCM TinyALSA" 3 "DSD TinyALSA") || exit 1
+    0 "${LABELS[0]}" 1 "${LABELS[1]}" 2 "${LABELS[2]}" 3 "${LABELS[3]}") || exit 1
 clear
 
 target="${PKGS[$option]}"
+ver_label="${LABELS[$option]}"
 if ! pacman -Q tinyalsa-evl >/dev/null 2>&1 && [[ "$option" -ge 2 ]]; then
     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/tinyalsa-evl-2.1-1-x86_64.pkg.tar.zst
     pacman -U --noconfirm /tmp/tinyalsa-evl-2.1-1-x86_64.pkg.tar.zst
@@ -50,13 +52,6 @@ if [[ "$ver" != "$target" ]]; then
     pacman -U --noconfirm "$pkg_file"
     ver=$(pacman -Q squeezelite | awk '{print $2}')
 fi
-
-# Derive display label from pkgrel
-case "${ver##*-}" in
-    31|32) ver_label="${PKG_VER}-alsa" ;;
-    61|62) ver_label="${PKG_VER}-tinyalsa" ;;
-    *)     ver_label="$ver" ;;
-esac
 
 #--- Device selection ---
 mapfile -t dev_list < <(aplay -L 2>/dev/null | grep ':')
@@ -82,7 +77,7 @@ ALSA_PARAMS=${ALSA_PARAMS:-60:4::1}
 BUFFER=$(cfg_get BUFFER)
 BUFFER=${BUFFER:-20000:500000}
 CODEC=$(cfg_get CODEC)
-CODEC=${SERVER_IP:-pcm}
+CODEC=${CODEC:-pcm}
 PRIORITY=$(cfg_get PRIORITY)
 PRIORITY=${PRIORITY:-95:80:65:50}
 MAX_RATE=$(cfg_get MAX_RATE)
@@ -91,12 +86,12 @@ MAC=$(cfg_get MAC)
 SERVER_IP=$(cfg_get SERVER_IP)
 SERVER_IP=${SERVER_IP:-127.0.0.1}
 DOP=$(cfg_get DOP)
+DOP=${DOP:-0:u32be}
 VOLUME=$(cfg_get VOLUME)
 
 #--- DSD adjustments ---
 INFO=''
-if [[ "$ver_label" == *dsd* ]]; then
-    [[ -z "$DOP" ]] && DOP='0:u32be'
+if [[ "$ver_label" == *DSD* ]]; then
     [[ "$CODEC" != *dsd* ]] && CODEC="${CODEC:+${CODEC},}dsd"
     INFO='\nDSD format: dop, u8, u16le, u16be, u32le, u32be'
 else
