@@ -2,7 +2,7 @@
 # squeezelite configuration helper
 
 CONFIG='/etc/squeezelite.conf'
-TITLE="ArchQ Squeezelite $1"
+ver=$(pacman -Q squeezelite | awk -F ' ' '{print $2}')
 
 # Available packages indexed by dialog option: [0]=PCM-ALSA [1]=DSD-ALSA [2]=PCM-TinyALSA [3]=DSD-TinyALSA
 PKG_VER='1.9.8.1317'
@@ -35,8 +35,16 @@ cfg_set() {
 ver=$(pacman -Q squeezelite 2>/dev/null | awk '{print $2}') \
     || die "squeezelite not installed"
 
+case "${ver##*-}" in
+    31) current_label="${LABELS[0]}" ;;
+    32) current_label="${LABELS[1]}" ;;
+    61) current_label="${LABELS[2]}" ;;
+    62) current_label="${LABELS[3]}" ;;
+    *)  current_label="$ver" ;;
+esac
+TITLE="ArchQ Squeezelite $1"
 option=$(dialog --stdout --title "$TITLE" \
-    --menu "Select version:" 7 0 0 \
+    --menu "Current: ${current_label}" 7 0 0 \
     0 "${LABELS[0]}" 1 "${LABELS[1]}" 2 "${LABELS[2]}" 3 "${LABELS[3]}") || exit 1
 clear
 
@@ -65,7 +73,7 @@ for d in "${dev_list[@]}"; do
     devs+=("$d" '　')
 done
 
-device=$(dialog --stdout --title "ArchQ Squeezelite ${ver_label}" \
+device=$(dialog --stdout --title "Squeezelite ${ver_label}" \
     --menu "Output device" 7 0 0 "${devs[@]}") || exit 1
 clear
 sed -i "s|^AUDIO_DEV=\"-o .*|AUDIO_DEV=\"-o ${device}\"|" "$CONFIG"
@@ -101,7 +109,7 @@ fi
 
 #--- Settings form ---
 mapfile -t opts < <(dialog --stdout \
-    --title "ArchQ Squeezelite ${ver_label}" --ok-label "Ok" \
+    --title "Squeezelite ${ver_label}" --ok-label "Ok" \
     --form "Modify settings  (leave blank to disable)${INFO}" 0 60 0 \
     "Name of Player"      1 1  "$NAME"        1 25 60 0 \
     "ALSA setting"        2 1  "$ALSA_PARAMS" 2 25 60 0 \
