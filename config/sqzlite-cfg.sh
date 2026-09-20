@@ -23,11 +23,20 @@ cfg_get() {
 
 # Write a config entry; if val is empty, comment it out
 cfg_set() {
-    local key=$1 flag=$2 val=$3
+    local key=$1 flag=$2 val=$3 line escaped
+    local pattern="^[[:space:]]*#?[[:space:]]*${1}="
     if [[ -z "$val" ]]; then
-        sed -i "s|^#.\?${key}=\"${flag}.*|#${key}=\"${flag} \"|" "$CONFIG"
+        line="#${key}=\"${flag} \""
     else
-        sed -i "s|^#.\?${key}=\"${flag}.*|${key}=\"${flag} ${val}\"|" "$CONFIG"
+        line="${key}=\"${flag} ${val}\""
+    fi
+    if grep -Eq "$pattern" "$CONFIG"; then
+        escaped=${line//\\/\\\\}
+        escaped=${escaped//&/\\&}
+        escaped=${escaped//|/\\|}
+        sed -i -E "s|${pattern}.*|${escaped}|" "$CONFIG"
+    else
+        printf '%s\n' "$line" >> "$CONFIG"
     fi
 }
 
