@@ -2,6 +2,7 @@
 
 config='/etc/fstab'
 grub_cfg='/boot/grub/grub.cfg'
+grub_def='/etc/default/grub'
 
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
@@ -11,10 +12,11 @@ cpus=$(getconf _NPROCESSORS_ONLN)
 # pacman -Q alsa-lib | grep -qE 'alsa-lib .*-1.$' \
 #   && alsalib='A ALSAlib@Dynamic' \
 #   || alsalib='A ALSAlib@Soft'
-pacman -Q xf86-video-fbdev >/dev/null 2>&1 || alsalib='A ALSAlib'
+pacman -Q xf86-video-fbdev >/dev/null 2>&1 || alsa='A ALSAlib'
+pacman -Q squeezelite | grep -qe '-6' && alsa='H HugePages'
 
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select an action:" 7 0 0 B Boot I Install M Remove $ramroot F Frequency $alsalib) || exit 1; clear
+            --menu "Select an action:" 7 0 0 B Boot I Install M Remove $ramroot F Frequency $alsa) || exit 1; clear
 
 mkgrub(){
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
@@ -140,5 +142,32 @@ case $WK in
 
         dialog --stdout --title "ALSA-lib $1" --yesno "The ${op} is up to date. \nReboot to take effect?" 0 0 && reboot || exit 0
         clear
-        ;;    
+        ;;
+    H)
+        grub_cmdline=$(sed -n "s/^[[:space:]]*GRUB_CMDLINE_LINUX=[\"']\(.*\)[\"'][[:space:]]*$/\1/p" "$grub_def" | tail -n 1)
+        hugepages_mb=256
+        if [[ $grub_cmdline =~ (^|[[:space:]])hugepages=([0-9]+)($|[[:space:]]) ]]; then
+            hugepages_mb=$((10#${BASH_REMATCH[2]} * 2))
+        fi
+
+        while true; do
+            hugepages_mb=$(dialog --stdout --title "TinyALSA HugePages $1" \
+                --inputbox "Memory size in MB:" 7 0 "$hugepages_mb") || exit 1
+            [[ $hugepages_mb =~ ^[0-9]+$ ]] && break
+            dialog --stdout --title "TinyALSA HugePages $1" \
+                --msgbox "Please enter a non-negative integer." 7 0
+        done
+        clear
+
+        grub_cmdline=$(printf '%s\n' "$grub_cmdline" | sed -E 's/(^|[[:space:]])hugepages=[^[:space:]]*/ /g;s/^[[:space:]]+//;s/[[:space:]]+$//')
+        hugepages=$((10#$hugepages_mb / 2))
+        grub_cmdline="${grub_cmdline:+$grub_cmdline }hugepages=$hugepages"
+        if grep -q '^[[:space:]]*GRUB_CMDLINE_LINUX=' "$grub_def"; then
+            grub_replacement=$(printf '%s\n' "$grub_cmdline" | sed 's/[\\&|]/\\&/g')
+            sed -i "s|^[[:space:]]*GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"$grub_replacement\"|" "$grub_def" || exit 1
+        else
+            printf '\nGRUB_CMDLINE_LINUX="%s"\n' "$grub_cmdline" >> "$grub_def" || exit 1
+        fi
+        mkgrub
+        ;;
 esac
