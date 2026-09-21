@@ -169,5 +169,7 @@ case $WK in
             printf '\nGRUB_CMDLINE_LINUX="%s"\n' "$grub_cmdline" >> "$grub_def" || exit 1
         fi
         mkgrub
+        dialog --stdout --title "TinyALSA HugePages $1" --yesno "Reboot to take effect?" 0 0 && reboot || exit 0
+        clear
         ;;
 esac
