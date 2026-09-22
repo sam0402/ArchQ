@@ -10,9 +10,9 @@ MENU=''
 pacman -Q mpd >/dev/null 2>&1 && MENU+='D MPD '
 pacman -Q squeezelite >/dev/null 2>&1 && MENU+='S Squeezelite '
 pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='A Airplay '
-
+grep -q HugePages /proc/meminfo && MENU+='G HugePages ' || MENU+='G DataCache'
 if [ -f /root/.advence ]; then
-   MENU2='R "abCDe ripper" P Player O Server I "Service mode" J "Backup/Restore" G "Data cache" C "CPU frequency" Z "Format/0 Wipe" N "NFS mount" B "SMB/CIFS mount" E Network V "NFS Server" Y Bcache T Timezone '
+   MENU2='R "abCDe ripper" P Player O Server I "Service mode" J "Backup/Restore" C "CPU frequency" Z "Format/0 Wipe" N "NFS mount" B "SMB/CIFS mount" E Network V "NFS Server" Y Bcache T Timezone '
 	find /dev/disk/by-id/usb-* | grep -q 'usb' && MENU2+='W "HDD Poweroff" '
 	if pacman -Q ffmpeg >/dev/null 2>&1; then
         { [[ $(pacman -Q ffmpeg) != 'ffmpeg 2:5.1.2-12' ]] || [[ -d '/opt/RoonServer' ]]; } && MENU2+='F FFmpeg '
@@ -60,7 +60,8 @@ case $options in
         fi
         ;;
     G)
-        /usr/bin/datacache-cfg.sh $KVER
+        grep -q HugePages /proc/meminfo && /usr/bin/datacache-cfg.sh $KVER hugepages || /usr/bin/datacache-cfg.sh $KVER datacache
+        
         ;;
     H)
         # pacman -Sy --noconfirm archlinux-keyring
