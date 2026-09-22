@@ -13,7 +13,7 @@ cpus=$(getconf _NPROCESSORS_ONLN)
 #   && alsalib='A ALSAlib@Dynamic' \
 #   || alsalib='A ALSAlib@Soft'
 pacman -Q xf86-video-fbdev >/dev/null 2>&1 || alsa='A ALSAlib'
-pacman -Q squeezelite | grep -qe '-6' && alsa=''
+pacman -Q squeezelite | grep -qe '-6' && alsa='H HugePages'
 
 WK=$(dialog --stdout --title "ArchQ $1" \
             --menu "Select an action:" 7 0 0 B Boot I Install M Remove $ramroot F Frequency $alsa) || exit 1; clear
