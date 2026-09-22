@@ -146,22 +146,18 @@ case $WK in
         ;;
     H)
         grub_cmdline=$(sed -n "s/^[[:space:]]*GRUB_CMDLINE_LINUX=[\"']\(.*\)[\"'][[:space:]]*$/\1/p" "$grub_def" | tail -n 1)
-        hugepages_mb=256
-        if [[ $grub_cmdline =~ (^|[[:space:]])hugepages=([0-9]+)($|[[:space:]]) ]]; then
-            hugepages_mb=$((10#${BASH_REMATCH[2]} * 2))
-        fi
+        hugepages=128
 
         while true; do
-            hugepages_mb=$(dialog --stdout --title "TinyALSA HugePages $1" \
-                --inputbox "Memory size in MB:" 7 0 "$hugepages_mb") || exit 1
-            [[ $hugepages_mb =~ ^[0-9]+$ ]] && break
-            dialog --stdout --title "TinyALSA HugePages $1" \
+            hugepages=$(dialog --stdout --title "ArchQ HugePages $1" \
+                --inputbox "Number of pages:" 7 0 "$hugepages") || exit 1
+            [[ $hugepages =~ ^[0-9]+$ ]] && break
+            dialog --stdout --title "ArchQ HugePages $1" \
                 --msgbox "Please enter a non-negative integer." 7 0
         done
         clear
 
         grub_cmdline=$(printf '%s\n' "$grub_cmdline" | sed -E 's/(^|[[:space:]])hugepages=[^[:space:]]*/ /g;s/^[[:space:]]+//;s/[[:space:]]+$//')
-        hugepages=$((10#$hugepages_mb / 2))
         grub_cmdline="${grub_cmdline:+$grub_cmdline }hugepages=$hugepages"
         if grep -q '^[[:space:]]*GRUB_CMDLINE_LINUX=' "$grub_def"; then
             grub_replacement=$(printf '%s\n' "$grub_cmdline" | sed 's/[\\&|]/\\&/g')
@@ -170,7 +166,7 @@ case $WK in
             printf '\nGRUB_CMDLINE_LINUX="%s"\n' "$grub_cmdline" >> "$grub_def" || exit 1
         fi
         mkgrub
-        dialog --stdout --title "TinyALSA HugePages $1" --yesno "Reboot to take effect?" 0 0 && reboot || exit 0
+        dialog --stdout --title "ArchQ HugePages $1" --yesno "Reboot to take effect?" 0 0 && reboot || exit 0
         clear
         ;;
 esac
