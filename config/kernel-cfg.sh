@@ -12,12 +12,12 @@ cpus=$(getconf _NPROCESSORS_ONLN)
 # pacman -Q alsa-lib | grep -qE 'alsa-lib .*-1.$' \
 #   && alsalib='A ALSAlib@Dynamic' \
 #   || alsalib='A ALSAlib@Soft'
-pacman -Q xf86-video-fbdev >/dev/null 2>&1 || alsa='A ALSAlib'
+pacman -Q xf86-video-fbdev >/dev/null 2>&1 || alsa='A ALSAlib '
 pacman -Q squeezelite | grep -qe '-6' && alsa=''
-grep -qe Hugetlb /proc/meminfo && alsa+='H HugePages'
+grep -q Hugetlb /proc/meminfo && alsa+='H HugePages '
 
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select an action:" 7 0 0 B Boot I Install M Remove $ramroot F Frequency $alsa) || exit 1; clear
+            --menu "Select an action:" 7 0 0 B Boot I Install M Remove F Frequency $alsa) || exit 1; clear
 
 mkgrub(){
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
@@ -146,7 +146,7 @@ case $WK in
         ;;
     H)
         grub_cmdline=$(sed -n "s/^[[:space:]]*GRUB_CMDLINE_LINUX=[\"']\(.*\)[\"'][[:space:]]*$/\1/p" "$grub_def" | tail -n 1)
-        hugepages=128
+        hugepages=1024
 
         while true; do
             hugepages=$(dialog --stdout --title "ArchQ HugePages $1" \
