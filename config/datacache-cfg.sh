@@ -2,6 +2,17 @@
 serpath='/usr/lib/systemd/system/'
 service=("mpd" "lyrionmusicserver" "squeezelite" "shairport-sync" "owntone" "hqplayerd" "networkaudio")
 nickname=("MPD" "LMS" "Squeezelite" "Airplay" "OwnTone" "HQPlayerEmbedded" "NAA")
+# Remove only the mimalloc settings managed by this script, including the
+# old service-wide preload. Leave unrelated service environment settings intact.
+remove_mimalloc() {
+    sed -i -E \
+        -e '/^Environment="?LD_PRELOAD=\/usr\/lib\/libmimalloc\.so\.3\.5"?$/d' \
+        -e '/^Environment="?MIMALLOC_ALLOW_LARGE_OS_PAGES=[^" ]*"?$/d' \
+        -e '/^Environment="?MIMALLOC_EAGER_COMMIT_DELAY=[^" ]*"?$/d' \
+        -e 's|^(ExecStart=)/usr/bin/env LD_PRELOAD=/usr/lib/libmimalloc\.so\.3\.5 |\1|' \
+        "$1"
+}
+
 arrList=(); arrService=()
 for ((i=0; i < ${#service[@]}; i++))
 do
@@ -24,9 +35,9 @@ case $2 in
         for ((i=0; i < ${#arrList[@]}; i++))
         do
             if ( echo $options | grep -q $i ); then
+                remove_mimalloc "${serpath}${arrService[$i]}.service"
                 grep -q pagecache-management "${serpath}${arrService[$i]}.service" || \
                 sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' "${serpath}${arrService[$i]}.service"
-                sed -i '/Environment=/d' "${serpath}${arrService[$i]}.service"
             else
                 sed -i 's|ExecStart=/usr/bin/pagecache-management.sh |ExecStart=|' "${serpath}${arrService[$i]}.service"
             fi
@@ -47,15 +58,16 @@ case $2 in
         for ((i=0; i < ${#arrList[@]}; i++))
         do
             if ( echo $options | grep -q $i ); then
-                grep -q MIMALLOC_ALLOW_LARGE_OS_PAGES "${serpath}${arrService[$i]}.service" || \
-                sed -i '/User=/i \
-Environment="LD_PRELOAD=/usr/lib/libmimalloc.so.3.5"\
+                remove_mimalloc "${serpath}${arrService[$i]}.service"
+                # Keep pre/post-start helpers on the system allocator.
+                sed -i '/^\[Service\]$/a \
 Environment="MIMALLOC_ALLOW_LARGE_OS_PAGES=1"\
 Environment="MIMALLOC_EAGER_COMMIT_DELAY=0"' "${serpath}${arrService[$i]}.service"
                 sed -i 's/^User=.*/User=root/' "${serpath}${arrService[$i]}.service"
-                sed -i 's|ExecStart=/usr/bin/pagecache-management.sh |ExecStart=|' "${serpath}${arrService[$i]}.service"
+                sed -i 's|^ExecStart=/usr/bin/pagecache-management.sh |ExecStart=|' "${serpath}${arrService[$i]}.service"
+                sed -i 's|^ExecStart=\(.\)|ExecStart=/usr/bin/env LD_PRELOAD=/usr/lib/libmimalloc.so.3.5 \1|' "${serpath}${arrService[$i]}.service"
             else
-                sed -i '/Environment=/d' "${serpath}${arrService[$i]}.service"
+                remove_mimalloc "${serpath}${arrService[$i]}.service"
             fi
         done
     ;;
