@@ -314,6 +314,9 @@ systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-j
 #** Reorganizer for XFS
 # xfs_fsr /mnt/music
 
+# Buffer for TinyALSA
+echo 128 >/proc/asound/card0/pcm0p/sub0/prealloc
+
 # Qrip stop all service
 [[ "\$(uname -r | cut -d- -f3)" = "Qrip" ]] && srvmode-cfg.sh stopsrv
 
