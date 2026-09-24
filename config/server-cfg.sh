@@ -1,5 +1,5 @@
 #!/bin/bash
-uname -r | grep -q D && mpdver=0.23.17-36 || mpdver=0.23.18-4
+mpdver=0.23.18-4
 mympdver=20.0.0-1
 lmsver=9.1-2
 
@@ -21,7 +21,6 @@ pacman -Q php-fpm >/dev/null 2>&1 && servs+='php-fpm '
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
         LMS "Lyrion Music Server" \
         MPD "MPD Slim output" \
-        MPD-alsa "MPD ALSA output" \
         Roon "Roon Server" \
         HQPE5 "HQPlayer Embedded 5" \
         HQPE4 "HQPlayer Embedded 4" \
@@ -29,22 +28,16 @@ server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
 yes | pacman -Scc
 
 case $server in
-    MPD|MPD-Ai|MPD-alsa)
-        case "$server" in
-            MPD)   pfx="m"; [[ $mpdver == 0.23.17-36 ]] || mpdver=0.23.18-4 ;;
-            MPD-Ai) pfx="m"; mpdver=0.23.18-3 ;;
-            MPD-alsa) pfx="a"; mpdver=0.23.17-36 ;;
-        esac
-
+    MPD)
         opts=()
-        [[ $server == "MPD" ]] && opts+=( ${pfx}W "Wav: PCM, WAV, AIFF only; best SQ" off )
-        opts+=(
-            ${pfx}U "Ultra: PCM, FLAC only; higher SQ" off
-            ${pfx}I "Light: PCM, CD; Radio: FLAC, MP3" on
-            ${pfx}D "DSD: PCM, DSD; Radio: FLAC" off
-            ${pfx}R "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off
-            ${pfx}S "Stream: PCM; Radio: FLAC AAC" off
-            ${pfx}M "MPEG: All features of the above; +AAC, ALAC" off
+        opts=(
+            mW "Wav: PCM, WAV, AIFF only; best SQ" off
+            mU "Ultra: PCM, FLAC only; higher SQ" off
+            mI "Light: PCM, CD; Radio: FLAC, MP3" on
+            mD "DSD: PCM, DSD; Radio: FLAC" off
+            mR "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off
+            mS "Stream: PCM; Radio: FLAC AAC" off
+            mM "MPEG: All features of the above; +AAC, ALAC" off
         )
         choice=$(dialog --stdout --title "ArchQ" \
             --radiolist "Select MPD version" 7 0 0 \
@@ -58,9 +51,7 @@ case $server in
             o "RompR web-based client") || exit 1; clear
         server="${client}${ver}"
         ;;
-esac
-case $server in
-    Player)  
+    Player)
         # sed -i 's/'"$isocpu"'//' /etc/default/grub
         /usr/bin/player-cfg.sh
         ;;
