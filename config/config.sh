@@ -60,8 +60,11 @@ case $options in
         fi
         ;;
     G)
-        grep -q HugePages /proc/meminfo && /usr/bin/datacache-cfg.sh $KVER hugepages || /usr/bin/datacache-cfg.sh $KVER datacache
-        
+        if awk '/^HugePages_Total:/ {exit !($2 > 0)}' /proc/meminfo; then
+            /usr/bin/datacache-cfg.sh $KVER hugepages
+        else
+            /usr/bin/datacache-cfg.sh $KVER datacache
+        fi
         ;;
     H)
         # pacman -Sy --noconfirm archlinux-keyring
