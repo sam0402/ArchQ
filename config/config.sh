@@ -1,4 +1,5 @@
 #!/bin/bash
+KVER=${KVER:-$(uname -r | cut -d- -f3)}
 [ -f /root/.update ] || echo 0 >/root/.update
 num=$(cat /root/.update)
 gitupd=$(curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/update)
