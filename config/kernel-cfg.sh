@@ -12,7 +12,7 @@ cpus=$(getconf _NPROCESSORS_ONLN)
 # pacman -Q alsa-lib | grep -qE 'alsa-lib .*-1.$' \
 #   && alsalib='A ALSAlib@Dynamic' \
 #   || alsalib='A ALSAlib@Soft'
-pacman -Q xf86-video-fbdev >/dev/null 2>&1 && alsa='' || alsa='A ALSAlib '
+pacman -Q xf86-video-fbdev >/dev/null 2>&1 || systemctl is-active squeezelite >/dev/null 2>&1 && alsa='' || alsa='A ALSAlib '
 grep -q Hugetlb /proc/meminfo && alsa+='H HugePages '
 
 WK=$(dialog --stdout --title "ArchQ $1" \
