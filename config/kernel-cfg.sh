@@ -16,7 +16,7 @@ pacman -Q xf86-video-fbdev >/dev/null 2>&1 && alsa='' || alsa='A ALSAlib '
 grep -q Hugetlb /proc/meminfo && alsa+='H HugePages '
 
 WK=$(dialog --stdout --title "ArchQ $1" \
-            --menu "Select an action:" 7 0 0 B Boot I Install M Remove F Frequency "$alsa") || exit 1; clear
+            --menu "Select an action:" 7 0 0 B Boot I Install M Remove F Frequency $alsa) || exit 1; clear
 
 mkgrub(){
     if lsblk -pln -o name,partlabel | grep -q Microsoft; then
