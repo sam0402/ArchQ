@@ -1,11 +1,13 @@
-Q441-6.18.7-6:≦6 Core
-Q441-6.18.7-6s:≦6 Core @Seagate
 Q441-6.18.7-8:≦8 Core
-Q441C-6.18.7-8:≦6 Core Console
+Q441-6.18.7-6:≦6 Core
+Q441-6.18.7-61:≦6 Core HugePages
 Q396-6.18.7-8:≦8 Core
 Q396-6.18.7-6:≦6 Core
-Q352-6.18.7-4:≦4 Core
 Q352-6.18.7-8:≦8 Core
+Q352-6.18.7-4:≦4 Core
+Q352-6.18.7-41:≦4 Core HugePages
+Q441-6.18.7-6s:≦6 Core @Seagate
+Q441C-6.18.7-8:≦6 Core Console
 Q220-6.18.7-4:≦4 Core
 A264-6.18.7-8:≦8 Core AMD
 A220-6.18.7-8:≦8 Core AMD
@@ -19,5 +21,3 @@ Q441S-6.12.12-12:≦8 Core Speed Step
 A352-6.12.12-2:≦8 Core AMD
 Q44-6.12.12-12:≦8 Core
 Q352H-6.6.17-12:≦8 Core HDMI
-Q441-6.18.7-61:≦6 Core HugePages
-Q352-6.18.7-41:≦4 Core HugePages
