@@ -4,10 +4,9 @@
 CONFIG='/etc/squeezelite.conf'
 ver=$(pacman -Q squeezelite | awk -F ' ' '{print $2}')
 
-# Available packages indexed by dialog option: [0]=PCM-ALSA [1]=DSD-ALSA [2]=PCM-TinyALSA [3]=DSD-TinyALSA
 PKG_VER='1.9.8.1317'
-PKGS=("${PKG_VER}-31" "${PKG_VER}-32" "${PKG_VER}-61" "${PKG_VER}-62")
-LABELS=("PCM ALSA" "DSD ALSA" "PCM TinyALSA" "DSD TinyALSA")
+PKGS=("${PKG_VER}-61" "${PKG_VER}-62")
+LABELS=("PCM" "DSD")
 
 die() { echo "Error: $*" >&2; exit 1; }
 
@@ -45,16 +44,14 @@ ver=$(pacman -Q squeezelite 2>/dev/null | awk '{print $2}') \
     || die "squeezelite not installed"
 
 case "${ver##*-}" in
-    31) current_label="${LABELS[0]}" ;;
-    32) current_label="${LABELS[1]}" ;;
-    61) current_label="${LABELS[2]}" ;;
-    62) current_label="${LABELS[3]}" ;;
+    61) current_label="${LABELS[0]}" ;;
+    62) current_label="${LABELS[1]}" ;;
     *)  current_label="$ver" ;;
 esac
 TITLE="ArchQ Squeezelite $1"
 option=$(dialog --stdout --title "$TITLE" \
     --menu "Current: ${current_label}" 7 0 0 \
-    0 "${LABELS[0]}" 1 "${LABELS[1]}" 2 "${LABELS[2]}" 3 "${LABELS[3]}") || exit 1
+    0 "${LABELS[0]}" 1 "${LABELS[1]}") || exit 1
 clear
 
 target="${PKGS[$option]}"
