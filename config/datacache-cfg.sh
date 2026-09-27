@@ -50,6 +50,7 @@ case $2 in
         fi
         for ((i=0; i < ${#arrList[@]}; i++))
         do
+            [ "${arrService[$i]}" = "lyrionmusicserver" ] && continue
             menu+=$i' '${arrList[$i]}
             grep -q MIMALLOC_ALLOW_LARGE_OS_PAGES "${serpath}${arrService[$i]}.service" && menu+=' on ' || menu+=' off '
         done
@@ -57,6 +58,7 @@ case $2 in
         options=$(dialog --stdout --title "ArchQ $1" --checklist "HugePages Enable" 7 0 0 ${menu}) || exit 1; clear
         for ((i=0; i < ${#arrList[@]}; i++))
         do
+            [ "${arrService[$i]}" = "lyrionmusicserver" ] && continue
             if ( echo $options | grep -q $i ); then
                 remove_mimalloc "${serpath}${arrService[$i]}.service"
                 # Keep pre/post-start helpers on the system allocator.
