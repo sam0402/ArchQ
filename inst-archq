@@ -366,7 +366,11 @@ case $server in
         arch-chroot /mnt pacman -U --noconfirm /root/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver.service >/mnt/usr/lib/systemd/system/lyrionmusicserver.service
         [ $cpus -ge 6 ] && [[ $player =~ S ]] && sed -i 's|)-1)|)/2)|' /mnt/usr/lib/systemd/system/lyrionmusicserver.service
-        sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/lyrionmusicserver.service
+        sed -i \
+            -e '/^\[Service\]$/a Environment="MIMALLOC_ALLOW_LARGE_OS_PAGES=1"\nEnvironment="MIMALLOC_EAGER_COMMIT_DELAY=0"' \
+            -e 's|^ExecStart=/usr/bin/pagecache-management\.sh |ExecStart=|' \
+            -e 's|^ExecStart=|ExecStart=/usr/bin/env LD_PRELOAD=/usr/lib/libmimalloc.so.3.5 |' \
+            /mnt/usr/lib/systemd/system/lyrionmusicserver.service
         arch-chroot /mnt systemctl enable lyrionmusicserver
         ;;
     Roon)
@@ -411,7 +415,11 @@ case $server in
             arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-2-x86_64.pkg.tar.zst
             arch-chroot /mnt pacman -U --noconfirm /root/flac-1.4.3-2-x86_64.pkg.tar.zst
         fi
-        sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/mpd.service
+        sed -i \
+            -e 's/^User=.*/User=root/' \
+            -e '/^\[Service\]$/a Environment="MIMALLOC_ALLOW_LARGE_OS_PAGES=1"\nEnvironment="MIMALLOC_EAGER_COMMIT_DELAY=0"' \
+            -e 's|^ExecStart=|ExecStart=/usr/bin/env LD_PRELOAD=/usr/lib/libmimalloc.so.3.5 |' \
+            /mnt/usr/lib/systemd/system/mpd.service
         # dependencies for owntone
         # pacstrap /mnt confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c
         arch-chroot /mnt pacman -U --noconfirm /root/vmtouch-1.3.1-1-any.pkg.tar.zst /root/socat-1.7.4.4-1-x86_64.pkg.tar.zst /root/owntone-28.10-2-x86_64.pkg.tar.zst /root/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
@@ -515,6 +523,11 @@ if [[ $player =~ S ]]; then
     arch-chroot /mnt pacman -U --noconfirm /root/squeezelite-1.9.8.1317-${sqver}-x86_64.pkg.tar.zst
     [[ -n "$scard" ]] && sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/squeezelite.conf
     [[ $server =~ [myo]. ]] && sed -i 's/^#SERVER_IP="-s .*/SERVER_IP="-s 127.0.0.1"/' /mnt/etc/squeezelite.conf
+    sed -i \
+        -e 's/^User=.*/User=root/' \
+        -e '/^\[Service\]$/a Environment="MIMALLOC_ALLOW_LARGE_OS_PAGES=1"\nEnvironment="MIMALLOC_EAGER_COMMIT_DELAY=0"' \
+        -e 's|^ExecStart=|ExecStart=/usr/bin/env LD_PRELOAD=/usr/lib/libmimalloc.so.3.5 |' \
+        /mnt/usr/lib/systemd/system/squeezelite.service
     arch-chroot /mnt systemctl enable squeezelite
 fi
 if [[ $player =~ A ]]; then
@@ -527,9 +540,15 @@ if [[ $player =~ A ]]; then
     [[ -n "$scard" ]] && sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/;s/^\/\?\/\?\toutput_format = ".*";/\toutput_format = "S32_LE";/' /mnt/etc/shairport-sync.conf
     sed -i 's/^\/\?\/\?\tperiod_size = <.*>;/\tperiod_size = 78;/;s/^\/\?\/\?\tbuffer_size = <.*>;/\tbuffer_size = 468;/' /mnt/etc/shairport-sync.conf
     sed -i 's/^\/\?\/\?\tresync_threshold_in_seconds = 0.050;/\tresync_threshold_in_seconds = 0.025;/' /mnt/etc/shairport-sync.conf
-    sed -i 's/Requires=/Requires=nqptp.service /' /mnt/usr/lib/systemd/system/shairport-sync.service 
-    sed -i '/Install\n/iNice=-20\nAllowedCPUs='\"$iso_1st\"'\n' /mnt/usr/lib/systemd/system/shairport-sync.service
-    sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /mnt/usr/lib/systemd/system/shairport-sync.service
+
+    sed -i \
+        -e 's/Requires=/Requires=nqptp.service /' \
+        -e '/Install\n/iNice=-20\nAllowedCPUs='\"$iso_1st\"'\n' \
+        -e 's/^User=.*/User=root/' \
+        -e '/^\[Service\]$/a Environment="MIMALLOC_ALLOW_LARGE_OS_PAGES=1"\nEnvironment="MIMALLOC_EAGER_COMMIT_DELAY=0"' \
+        -e 's|^ExecStart=|ExecStart=/usr/bin/env LD_PRELOAD=/usr/lib/libmimalloc.so.3.5 |' \
+        /mnt/usr/lib/systemd/system/shairport-sync.service
+
     arch-chroot /mnt systemctl enable shairport-sync nqptp
 fi
 if  [[ $player =~ R ]]; then
@@ -552,11 +571,14 @@ if  [[ $player =~ H ]]; then
 fi
 
 ## isocpu
-sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /mnt/etc/default/grub
+sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="hugepages=1024 '"$isocpu"'"/' /mnt/etc/default/grub
 arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
 ### Other setting
 echo -e "\n${c_blue_b}Setting service ...${c_gray}\n"
+arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mimalloc-3.5.3-1-x86_64.pkg.tar.zst
+arch-chroot /mnt pacman -U --noconfirm /root/mimalloc-3.5.3-1-x86_64.pkg.tar.zst
+
 cp /archq/qt5-base-5.15.9+kde+r151-1-x86_64.pkg.tar.zst /archq/kid3-common-3.9.3-2-x86_64.pkg.tar.zst /archq/double-conversion-3.2.1-1-x86_64.pkg.tar.zst /mnt/root
 ## Instal alsa-lib-1.1.9
 cp /archq/alsa-utils-1.2.8-1-x86_64.pkg.tar.zst /mnt/root
