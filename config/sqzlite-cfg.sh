@@ -56,10 +56,6 @@ clear
 
 target="${PKGS[$option]}"
 ver_label="${LABELS[$option]}"
-if ! pacman -Q tinyalsa-evl >/dev/null 2>&1 && [[ "$option" -ge 2 ]]; then
-    wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/tinyalsa-evl-2.1-1-x86_64.pkg.tar.zst
-    pacman -U --noconfirm /tmp/tinyalsa-evl-2.1-1-x86_64.pkg.tar.zst
-fi
 if [[ "$ver" != "$target" ]]; then
     pkg_file="/tmp/squeezelite-${target}-x86_64.pkg.tar.zst"
     wget -P /tmp "https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/squeezelite-${target}-x86_64.pkg.tar.zst"
