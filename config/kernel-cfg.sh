@@ -9,10 +9,7 @@ c_gray=$'\e[m'
 cpus=$(getconf _NPROCESSORS_ONLN)
 
 # pacman -Q ramroot >/dev/null 2>&1 || ramroot='R Ramroot'
-# pacman -Q alsa-lib | grep -qE 'alsa-lib .*-1.$' \
-#   && alsalib='A ALSAlib@Dynamic' \
-#   || alsalib='A ALSAlib@Soft'
-pacman -Q xf86-video-fbdev >/dev/null 2>&1 || systemctl is-active squeezelite >/dev/null 2>&1 && alsa='' || alsa='A ALSAlib '
+pacman -Q xf86-video-fbdev >/dev/null 2>&1 || systemctl is-active squeezelite >/dev/null 2>&1 && alsa='T TinyALSA ' || alsa='A ALSAlib '
 grep -q Hugetlb /proc/meminfo && alsa+='H HugePages '
 
 WK=$(dialog --stdout --title "ArchQ $1" \
@@ -113,34 +110,40 @@ case $WK in
         dialog --stdout --title "ArchQ $1" --msgbox "\nKernel frequency: $count" $((cpus + 6)) 35; clear
         ;;
     A)
-        a_name=(Halo Soft Analytical Dynamic)
-        ver=(11 15 21 25)
-
-        declare -A name2ver ver2name
-
-        for i in "${!a_name[@]}"; do
-            name2ver[${a_name[$i]}]=${ver[$i]}
-            ver2name[${ver[$i]}]=${a_name[$i]}
-        done
-
+        declare -A a_name=([11]=Halo [15]=Soft [21]=Analytical [25]=Dynamic)
         inst_ver=$(pacman -Q alsa-lib | awk -F '-' '{print $3}')
 
-        menu_items=()
-        for name in "${a_name[@]}"; do
-            menu_items+=("$name" "")
-        done
-
-        op=$(dialog --stdout \
-            --title "ALSA-lib ${ver2name[$inst_ver]}" \
+        op=$(dialog --stdout --no-tags \
+            --title "ALSA-lib ${a_name[$inst_ver]}" \
             --menu "Select version:" 7 0 0 \
-            "${menu_items[@]}" )|| exit 1
+            11 "${a_name[11]}" 15 "${a_name[15]}" \
+            21 "${a_name[21]}" 25 "${a_name[25]}") || exit 1
         clear
-        
-        echo -e "${c_blue_b}Install ALSA-lib ${op}...${c_gray}"
-        wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/alsa-lib-1.1.9-${name2ver[$op]}-x86_64.pkg.tar.zst
-        pacman -U --noconfirm /tmp/alsa-lib-1.1.9-${name2ver[$op]}-x86_64.pkg.tar.zst
 
-        dialog --stdout --title "ALSA-lib $1" --yesno "The ${op} is up to date. \nReboot to take effect?" 0 0 && reboot || exit 0
+        pkg="alsa-lib-1.1.9-${op}-x86_64.pkg.tar.zst"
+        echo -e "${c_blue_b}Install ALSA-lib ${a_name[$op]}...${c_gray}"
+        wget -P /tmp "https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/$pkg"
+        pacman -U --noconfirm "/tmp/$pkg"
+
+        dialog --stdout --title "ALSA-lib $1" --yesno "The ${a_name[$op]} is up to date. \nReboot to take effect?" 0 0 && reboot || exit 0
+        clear
+        ;;
+    T)
+        declare -A t_name=([1]=Lively [2]=Mature)
+        inst_ver=$(pacman -Q tinyalsa-evl | sed 's/.*\.\([^-]*\)-.*/\1/')
+
+        op=$(dialog --stdout --no-tags \
+            --title "TinyALSA ${t_name[$inst_ver]}" \
+            --menu "Select version:" 7 0 0 \
+            1 "${t_name[1]}" 2 "${t_name[2]}") || exit 1
+        clear
+
+        pkg="tinyalsa-evl-2.${op}-1-x86_64.pkg.tar.zst"
+        echo -e "${c_blue_b}Install TinyALSA ${t_name[$op]}...${c_gray}"
+        wget -P /tmp "https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/$pkg"
+        pacman -U --noconfirm "/tmp/$pkg"
+
+        dialog --stdout --title "TinyALSA $1" --yesno "The ${t_name[$op]} is up to date. \nReboot to take effect?" 0 0 && reboot || exit 0
         clear
         ;;
     H)
