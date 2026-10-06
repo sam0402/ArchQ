@@ -91,6 +91,7 @@ server=$(dialog --stdout --title "ArchQ" \
         --menu "Please select a music server or player" 7 0 0 \
         LMS "Lyrion Music Server" \
         MPD "MPD, Rigelian(iOS) | text-based client" \
+        MPD-Net "MPD pcmNet output; text client" \
         myMPD "MPD & myMPD web-based client" \
         Roon "Roon Server" \
         HQPE5 "HQPlayer Embedded 5" \
@@ -102,23 +103,31 @@ case $server in
     LMS)
         player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
         ;;
-    MPD|myMPD|RompR)
+    MPD|MPD-Net|myMPD|RompR)
         case "$server" in
-            MPD)   pfx="m" ;;
-            myMPD) pfx="y" ;;
-            RompR) pfx="o" ;;
+            MPD)    pfx="m"; player=S ;;
+            MPD-Net) pfx="n"; player=P ;;
+            myMPD)  pfx="y"; player=S ;;
+            RompR)  pfx="o"; player=S ;;
         esac
-
+    if [[ $server == MPD-Net ]]; then
+            choice=$(dialog --stdout --title "ArchQ" \
+            --radiolist "Select MPD version" 7 0 0 \
+            ${pfx}P "PCM: PCM, FLAC only; HiSQ" on \
+            ${pfx}F "+Flac: PCM, CD; Radio: FLAC, MP3" off \
+            ${pfx}X "+DSD: PCM, DSD; Radio: FLAC" off \
+        ) || exit 1
+    else
         choice=$(dialog --stdout --title "ArchQ" \
             --radiolist "Select MPD version" 7 0 0 \
             ${pfx}U "Ultra: PCM, FLAC only; best SQ" off \
-            ${pfx}I "Light: PCM, CD; Radio: FLAC, MP3" on \
+            ${pfx}L "Light: PCM, CD; Radio: FLAC, MP3" on \
             ${pfx}D "DSD: PCM, DSD; Radio: FLAC" off \
             ${pfx}R "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
             ${pfx}S "Stream: PCM; Radio: FLAC AAC; http output:9000" off \
             ${pfx}M "MPEG: All features of the above; +AAC, ALAC" off
         ) || exit 1
-
+    fi
         server="$choice"
         ;;
     Player)
@@ -203,7 +212,7 @@ mkfs.xfs -fL Data "${part_data}"
 
 ## Mount root & boot partition
 mount "${part_root}" /mnt
-mkdir /mnt/boot
+mkdir -p /mnt/boot
 mount "${part_boot}" /mnt/boot
 
 ## Roon server data partition
@@ -214,7 +223,7 @@ if [ $server = Roon ]; then
     mount "${part_data}" /mnt/var/roon
 fi
 
-cpu=intel; cat /proc/cpuinfo | grep -q AMD && cpu=amd
+cpu=intel; grep -q AMD /proc/cpuinfo && cpu=amd
 [ -f /mnt/boot/${cpu}-ucode.img ] || pacstrap /mnt ${cpu}-ucode
 
 echo -e "\n${c_blue_b}Install Arch Linux package ...${c_gray}\n"
@@ -383,13 +392,15 @@ case $server in
         sed -i 's/exec "$HARDLINK" "$SCRIPT.dll" "$@"/exec nice -n -20 "$HARDLINK" "$SCRIPT.dll" "$@"/g' /mnt/opt/RoonServer/Appliance/RAATServer
         arch-chroot /mnt systemctl enable roonserver
         ;;
-    m?|y?|o?)
-        player=S
+    m?|y?|o?|n?)
         [ $cpus -ge 6 ] && isocpu="rcu_nocbs=$iso_1st "
         case "$server" in
+            *P) MPD=pcmnet ;;
+            *X) MPD=dsdnet ;;
+            *F) MPD=flcnet ;;
             *U) MPD=ul ;;
-            *I) MPD=light ;;
             *D) MPD=dsd; sqver=62 ;;
+            *L) MPD=light ;;
             *R) MPD=radio ;;
             *S) MPD=stream ;;
             *M) MPD=ffmpeg ;;
@@ -411,7 +422,7 @@ case $server in
         # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libsndfile-1.2.0-3-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
         arch-chroot /mnt pacman -U --noconfirm /root/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst /root/mpd_cdrom-1.0.0-1-any.pkg.tar.zst /root/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst /root/flac-1.4.3-1-x86_64.pkg.tar.zst
-        if [[ $MPD == ul ]]; then
+        if [[ $MPD == flcnet ]]; then
             arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-2-x86_64.pkg.tar.zst
             arch-chroot /mnt pacman -U --noconfirm /root/flac-1.4.3-2-x86_64.pkg.tar.zst
         fi
@@ -445,8 +456,8 @@ case $server in
             arch-chroot /mnt pacman -U --noconfirm /root/rompr-2.00-1-any.pkg.tar.zst
             mkdir -p /mnt/etc/nginx/sites-available /mnt/etc/nginx/sites-enabled
             sed -i '$i include /etc/nginx/sites-enabled/*;' /mnt/etc/nginx/nginx.conf
-            curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/mnt/etc/nginx/sites-available/rompr
-            curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cantata_nginx >/mnt/etc/nginx/sites-available/cantata
+            curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/mnt/etc/nginx/sites-available/rompr
+            curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cantata_nginx >/mnt/etc/nginx/sites-available/cantata
             sed -i 's/hostname/'"${hostname,,}"'/' /mnt/etc/nginx/sites-available/rompr
             sed -i 's/hostname/'"${hostname,,}"'/' /mnt/etc/nginx/sites-available/cantata
             sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /mnt/etc/php/php.ini
@@ -516,6 +527,21 @@ EOF
         ;;
 esac
 
+if [[ $player =~ P ]]; then
+    echo -e "\n${c_blue_b}Install pcmRecv ...${c_gray}\n"
+    # pacstrap /mnt faad2 libmad
+    arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/pcmrecv-0.5-1-x86_64.pkg.tar.zst
+    arch-chroot /mnt pacman -U --noconfirm /root/pcmrecv-0.5-1-x86_64.pkg.tar.zst
+    # [[ -n "$scard" ]] && sed -i 's/^AUDIO_DEV="-o .*/AUDIO_DEV="-o '"$scard"'"/' /mnt/etc/pcmrecv.conf
+    # [[ $server =~ [myo]. ]] && sed -i 's/^#SERVER_IP="-s .*/SERVER_IP="-s 127.0.0.1"/' /mnt/etc/pcmrecv.conf
+    sed -i \
+        -e 's/^User=.*/User=root/' \
+        -e '/^\[Service\]$/a Environment="MIMALLOC_ALLOW_LARGE_OS_PAGES=1"\nEnvironment="MIMALLOC_EAGER_COMMIT_DELAY=0"' \
+        -e 's|^ExecStart=|ExecStart=/usr/bin/env LD_PRELOAD=/usr/lib/libmimalloc.so.3.5 |' \
+        /mnt/usr/lib/systemd/system/pcmrecv.service
+    arch-chroot /mnt systemctl enable pcmrecv
+fi
+
 if [[ $player =~ S ]]; then
     echo -e "\n${c_blue_b}Install Squeezelite ...${c_gray}\n"
     # pacstrap /mnt faad2 libmad
@@ -536,7 +562,7 @@ if [[ $player =~ A ]]; then
     arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync-4.3.3-2-x86_64.pkg.tar.zst
     arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/nqptp-1.2.5-1-x86_64.pkg.tar.zst
     arch-chroot /mnt pacman -U --noconfirm /root/shairport-sync-4.3.3-2-x86_64.pkg.tar.zst /root/nqptp-1.2.5-1-x86_64.pkg.tar.zst
-    curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync.service >/mnt/usr/lib/systemd/system/shairport-sync.service
+    curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/shairport-sync.service >/mnt/usr/lib/systemd/system/shairport-sync.service
     [[ -n "$scard" ]] && sed -i 's/^\/\?\/\?\toutput_device = ".*";/\toutput_device = '"\"$scard\""';/;s/^\/\?\/\?\toutput_format = ".*";/\toutput_format = "S32_LE";/' /mnt/etc/shairport-sync.conf
     sed -i 's/^\/\?\/\?\tperiod_size = <.*>;/\tperiod_size = 78;/;s/^\/\?\/\?\tbuffer_size = <.*>;/\tbuffer_size = 468;/' /mnt/etc/shairport-sync.conf
     sed -i 's/^\/\?\/\?\tresync_threshold_in_seconds = 0.050;/\tresync_threshold_in_seconds = 0.025;/' /mnt/etc/shairport-sync.conf
@@ -615,17 +641,17 @@ EOF
 # cat >/mnt/etc/udev/rules.d/80-usbsound.rules <<EOF
 # ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="8888", ATTR{idProduct}=="1717", RUN+="/bin/systemctl start shairport-sync.service"
 # EOF
-curl -sL https://raw.githubusercontent.com/bb-qq/r8152/master/50-usb-realtek-net.rules >/mnt/etc/udev/rules.d/50-usb-realtek-net.rules
+curl -fsSL https://raw.githubusercontent.com/bb-qq/r8152/master/50-usb-realtek-net.rules >/mnt/etc/udev/rules.d/50-usb-realtek-net.rules
 # hot plug
-#curl -sL https://raw.githubusercontent.com/bb-qq/r8152/master/51-usb-r8152-net.rules >/mnt/etc/udev/rules.d/51-usb-r8152-net.rules
+#curl -fsSL https://raw.githubusercontent.com/bb-qq/r8152/master/51-usb-r8152-net.rules >/mnt/etc/udev/rules.d/51-usb-r8152-net.rules
 # USB Affinity
-curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/usb-affinity.service >/mnt/usr/lib/systemd/system/usb-affinity.service
+curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/usb-affinity.service >/mnt/usr/lib/systemd/system/usb-affinity.service
 arch-chroot /mnt systemctl enable usb-affinity
 
 ## Patch
 sed -i 's/#Storage=auto/Storage=none/' /mnt/etc/systemd/journald.conf
 sed -i 's/wait-online/wait-online --any/' /mnt/usr/lib/systemd/system/systemd-networkd-wait-online.service
-sed -i '/Service/iAfter=mpd.service\n' /mnt/usr/lib/systemd/system/rc-local.service
+sed -i '/^\[Service\]$/iAfter=mpd.service\n' /mnt/usr/lib/systemd/system/rc-local.service
 
 ### install config file
 # curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/pacman.conf >/mnt/etc/pacman.conf
