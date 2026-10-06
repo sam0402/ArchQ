@@ -13,14 +13,15 @@ servs=''
 pacman -Q lyrionmusicserver >/dev/null 2>&1 && servs+='lyrionmusicserver '
 pacman -Q mpd >/dev/null 2>&1 && servs+='mpd '
 pacman -Q mympd >/dev/null 2>&1 && servs+='mympd '
-pacman -Q roonserver >/dev/null 2>&1 && servs+='roonserver '
-pacman -Q hqplayerd >/dev/null 2>&1 && servs+='hqplayerd '
+# pacman -Q roonserver >/dev/null 2>&1 && servs+='roonserver '
+# pacman -Q hqplayerd >/dev/null 2>&1 && servs+='hqplayerd '
 pacman -Q nginx >/dev/null 2>&1 && servs+='nginx '
 pacman -Q php-fpm >/dev/null 2>&1 && servs+='php-fpm '
 
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
         LMS "Lyrion Music Server" \
         MPD "MPD Slim output" \
+        MPD-Net "MPD pcmRecv output" \
         Roon "Roon Server" \
         HQPE5 "HQPlayer Embedded 5" \
         HQPE4 "HQPlayer Embedded 4" \
@@ -28,17 +29,30 @@ server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
 yes | pacman -Scc
 
 case $server in
-    MPD)
-        opts=()
-        opts=(
-            mW "Wav: PCM, WAV, AIFF only; best SQ" off
-            mU "Ultra: PCM, FLAC only; higher SQ" off
-            mI "Light: PCM, CD; Radio: FLAC, MP3" on
-            mD "DSD: PCM, DSD; Radio: FLAC" off
-            mR "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off
-            mS "Stream: PCM; Radio: FLAC AAC" off
-            mM "MPEG: All features of the above; +AAC, ALAC" off
-        )
+    MPD|MPD-Net)
+        case "$server" in
+            MPD)
+                opts=(
+                mW "Wav: PCM, WAV, AIFF only; best SQ" off
+                mU "Ultra: PCM, FLAC only; higher SQ" off
+                mI "Light: PCM, CD; Radio: FLAC, MP3" on
+                mD "DSD: PCM, DSD; Radio: FLAC" off
+                mR "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off
+                mS "Stream: PCM; Radio: FLAC AAC" off
+                mM "MPEG: All features of the above; +AAC, ALAC" off
+                )
+                player=S
+            ;;
+            MPD-Net)
+                opts=(
+                mP "PCM: PCM, FLAC only; HiSQ" on \
+                mF "+Flac: PCM, CD; Radio: FLAC, MP3" off \
+                mX "+DSD: PCM, DSD; Radio: FLAC" off \
+                )
+                player=P
+            ;;
+        esac
+    
         choice=$(dialog --stdout --title "ArchQ" \
             --radiolist "Select MPD version" 7 0 0 \
             "${opts[@]}"
@@ -51,7 +65,9 @@ case $server in
             o "RompR web-based client") || exit 1; clear
         server="${client}${ver}"
         ;;
-    Player)
+esac
+case $server in
+    Player)  
         # sed -i 's/'"$isocpu"'//' /etc/default/grub
         /usr/bin/player-cfg.sh
         ;;
@@ -119,6 +135,9 @@ EOF
             *R) MPD=radio ;;
             *S) MPD=stream ;;
             *M) MPD=ffmpeg ;;
+            *P) MPD=pcmnet ;;
+            *F) MPD=flcmnet ;;
+            *X) MPD=dsdnet ;;
         esac
         [[ $MPD == ul || $MPD == light || $MPD == wav ]] || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
 
@@ -149,7 +168,6 @@ EOF
                     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-1-x86_64.pkg.tar.zst
                     pacman -U --noconfirm /tmp/flac-1.4.3-1-x86_64.pkg.tar.zst
                 fi
-                pacman -R --noconfirm $(pacman -Q mpd | awk '{print $1}')
                 pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
                 sed -i 's/album,title/album,albumartist,title/' /etc/mpd.conf
                 sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
@@ -180,12 +198,13 @@ EOF
             ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
             ln -s /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
             chmod 644 /etc/nginx/sites-enabled/*
+            servs=${servs/nginx/}; servs=${servs/php-fpm/}; servs=${servs/avahi-daemon/};
             systemctl enable nginx php-fpm avahi-daemon
         fi
 # cpu isolation
         if [ $cpus -ge 6 ]; then
             echo cpu isolation ...
-            grep -q '^[[:space:]]*cpu_affinity' /etc/mpd.conf || sed -i '/dop/i\tcpu_affinity\t"'"$iso_1st"'"' /etc/mpd.conf
+            # grep -q '^[[:space:]]*cpu_affinity' /etc/mpd.conf || sed -i '/dop/i\tcpu_affinity\t"'"$iso_1st"'"' /etc/mpd.conf
             sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
             grub-mkconfig -o /boot/grub/grub.cfg
         fi
@@ -195,6 +214,18 @@ EOF
         # /usr/bin/mpd-cfg.sh
         usermod -aG optical mpd
         systemctl enable --now mpd
+        if [[ $player == "P" ]]; then
+            if !pacman -Q pcmrecv >/dev/null 2>&1; then
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/pcmrecv-0.5-1-x86_64.pkg.tar.zst
+                pacman -U --noconfirm /tmp/pcmrecv-0.5-1-x86_64.pkg.tar.zst
+            fi
+            systemctl enable --now pcmrecv; systemctl disable --now squeezelite
+        fi
+
+        if [[ $player == "S" ]]; then
+            systemctl enable --now squeezelite
+            systemctl disable --now pcmrecv
+        fi
         server=MPD
         ;;
     HQPE4|HQPE5)
