@@ -112,14 +112,14 @@ case $server in
         esac
     if [[ $server == MPD-Net ]]; then
             choice=$(dialog --stdout --title "ArchQ" \
-            --radiolist "Select MPD version" 7 0 0 \
+            --radiolist "Select $server version" 7 0 0 \
             ${pfx}P "PCM: PCM, FLAC only; HiSQ" on \
             ${pfx}F "+Flac: PCM, CD; Radio: FLAC, MP3" off \
             ${pfx}X "+DSD: PCM, DSD; Radio: FLAC" off \
         ) || exit 1
     else
         choice=$(dialog --stdout --title "ArchQ" \
-            --radiolist "Select MPD version" 7 0 0 \
+            --radiolist "Select $server version" 7 0 0 \
             ${pfx}U "Ultra: PCM, FLAC only; best SQ" off \
             ${pfx}L "Light: PCM, CD; Radio: FLAC, MP3" on \
             ${pfx}D "DSD: PCM, DSD; Radio: FLAC" off \
