@@ -137,11 +137,12 @@ EOF
             *S) MPD=stream ;;
             *M) MPD=ffmpeg ;;
             *P) MPD=pcmnet ;;
-            *F) MPD=flcmnet ;;
+            *F) MPD=flcnet ;;
             *X) MPD=dsdnet ;;
             *Q) MPD=qobuz ;;
         esac
-        [[ $MPD == ul || $MPD == light || $MPD == wav ]] || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
+
+        [[ $MPD == ul || $MPD == light || $MPD == wav || $MPD =~ net ]] || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
 
         if ! pacman -Q mpd-${MPD} >/dev/null 2>&1; then
             echo -e "\n${c_blue_b}Install MPD-${MPD} ...${c_gray}\n"
@@ -163,7 +164,7 @@ EOF
             fi
             if [[ $(pacman -Q mpd-${MPD} | awk '{print $2}') != ${mpdver} ]]; then
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
-                if [[ $MPD == ul ]]; then
+                if [[ $MPD == ul || $MPD == flcnet ]]; then
                     wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-2-x86_64.pkg.tar.zst
                     pacman -U --noconfirm /tmp/flac-1.4.3-2-x86_64.pkg.tar.zst
                 else
@@ -212,12 +213,13 @@ EOF
         fi
         ### Start mpd.. etc. service
         servs=$(echo " $servs " | sed 's/ mpd / /' | xargs)
-        systemctl disable --now $servs mpd.socket
         # /usr/bin/mpd-cfg.sh
         usermod -aG optical mpd
         systemctl enable --now mpd
+        systemctl disable --now $servs mpd.socket
+
         if [[ $player == "P" ]]; then
-            if !pacman -Q pcmrecv >/dev/null 2>&1; then
+            if ! pacman -Q pcmrecv >/dev/null 2>&1; then
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/pcmrecv-0.5-1-x86_64.pkg.tar.zst
                 pacman -U --noconfirm /tmp/pcmrecv-0.5-1-x86_64.pkg.tar.zst
             fi
@@ -272,6 +274,6 @@ EOF
 esac
 if [ -n "$MPD" ]; then
     MPD="-$MPD"
-    uname -r | grep -vq D && [[ $pfx != "a" ]] && ! pacman -Q squeezelite >/dev/null 2>&1 && /usr/bin/sqzlite-cfg.sh
+    uname -r | grep -vq D && [[ $player == "S" ]] && ! pacman -Q squeezelite >/dev/null 2>&1 && /usr/bin/sqzlite-cfg.sh
 fi
 echo -e "\n"${c_blue_b}${server}${MPD}${c_gray}" is started."
