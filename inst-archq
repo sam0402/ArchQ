@@ -91,7 +91,7 @@ server=$(dialog --stdout --title "ArchQ" \
         --menu "Please select a music server or player" 7 0 0 \
         LMS "Lyrion Music Server" \
         MPD "MPD, Rigelian(iOS) | text-based client" \
-        MPD-Net "MPD pcmNet output; text client" \
+        MPD-Net "pcmNet output; text client" \
         myMPD "MPD & myMPD web-based client" \
         Roon "Roon Server" \
         HQPE5 "HQPlayer Embedded 5" \
