@@ -492,7 +492,7 @@ EOF
         cat >>/mnt/etc/rc.local <<EOF
 fi
 # Buffer for TinyALSA
-echo 128 >/proc/asound/card0/pcm0p/sub0/prealloc
+#echo 128 >/proc/asound/card0/pcm0p/sub0/prealloc
 
 exit 0
 EOF
