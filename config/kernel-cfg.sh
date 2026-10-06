@@ -9,7 +9,7 @@ c_gray=$'\e[m'
 cpus=$(getconf _NPROCESSORS_ONLN)
 
 # pacman -Q ramroot >/dev/null 2>&1 || ramroot='R Ramroot'
-pacman -Q xf86-video-fbdev >/dev/null 2>&1 || systemctl is-active squeezelite >/dev/null 2>&1 && alsa='T TinyALSA ' || alsa='A ALSAlib '
+pacman -Q xf86-video-fbdev >/dev/null 2>&1 || systemctl is-active squeezelite >/dev/null 2>&1 || systemctl is-active pcmrecv >/dev/null 2>&1 && alsa='T TinyALSA ' || alsa='A ALSAlib '
 grep -q Hugetlb /proc/meminfo && alsa+='H HugePages '
 
 WK=$(dialog --stdout --title "ArchQ $1" \
