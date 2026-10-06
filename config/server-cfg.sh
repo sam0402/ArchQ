@@ -48,6 +48,7 @@ case $server in
                 mP "PCM: PCM, FLAC only; HiSQ" on \
                 mF "+Flac: PCM, CD; Radio: FLAC, MP3" off \
                 mX "+DSD: PCM, DSD; Radio: FLAC" off \
+                mQ "Qobuz: PCM, FLAC only; Radio: FLAC" off \
                 )
                 player=P
             ;;
@@ -138,6 +139,7 @@ EOF
             *P) MPD=pcmnet ;;
             *F) MPD=flcmnet ;;
             *X) MPD=dsdnet ;;
+            *Q) MPD=qobuz ;;
         esac
         [[ $MPD == ul || $MPD == light || $MPD == wav ]] || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
 
