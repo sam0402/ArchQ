@@ -54,7 +54,7 @@ case $server in
         esac
     
         choice=$(dialog --stdout --title "ArchQ" \
-            --radiolist "Select MPD version" 7 0 0 \
+            --radiolist "Select $server version" 7 0 0 \
             "${opts[@]}"
         ) || exit 1; clear
 
