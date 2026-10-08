@@ -60,10 +60,14 @@ case $server in
         ) || exit 1; clear
 
         ver=${choice:1:1}
-        client=$(dialog --stdout --title "ArchQ" --menu "Select MPD client" 7 0 0 \
-            m "Rigelian(iOS) | text-based client" \
-            y "myMPD web-based client" \
-            o "RompR web-based client") || exit 1; clear
+        if [[ $server == MPD ]]; then
+            client=$(dialog --stdout --title "ArchQ" --menu "Select MPD client" 7 0 0 \
+                m "Rigelian(iOS) | text-based client" \
+                y "myMPD web-based client" \
+                o "RompR web-based client") || exit 1; clear
+        else
+            client=m
+        fi
         server="${client}${ver}"
         ;;
 esac
@@ -184,6 +188,9 @@ EOF
             pacman -U --noconfirm /tmp/*.pkg.tar.zst
             systemctl enable --now mympd
             servs=$(echo " $servs " | sed 's/ mympd / /' | xargs)
+        elif [[ $player == "P" ]] && pacman -Q mympd >/dev/null 2>&1; then
+            systemctl enable --now mympd
+            servs=${servs/mympd/}
         fi
         if [[ $server =~ o. ]]; then
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
