@@ -113,7 +113,7 @@ case $server in
     if [[ $server == MPD-Net ]]; then
             choice=$(dialog --stdout --title "ArchQ" \
             --radiolist "Select $server version" 7 0 0 \
-            ${pfx}P "PCM: PCM, FLAC only; HiSQ" on \
+            ${pfx}P "PCM: PCM, AIFF only; HiSQ" on \
             ${pfx}F "+Flac: PCM, CD; Radio: FLAC, MP3" off \
             ${pfx}X "+DSD: PCM, DSD; Radio: FLAC" off \
         ) || exit 1
@@ -646,11 +646,11 @@ curl -fsSL https://raw.githubusercontent.com/bb-qq/r8152/master/50-usb-realtek-n
 curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/usb-affinity.service >/mnt/usr/lib/systemd/system/usb-affinity.service
 arch-chroot /mnt systemctl enable usb-affinity
 # ALSA USB Audio setting
-# cat >/mnt/etc/modprobe.d/alsa-base.conf <<EOF
-# options snd-pcm prealloc_size=2048 buffer_time=500 max_alloc_per_card=32768 enable_mmap=1
-# options snd-usb-audio nrpacks=1 implicit_fb=1 use_vmalloc=1
-# options snd slots=snd-usb-audio
-# EOF
+cat >/mnt/etc/modprobe.d/alsa-base.conf <<EOF
+options snd-pcm prealloc_size=2048 buffer_time=500 max_alloc_per_card=32768 enable_mmap=1
+options snd-usb-audio nrpacks=1 implicit_fb=1 use_vmalloc=1
+options snd slots=snd-usb-audio
+EOF
 
 ## Patch
 sed -i 's/#Storage=auto/Storage=none/' /mnt/etc/systemd/journald.conf
