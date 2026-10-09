@@ -1,7 +1,7 @@
 #!/bin/bash
 serpath='/usr/lib/systemd/system/'
-service=("mpd" "lyrionmusicserver" "squeezelite" "pcmrcev" "shairport-sync" "owntone" "hqplayerd" "networkaudio")
-nickname=("MPD" "LMS" "Squeezelite" "pcmRcev" "Airplay" "OwnTone" "HQPlayerEmbedded" "NAA")
+service=("mpd" "lyrionmusicserver" "pcmrecv" "squeezelite" "shairport-sync" "owntone" "hqplayerd" "networkaudio")
+nickname=("MPD" "LMS" "PCMRecv" "Squeezelite" "Airplay" "OwnTone" "HQPlayerEmbedded" "NAA")
 # Remove only the mimalloc settings managed by this script, including the
 # old service-wide preload. Leave unrelated service environment settings intact.
 remove_mimalloc() {
@@ -60,14 +60,12 @@ case $2 in
             if ( echo $options | grep -q $i ); then
                 remove_mimalloc "${serpath}${arrService[$i]}.service"
                 # Keep pre/post-start helpers on the system allocator.
-                sed -i \
-                    -e '/^\[Service\]$/a Environment="MIMALLOC_ALLOW_LARGE_OS_PAGES=1"\nEnvironment="MIMALLOC_EAGER_COMMIT_DELAY=0"' \
-                    -e 's|^ExecStart=/usr/bin/pagecache-management\.sh |ExecStart=|' \
-                    -e 's|^ExecStart=|ExecStart=/usr/bin/env LD_PRELOAD=/usr/lib/libmimalloc.so.3.5 |' \
-                    "${serpath}${arrService[$i]}.service"
-
-[ "${arrService[$i]}" = "lyrionmusicserver" ] ||
-    sed -i 's/^User=.*/User=root/' "$service"
+                sed -i '/^\[Service\]$/a \
+Environment="MIMALLOC_ALLOW_LARGE_OS_PAGES=1"\
+Environment="MIMALLOC_EAGER_COMMIT_DELAY=0"' "${serpath}${arrService[$i]}.service"
+                [ "${arrService[$i]}" = "lyrionmusicserver" ] || sed -i 's/^User=.*/User=root/' "${serpath}${arrService[$i]}.service"
+                sed -i 's|^ExecStart=/usr/bin/pagecache-management.sh |ExecStart=|' "${serpath}${arrService[$i]}.service"
+                sed -i 's|^ExecStart=\(.\)|ExecStart=/usr/bin/env LD_PRELOAD=/usr/lib/libmimalloc.so.3.5 \1|' "${serpath}${arrService[$i]}.service"
             else
                 remove_mimalloc "${serpath}${arrService[$i]}.service"
             fi
