@@ -9,7 +9,16 @@ ipaddr=$(ip -o addr | grep en | awk 'NR == 1 {print $4}')
 MENU=''
 [[ "$gitupd" -gt "$num" || -z $num ]] && MENU+='U Update '
 pacman -Q mpd >/dev/null 2>&1 && MENU+='D MPD '
-pacman -Q squeezelite >/dev/null 2>&1 && MENU+='S Squeezelite '
+systemctl is-active --quiet squeezelite && {
+MENU+='S Squeezelite '
+    PCMSQZ=Squeezelite
+}
+
+systemctl is-active --quiet pcmrecv && {
+    MENU+='S Pcmrecv '
+    PCMSQZ=Pcmrecv
+}
+
 pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='A Airplay '
 awk '/^HugePages_Total:/ {exit !($2 >= 512)}' /proc/meminfo && MENU+='G HugePages ' || MENU+='G DataCache '
 if [ -f /root/.advence ]; then
@@ -98,7 +107,7 @@ case $options in
         /usr/bin/abcde-cfg.sh $KVER
         ;;
     S)
-        /usr/bin/sqzlite-cfg.sh $KVER
+        [[ $PCMSQZ == "Pcmrecv" ]] && /usr/bin/sqzlite-cfg.sh Pcmrecv $KVER || /usr/bin/sqzlite-cfg.sh Squeezelite $KVER
         ;;
     T)
         /usr/bin/timezone.sh $KVER

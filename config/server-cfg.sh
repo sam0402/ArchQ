@@ -178,7 +178,13 @@ EOF
                 pacman -R --noconfirm $(pacman -Q mpd | awk '{print $1}')
                 pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
                 sed -i 's/album,title/album,albumartist,title/' /etc/mpd.conf
-                sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/mpd.service
+                awk '/^HugePages_Total:/ {exit !($2 >= 512)}' /proc/meminfo && sed -i \
+                    -e '/^\[Service\]$/a Environment="MIMALLOC_ALLOW_LARGE_OS_PAGES=1"\nEnvironment="MIMALLOC_EAGER_COMMIT_DELAY=0"' \
+                    -e 's|^ExecStart=/usr/bin/pagecache-management\.sh |ExecStart=|' \
+                    -e 's|^ExecStart=|ExecStart=/usr/bin/env LD_PRELOAD=/usr/lib/libmimalloc.so.3.5 |' \
+                    /usr/lib/systemd/system/mpd.service
+                systemctl daemon-reload
+                systemctl restart mpd
             fi
         fi
         if [[ $server =~ y. ]]; then
