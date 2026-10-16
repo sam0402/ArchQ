@@ -41,8 +41,8 @@ case $server in
             ;;
             MPD-Net)
                 opts=(
-                mP "PCM: WAV, AIFF only; HiSQ" on
-                mF "+Flac; Radio: FLAC, MP3" off
+                mP "PCM: WAV, AIFF only; HiSQ" off
+                mF "+Flac; Radio: FLAC, MP3" on
                 mX "+DSD; Radio: FLAC" off
                 mQ "Qobuz: PCM, FLAC only; Radio: FLAC" off
                 mR "Radio: +AAC OPUS; Output: +Slim" off
