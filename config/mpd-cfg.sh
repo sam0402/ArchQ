@@ -78,59 +78,15 @@ brow_mtp() {
 }
 
 # ==============================================================================
-# 第一步：選擇 MPD 用戶端
+# 第一步：選擇 MPD 用戶端 (若安裝 mpd-stream 則可設定 Multi-user)
 # ==============================================================================
 client=''
-client_menu=(
-    N "Ncmpcpp | Rigelian(iOS)"
-    C "Cantata :8080"
-)
-# pacman -Q mympd >/dev/null 2>&1      && client_menu+=(M "myMPD :80")
-# pacman -Q rompr >/dev/null 2>&1      && client_menu+=(R "RompR :6660")
-# pacman -Q mpd-stream >/dev/null 2>&1 && client_menu+=(U "Multi user")
-
-# client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 "${client_menu[@]}") || exit 1
-# clear
-
-pacman -Q mpd-stream >/dev/null 2>&1 && client=$(dialog --stdout --title "ArchQ MPD" --menu "Setting Multi user?" 7 0 0 N No U Yes) || exit 1
+if pacman -Q mpd-stream >/dev/null 2>&1; then
+    client=$(dialog --stdout --title "ArchQ MPD" --menu "Setting Multi user?" 7 0 0 N "No" U "Yes") || exit 1
+    clear
+fi
 
 case $client in
-    R)
-        # RompR (Web Client on port 6660)
-        rm -f /etc/nginx/sites-enabled/cantata
-        ln -sf /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
-        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd
-        systemctl enable --now mpd php-fpm avahi-daemon
-        systemctl enable nginx && systemctl restart nginx
-        ;;
-    M)
-        # myMPD (Web Client on port 80)
-        pacman -Q mympd >/dev/null 2>&1 || {
-            pacman -Sy --noconfirm archlinux-keyring mympd
-            yes | pacman -Scc >/dev/null 2>&1
-        }
-        pacman -Q nginx >/dev/null 2>&1 && systemctl disable --now nginx php-fpm
-        systemctl enable --now mpd mympd avahi-daemon
-        ;;
-    N)
-        # Ncmpcpp / Rigelian (Terminal / iOS MPD client)
-        pacman -Q ncmpcpp >/dev/null 2>&1 || {
-            pacman -Sy --noconfirm archlinux-keyring ncmpcpp
-            yes | pacman -Scc >/dev/null 2>&1
-        }
-        pacman -Q nginx >/dev/null 2>&1 && systemctl disable --now nginx php-fpm avahi-daemon
-        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd avahi-daemon
-        systemctl enable --now mpd
-        ;;
-    C)
-        # Cantata (Web Client on port 8080)
-        rm -f /etc/nginx/sites-enabled/rompr
-        ln -sf /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
-        pacman -Q php-fpm >/dev/null 2>&1 && systemctl disable --now php-fpm avahi-daemon
-        pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd avahi-daemon
-        systemctl enable --now mpd
-        systemctl enable nginx && systemctl restart nginx
-        ;;
     U)
         # Multi-user (透過 mpd-proxy 分配多組 MPD 控制與串流連接埠)
         new=$(ls /etc/systemd/system/multi-user.target.wants/ 2>/dev/null | grep 'mpd-proxy@' | grep -oP '(?<=@)[0-9]+' |
@@ -176,10 +132,9 @@ case $client in
                 fi
                 ;;
         esac
-        exit 0
         ;;
-	*)
-	;;
+    *)
+        ;;
 esac
 
 # ==============================================================================
@@ -190,7 +145,7 @@ grep -E '^[[:space:]]*include_optional[[:space:]]+"mpd.d/owntone.out"' "$config"
 grep -E '^[[:space:]]*include_optional[[:space:]]+"mpd.d/httpd.out"' "$config" >/dev/null 2>&1 && h0=on
 
 output_menu=()
-if [ "$client" = "M" ]; then
+if pacman -Q mympd >/dev/null 2>&1 || [ "$client" = "M" ]; then
     p0=off
     grep -E '^[[:space:]]*include_optional[[:space:]]+"mpd.d/mtp_' "$config" >/dev/null 2>&1 && p0=on
     output_menu+=(P "Multi-player" "$p0")
