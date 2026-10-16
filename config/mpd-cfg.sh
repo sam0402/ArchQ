@@ -1,22 +1,51 @@
 #!/bin/bash
-## modprobe brd rd_size=2621440 max_part=1 rd_nr=1
-config='/etc/mpd.conf'
-user=$(grep '1000' /etc/passwd | awk -F: '{print $1}')
+# ==============================================================================
+# ArchQ MPD Configuration Utility
+# 功能：
+#   1. 設定 MPD 用戶端 (myMPD, RompR, Cantata, Ncmpcpp, Multi-user)
+#   2. 設定音訊可選輸出 (Multi-room / AirPlay, Multi-player / 分區, Http Stream)
+#   3. 設定音訊緩衝區大小 (audio_buffer_size)
+#   4. 設定 PcmNet 接收端 IP (host) 與音樂目錄路徑 (music_directory)
+# ==============================================================================
 
-### Volume Control none/software/hardware
-vol_ctrl(){
-    v_none='off'; v_soft='off'; v_hard='off'
-    case $(grep 'mixer_type' $2 | cut -d'"' -f2) in
-        none)
-            v_none=on
-            ;;
-        software)
-            v_soft=on
-            ;;
-        hardware)
-            v_hard=on
-            ;;
+config='/etc/mpd.conf'
+user=$(awk -F: '$3 == 1000 {print $1}' /etc/passwd)
+user=${user:-sam}
+
+# ------------------------------------------------------------------------------
+# 輔助函式：切換 include_optional 設定項
+# ------------------------------------------------------------------------------
+set_include() {
+    local target_file="$1"
+    local state="$2"  # on 或 off
+    local directive="include_optional \"$target_file\""
+
+    if [ "$state" = "on" ]; then
+        if grep -q "$target_file" "$config"; then
+            sed -i "s|^[[:space:]]*#\?[[:space:]]*include_optional[[:space:]]\+\"$target_file\"|$directive|" "$config"
+        else
+            echo "$directive" >> "$config"
+        fi
+    else
+        if grep -q "$target_file" "$config"; then
+            sed -i "s|^[[:space:]]*include_optional[[:space:]]\+\"$target_file\"|#$directive|" "$config"
+        fi
+    fi
+}
+
+# ------------------------------------------------------------------------------
+# 輔助函式：音量控制設定 (none / software / hardware)
+# ------------------------------------------------------------------------------
+vol_ctrl() {
+    local target="$2"
+    local v_none='off' v_soft='off' v_hard='off'
+    case $(grep -E '^[[:space:]]*mixer_type[[:space:]]+' "$target" | cut -d'"' -f2) in
+        software) v_soft=on ;;
+        hardware) v_hard=on ;;
+        *)        v_none=on ;;
     esac
+
+    local volume
     volume=$(dialog --stdout \
         --title "ArchQ MPD" \
         --radiolist "$1 volume control" 7 0 0 \
@@ -24,29 +53,47 @@ vol_ctrl(){
         software '　' $v_soft \
         hardware '　' $v_hard) || exit 1
     clear
-    sed -i 's/mixer_type.*"/mixer_type\t"'"$volume"'"/' $2
+    sed -i -E "s/^[[:space:]]*#?[[:space:]]*mixer_type[[:space:]]+\"[^\"]*\"/mixer_type\t\"$volume\"/" "$target"
 }
 
-brow_mtp(){
-    MENU="Name"$'\t\t:'"Ctrl-port\n"
+# ------------------------------------------------------------------------------
+# 輔助函式：瀏覽現有的 Multi-player (Owntone 分區) 連接埠清單
+# ------------------------------------------------------------------------------
+brow_mtp() {
+    local menu="Name"$'\t\t:'"Ctrl-port\n"
+    local found=0
     for file in /etc/owntone-*.conf; do
-        port=$(cat $file | grep port | cut -d ' ' -f 3)
-        filename=${file##*/}; filename=${filename:8:-5}
-        MENU=$MENU"${filename@u}"$'\t:'"$port"'\n'
+        [ -f "$file" ] || continue
+        found=1
+        local port
+        port=$(grep -E '^[[:space:]]*port[[:space:]]+' "$file" | awk '{print $3}')
+        local filename="${file##*/}"
+        filename="${filename:8:-5}"
+        menu+="${filename@u}"$'\t:'"$port"$'\n'
     done
-    dialog --stdout --title "ArchQ MPD" --msgbox "$MENU" 10 30 || exit 1; clear
+
+    [ $found -eq 0 ] && menu="No multi-player configured."
+    dialog --stdout --title "ArchQ MPD" --msgbox "$menu" 10 30 || exit 1
+    clear
 }
 
-### MPD client select
-MENU=''
-pacman -Q mympd >/dev/null 2>&1 && MENU+='M "myMPD :80" '
-pacman -Q rompr >/dev/null 2>&1 && MENU+='R "RompR :6660" '
-pacman -Q mpd-stream >/dev/null 2>&1 && MENU+='U "Multi user" '
-exec='dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 C "Cantata :8080" N "Ncmpcpp | Rigelian(iOS)" '$MENU''
-client=$(eval $exec)|| exit 1
+# ==============================================================================
+# 第一步：選擇 MPD 用戶端
+# ==============================================================================
+client_menu=(
+    N "Ncmpcpp | Rigelian(iOS)"
+    C "Cantata :8080"
+)
+pacman -Q mympd >/dev/null 2>&1      && client_menu+=(M "myMPD :80")
+pacman -Q rompr >/dev/null 2>&1      && client_menu+=(R "RompR :6660")
+pacman -Q mpd-stream >/dev/null 2>&1 && client_menu+=(U "Multi user")
+
+client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 "${client_menu[@]}") || exit 1
 clear
+
 case $client in
     R)
+        # RompR (Web Client on port 6660)
         rm -f /etc/nginx/sites-enabled/cantata
         ln -sf /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
         pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd
@@ -54,17 +101,26 @@ case $client in
         systemctl enable nginx && systemctl restart nginx
         ;;
     M)
-        pacman -Q mympd >/dev/null 2>&1 || (pacman -Sy --noconfirm archlinux-keyring mympd; yes | pacman -Scc >/dev/null 2>&1)
+        # myMPD (Web Client on port 80)
+        pacman -Q mympd >/dev/null 2>&1 || {
+            pacman -Sy --noconfirm archlinux-keyring mympd
+            yes | pacman -Scc >/dev/null 2>&1
+        }
         pacman -Q nginx >/dev/null 2>&1 && systemctl disable --now nginx php-fpm
         systemctl enable --now mpd mympd avahi-daemon
         ;;
     N)
-        pacman -Q ncmpcpp >/dev/null 2>&1 || (pacman -Sy --noconfirm archlinux-keyring ncmpcpp; yes | pacman -Scc >/dev/null 2>&1)
+        # Ncmpcpp / Rigelian (Terminal / iOS MPD client)
+        pacman -Q ncmpcpp >/dev/null 2>&1 || {
+            pacman -Sy --noconfirm archlinux-keyring ncmpcpp
+            yes | pacman -Scc >/dev/null 2>&1
+        }
         pacman -Q nginx >/dev/null 2>&1 && systemctl disable --now nginx php-fpm avahi-daemon
         pacman -Q mympd >/dev/null 2>&1 && systemctl disable --now mympd avahi-daemon
         systemctl enable --now mpd
         ;;
-    C)  
+    C)
+        # Cantata (Web Client on port 8080)
         rm -f /etc/nginx/sites-enabled/rompr
         ln -sf /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
         pacman -Q php-fpm >/dev/null 2>&1 && systemctl disable --now php-fpm avahi-daemon
@@ -73,128 +129,155 @@ case $client in
         systemctl enable nginx && systemctl restart nginx
         ;;
     U)
-        # Httpd stream multi user
-        new=$(ls /etc/systemd/system/multi-user.target.wants/ | grep 'mpd-proxy@' | grep -oP '(?<=@)[0-9]+' |
+        # Multi-user (透過 mpd-proxy 分配多組 MPD 控制與串流連接埠)
+        new=$(ls /etc/systemd/system/multi-user.target.wants/ 2>/dev/null | grep 'mpd-proxy@' | grep -oP '(?<=@)[0-9]+' |
             awk 'BEGIN{max=0} {if($1>max) max=$1} END{print max+1}')
-        port=800${new}
-        proxys=$(ls /etc/systemd/system/multi-user.target.wants/ | grep 'mpd-proxy')
-        ls /etc/systemd/system/multi-user.target.wants/mpd-proxy@*.service >/dev/null 2>&1 && RM='R Remove '
-        exec="dialog --stdout --title 'ArchQ MPD' --menu 'Multi User' 7 0 0 A Add $RM"
-        WK=$(eval $exec)|| exit 1
-        case $WK in
-            A)
-                user=$(dialog --stdout --title "ArchQ MPD User" --inputbox "Add user name" 0 25) || exit 1; clear
+        new=${new:-1}
+        port="800${new}"
 
-                cp /etc/mpd.d/httpd.out /etc/mpd.d/${port}.out
-                sed -i 's/mp3/'"$port"'/;s/port.*"/port\t"'"$port"'"/' /etc/mpd.d/${port}.out
-                grep -q ${port} $config || echo "include_optional \"mpd.d/${port}.out\"" >>$config
-                systemctl enable --now mpd-proxy@${new}${user}
-                echo "$user's MPD control port: 660$new; Stream port: $port"
-                ;;
-            R)
-                MENU=''
-                while read user; do
-                    MENU+=" \"$user\" \"\""
-                done <<< $(ls /etc/systemd/system/multi-user.target.wants/ | grep '^mpd-proxy@.*\.service$' | grep -oP '(?<=@).*(?=\.service)')
-                if ! [ $user == '' ]; then
-                    exec="dialog --stdout --title 'ArchQ MPD User' --menu 'Select user to remove' 7 0 0 $MENU"
-                    user=$(eval $exec)|| exit 1
-                    sed -i "/800${user:0:1}/d" $config
-                    systemctl disable --now mpd-proxy@${user}
-                    echo "MPD User ${user:1} is removed."
+        mu_menu=(A "Add")
+        ls /etc/systemd/system/multi-user.target.wants/mpd-proxy@*.service >/dev/null 2>&1 && mu_menu+=(R "Remove")
+
+        wk=$(dialog --stdout --title "ArchQ MPD" --menu "Multi User" 7 0 0 "${mu_menu[@]}") || exit 1
+        clear
+
+        case $wk in
+            A)
+                # 新增使用者並建立專屬串流設定檔
+                user_name=$(dialog --stdout --title "ArchQ MPD User" --inputbox "Add user name" 0 25) || exit 1
+                clear
+                if [ -n "$user_name" ]; then
+                    cp /etc/mpd.d/httpd.out "/etc/mpd.d/${port}.out"
+                    sed -i "s/mp3/$port/;s/port.*\"/port\t\"$port\"/" "/etc/mpd.d/${port}.out"
+                    grep -q "${port}" "$config" || echo "include_optional \"mpd.d/${port}.out\"" >> "$config"
+                    systemctl enable --now "mpd-proxy@${new}${user_name}"
+                    echo "$user_name's MPD control port: 660$new; Stream port: $port"
                 fi
                 ;;
-            esac
+            R)
+                # 移除既有使用者
+                users=()
+                while read -r u; do
+                    [ -n "$u" ] && users+=("$u" "")
+                done <<< $(ls /etc/systemd/system/multi-user.target.wants/ 2>/dev/null | grep '^mpd-proxy@.*\.service$' | grep -oP '(?<=@).*(?=\.service)')
+
+                if [ ${#users[@]} -gt 0 ]; then
+                    rm_user=$(dialog --stdout --title "ArchQ MPD User" --menu "Select user to remove" 7 0 0 "${users[@]}") || exit 1
+                    clear
+                    sed -i "/800${rm_user:0:1}/d" "$config"
+                    systemctl disable --now "mpd-proxy@${rm_user}"
+                    rm -f "/etc/mpd.d/800${rm_user:0:1}.out"
+                    echo "MPD User ${rm_user:1} is removed."
+                else
+                    dialog --stdout --title "ArchQ MPD User" --msgbox "No multi-user to remove." 7 30
+                fi
+                ;;
+        esac
         exit 0
         ;;
-        
 esac
 
-# ### Select sound device
-# if [ ! $(aplay -L | grep ':') ]; then
-#     dialog --title "ArchQ MPD $1" --msgbox "No Sound Device" 7 30
-# else
-#     devs='hw:0,0 　 '
-#     while read line; do
-#         devs+=${line}' 　 '
-#     done <<< $(aplay -L | grep ':')
+# ==============================================================================
+# 第二步：選取額外音訊輸出 (Multi-room, Http Stream, Multi-player)
+# ==============================================================================
+m0=off; h0=off
+grep -E '^[[:space:]]*include_optional[[:space:]]+"mpd.d/owntone.out"' "$config" >/dev/null 2>&1 && m0=on
+grep -E '^[[:space:]]*include_optional[[:space:]]+"mpd.d/httpd.out"' "$config" >/dev/null 2>&1 && h0=on
 
-#     device=$(dialog --stdout \
-#             --title "ArchQ MPD $1" \
-#             --menu "Ouput device" 7 0 0 ${devs}) || exit 1; clear
-#     sed -i 's/^#\?.* \?\tdevice.*"/\tdevice\t'"\"$device\""'/' $config
-# fi
-
-### ALSA ###
-## Volume Control
-# vol_ctrl ALSA $config
-
-### Include audio output & Dop
-m0=off; h0=off; d0=off
-m1=off; h1=off; d1=off
-cat $config | grep owntone | grep -q '#' || m0=on
-cat $config | grep httpd | grep -q '#' || h0=on
-cat $config | grep -q "#[[:space:]]dop" || d0=on
-MENU=''
-if [ $client = M ]; then
-    cat $config | grep 'mtp_' | grep -q '^i' && p0=on || p0=off
-    p1=off
-    MENU="P Multi-player $p0 "
+output_menu=()
+if [ "$client" = "M" ]; then
+    p0=off
+    grep -E '^[[:space:]]*include_optional[[:space:]]+"mpd.d/mtp_' "$config" >/dev/null 2>&1 && p0=on
+    output_menu+=(P "Multi-player" "$p0")
 fi
-pacman -Q mpd-ul >/dev/null 2>&1 || pacman -Q mpd-wav >/dev/null 2>&1 || MENU+='M Multi-room '$m0' H "Http Stream:9000" '$h0' '
-exec='dialog --stdout --title "ArchQ MPD" --checklist "Output method" 7 0 0 '$MENU'D "DSD over PCM" '$d0
-output=$(eval $exec) || exit 1; clear
 
-[[ $output =~ M ]] && m1=on
-[[ $output =~ P ]] && p1=on
-[[ $output =~ H ]] && h1=on
-[[ $output =~ D ]] && d1=on
-## Airplay multi room on/off
-if [[ $m1 == on ]]; then
-    [[ -d /var/lib/mpd/fifo ]] || install -o mpd -g mpd -m 755 -d /var/lib/mpd/fifo
-    sed -i 's/^#.\?include_optional "mpd.d\/owntone.out"/include_optional "mpd.d\/owntone.out"/' $config
+# 精簡版套件 (flcnet/pcmnet/qbznet/dsdnet/ul/wav/qobuz) 移除 fifo/httpd，不提供 Multi-room 與 Http Stream
+if ! pacman -Q mpd-flcnet >/dev/null 2>&1 && ! pacman -Q mpd-pcmnet >/dev/null 2>&1 && \
+   ! pacman -Q mpd-qbznet >/dev/null 2>&1 && ! pacman -Q mpd-dsdnet >/dev/null 2>&1 && \
+   ! pacman -Q mpd-ul >/dev/null 2>&1 && ! pacman -Q mpd-wav >/dev/null 2>&1 && \
+   ! pacman -Q mpd-qobuz >/dev/null 2>&1; then
+    output_menu+=(M "Multi-room" "$m0" H "Http Stream:9000" "$h0")
+fi
+
+m1=off; p1=off; h1=off
+if [ ${#output_menu[@]} -gt 0 ]; then
+    selected_outputs=$(dialog --stdout --title "ArchQ MPD" --checklist "Output method" 7 0 0 "${output_menu[@]}") || exit 1
+    clear
+
+    [[ "$selected_outputs" =~ "M" ]] && m1=on
+    [[ "$selected_outputs" =~ "P" ]] && p1=on
+    [[ "$selected_outputs" =~ "H" ]] && h1=on
+fi
+
+# ------------------------------------------------------------------------------
+# 2-1. AirPlay Multi-room (Owntone FIFO 輸出)
+# ------------------------------------------------------------------------------
+if [ "$m1" = "on" ]; then
+    [ -d /var/lib/mpd/fifo ] || install -o mpd -g mpd -m 755 -d /var/lib/mpd/fifo
+    set_include "mpd.d/owntone.out" on
     systemctl enable --now avahi-daemon.socket owntone
-    # systemctl --user --now -M $user@ enable pipewire pipewire-pulse sinkdef
 else
-    sed -i 's/^include_optional "mpd.d\/owntone.out"/#include_optional "mpd.d\/owntone.out"/' $config
-    systemctl  disable --now owntone avahi-daemon.socket
+    set_include "mpd.d/owntone.out" off
+    systemctl disable --now owntone avahi-daemon.socket
 fi
 
-if [[ $p1 == on ]]; then
+# ------------------------------------------------------------------------------
+# 2-2. Multi-player 多分區輸出 (需支援 partition 的 mpd-stream 套件)
+# ------------------------------------------------------------------------------
+if [ "$p1" = "on" ]; then
     if ! pacman -Q mpd-stream >/dev/null 2>&1; then
+        wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-stream-0.23.18-4-x86_64.pkg.tar.zst || \
         wget -qP /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-stream-0.23.14-12-x86_64.pkg.tar.zst
-        pacman -U --noconfirm /tmp/*.pkg.tar.zst
+        pacman -U --noconfirm /tmp/mpd-stream-*.pkg.tar.zst
     fi
-    sed -i 's/^#.\?include_optional "mpd.d\/mtp_/include_optional "mpd.d\/mtp_/' $config
-    options=$(dialog --stdout --title "ArchQ MPD" --menu "Player(Partition)" 7 0 0 \
-        B Browse A Add R Remove ) || exit 1; clear
-    case $options in
-    B)
-        brow_mtp
-        ;;
-    A)
-        mtp_name=$(dialog --stdout --title "ArchQ" --inputbox "Add player(partition)" 0 0) || exit 1; clear
-        mtp_file="/etc/mpd.d/mtp_${mtp_name@u}.out"
-echo "include_optional \"mpd.d/mtp_${mtp_name@u}.out\"" >>$config
-# echo 'partition {'                      >$mtp_file
-# echo '	name	"'${mtp_name@u}'"'    >>$mtp_file
-# echo '}'                                >>$mtp_file
-echo 'audio_output {'                   >$mtp_file
-echo '	type	"fifo"'                 >>$mtp_file
-echo '	name	"'${mtp_name@u}'"'      >>$mtp_file
-echo '	path	"/var/lib/mpd/'${mtp_name@u}'/air"' >>$mtp_file
-echo '	format	"44100:16:2"'           >>$mtp_file
-echo '}'                                >>$mtp_file
+    sed -i 's/^[[:space:]]*#\?[[:space:]]*include_optional "mpd.d\/mtp_/include_optional "mpd.d\/mtp_/' "$config"
 
-    [[ -d /var/lib/mpd/${mtp_name@u} ]] || install -o mpd -g mpd -m 755 -d /var/lib/mpd/${mtp_name@u}
-    ln -s "/etc/systemd/system/owntone@.service" "/etc/systemd/system/owntone@${mtp_name@u}"
-    ot_conf=/etc/owntone-${mtp_name@u}.conf
-    ports=$(cat /etc/owntone-*.conf | grep port | cut -d ' ' -f 3)
-    max=3689
-    for n in ${ports[@]}; do
-        [[ $n > $max ]] && max=$n
-    done
-    cat >$ot_conf <<EOF
+    mtp_choice=$(dialog --stdout --title "ArchQ MPD" --menu "Player(Partition)" 7 0 0 \
+        B "Browse" A "Add" R "Remove") || exit 1
+    clear
+
+    case $mtp_choice in
+        B)
+            brow_mtp
+            ;;
+        A)
+            # 新增分區輸出與對應的 Owntone 獨立服務
+            mtp_name=$(dialog --stdout --title "ArchQ" --inputbox "Add player(partition)" 0 0) || exit 1
+            clear
+            if [ -n "$mtp_name" ]; then
+                name_u="${mtp_name@u}"
+                mtp_file="/etc/mpd.d/mtp_${name_u}.out"
+                echo "include_optional \"mpd.d/mtp_${name_u}.out\"" >> "$config"
+
+                cat > "$mtp_file" <<EOF
+audio_output {
+	type	"fifo"
+	name	"${name_u}"
+	path	"/var/lib/mpd/${name_u}/air"
+	format	"44100:16:2"
+}
+EOF
+                [ -d "/var/lib/mpd/${name_u}" ] || install -o mpd -g mpd -m 755 -d "/var/lib/mpd/${name_u}"
+
+                # 確保 instantiated service 範本存在
+                if [ ! -f /etc/systemd/system/owntone@.service ] && [ -f /usr/lib/systemd/system/owntone.service ]; then
+                    sed 's|ExecStart=/usr/bin/owntone -f|ExecStart=/usr/bin/owntone -f -c /etc/owntone-%i.conf|' \
+                        /usr/lib/systemd/system/owntone.service > /etc/systemd/system/owntone@.service
+                    systemctl daemon-reload
+                fi
+                ln -sf "/etc/systemd/system/owntone@.service" "/etc/systemd/system/owntone@${name_u}.service"
+
+                # 搜尋現有 Owntone 設定檔以遞增 port
+                max_port=3689
+                for f in /etc/owntone-*.conf; do
+                    [ -f "$f" ] || continue
+                    p=$(grep -E '^[[:space:]]*port[[:space:]]+' "$f" | awk '{print $3}')
+                    if [[ "$p" =~ ^[0-9]+$ ]] && (( p > max_port )); then
+                        max_port=$p
+                    fi
+                done
+
+                cat > "/etc/owntone-${name_u}.conf" <<EOF
 general {
 	uid = "owntone"
 	loglevel = fatal
@@ -205,91 +288,132 @@ general {
 }
 
 library {
+	port = $((max_port + 1))
+	directories = { "/var/lib/mpd/${name_u}" }
+	follow_symlinks = false
+}
 EOF
-echo '	port = '$((max+1))          >>$ot_conf
-echo '	directories = { "/var/lib/mpd/'${mtp_name@u}'" }' >>$ot_conf
-echo '	follow_symlinks = false'    >>$ot_conf
-echo '}'                            >>$ot_conf
+                brow_mtp
+                systemctl enable --now avahi-daemon.socket "owntone@${name_u}"
+            fi
+            ;;
+        R)
+            # 移除指定分區輸出
+            del_menu=()
+            while read -r line; do
+                [ -n "$line" ] && del_menu+=("$line" "")
+            done <<< $(grep -oP '(?<=mtp_)[^.]+(?=\.out)' "$config" 2>/dev/null)
 
-    brow_mtp
-    systemctl enable --now avahi-daemon.socket owntone@${mtp_name@u}
-        ;;
-    R)
-        MENU=''
-        while read line; do
-            MENU=${MENU}${line}' 　 '
-        done <<< $(cat $config | grep mtp_ | cut -d '_' -f 3 | cut -d '.' -f1)
-        options=$(dialog --stdout --title "ArchQ MPD" --menu "Remove player(partition)" 7 0 0 $MENU ) || exit 1; clear
-        systemctl disable --now owntone@${options}
-        sed -i '/mtp_'"$options"'/d' $config
-        rm -f "/etc/mpd.d/mtp_${options}.out" "/etc/owntone-${options}.conf" "/etc/systemd/system/owntone@${options}"
-        brow_mtp
-        ;;
+            if [ ${#del_menu[@]} -gt 0 ]; then
+                rm_target=$(dialog --stdout --title "ArchQ MPD" --menu "Remove player(partition)" 7 0 0 "${del_menu[@]}") || exit 1
+                clear
+                systemctl disable --now "owntone@${rm_target}"
+                sed -i "/mtp_${rm_target}/d" "$config"
+                rm -f "/etc/mpd.d/mtp_${rm_target}.out" "/etc/owntone-${rm_target}.conf" \
+                      "/etc/systemd/system/owntone@${rm_target}.service" "/etc/systemd/system/owntone@${rm_target}"
+                brow_mtp
+            else
+                dialog --stdout --title "ArchQ MPD" --msgbox "No player to remove." 7 30
+            fi
+            ;;
     esac
-
 fi
-## Httpd stream output on/off
-if [[ $h1 == on ]]; then
+
+# ------------------------------------------------------------------------------
+# 2-3. Httpd stream 輸出與編碼器設定 (Stream.mp3 / Stream.flac)
+# ------------------------------------------------------------------------------
+if [ "$h1" = "on" ]; then
     ht_conf='/etc/mpd.d/httpd.out'
-    sed -i 's/^#.\?include_optional "mpd.d\/httpd.out"/include_optional "mpd.d\/httpd.out"/' $config
+    set_include "mpd.d/httpd.out" on
+
     http_flac=off; http_wave=off; http_lame=off
-    declare http_$(cat $ht_conf | grep 'encoder' | cut -d'"' -f2)=on
-    pacman -Q mpd-ffmpeg || pacman -Q mpd-stream && MENU=' mp3 　 '$http_lame' flac 　 '$http_flac' wave 　 '$http_wave
-    encoder=$(dialog --stdout --title "ArchQ MPD" --radiolist "Http:9000 codec" 7 0 0 $MENU) || exit 1
+    if [ -f "$ht_conf" ]; then
+        enc=$(grep -E '^[[:space:]]*encoder[[:space:]]+' "$ht_conf" | cut -d'"' -f2)
+        case "$enc" in
+            lame|mp3) http_lame=on ;;
+            wave)     http_wave=on ;;
+            *)        http_flac=on ;;
+        esac
+    else
+        http_flac=on
+    fi
+
+    # 依套件支援之編碼器動態組合選單
+    codec_menu=()
+    if pacman -Q mpd-ffmpeg >/dev/null 2>&1 || pacman -Q mpd-stream >/dev/null 2>&1; then
+        codec_menu=(mp3 "　" "$http_lame" flac "　" "$http_flac" wave "　" "$http_wave")
+    elif pacman -Q mpd-radio >/dev/null 2>&1 || pacman -Q mpd-sam >/dev/null 2>&1; then
+        codec_menu=(mp3 "　" "$http_lame" flac "　" "$http_flac")
+    elif pacman -Q mpd-light >/dev/null 2>&1; then
+        codec_menu=(flac "　" "on")
+    else
+        codec_menu=(mp3 "　" "$http_lame" flac "　" "$http_flac")
+    fi
+
+    encoder=$(dialog --stdout --title "ArchQ MPD" --radiolist "Http:9000 codec" 7 0 0 "${codec_menu[@]}") || exit 1
     clear
-    sed -i 's/name.*"/name\t"'"Stream.$encoder"'"/' $ht_conf
-    [[ $encoder == 'mp3' ]] && encoder=lame
-    sed -i 's/encoder.*"/encoder\t"'"$encoder"'"/' $ht_conf
-else   
-    sed -i 's/^include_optional "mpd.d\/httpd.out"/#include_optional "mpd.d\/httpd.out"/' $config
+
+    if [ -f "$ht_conf" ]; then
+        sed -i "s/^[[:space:]]*name[[:space:]]\+\"[^\"]*\"/\tname\t\t\"Stream.$encoder\"/" "$ht_conf"
+        [ "$encoder" = "mp3" ] && encoder="lame"
+        sed -i "s/^[[:space:]]*encoder[[:space:]]\+\"[^\"]*\"/\tencoder\t\t\"$encoder\"/" "$ht_conf"
+    fi
+else
+    set_include "mpd.d/httpd.out" off
 fi
-## Dop on/off
-[[ $d1 == on ]] && sed -i 's/^#.\?dop.*/\tdop\t"yes"/;s/dsd64:.* /dsd64:*=dop /;s/dsd128:.*"/dsd128:*=dop"/' $config \
-                || sed -i 's/^[[:space:]]dop.*/#\tdop\t"yes"/;s/=dop//g' $config
 
-### Buffer, bitDepth, Upsampling, & Music Directory 
-mdir=$(grep 'music_directory' $config | cut -d'"' -f2 | cut -d'/' -f3-)
-buffer=$(grep 'audio_buffer_size' $config | cut -d'"' -f2 | cut -d'/' -f3-)
-# pertime=$(grep 'period_time' $config | cut -d'"' -f2 | cut -d'/' -f3-)
-sqzlip=$(grep 'ip' $config | cut -d'"' -f2 | cut -d'/' -f3-)
-# bitdepth=$(grep -P '\tallowed_formats' $config | awk '{print $2}' | cut -d':' -f2)
-# sampling=$(grep 'upsampling_two_multiple' $config | cut -d'"' -f2)
+# ==============================================================================
+# 第三步：設定緩衝區 (audio_buffer_size)、接收端 IP (host)、音樂目錄 (music_directory)
+# ==============================================================================
+mdir=$(grep -E '^[[:space:]]*music_directory[[:space:]]+' "$config" | cut -d'"' -f2)
+mdir=${mdir#/mnt/}
+mdir=${mdir#/}
+mdir=${mdir:-music}
 
-options=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Buffer & Music directory" 0 40 0 \
-    "Audio Buffer >=128"        1 1 $buffer   1 25 40 0 \
-    "Squeezelite IP"            2 1 $sqzlip   2 25 40 0 \
-    "Music Dir          /mnt/"  3 1 "$mdir"   3 25 40 0 ) || exit 1; clear
-    
-buffer=$(echo $options | awk '//{print $1 }')
-sqzlip=$(echo $options | awk '//{print $2 }')
-mdir=$(echo $options | awk '//{print $3}' | sed 's"/"\\\/"g')
-# pertime=$(echo $options | awk '//{print $2 }')
-# buftime=$(($pertime * 6))
-# bitdepth=$(echo $options | awk '//{print $3 }')
-# sampling=$(echo $options | awk '//{print $4 }')
+buffer=$(grep -E '^[[:space:]]*audio_buffer_size[[:space:]]+' "$config" | cut -d'"' -f2)
+buffer=${buffer:-2048}
 
-## Set ramdisk
-# rd_GB=$(echo $options | awk '//{print $3 }')
-# if [ $rd_GB = '0' ]; then
-#     rm -f /var/lib/mpd/playlists/RAMDISK.m3u
-# else
-#     touch /tmp/RAMDISK.m3u
-#     install -Dm 644 -o mpd -g mpd /tmp/RAMDISK.m3u -t /var/lib/mpd/playlists/
-# fi
-# if [ -f /usr/bin/mpd-rdcheck.sh ]; then
-#     ramdisk=$(python -c "print(int($rd_GB*1048576))")
-#     sed -i 's/rdsize=.*/rdsize='"$ramdisk"'/' /usr/bin/mpd-rdcheck.sh
-# fi
-sed -i 's/^#\?audio_buffer_size.*"/audio_buffer_size\t"'"$buffer"'"/' $config
-# sed -i 's/^#\?.* \?\tbuffer_time.*"/\tbuffer_time\t"'"$buftime"'"/;s/^#\?.* \?\tperiod_time.*"/\tperiod_time\t"'"$pertime"'"/' $config
-# sed -i 's/^#\?.allowed_formats .*"*:..:/\tallowed_formats "*:'"$bitdepth"':/' $config
-# sed -i 's/^#\?.upsampling_two_multiple.*"/\tupsampling_two_multiple\t"'"$sampling"'"/' $config
-sed -i 's/^#\?.ip.*"/\tip\t\t"'"$sqzlip"'"/' $config
-sed -i 's/^#\?music_directory.*"/music_directory\t"\/mnt\/'"$mdir"'"/' $config
+pcmrecvip=$(grep -E '^[[:space:]]*host[[:space:]]+' "$config" | cut -d'"' -f2)
+[ -z "$pcmrecvip" ] && pcmrecvip=$(grep -E '^[[:space:]]*ip[[:space:]]+' "$config" | cut -d'"' -f2)
+pcmrecvip=${pcmrecvip:-127.0.0.1}
 
-### Blissify scan music directory as mpd
-[[ -f /etc/blissify.conf ]] && sed -i 's/"mpd_base_path": ".*/"mpd_base_path": "'"$mdir"'"/' /etc/blissify.conf
+form_res=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Buffer & Music directory" 0 40 0 \
+    "Audio Buffer >=128" 1 1 "$buffer"    1 25 40 0 \
+    "Pcmrecv IP"         2 1 "$pcmrecvip" 2 25 40 0 \
+    "Music Dir     /mnt/" 3 1 "$mdir"     3 25 40 0) || exit 1
+clear
 
-### Restart MPD
+# 逐行讀取表單結果，防範空欄位位移
+{
+    read -r buffer
+    read -r pcmrecvip
+    read -r mdir
+} <<< "$form_res"
+
+buffer=${buffer:-2048}
+pcmrecvip=${pcmrecvip:-127.0.0.1}
+mdir=${mdir#/mnt/}
+mdir=${mdir#/}
+mdir=${mdir:-music}
+
+# 3-1. 寫入 audio_buffer_size
+sed -i -E "s/^[[:space:]]*#?[[:space:]]*audio_buffer_size[[:space:]]+\"[^\"]*\"/audio_buffer_size\t\"$buffer\"/" "$config"
+
+# 3-2. 寫入 Pcmrecv IP (pcmnet 使用 host，相容舊版 slim 的 ip)
+if grep -q -E '^[[:space:]]*#?[[:space:]]*host[[:space:]]+' "$config"; then
+    sed -i -E "s/^[[:space:]]*#?[[:space:]]*host[[:space:]]+\"[^\"]*\"/    host        \"$pcmrecvip\"/" "$config"
+elif grep -q -E '^[[:space:]]*#?[[:space:]]*ip[[:space:]]+' "$config"; then
+    sed -i -E "s/^[[:space:]]*#?[[:space:]]*ip[[:space:]]+\"[^\"]*\"/\tip\t\t\"$pcmrecvip\"/" "$config"
+fi
+
+# 3-3. 寫入音樂目錄路徑
+sed -i "s|^[[:space:]]*#\?[[:space:]]*music_directory.*|music_directory\t\"/mnt/$mdir\"|" "$config"
+
+# 3-4. 同步更新 Blissify 音樂路徑
+[ -f /etc/blissify.conf ] && sed -i "s/\"mpd_base_path\": \".*\"/\"mpd_base_path\": \"$mdir\"/" /etc/blissify.conf
+
+# ==============================================================================
+# 第四步：重啟 MPD 服務
+# ==============================================================================
 systemctl restart mpd
 echo "MPD is configured and restarted."
