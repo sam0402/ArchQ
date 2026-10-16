@@ -33,22 +33,21 @@ case $server in
         case "$server" in
             MPD)
                 opts=(
-                mW "Wav: PCM, WAV, AIFF only; best SQ" off
                 mU "Ultra: PCM, FLAC only; higher SQ" off
                 mI "Light: PCM, CD; Radio: FLAC, MP3" on
                 mD "DSD: PCM, DSD; Radio: FLAC" off
-                mR "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off
-                mS "Stream: PCM; Radio: FLAC AAC" off
-                mM "MPEG: All features of the above; +AAC, ALAC" off
                 )
                 player=S
             ;;
             MPD-Net)
                 opts=(
-                mP "PCM: WAV, AIFF only; HiSQ" on \
-                mF "+Flac: PCM, CD; Radio: FLAC, MP3" off \
-                mX "+DSD: PCM, DSD; Radio: FLAC" off \
-                mQ "Qobuz: PCM, FLAC only; Radio: FLAC" off \
+                mP "PCM: WAV, AIFF only; HiSQ" on
+                mF "+Flac; Radio: FLAC, MP3" off
+                mX "+DSD; Radio: FLAC" off
+                mQ "Qobuz: PCM, FLAC only; Radio: FLAC" off
+                mR "Radio: +AAC OPUS; Output: +Slim" off
+                mS "Stream: Radio: FLAC AAC; Output: +Slim, Http" off
+                mM "MPEG: All +AAC, ALAC; Output: +Slim, Http" off
                 )
                 player=P
             ;;
