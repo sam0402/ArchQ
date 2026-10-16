@@ -338,9 +338,9 @@ pcmrecvip=$(grep -E '^[[:space:]]*host[[:space:]]+' "$config" | cut -d'"' -f2)
 pcmrecvip=${pcmrecvip:-127.0.0.1}
 
 form_res=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Buffer & Music directory" 0 40 0 \
-    "Audio Buffer >=128" 1 1 "$buffer"    1 25 40 0 \
-    "Pcmrecv IP"         2 1 "$pcmrecvip" 2 25 40 0 \
-    "Music Dir     /mnt/" 3 1 "$mdir"     3 25 40 0) || exit 1
+    "Audio Buffer >=128" 1 1 "$buffer"    1 20 40 0 \
+    "Pcmrecv IP"         2 1 "$pcmrecvip" 2 20 40 0 \
+    "Music Dir     /mnt/" 3 1 "$mdir"     3 20 40 0) || exit 1
 clear
 
 # 逐行讀取表單結果，防範空欄位位移
