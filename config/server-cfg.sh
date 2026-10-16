@@ -236,12 +236,13 @@ EOF
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/pcmrecv-0.5-1-x86_64.pkg.tar.zst
                 pacman -U --noconfirm /tmp/pcmrecv-0.5-1-x86_64.pkg.tar.zst
             fi
-            systemctl enable --now pcmrecv; systemctl disable --now squeezelite
+            systemctl enable --now pcmrecv
+            pacman -Q squeezelite >/dev/null 2>&1 && systemctl disable --now squeezelite
         fi
 
         if [[ $player == "S" ]]; then
             systemctl enable --now squeezelite
-            systemctl disable --now pcmrecv
+            pacman -Q pcmrecv >/dev/null 2>&1 && systemctl disable --now pcmrecv
         fi
         server=MPD
         ;;
