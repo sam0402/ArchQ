@@ -90,8 +90,7 @@ player=N
 server=$(dialog --stdout --title "ArchQ" \
         --menu "Please select a music server or player" 7 0 0 \
         LMS "Lyrion Music Server" \
-        MPD "MPD, Rigelian(iOS) | text-based client" \
-        MPD-Net "pcmNet output; text client" \
+        MPD-Net "MPD, Rigelian(iOS) | text-based client" \
         myMPD "MPD & myMPD web-based client" \
         Roon "Roon Server" \
         HQPE5 "HQPlayer Embedded 5" \
@@ -103,29 +102,21 @@ case $server in
     LMS)
         player=$(dialog --stdout --title "ArchQ" --menu "Squeezelite Enable" 7 0 0 S Enable N Disable) || exit 1
         ;;
-    MPD|MPD-Net|myMPD|RompR)
+    MPD-Net|myMPD|RompR)
         case "$server" in
-            MPD)    pfx="m"; player=S ;;
             MPD-Net) pfx="n"; player=P ;;
-            myMPD)  pfx="y"; player=S ;;
-            RompR)  pfx="o"; player=S ;;
+            myMPD)  pfx="y"; player=P ;;
+            RompR)  pfx="o"; player=P ;;
         esac
     if [[ $server == MPD-Net ]]; then
             choice=$(dialog --stdout --title "ArchQ" \
-            --radiolist "Select $server version" 7 0 0 \
-            ${pfx}P "PCM: PCM, AIFF only; HiSQ" on \
-            ${pfx}F "+Flac: PCM, CD; Radio: FLAC, MP3" off \
-            ${pfx}X "+DSD: PCM, DSD; Radio: FLAC" off \
-        ) || exit 1
-    else
-        choice=$(dialog --stdout --title "ArchQ" \
-            --radiolist "Select $server version" 7 0 0 \
-            ${pfx}U "Ultra: PCM, FLAC only; best SQ" off \
-            ${pfx}L "Light: PCM, CD; Radio: FLAC, MP3" on \
-            ${pfx}D "DSD: PCM, DSD; Radio: FLAC" off \
-            ${pfx}R "Radio: PCM; Radio: FLAC MP3 AAC OPUS" off \
-            ${pfx}S "Stream: PCM; Radio: FLAC AAC; http output:9000" off \
-            ${pfx}M "MPEG: All features of the above; +AAC, ALAC" off
+            --radiolist "Select MPD version" 7 0 0 \
+            mP "PCM: WAV, AIFF only; HiSQ" on \
+            mF "+Flac; Radio: FLAC, MP3" off \
+            mX "+DSD; Radio: FLAC" off \
+            mR "Radio: +AAC OPUS; Output: +Slim" off \
+            mS "Stream: Radio: FLAC AAC; Output: +Slim, Http" off \
+            mM "MPEG: All +AAC, ALAC; Output: +Slim, Http" off \
         ) || exit 1
     fi
         server="$choice"
@@ -393,15 +384,12 @@ case $server in
         sed -i 's/exec "$HARDLINK" "$SCRIPT.dll" "$@"/exec nice -n -20 "$HARDLINK" "$SCRIPT.dll" "$@"/g' /mnt/opt/RoonServer/Appliance/RAATServer
         arch-chroot /mnt systemctl enable roonserver
         ;;
-    m?|y?|o?|n?)
+    m?|y?|o?)
         [ $cpus -ge 6 ] && isocpu="rcu_nocbs=$iso_1st "
         case "$server" in
             *P) MPD=pcmnet ;;
             *X) MPD=dsdnet ;;
             *F) MPD=flcnet ;;
-            *U) MPD=ul ;;
-            *D) MPD=dsd; sqver=62 ;;
-            *L) MPD=light ;;
             *R) MPD=radio ;;
             *S) MPD=stream ;;
             *M) MPD=ffmpeg ;;
