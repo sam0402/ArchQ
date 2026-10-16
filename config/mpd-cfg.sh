@@ -91,7 +91,7 @@ client_menu=(
 # client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 "${client_menu[@]}") || exit 1
 # clear
 
-pacman -Q mpd-stream >/dev/null 2>&1 && client=U
+pacman -Q mpd-stream >/dev/null 2>&1 && client=$(dialog --stdout --title "ArchQ MPD" --menu "Setting Multi user?" 7 0 0 N No U Yes) || exit 1
 
 case $client in
     R)
