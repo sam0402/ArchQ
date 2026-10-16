@@ -84,12 +84,14 @@ client_menu=(
     N "Ncmpcpp | Rigelian(iOS)"
     C "Cantata :8080"
 )
-pacman -Q mympd >/dev/null 2>&1      && client_menu+=(M "myMPD :80")
-pacman -Q rompr >/dev/null 2>&1      && client_menu+=(R "RompR :6660")
-pacman -Q mpd-stream >/dev/null 2>&1 && client_menu+=(U "Multi user")
+# pacman -Q mympd >/dev/null 2>&1      && client_menu+=(M "myMPD :80")
+# pacman -Q rompr >/dev/null 2>&1      && client_menu+=(R "RompR :6660")
+# pacman -Q mpd-stream >/dev/null 2>&1 && client_menu+=(U "Multi user")
 
-client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 "${client_menu[@]}") || exit 1
-clear
+# client=$(dialog --stdout --title "ArchQ MPD" --menu "Select MPD client" 7 0 0 "${client_menu[@]}") || exit 1
+# clear
+
+pacman -Q mpd-stream >/dev/null 2>&1 && client=U
 
 case $client in
     R)
