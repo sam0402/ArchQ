@@ -143,7 +143,15 @@ case $WK in
         wget -P /tmp "https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/$pkg"
         pacman -U --noconfirm "/tmp/$pkg"
 
-        dialog --stdout --title "TinyALSA $1" --yesno "The ${t_name[$op]} is up to date. \nRestart Squeezelite to take effect?" 0 0 && systemctl restart squeezelite || exit 0
+        if dialog --stdout --title "TinyALSA $1" \
+            --yesno "The ${t_name[$op]} is up to date.\nRestart audio services to take effect?" 0 0; then
+
+            systemctl is-active --quiet pcmrecv &&
+                systemctl restart pcmrecv
+
+            systemctl is-active --quiet squeezelite &&
+                systemctl restart squeezelite
+        fi
         clear
         ;;
     H)
