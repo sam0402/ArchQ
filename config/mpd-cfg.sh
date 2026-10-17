@@ -323,7 +323,7 @@ else
 fi
 
 # ==============================================================================
-# 第三步：設定緩衝區 (audio_buffer_size)、接收端 IP (host)、音樂目錄 (music_directory)
+# 第三步：設定緩衝區 (audio_buffer_size)、接收端 IP (host)、Bit Depth (format)、音樂目錄 (music_directory)
 # ==============================================================================
 mdir=$(grep -E '^[[:space:]]*music_directory[[:space:]]+' "$config" | cut -d'"' -f2)
 mdir=${mdir#/mnt/}
@@ -337,16 +337,23 @@ pcmrecvip=$(grep -E '^[[:space:]]*host[[:space:]]+' "$config" | cut -d'"' -f2)
 [ -z "$pcmrecvip" ] && pcmrecvip=$(grep -E '^[[:space:]]*ip[[:space:]]+' "$config" | cut -d'"' -f2)
 pcmrecvip=${pcmrecvip:-127.0.0.1}
 
+bitdepth=$(grep -E '^[[:space:]]*format[[:space:]]+' "$config" | cut -d'"' -f2)
+if [[ "$bitdepth" =~ : ]]; then
+    bitdepth=$(echo "$bitdepth" | cut -d':' -f2)
+fi
+
 form_res=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Buffer & Music directory" 0 40 0 \
-    "Audio Buffer >=128" 1 1 "$buffer"    1 20 40 0 \
-    "Pcmrecv IP"         2 1 "$pcmrecvip" 2 20 40 0 \
-    "Music Dir     /mnt/" 3 1 "$mdir"     3 20 40 0) || exit 1
+    "Audio Buffer ≧128 " 1 1 "$buffer"    1 19 40 0 \
+    "Pcmrecv IP"         2 1 "$pcmrecvip" 2 19 40 0 \
+    "Bit Depth"          3 1 "$bitdepth"  3 19 40 0 \
+    "Music Dir    /mnt/" 4 1 "$mdir"      4 19 40 0) || exit 1
 clear
 
 # 逐行讀取表單結果，防範空欄位位移
 {
     read -r buffer
     read -r pcmrecvip
+    read -r bitdepth
     read -r mdir
 } <<< "$form_res"
 
@@ -366,10 +373,25 @@ elif grep -q -E '^[[:space:]]*#?[[:space:]]*ip[[:space:]]+' "$config"; then
     sed -i -E "s/^[[:space:]]*#?[[:space:]]*ip[[:space:]]+\"[^\"]*\"/\tip\t\t\"$pcmrecvip\"/" "$config"
 fi
 
-# 3-3. 寫入音樂目錄路徑
+# 3-3. 寫入 Bit Depth (format，空白為註解)
+if [ -n "$bitdepth" ]; then
+    if [[ "$bitdepth" =~ : ]]; then
+        fmt_val="$bitdepth"
+    else
+        fmt_val="*:${bitdepth}:*"
+    fi
+    if grep -q -E '^[[:space:]]*#?[[:space:]]*format[[:space:]]+' "$config"; then
+        sed -i -E "s|^[[:space:]]*#?[[:space:]]*format[[:space:]]+.*|    format\t\"$fmt_val\"|" "$config"
+    fi
+else
+    # 空白為註解
+    sed -i -E "s|^[[:space:]]*format[[:space:]]+|#    format\t|" "$config"
+fi
+
+# 3-4. 寫入音樂目錄路徑
 sed -i "s|^[[:space:]]*#\?[[:space:]]*music_directory.*|music_directory\t\"/mnt/$mdir\"|" "$config"
 
-# 3-4. 同步更新 Blissify 音樂路徑
+# 3-5. 同步更新 Blissify 音樂路徑
 [ -f /etc/blissify.conf ] && sed -i "s/\"mpd_base_path\": \".*\"/\"mpd_base_path\": \"$mdir\"/" /etc/blissify.conf
 
 # ==============================================================================
