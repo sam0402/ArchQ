@@ -624,6 +624,10 @@ EOF
 cat >/mnt/etc/udev/rules.d/69-hdparm.rules <<EOF
 ACTION=="add|change", KERNEL=="sd[a-z]", ATTRS{queue/rotational}=="1", RUN+="/usr/bin/hdparm -a0 /dev/%k"
 EOF
+# ALSA Audio setting
+cat >/mnt/etc/udev/rules.d/99-alsa-prealloc.rules <<EOF
+ACTION=="add", SUBSYSTEM=="sound", KERNEL=="pcmC0D0p", RUN+="/bin/sh -c 'echo 1024 > /proc/asound/card0/pcm0p/sub0/prealloc'"
+EOF
 # cat >/mnt/etc/udev/rules.d/80-usbsound.rules <<EOF
 # ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="8888", ATTR{idProduct}=="1717", RUN+="/bin/systemctl start shairport-sync.service"
 # EOF
@@ -633,12 +637,6 @@ curl -fsSL https://raw.githubusercontent.com/bb-qq/r8152/master/50-usb-realtek-n
 # USB Affinity
 curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/usb-affinity.service >/mnt/usr/lib/systemd/system/usb-affinity.service
 arch-chroot /mnt systemctl enable usb-affinity
-# ALSA USB Audio setting
-# cat >/mnt/etc/modprobe.d/alsa-base.conf <<EOF
-# options snd-pcm prealloc_size=2048 buffer_time=500 max_alloc_per_card=32768 enable_mmap=1
-# options snd-usb-audio nrpacks=1 implicit_fb=1 use_vmalloc=1
-# options snd slots=snd-usb-audio
-# EOF
 
 ## Patch
 sed -i 's/#Storage=auto/Storage=none/' /mnt/etc/systemd/journald.conf
