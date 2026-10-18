@@ -39,10 +39,11 @@ ifport=$(dialog --stdout --title "ArchQ $1" \
     
 ### Tailscale setup
 if [[ ${ifport} == "Tailscale" ]]; then
-    if ! systemctl is-active tailscaled >/dev/null 2>&1; then
+    if ! systemctl is-active --quiet tailscaled; then
         if ! pacman -Q tailscale >/dev/null 2>&1; then
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/tailscale-$tsver-x86_64.pkg.tar.zst
-            pacman -U --noconfirm /tmp/tailscale-$tsver-x86_64.pkg.tar.zst
+            curl -fL https://archlinux.org/packages/extra/x86_64/tailscale/download/ \
+                -o /tmp/tailscale.pkg.tar.zst || exit 1
+            pacman -U --noconfirm /tmp/tailscale.pkg.tar.zst
             systemctl enable --now tailscaled
             echo -e ${c_gray}
             tailscale up
