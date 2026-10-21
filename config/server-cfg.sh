@@ -44,7 +44,6 @@ case $server in
                 mP "PCM: WAV, AIFF only; HiSQ" off
                 mF "+Flac; Radio: FLAC, MP3" on
                 mX "+DSD; Radio: FLAC" off
-                mQ "Qobuz: PCM, FLAC only; Radio: FLAC" off
                 mR "Radio: +AAC OPUS; Output: +Slim" off
                 mS "Stream: Radio: FLAC AAC; Output: +Slim, Http" off
                 mM "MPEG: All +AAC, ALAC; Output: +Slim, Http" off
