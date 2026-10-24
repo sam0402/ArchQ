@@ -9,12 +9,12 @@ ipaddr=$(ip -o addr | grep en | awk 'NR == 1 {print $4}')
 MENU=''
 [[ "$gitupd" -gt "$num" || -z $num ]] && MENU+='U Update '
 pacman -Q mpd >/dev/null 2>&1 && MENU+='D MPD '
-systemctl is-active --quiet squeezelite && {
+pacman -Q squeezelite >/dev/null 2>&1 && systemctl is-failed --quiet pcmrecv && {
 MENU+='S Squeezelite '
     PCMSQZ=Squeezelite
 }
 
-systemctl is-active --quiet pcmrecv && {
+pacman -Q pcmrecv >/dev/null 2>&1 && systemctl is-failed --quiet squeezelite && {
     MENU+='S Pcmrecv '
     PCMSQZ=Pcmrecv
 }
