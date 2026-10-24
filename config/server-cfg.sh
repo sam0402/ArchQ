@@ -19,7 +19,7 @@ pacman -Q nginx >/dev/null 2>&1 && servs+='nginx '
 pacman -Q php-fpm >/dev/null 2>&1 && servs+='php-fpm '
 
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
-        MPD-Net "Output->Pcmrecv " \
+        MPD-Net "Output->Pcmrecv" \
         LMS "Lyrion Music Server" \
         MPD "Output->Squeezelite" \
         Roon "Roon Server" \
