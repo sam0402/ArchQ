@@ -81,7 +81,7 @@ Squeezelite)
 
     #--- Device selection ---
     SelDevice
-    sed -i "s|^AUDIO_DEV=\"-o .*|AUDIO_DEV=\"-o ${device}\"|" "$CONFIG"
+    cfg_set AUDIO_DEV -o "$device"
 
     #--- Load current settings ---
     NAME=$(cfg_get NAME)
@@ -150,8 +150,7 @@ Pcmrecv)
     CONFIG='/etc/pcmrecv.conf'
     #--- Device selection ---
     SelDevice
-    echo $device
-    sed -i "s|^AUDIO_DEV=\"-o .*|AUDIO_DEV=\"-o ${device}\"|" "$CONFIG"
+    cfg_set AUDIO_DEV -o "$device"
 
     #--- Load current settings ---
 
