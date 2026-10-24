@@ -162,7 +162,7 @@ Pcmrecv)
     PRIORITY=$(cfg_get PRIORITY)
     PRIORITY=${PRIORITY:-95}
     SERVER_IP=$(cfg_get SERVER_IP)
-    SERVER_IP=${SERVER_IP:-127.0.0.1}
+    [[ "$SERVER_IP" != "127.0.0.1" ]] && SERVER_IP="0.0.0.0"
 
     #--- Settings form ---
     mapfile -t opts < <(dialog --stdout \
@@ -176,6 +176,7 @@ Pcmrecv)
     clear
 
     #--- Save settings ---
+    [[ "${opts[2]}" != "127.0.0.1" ]] && opts[2]="0.0.0.0"
     cfg_set ALSA_PARAMS -a "${opts[0]}"
     cfg_set BUFFER      -b "${opts[1]}"
     cfg_set SERVER_IP   -s "${opts[2]}"
