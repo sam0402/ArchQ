@@ -18,10 +18,21 @@ pacman -Q mympd >/dev/null 2>&1 && servs+='mympd '
 pacman -Q nginx >/dev/null 2>&1 && servs+='nginx '
 pacman -Q php-fpm >/dev/null 2>&1 && servs+='php-fpm '
 
+set_mimalloc() {
+    awk '/^HugePages_Total:/ {exit !($2 >= 512)}' /proc/meminfo && {
+        sed -i \
+            -e '/^\[Service\]$/a Environment="MIMALLOC_ALLOW_LARGE_OS_PAGES=1"\nEnvironment="MIMALLOC_EAGER_COMMIT_DELAY=0"' \
+            -e 's|^ExecStart=/usr/bin/pagecache-management\.sh |ExecStart=|' \
+            -e 's|^ExecStart=|ExecStart=/usr/bin/env LD_PRELOAD=/usr/lib/libmimalloc.so.3.5 |' \
+            "$1"
+        [[ "$1" =~ lyrionmusicserver ]] || sed -i 's/^User=.*/User=root/' "$1"
+    }
+}
+
 server=$(dialog --stdout --title "ArchQ $1" --menu "Select music server" 7 0 0 \
-        MPD-Net "Output->Pcmrecv" \
+        MPD-Net "pcmNet output" \
         LMS "Lyrion Music Server" \
-        MPD "Output->Squeezelite" \
+        MPD "Slim output" \
         Roon "Roon Server" \
         HQPE5 "HQPlayer Embedded 5" \
         HQPE4 "HQPlayer Embedded 4" \
@@ -44,6 +55,7 @@ case $server in
                 mP "PCM: WAV, AIFF only; HiSQ" off
                 mF "+Flac; Radio: FLAC, MP3" on
                 mX "+DSD; Radio: FLAC" off
+                mQ "Qobuz: PCM, FLAC only; Radio: FLAC" off
                 mR "Radio: +AAC OPUS; Output: +Slim" off
                 mS "Stream: Radio: FLAC AAC; Output: +Slim, Http" off
                 mM "MPEG: All +AAC, ALAC; Output: +Slim, Http" off
@@ -57,16 +69,12 @@ case $server in
             "${opts[@]}"
         ) || exit 1; clear
 
-        ver=${choice:1:1}
-        if [[ $server == MPD ]]; then
-            client=$(dialog --stdout --title "ArchQ" --menu "Select MPD client" 7 0 0 \
-                m "Rigelian(iOS) | text-based client" \
-                y "myMPD web-based client" \
-                o "RompR web-based client") || exit 1; clear
-        else
-            client=m
-        fi
-        server="${client}${ver}"
+        client=$(dialog --stdout --title "ArchQ" --menu "Select MPD client" 7 0 0 \
+            m "Rigelian(iOS) | text-based client" \
+            y "myMPD web-based client" \
+            o "RompR web-based client") || exit 1; clear
+
+        server="${client}${choice:1:1}"
         ;;
 esac
 case $server in
@@ -82,11 +90,11 @@ case $server in
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
             pacman -U --noconfirm /tmp/lyrionmusicserver-${lmsver}-x86_64.pkg.tar.xz
             curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/lyrionmusicserver.service >/usr/lib/systemd/system/lyrionmusicserver.service
-            sed -i 's/GRUB_CMDLINE_LINUX=.*/GRUB_CMDLINE_LINUX="'"$isocpu"'"/' /etc/default/grub
-            sed -i 's|ExecStart=|ExecStart=/usr/bin/pagecache-management.sh |' /usr/lib/systemd/system/lyrionmusicserver.service
+            set_mimalloc /usr/lib/systemd/system/lyrionmusicserver.service
         fi
 
         servs=${servs/lyrionmusicserver/}
+        systemctl daemon-reload
         systemctl disable --now $servs
         systemctl enable --now lyrionmusicserver
         
@@ -176,11 +184,7 @@ EOF
                 pacman -R --noconfirm $(pacman -Q mpd | awk '{print $1}')
                 pacman -U --noconfirm /tmp/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
                 sed -i 's/album,title/album,albumartist,title/' /etc/mpd.conf
-                awk '/^HugePages_Total:/ {exit !($2 >= 512)}' /proc/meminfo && sed -i \
-                    -e '/^\[Service\]$/a Environment="MIMALLOC_ALLOW_LARGE_OS_PAGES=1"\nEnvironment="MIMALLOC_EAGER_COMMIT_DELAY=0"' \
-                    -e 's|^ExecStart=/usr/bin/pagecache-management\.sh |ExecStart=|' \
-                    -e 's|^ExecStart=|ExecStart=/usr/bin/env LD_PRELOAD=/usr/lib/libmimalloc.so.3.5 |' \
-                    /usr/lib/systemd/system/mpd.service
+                set_mimalloc /usr/lib/systemd/system/mpd.service
                 systemctl daemon-reload
                 systemctl restart mpd
             fi
@@ -234,12 +238,15 @@ EOF
             if ! pacman -Q pcmrecv >/dev/null 2>&1; then
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/pcmrecv-0.5-1-x86_64.pkg.tar.zst
                 pacman -U --noconfirm /tmp/pcmrecv-0.5-1-x86_64.pkg.tar.zst
+                set_mimalloc /usr/lib/systemd/system/pcmrecv.service
             fi
+            systemctl daemon-reload
             systemctl enable --now pcmrecv
             pacman -Q squeezelite >/dev/null 2>&1 && systemctl disable --now squeezelite
         fi
 
         if [[ $player == "S" ]]; then
+            systemctl daemon-reload
             systemctl enable --now squeezelite
             pacman -Q pcmrecv >/dev/null 2>&1 && systemctl disable --now pcmrecv
         fi
