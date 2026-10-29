@@ -149,7 +149,7 @@ EOF
             *P) MPD=pcmnet ;;
             *F) MPD=flcnet ;;
             *X) MPD=dsdnet ;;
-            *Q) MPD=qobuz ;;
+            *Q) MPD=qbznet ;;
         esac
 
         [[ $MPD == ul || $MPD == light || $MPD == wav || $MPD =~ net ]] || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
