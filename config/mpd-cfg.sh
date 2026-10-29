@@ -4,8 +4,7 @@
 # 功能：
 #   1. 設定 MPD 用戶端 (myMPD, RompR, Cantata, Ncmpcpp, Multi-user)
 #   2. 設定音訊可選輸出 (Multi-room / AirPlay, Multi-player / 分區, Http Stream)
-#   3. 設定音訊緩衝區大小 (audio_buffer_size)
-#   4. 設定 PcmNet 接收端 IP (host) 與音樂目錄路徑 (music_directory)
+#   3. 設定音訊緩衝區大小、接收端 IP、Bit Depth、DoP 與音樂目錄路徑
 # ==============================================================================
 
 config='/etc/mpd.conf'
@@ -323,7 +322,7 @@ else
 fi
 
 # ==============================================================================
-# 第三步：設定緩衝區 (audio_buffer_size)、接收端 IP (host)、Bit Depth (format)、音樂目錄 (music_directory)
+# 第三步：設定緩衝區 (audio_buffer_size)、接收端 IP (host)、Bit Depth (format)、DoP (dop)、音樂目錄 (music_directory)
 # ==============================================================================
 mdir=$(grep -E '^[[:space:]]*music_directory[[:space:]]+' "$config" | cut -d'"' -f2)
 mdir=${mdir#/mnt/}
@@ -342,11 +341,15 @@ if [[ "$bitdepth" =~ : ]]; then
     bitdepth=$(echo "$bitdepth" | cut -d':' -f2)
 fi
 
+dop=$(grep -E '^[[:space:]]*dop[[:space:]]+' "$config" | cut -d'"' -f2)
+[ "$dop" = "false" ] || [ "$dop" = "no" ] && dop=""
+
 form_res=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Buffer & Music directory" 0 40 0 \
     "Audio Buffer ≧128 " 1 1 "$buffer"    1 19 40 0 \
     "Pcmrecv IP"         2 1 "$pcmrecvip" 2 19 40 0 \
     "Bit Depth"          3 1 "$bitdepth"  3 19 40 0 \
-    "Music Dir    /mnt/" 4 1 "$mdir"      4 19 40 0) || exit 1
+    "Dop"                4 1 "$dop"       4 19 40 0 \
+    "Music Dir    /mnt/" 5 1 "$mdir"      5 19 40 0) || exit 1
 clear
 
 # 逐行讀取表單結果，防範空欄位位移
@@ -354,6 +357,7 @@ clear
     read -r buffer
     read -r pcmrecvip
     read -r bitdepth
+    read -r dop
     read -r mdir
 } <<< "$form_res"
 
@@ -388,10 +392,22 @@ else
     sed -i -E "s|^[[:space:]]*format[[:space:]]+|#    format\t|" "$config"
 fi
 
-# 3-4. 寫入音樂目錄路徑
+# 3-4. 寫入 DoP (dop，yes 為開啟，空白或 no 為註解)
+if [[ "$dop" =~ ^[Yy] ]] || [ "$dop" = "true" ] || [ "$dop" = "1" ]; then
+    if grep -q -E '^[[:space:]]*#?[[:space:]]*dop[[:space:]]+' "$config"; then
+        sed -i -E "s|^[[:space:]]*#?[[:space:]]*dop[[:space:]]+.*|    dop\t\t\"yes\"|" "$config"
+    elif grep -q -E '^[[:space:]]*mixer_type' "$config"; then
+        sed -i -E "/^[[:space:]]*mixer_type/a \    dop\t\t\"yes\"" "$config"
+    fi
+else
+    # 空白或 no 為註解
+    sed -i -E "s|^[[:space:]]*dop[[:space:]]+|#    dop\t|" "$config"
+fi
+
+# 3-5. 寫入音樂目錄路徑
 sed -i "s|^[[:space:]]*#\?[[:space:]]*music_directory.*|music_directory\t\"/mnt/$mdir\"|" "$config"
 
-# 3-5. 同步更新 Blissify 音樂路徑
+# 3-6. 同步更新 Blissify 音樂路徑
 [ -f /etc/blissify.conf ] && sed -i "s/\"mpd_base_path\": \".*\"/\"mpd_base_path\": \"$mdir\"/" /etc/blissify.conf
 
 # ==============================================================================
