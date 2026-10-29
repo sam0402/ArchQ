@@ -152,7 +152,7 @@ EOF
             *Q) MPD=qbznet ;;
         esac
 
-        [[ $MPD == ul || $MPD == light || $MPD == wav || $MPD =~ net ]] || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
+        [[ $MPD == ul || $MPD == light || $MPD == pcmnet ]] || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
 
         if ! pacman -Q mpd-${MPD} >/dev/null 2>&1; then
             echo -e "\n${c_blue_b}Install MPD-${MPD} ...${c_gray}\n"
