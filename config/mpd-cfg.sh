@@ -324,6 +324,9 @@ fi
 # ==============================================================================
 # 第三步：設定緩衝區 (audio_buffer_size)、接收端 IP (host)、Bit Depth (format)、DoP (dop)、音樂目錄 (music_directory)
 # ==============================================================================
+support_dsd=0
+mpd -V 2>/dev/null | grep -qiE 'dsdiff|dsf|dsd' && support_dsd=1
+
 mdir=$(grep -E '^[[:space:]]*music_directory[[:space:]]+' "$config" | cut -d'"' -f2)
 mdir=${mdir#/mnt/}
 mdir=${mdir#/}
@@ -341,25 +344,42 @@ if [[ "$bitdepth" =~ : ]]; then
     bitdepth=$(echo "$bitdepth" | cut -d':' -f2)
 fi
 
-dop=$(grep -E '^[[:space:]]*dop[[:space:]]+' "$config" | cut -d'"' -f2)
-[ "$dop" = "false" ] || [ "$dop" = "no" ] && dop=""
+form_fields=(
+    "Audio Buffer ≧128 " 1 1 "$buffer"    1 19 40 0
+    "Pcmrecv IP"         2 1 "$pcmrecvip" 2 19 40 0
+    "Bit Depth"          3 1 "$bitdepth"  3 19 40 0
+)
 
-form_res=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Buffer & Music directory" 0 40 0 \
-    "Audio Buffer ≧128 " 1 1 "$buffer"    1 19 40 0 \
-    "Pcmrecv IP"         2 1 "$pcmrecvip" 2 19 40 0 \
-    "Bit Depth"          3 1 "$bitdepth"  3 19 40 0 \
-    "Dop"                4 1 "$dop"       4 19 40 0 \
-    "Music Dir    /mnt/" 5 1 "$mdir"      5 19 40 0) || exit 1
+row=4
+if [ "$support_dsd" = 1 ]; then
+    dop=$(grep -E '^[[:space:]]*dop[[:space:]]+' "$config" | cut -d'"' -f2)
+    [ "$dop" = "false" ] || [ "$dop" = "no" ] && dop=""
+    form_fields+=("Dop" $row 1 "$dop" $row 19 40 0)
+    ((row++))
+fi
+
+form_fields+=("Music Dir    /mnt/" $row 1 "$mdir" $row 19 40 0)
+
+form_res=$(dialog --stdout --title "ArchQ MPD" --ok-label "Ok" --form "Buffer & Music directory" 0 40 0 "${form_fields[@]}") || exit 1
 clear
 
 # 逐行讀取表單結果，防範空欄位位移
-{
-    read -r buffer
-    read -r pcmrecvip
-    read -r bitdepth
-    read -r dop
-    read -r mdir
-} <<< "$form_res"
+if [ "$support_dsd" = 1 ]; then
+    {
+        read -r buffer
+        read -r pcmrecvip
+        read -r bitdepth
+        read -r dop
+        read -r mdir
+    } <<< "$form_res"
+else
+    {
+        read -r buffer
+        read -r pcmrecvip
+        read -r bitdepth
+        read -r mdir
+    } <<< "$form_res"
+fi
 
 buffer=${buffer:-2048}
 pcmrecvip=${pcmrecvip:-127.0.0.1}
@@ -392,16 +412,18 @@ else
     sed -i -E "s|^[[:space:]]*format[[:space:]]+|#    format\t|" "$config"
 fi
 
-# 3-4. 寫入 DoP (dop，yes 為開啟，空白或 no 為註解)
-if [[ "$dop" =~ ^[Yy] ]] || [ "$dop" = "true" ] || [ "$dop" = "1" ]; then
-    if grep -q -E '^[[:space:]]*#?[[:space:]]*dop[[:space:]]+' "$config"; then
-        sed -i -E "s|^[[:space:]]*#?[[:space:]]*dop[[:space:]]+.*|    dop\t\t\"yes\"|" "$config"
-    elif grep -q -E '^[[:space:]]*mixer_type' "$config"; then
-        sed -i -E "/^[[:space:]]*mixer_type/a \    dop\t\t\"yes\"" "$config"
+# 3-4. 寫入 DoP (僅在支援 DSD 時設定；yes 為開啟，空白或 no 為註解)
+if [ "$support_dsd" = 1 ]; then
+    if [[ "$dop" =~ ^[Yy] ]] || [ "$dop" = "true" ] || [ "$dop" = "1" ]; then
+        if grep -q -E '^[[:space:]]*#?[[:space:]]*dop[[:space:]]+' "$config"; then
+            sed -i -E "s|^[[:space:]]*#?[[:space:]]*dop[[:space:]]+.*|    dop\t\t\"yes\"|" "$config"
+        elif grep -q -E '^[[:space:]]*mixer_type' "$config"; then
+            sed -i -E "/^[[:space:]]*mixer_type/a \    dop\t\t\"yes\"" "$config"
+        fi
+    else
+        # 空白或 no 為註解
+        sed -i -E "s|^[[:space:]]*dop[[:space:]]+|#    dop\t|" "$config"
     fi
-else
-    # 空白或 no 為註解
-    sed -i -E "s|^[[:space:]]*dop[[:space:]]+|#    dop\t|" "$config"
 fi
 
 # 3-5. 寫入音樂目錄路徑
