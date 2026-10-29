@@ -90,12 +90,12 @@ player=N
 server=$(dialog --stdout --title "ArchQ" \
         --menu "Please select a music server or player" 7 0 0 \
         LMS "Lyrion Music Server" \
-        MPD-Net "MPD, Rigelian(iOS) | text-based client" \
+        MPD-Net "MPD, Rigelian(iOS)|text-based client" \
         myMPD "MPD & myMPD web-based client" \
         Roon "Roon Server" \
         HQPE5 "HQPlayer Embedded 5" \
         HQPE4 "HQPlayer Embedded 4" \
-        Player "Airplay | Squeezelite | Roonbridge | HQP NAA" ) || exit 1; clear
+        Player "Pcmrecv|Airplay|Squeezelite|Roonbridge|HQP NAA" ) || exit 1; clear
 #        RompR "MPD & RompR web-based client" \
 
 case $server in
@@ -114,6 +114,7 @@ case $server in
             mP "PCM: WAV, AIFF only; HiSQ" off \
             mF "+Flac; Radio: FLAC, MP3" on \
             mX "+DSD; Radio: FLAC" off \
+            mQ "Qobuz: PCM, FLAC only; Radio: FLAC" off \
             mR "Radio: +AAC OPUS; Output: +Slim" off \
             mS "Stream: Radio: FLAC AAC; Output: +Slim, Http" off \
             mM "MPEG: All +AAC, ALAC; Output: +Slim, Http" off \
@@ -124,8 +125,9 @@ case $server in
     Player)
         player=$(dialog --stdout --title "ArchQ" \
                 --checklist "Select a music player" 7 0 0 \
-                A Airplay off \
+                P Pcmrecv on \
                 S Squeezelite off \
+                A Airplay off \
                 R Roonbridge off \
                 H "HQplayer NAA" off ) || exit 1
         ;;
@@ -390,6 +392,7 @@ case $server in
             *P) MPD=pcmnet ;;
             *X) MPD=dsdnet ;;
             *F) MPD=flcnet ;;
+            *Q) MPD=qbznet ;;
             *R) MPD=radio ;;
             *S) MPD=stream ;;
             *M) MPD=ffmpeg ;;
