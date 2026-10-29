@@ -401,8 +401,8 @@ case $server in
         # pacstrap /mnt fmt libcdio libupnp liburing cdparanoia libcdio-paranoia libcddb libmms libid3tag ncmpcpp mpc python-mpd2 lua
         if ! [[ $MPD == ul || $MPD == light ]]; then
             pacstrap /mnt upmpdcli
-            arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli-1.9.6-1-x86_64.pkg.tar.zst
-            arch-chroot /mnt pacman -U --noconfirm /root/upmpdcli-1.9.6-1-x86_64.pkg.tar.zst
+            arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli-1.10.0-1-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm /root/upmpdcli-1.10.0-1-x86_64.pkg.tar.zst
         fi
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-${MPD}-${mpdver}-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
