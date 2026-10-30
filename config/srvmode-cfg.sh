@@ -3,17 +3,24 @@ config='/etc/srvmode.conf'
 grub_cfg='/boot/grub/grub.cfg'
 [ ! -s "$config" ] && echo "Active=" >$config
 MENU=''; SRV='avahi-daemon mpd.socket '
-pacman -Q mpd >/dev/null 2>&1 && MENU='MPD 　 off ' && SRV+='mpd '
-pacman -Q rompr >/dev/null 2>&1 && MENU='Rompr 　 off '&& SRV+='mpd rompr nginx php-fpm '
-pacman -Q mympd >/dev/null 2>&1 && MENU='MyMPD 　 off ' && SRV+='mpd mympd '
-pacman -Q logitechmusicserver >/dev/null 2>&1 && MENU+='LMS 　 off ' && SRV+='logitechmusicserver '
-pacman -Q squeezelite >/dev/null 2>&1 && MENU+='Squeezelite 　 off ' && SRV+='squeezelite '
-[ -f /usr/lib/systemd/system/roonserver.service ] && MENU+='Roon 　 off ' && SRV+='roonserver '
-[ -f /usr/lib/systemd/system/hqplayerd.service ] && MENU+='HQPlayerd 　 off ' && SRV+='hqplayerd '
-pacman -Q roonbridge >/dev/null 2>&1 && MENU+='Roonbridge 　 off ' && SRV+='roonbridge '
-pacman -Q shairport-sync >/dev/null 2>&1 && MENU+='Airplay 　 off ' && SRV+='nqptp shairport-sync '
-pacman -Q hqplayer-network-audio-daemon >/dev/null 2>&1 && MENU+='"HQPlayer NAA" 　 off ' && SRV+='networkaudio '
-pacman -Q owntone >/dev/null 2>&1 && MENU+='Owntone 　 off ' && SRV+='owntone '
+
+add_srv() {
+    { pacman -Q "$1" || [ -f "/usr/lib/systemd/system/$1.service" ] || [ -f "/usr/lib/systemd/system/${3:-$1}.service" ]; } &>/dev/null && \
+        MENU+="$2 　 off " && SRV+="${3:-$1} "
+}
+
+add_srv pcmrecv Pcmrecv
+add_srv squeezelite Squeezelite
+add_srv mpd MPD
+add_srv rompr Rompr 'mpd nginx php-fpm'
+add_srv mympd MyMPD 'mpd mympd'
+add_srv logitechmusicserver LMS || add_srv lyrionmusicserver LMS
+add_srv roonserver Roon
+add_srv hqplayerd HQPlayerd
+add_srv roonbridge Roonbridge
+add_srv shairport-sync Airplay 'nqptp shairport-sync'
+add_srv hqplayer-network-audio-daemon '"HQPlayer NAA"' networkaudio
+add_srv owntone Owntone
 
 kernel(){
     n=1; kernel=()
@@ -24,22 +31,22 @@ kernel(){
 
     if [ ! $1 ]; then
         for i in ${!kernel[@]}; do
-            $(echo ${kernel[i]} | grep -qv 'fallback') && KMENU+=$i' '${kernel[i]}' '
+            echo "${kernel[i]}" | grep -qv 'fallback' && KMENU+="$i '${kernel[i]}' "
             (( n += 1 ))
         done
-        kerboot=$(dialog --stdout --title "Service mode"  --menu "Boot Kernel" 7 0 0 $KMENU) || exit 1; clear
+        kerboot=$(eval "dialog --stdout --title 'Service mode' --menu 'Boot Kernel' 7 0 0 $KMENU") || exit 1; clear
     fi
 }
 
 disablesrv(){
     for i in $SRV; do
-        [ $(systemctl status $i 2>&1 | grep -c 'active') = 1 ] && systemctl disable $i
+        systemctl is-enabled --quiet $i 2>/dev/null && systemctl disable $i 2>/dev/null
     done
 }
 
 stopsrv(){
     for i in $SRV; do
-        [ $(systemctl status $i 2>&1 | grep -c 'enabled') = 1 ] && systemctl stop $i
+        systemctl is-active --quiet $i 2>/dev/null && systemctl stop $i 2>/dev/null
     done
 }
 
@@ -64,8 +71,10 @@ else
             done <<< $(cat $config | sed '1d')
             exec='dialog --stdout --title "ArchQ $1" --menu "Modify service mode" 7 0 0 '$e_menu
             m_name=$(eval $exec) || exit 1; clear
-            for list in $(grep $m_name $config | awk -F: '{print $2}'); do
-                MENU=$(echo $MENU | sed -e 's/'"$list"' 　 off /'"$list"' 　 on /')
+            saved_opts=$(grep "^$m_name:" $config | awk -F: '{print $2}')
+            eval "set -- $saved_opts"
+            for item in "$@"; do
+                MENU=$(echo "$MENU" | sed -e "s/\"$item\" 　 off /\"$item\" 　 on /; s/$item 　 off /$item 　 on /")
             done
             exec='dialog --stdout --title "'$m_name'" --checklist "Select service" 7 0 0 '$MENU
             options=$(eval $exec) || exit 1; clear
@@ -79,14 +88,15 @@ else
             done <<< $(cat $config | sed '1d')
             exec='dialog --stdout --title "ArchQ $1" --menu "Remove service mode" 7 0 0 '$e_menu
             m_name=$(eval $exec) || exit 1; clear
-            sed -i '/'"$m_name"':/d' $config
+            sed -i '/^'"$m_name"':/d' $config
+            [ "$(head -n 1 $config | awk -F= '{print $2}')" = "$m_name" ] && sed -i '1s/Active=.*/Active=/' $config
             echo "Service mode $m_name remove."
             ;;
         C)
             i=1
             while read line; do
                 e_menu+=$i' '\"$(echo $line | awk -F: '{print $1}')\"' '
-                $((i++))
+                ((i++))
             done <<< $(cat $config | sed '1d')
             exec='dialog --stdout --title "ArchQ $1" --menu "Active service mode" 7 0 0 '$e_menu
             options=$(eval $exec) || exit 1; clear

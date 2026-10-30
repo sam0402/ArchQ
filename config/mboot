@@ -21,6 +21,6 @@ if [ ! $1 ]; then
 fi
 
 sudo sed -i '1s/Active=.*/Active='"${options[$input]}"'/' $config
-qboot=$(cat $config | sed '1d' | grep "${options[$input]}" | awk -F: '{print $3}')
+qboot=$(cat $config | sed '1d' | grep "^${options[$input]}:" | awk -F: '{print $3}')
 echo "ArchQ change to mode '${c_red_b}${options[$input]}'${c_write}."
 sudo qboot $qboot 2>/dev/null
