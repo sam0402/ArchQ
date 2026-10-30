@@ -317,14 +317,16 @@ systemctl stop systemd-journald-dev-log.socket systemd-journald.socket systemd-j
 [[ "\$(uname -r | cut -d- -f3)" = "Qrip" ]] && srvmode-cfg.sh stopsrv
 
 # Mode active
-active=\$(head -n 1 /etc/srvmode.conf | awk -F= '{print \$2}')
-if [ ! \$active == '' ]; then
-    service=\$(grep \$active /etc/srvmode.conf | awk -F: '{print \$2}' | \\
-        sed -e 's/\(.*\)/\L\1/;s/lms/lyrionmusicserver/;s/"hqplayer naa"/naa/;s/owntone/mtroom/;')
-    for i in \$service; do
-        sw \$i >/dev/null 2>&1
-        sleep 0.2
-    done
+if [ -f /etc/srvmode.conf ]; then
+    active=\$(head -n 1 /etc/srvmode.conf | awk -F= '{print \$2}')
+    if [ -n "\$active" ]; then
+        service=\$(grep "^\${active}:" /etc/srvmode.conf | awk -F: '{print \$2}' | \\
+            sed -e 's/"hqplayer naa"/naa/gI; s/hqplayerd/hqe/gI; s/owntone/mtroom/gI; s/"//g' | tr '[:upper:]' '[:lower:]')
+        for i in \$service; do
+            sw \$i >/dev/null 2>&1
+            sleep 0.2
+        done
+    fi
 fi
 
 exit 0
