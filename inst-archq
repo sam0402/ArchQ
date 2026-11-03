@@ -412,7 +412,7 @@ case $server in
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/vmtouch-1.3.1-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/socat-1.7.4.4-1-x86_64.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.10-2-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-mini-1.6-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-1-x86_64.pkg.tar.zst
         # arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libsndfile-1.2.0-3-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
@@ -428,10 +428,10 @@ case $server in
             /mnt/usr/lib/systemd/system/mpd.service
         # dependencies for owntone
         # pacstrap /mnt confuse libev libplist libsodium libuv libwebsockets mxml protobuf protobuf-c
-        arch-chroot /mnt pacman -U --noconfirm /root/vmtouch-1.3.1-1-any.pkg.tar.zst /root/socat-1.7.4.4-1-x86_64.pkg.tar.zst /root/owntone-28.10-2-x86_64.pkg.tar.zst /root/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
+        arch-chroot /mnt pacman -U --noconfirm /root/vmtouch-1.3.1-1-any.pkg.tar.zst /root/socat-1.7.4.4-1-x86_64.pkg.tar.zst /root/owntone-mini-1.6-1-x86_64.pkg.tar.zst /root/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
         arch-chroot /mnt systemctl enable mpd mpd-plugin
-        sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /mnt/etc/systemd/system/owntone.service
-        sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /mnt/etc/systemd/system/owntone\@.service
+        sed -i '/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /mnt/usr/lib/systemd/system/owntone.service
+        # sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /mnt/etc/systemd/system/owntone\@.service
         curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-proxy\@.service >/mnt/etc/systemd/system/mpd-proxy\@.service
         ### Install myMPD
         if [[ $server =~ y. ]]; then
