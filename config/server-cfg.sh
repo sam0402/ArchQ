@@ -140,16 +140,15 @@ EOF
     fi
         case "$server" in
             *U) MPD=ul ;;
-            *W) MPD=wav ;;
             *I) MPD=light ;;
             *D) MPD=dsd ;;
-            *R) MPD=radio ;;
-            *S) MPD=stream ;;
-            *M) MPD=ffmpeg ;;
             *P) MPD=pcmnet ;;
             *F) MPD=flcnet ;;
             *X) MPD=dsdnet ;;
             *Q) MPD=qbznet ;;
+            *R) MPD=radio ;;
+            *S) MPD=stream ;;
+            *M) MPD=ffmpeg ;;
         esac
 
         [[ $MPD == ul || $MPD == light || $MPD == pcmnet ]] || wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/upmpdcli.tar | tar xf - -C /tmp
@@ -161,14 +160,13 @@ EOF
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/vmtouch-1.3.1-1-any.pkg.tar.zst
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/socat-1.7.4.4-1-x86_64.pkg.tar.zst
-                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-28.6-1-x86_64.pkg.tar.zst
+                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-mini-1.6-1-x86_64.pkg.tar.zst
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-1-x86_64.pkg.tar.zst
                 # wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libsndfile-1.2.0-3-x86_64.pkg.tar.zst
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/ffmpeg-2\:5.1.2-12-x86_64.pkg.tar.zst
                 pacman -U --noconfirm /tmp/*.pkg.tar.zst
                 sed -i '58,92d' /usr/bin/mpd-plugin.py
-                sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone.service
-                sed -i 's/daemon.socket/daemon.service/;s/pulseaudio/mpd/;/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /etc/systemd/system/owntone\@.service
+                sed -i '/ExecStart=/i ExecStartPre=systemctl start avahi-daemon' /usr/lib/systemd/system/owntone.service
                 sed -i '$d' /etc/rc.local
                 curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-proxy\@.service >/etc/systemd/system/mpd-proxy\@.service
             fi
