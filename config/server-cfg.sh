@@ -70,7 +70,7 @@ case $server in
         ) || exit 1; clear
 
         client=$(dialog --stdout --title "ArchQ" --menu "Select MPD client" 7 0 0 \
-            m "Rigelian(iOS) | text-based client" \
+            m "iOS|text-based client(rmpc|ncmpcpp)" \
             y "myMPD web-based client" \
             o "RompR web-based client") || exit 1; clear
 
