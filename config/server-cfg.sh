@@ -200,20 +200,30 @@ EOF
             servs=${servs/mympd/}
         fi
         if [[ $server =~ o. ]]; then
-            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
+            wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.29-1-any.pkg.tar.zst
             pacman -U --noconfirm /tmp/rompr-*.pkg.tar.zst
             ### Setup RompR
             mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
-            sed -i '$i include /etc/nginx/sites-enabled/*;' /etc/nginx/nginx.conf
             curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/etc/nginx/sites-available/rompr
             curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cantata_nginx >/etc/nginx/sites-available/cantata
             sed -i 's/hostname/'"${HOSTNAME,,}"'/' /etc/nginx/sites-available/rompr
             sed -i 's/hostname/'"${HOSTNAME,,}"'/' /etc/nginx/sites-available/cantata
-            sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /etc/php/php.ini
-            sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /etc/php/php.ini
-            sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /usr/lib/systemd/system/nginx.service
             ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
             ln -s /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
+            sed -i \
+                -e '$i include /etc/nginx/sites-enabled/*;' \
+                -e '35,79s/^[[:space:]]*[^#]/#&/' \
+                /etc/nginx/nginx.conf
+            sed -i \
+                -e 's/max_execution_time =.*/max_execution_time = 1800/' \
+                -e 's/post_max_size =.*/post_max_size = 256M/' \
+                -e 's/upload_max_filesize =.*/upload_max_filesize = 10M/' \
+                -e 's/max_file_uploads =.*/max_file_uploads = 200/' \
+                -e 's/;extension=pdo_sqlite/extension=pdo_sqlite/' \
+                -e 's/;extension=gd/extension=gd/' \
+                -e 's/;extension=intl/extension=intl/' \
+                /etc/php/php.ini
+            sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /usr/lib/systemd/system/nginx.service
             chmod 644 /etc/nginx/sites-enabled/*
             servs=${servs/nginx/}; servs=${servs/php-fpm/}; servs=${servs/avahi-daemon/};
             systemctl enable nginx php-fpm avahi-daemon
