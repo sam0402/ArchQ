@@ -7,6 +7,9 @@ grub_def='/etc/default/grub'
 c_blue_b=$'\e[1;38;5;27m'
 c_gray=$'\e[m'
 cpus=$(getconf _NPROCESSORS_ONLN)
+iso_1st=$((cpus - 1))
+iso_2nd=$((iso_1st - 1))
+isocpu="isolcpus=$iso_1st rcu_nocbs=$iso_1st "
 
 # pacman -Q ramroot >/dev/null 2>&1 || ramroot='R Ramroot'
 pacman -Q xf86-video-fbdev >/dev/null 2>&1 || systemctl is-active --quiet squeezelite || systemctl is-active --quiet pcmrecv || systemctl is-active --quiet pcmrecv && alsa='T TinyALSA ' || alsa='A ALSAlib '
@@ -74,16 +77,46 @@ case $WK in
         mkgrub
         ;;
     B)
-        grub_def='/etc/default/grub'; n=0
+        grub_def='/etc/default/grub'; n=0; klist=()
         grep -q '#GRUB_DISABLE_SUBMENU' $grub_def && sed -i 's/^#\?GRUB_DISABLE_SUBMENU=.*$/GRUB_DISABLE_SUBMENU=y/' $grub_def
 
         bootlist='dialog --stdout --title "ArchQ $1" --menu "Select default boot" 7 0 0 '
         while read line; do
-            echo $line | grep 'fallback' || bootlist+=$n' '\"$line\"' '
+            if ! echo "$line" | grep -q 'fallback'; then
+                bootlist+=$n' '\"$line\"' '
+                klist[$n]="$line"
+            fi
             ((n++))
         done <<< "$(grep 'menuentry ' $grub_cfg | cut -d "'" -f2 | sed '$d;s/Arch Linux, with Linux //;s/ initramfs//'|cut -d' ' -f1-2)"
         bootlist+='S "Save Default"'
         options=$(eval $bootlist) || exit 1; clear
+
+        if [[ "${klist[$options]}" =~ [Qq]rip ]]; then
+            cmdline=$(grep -E "^[[:space:]]*GRUB_CMDLINE_LINUX=" "$grub_def" | tail -n 1)
+            cmdline="${cmdline#*\"}"
+            cmdline="${cmdline%\"}"
+            cmdline=$(echo "$cmdline" | sed -E "s/(^|[[:space:]]+)isolcpus=$iso_1st(,$iso_2nd)?([[:space:]]+|$)/ /g; s/(^|[[:space:]]+)rcu_nocbs=$iso_1st(,$iso_2nd)?([[:space:]]+|$)/ /g; s/^[[:space:]]+//; s/[[:space:]]+$//; s/[[:space:]]+/ /g")
+            sed -i "s|^[[:space:]]*GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"$cmdline\"|" "$grub_def"
+
+            cmdline_def=$(grep -E "^[[:space:]]*GRUB_CMDLINE_LINUX_DEFAULT=" "$grub_def" | tail -n 1)
+            cmdline_def="${cmdline_def#*\"}"
+            cmdline_def="${cmdline_def%\"}"
+            if echo "$cmdline_def" | grep -qE "isolcpus=$iso_1st|rcu_nocbs=$iso_1st"; then
+                cmdline_def=$(echo "$cmdline_def" | sed -E "s/(^|[[:space:]]+)isolcpus=$iso_1st(,$iso_2nd)?([[:space:]]+|$)/ /g; s/(^|[[:space:]]+)rcu_nocbs=$iso_1st(,$iso_2nd)?([[:space:]]+|$)/ /g; s/^[[:space:]]+//; s/[[:space:]]+$//; s/[[:space:]]+/ /g")
+                sed -i "s|^[[:space:]]*GRUB_CMDLINE_LINUX_DEFAULT=.*$|GRUB_CMDLINE_LINUX_DEFAULT=\"$cmdline_def\"|" "$grub_def"
+            fi
+        elif [ "$options" != 'S' ]; then
+            if pacman -Q lyrionmusicserver >/dev/null 2>&1 || pacman -Q squeezelite >/dev/null 2>&1 ; then
+                cmdline=$(grep -E "^[[:space:]]*GRUB_CMDLINE_LINUX=" "$grub_def" | tail -n 1)
+                cmdline="${cmdline#*\"}"
+                cmdline="${cmdline%\"}"
+                if ! echo "$cmdline" | grep -q "isolcpus="; then
+                    cmdline="${cmdline:+$cmdline }${isocpu}"
+                    cmdline=$(echo "$cmdline" | sed -E "s/^[[:space:]]+//; s/[[:space:]]+$//; s/[[:space:]]+/ /g")
+                    sed -i "s|^[[:space:]]*GRUB_CMDLINE_LINUX=.*$|GRUB_CMDLINE_LINUX=\"$cmdline\"|" "$grub_def"
+                fi
+            fi
+        fi
 
         sed -i 's/^#\?GRUB_DEFAULT=.*$/GRUB_DEFAULT='"$options"'/' $grub_def
         [ $options = 'S' ] && sed -i 's/^#\?GRUB_SAVEDEFAULT=.*$/GRUB_SAVEDEFAULT=true/' $grub_def
