@@ -449,18 +449,29 @@ case $server in
         if [[ $server =~ o. ]]; then
             echo -e "\n${c_blue_b}Install RompR ...${c_gray}\n"
             # pacstrap /mnt nginx php-sqlite php-gd php-fpm php-intl imagemagick
-            arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.00-1-any.pkg.tar.zst
+            arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.29-1-any.pkg.tar.zst
             arch-chroot /mnt pacman -U --noconfirm /root/rompr-2.00-1-any.pkg.tar.zst
             mkdir -p /mnt/etc/nginx/sites-available /mnt/etc/nginx/sites-enabled
-            sed -i '$i include /etc/nginx/sites-enabled/*;' /mnt/etc/nginx/nginx.conf
             curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/mnt/etc/nginx/sites-available/rompr
             curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cantata_nginx >/mnt/etc/nginx/sites-available/cantata
             sed -i 's/hostname/'"${hostname,,}"'/' /mnt/etc/nginx/sites-available/rompr
             sed -i 's/hostname/'"${hostname,,}"'/' /mnt/etc/nginx/sites-available/cantata
-            sed -i 's/max_execution_time =.*/max_execution_time = 1800/;s/post_max_size =.*/post_max_size = 256M/;s/upload_max_filesize =.*/upload_max_filesize = 10M/;s/max_file_uploads =.*/max_file_uploads = 200/' /mnt/etc/php/php.ini
-            sed -i 's/;extension=pdo_sqlite/extension=pdo_sqlite/;s/;extension=gd/extension=gd/;s/;extension=intl/extension=intl/' /mnt/etc/php/php.ini
-            sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /mnt/usr/lib/systemd/system/nginx.service
             arch-chroot /mnt ln -s /etc/nginx/sites-available/rompr /etc/nginx/sites-enabled/rompr
+            arch-chroot /mnt ln -s /etc/nginx/sites-available/cantata /etc/nginx/sites-enabled/cantata
+            sed -i \
+                -e '$i include /etc/nginx/sites-enabled/*;' \
+                -e '35,79s/^[[:space:]]*[^#]/#&/' \
+                /mnt/etc/nginx/nginx.conf
+            sed -i \
+                -e 's/max_execution_time =.*/max_execution_time = 1800/' \
+                -e 's/post_max_size =.*/post_max_size = 256M/' \
+                -e 's/upload_max_filesize =.*/upload_max_filesize = 10M/' \
+                -e 's/max_file_uploads =.*/max_file_uploads = 200/' \
+                -e 's/;extension=pdo_sqlite/extension=pdo_sqlite/' \
+                -e 's/;extension=gd/extension=gd/' \
+                -e 's/;extension=intl/extension=intl/' \
+                /mnt/etc/php/php.ini
+            sed -i '/ExecStart=/i ExecStartPre=mkdir -p \/var\/log\/nginx' /mnt/usr/lib/systemd/system/nginx.service
             arch-chroot /mnt chmod 644 /etc/nginx/sites-enabled/rompr
             arch-chroot /mnt systemctl enable nginx php-fpm avahi-daemon
         fi
