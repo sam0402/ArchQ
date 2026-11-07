@@ -1,7 +1,7 @@
 server {
 
-    listen 6660;
-    # listen [::]:80;
+    listen 80;
+   # listen [::]:80;
 
     root /usr/share/webapps/rompr;
     index index.php index.html index.htm;
