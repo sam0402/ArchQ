@@ -395,6 +395,8 @@ case $server in
             *X) MPD=dsdnet ;;
             *F) MPD=flcnet ;;
             *Q) MPD=qbznet ;;
+                wget -P /root https://archive.archlinux.org/packages/y/yajl/yajl-2.1.0-5-x86_64.pkg.tar.zst
+                pacman -U --noconfirm /root/yajl-2.1.0-5-x86_64.pkg.tar.zst
             *R) MPD=radio ;;
             *S) MPD=stream ;;
             *M) MPD=ffmpeg ;;
@@ -411,7 +413,7 @@ case $server in
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/vmtouch-1.3.1-1-any.pkg.tar.zst
-        arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/socat-1.7.4.4-1-x86_64.pkg.tar.zst
+        arch-chroot /mnt wget -qP /root https://archive.archlinux.org/packages/s/socat/socat-1.7.4.4-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-mini-1.6-1-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rmpc-0.11.0-2-x86_64.pkg.tar.zst
         arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-1-x86_64.pkg.tar.zst
@@ -439,7 +441,7 @@ case $server in
         if [[ $server =~ y. ]]; then
             echo -e "\n${c_blue_b}Install myMPD ...${c_gray}\n"
             arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
-            arch-chroot /mnt wget -qP /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
+            arch-chroot /mnt wget -qP /root https://archive.archlinux.org/packages/l/libnewt/libnewt-0.52.24-2-x86_64.pkg.tar.zst
             arch-chroot /mnt pacman -U --noconfirm /root/mympd-${mympdver}-x86_64.pkg.tar.zst /root/libnewt-0.52.24-2-x86_64.pkg.tar.zst
             mkdir -p /mnt/var/lib/private/mympd/config/
             echo 'Unknown' >/mnt/var/lib/private/mympd/config/album_group_tag
@@ -508,7 +510,7 @@ EOF
     HQPE4|HQPE5)
         echo -e "\n${c_blue_b}Install HQPlayer Embedded${server:4:1}...${c_gray}\n"
         curl https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayerd-lib.tar.gz | tar zxf - -C /tmp
-        curl -O --output-dir /tmp/hqplayerd-lib/ https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/gtk3-1%3A3.24.37-1-x86_64.pkg.tar.zst
+        curl -O --output-dir /tmp/hqplayerd-lib/ https://archive.archlinux.org/packages/g/gtk3/gtk3-1%3A3.24.37-1-x86_64.pkg.tar.zst
         pacman -U --noconfirm -r /mnt /tmp/hqplayerd-lib/*.pkg.tar.zst
         hqe_deb=$(curl -sL https://www.signalyst.eu/bins/hqplayerd/jammy/ | grep "hqplayerd_${server:4:1}" | grep _amd64.deb | tail -n1 | awk -F'"' '{print $2}')
         curl -L "https://www.signalyst.eu/bins/hqplayerd/jammy/$hqe_deb" | bsdtar xf - -C /tmp
