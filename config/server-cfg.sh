@@ -204,7 +204,8 @@ EOF
         fi
         if [[ $server =~ o. ]]; then
             wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.29-1-any.pkg.tar.zst
-            pacman -U --noconfirm /tmp/rompr-*.pkg.tar.zst
+            wget -P /tmp https://archive.archlinux.org/packages/p/python-websockets/python-websockets-17.2-1-x86_64.pkg.tar.zst
+            pacman -U --noconfirm /tmp/rompr-*.pkg.tar.zst /tmp/python-websockets-*-x86_64.pkg.tar.zst
             ### Setup RompR
             mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
             curl -sL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/etc/nginx/sites-available/rompr
