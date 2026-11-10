@@ -147,6 +147,7 @@ EOF
             *X) MPD=dsdnet ;;
             *Q) MPD=qbznet 
                 wget -P /tmp https://archive.archlinux.org/packages/y/yajl/yajl-2.1.0-5-x86_64.pkg.tar.zst
+                pacman -U --noconfirm /tmp/yajl*.pkg.tar.zst
                 ;;
             *R) MPD=radio ;;
             *S) MPD=stream ;;
