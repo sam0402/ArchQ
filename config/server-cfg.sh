@@ -145,7 +145,9 @@ EOF
             *P) MPD=pcmnet ;;
             *F) MPD=flcnet ;;
             *X) MPD=dsdnet ;;
-            *Q) MPD=qbznet ;;
+            *Q) MPD=qbznet 
+                wget -P /tmp https://archive.archlinux.org/packages/y/yajl/yajl-2.1.0-5-x86_64.pkg.tar.zst
+                ;;
             *R) MPD=radio ;;
             *S) MPD=stream ;;
             *M) MPD=ffmpeg ;;
@@ -159,7 +161,7 @@ EOF
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd_cdrom-1.0.0-1-any.pkg.tar.zst
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mpd-plugin-0.3.5-1-x86_64.pkg.tar.zst
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/vmtouch-1.3.1-1-any.pkg.tar.zst
-                wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/socat-1.7.4.4-1-x86_64.pkg.tar.zst
+                wget -P /tmp https://archive.archlinux.org/packages/s/socat/socat-1.7.4.4-1-x86_64.pkg.tar.zst
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/owntone-mini-1.6-1-x86_64.pkg.tar.zst
                 wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/flac-1.4.3-1-x86_64.pkg.tar.zst
                 # wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libsndfile-1.2.0-3-x86_64.pkg.tar.zst
@@ -189,7 +191,7 @@ EOF
         fi
         if [[ $server =~ y. ]]; then
             pacman -Q mympd >/dev/null 2>&1 ||   wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/mympd-${mympdver}-x86_64.pkg.tar.zst
-            pacman -Q libnewt >/dev/null 2>&1 || wget -P /tmp https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/libnewt-0.52.24-2-x86_64.pkg.tar.zst
+            pacman -Q libnewt >/dev/null 2>&1 || wget -P /tmp https://archive.archlinux.org/packages/l/libnewt/libnewt-0.52.24-2-x86_64.pkg.tar.zst
             mkdir -p /var/lib/private/mympd/config/
             echo 'Unknown' >/var/lib/private/mympd/config/album_group_tag
             pacman -U --noconfirm /tmp/*.pkg.tar.zst
@@ -264,7 +266,7 @@ EOF
         echo -e "\n${c_blue_b}Install HQPlayer Embedded${server:4:1}...${c_gray}\n"
         if ! pacman -Q gupnp-dlna >/dev/null 2>&1; then
             wget -O - https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/hqplayerd-lib.tar.gz | tar zxf - -C /tmp
-            wget -P /tmp/hqplayerd-lib https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/gtk3-1%3A3.24.37-1-x86_64.pkg.tar.zst
+            wget -P /tmp/hqplayerd-lib https://archive.archlinux.org/packages/g/gtk3/gtk3-1%3A3.24.37-1-x86_64.pkg.tar.zst
             pacman -U --noconfirm /tmp/hqplayerd-lib/*.pkg.tar.zst
         fi
         ## install hqplayerd
