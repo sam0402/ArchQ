@@ -452,7 +452,8 @@ case $server in
             echo -e "\n${c_blue_b}Install RompR ...${c_gray}\n"
             # pacstrap /mnt nginx php-sqlite php-gd php-fpm php-intl imagemagick
             arch-chroot /mnt wget -P /root https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr-2.29-1-any.pkg.tar.zst
-            arch-chroot /mnt pacman -U --noconfirm /root/rompr-2.00-1-any.pkg.tar.zst
+            arch-chroot /mnt wget -P /root https://archive.archlinux.org/packages/p/python-websockets/python-websockets-17.2-1-x86_64.pkg.tar.zst
+            arch-chroot /mnt pacman -U --noconfirm /root/rompr-2.00-1-any.pkg.tar.zst /root/python-websockets-17.2-1-x86_64.pkg.tar.zst
             mkdir -p /mnt/etc/nginx/sites-available /mnt/etc/nginx/sites-enabled
             curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/rompr_nginx >/mnt/etc/nginx/sites-available/rompr
             curl -fsSL https://raw.githubusercontent.com/sam0402/ArchQ/main/pkg/cantata_nginx >/mnt/etc/nginx/sites-available/cantata
