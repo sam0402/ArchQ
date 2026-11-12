@@ -18,24 +18,85 @@ HEADERS = {
     'Accept-Language': 'en-US, en;q=0.5'
 }
 
-def fetch_url(url):
+def fetch_url(url, is_ajax=False):
     curl_cmd = [
         'curl', '-s', '-L',
         '-H', f'User-Agent: {HEADERS["User-Agent"]}',
-        '-H', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         '-H', 'Accept-Language: en-US,en;q=0.5',
-        '-H', 'Sec-Fetch-Dest: document',
-        '-H', 'Sec-Fetch-Mode: navigate',
-        '-H', 'Sec-Fetch-Site: none',
-        '-H', 'Sec-Fetch-User: ?1',
-        url
     ]
+    if is_ajax:
+        curl_cmd += [
+            '-H', 'Accept: text/html, */*; q=0.01',
+            '-H', 'X-Requested-With: XMLHttpRequest',
+            '-H', 'Sec-Fetch-Dest: empty',
+            '-H', 'Sec-Fetch-Mode: cors',
+            '-H', 'Sec-Fetch-Site: same-origin',
+        ]
+    else:
+        curl_cmd += [
+            '-H', 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            '-H', 'Sec-Fetch-Dest: document',
+            '-H', 'Sec-Fetch-Mode: navigate',
+            '-H', 'Sec-Fetch-Site: none',
+            '-H', 'Sec-Fetch-User: ?1',
+        ]
+    curl_cmd.append(url)
     res = subprocess.run(curl_cmd, capture_output=True)
     if res.returncode == 0 and res.stdout:
         return res.stdout
     # Fallback to requests if curl fails
-    resp = requests.get(url, headers=HEADERS, timeout=15)
+    headers = dict(HEADERS)
+    if is_ajax:
+        headers['X-Requested-With'] = 'XMLHttpRequest'
+    resp = requests.get(url, headers=headers, timeout=15)
     return resp.content
+
+def load_all_tracks(soup, url=""):
+    player_tracks = soup.find(id='playerTracks')
+    if not player_tracks:
+        return
+
+    album_id = player_tracks.get('data-itemid')
+    if not album_id:
+        more_btn = soup.find('button', class_='player-more__button')
+        if more_btn:
+            album_id = more_btn.get('data-itemid')
+
+    try:
+        nb_tracks = int(player_tracks.get('data-nbtracks', 0))
+    except (ValueError, TypeError):
+        nb_tracks = 0
+
+    try:
+        limit = int(player_tracks.get('data-limit', 50))
+    except (ValueError, TypeError):
+        limit = 50
+
+    store = player_tracks.get('data-store')
+    if not store and url:
+        match = re.search(r"qobuz\.com/([a-z]{2}-[a-z]{2})/", url)
+        if match:
+            store = match.group(1)
+    if not store:
+        store = 'gb-en'
+
+    current_tracks = len(player_tracks.find_all('div', class_='track'))
+    offset = current_tracks
+
+    while album_id and (offset < nb_tracks or soup.find('button', class_='player-more__button')):
+        ajax_url = f"https://www.qobuz.com/v4/ajax/album/load-tracks?albumId={album_id}&offset={offset}&limit={limit}&store={store}"
+        ajax_content = fetch_url(ajax_url, is_ajax=True)
+        if not ajax_content:
+            break
+        ajax_soup = BeautifulSoup(ajax_content, "lxml")
+        new_tracks = ajax_soup.find_all('div', class_='track')
+        if not new_tracks:
+            break
+        for tr in new_tracks:
+            player_tracks.append(tr)
+        offset += len(new_tracks)
+        if len(new_tracks) < limit:
+            break
 
 def track_titles(soup):
     return [
@@ -109,6 +170,7 @@ if __name__ == "__main__":
         with open(url, 'r', encoding='utf-8', errors='ignore') as f:
             webpage = f.read()
     soup = BeautifulSoup(webpage, "lxml")
+    load_all_tracks(soup, url)
 
     album = album_title(soup).strip().split("\n")[0]
     titles = track_titles(soup)
